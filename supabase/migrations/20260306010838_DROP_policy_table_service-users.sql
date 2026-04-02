@@ -1,0 +1,1 @@
+DROP POLICY "Users can read their own service_user" ON public.service_users;

@@ -1,0 +1,27 @@
+ROLES DE LA APP
+
+ADMIN: es el super administrador, tiene su propia ruta /admin
+GERENTE
+RECEPCIONISTA
+AUXILIAR ADMINISTRATIVA
+DIRECTOR TECNICO
+
+
+Datos para registro
+
+Nombre
+Cedula
+teléfono
+correo electrónico
+Rol (puede estar en varios al mismo tiempo, ósea los permisos)
+Activo o no activo
+fecha de creación
+fecha de actualización
+quien lo creo
+
+PENDIENTES
+
+- agregar el tipo de cedula de los usuarios
+- ajustar rls para verificar si es activo o no para protección y en el login
+- revisar que las tablas que se les haga partition, el update funcione
+- el gerente puede crear ingeniero, y el ingeniero puede crear auxiliar y recepcionista.

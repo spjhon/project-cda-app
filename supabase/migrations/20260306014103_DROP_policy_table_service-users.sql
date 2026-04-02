@@ -1,0 +1,1 @@
+DROP POLICY "Users can read service_users from their same tenants" ON public.service_users;

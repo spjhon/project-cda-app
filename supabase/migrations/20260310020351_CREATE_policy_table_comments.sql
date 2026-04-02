@@ -1,0 +1,35 @@
+-- ==========================================
+-- RLS (Row Level Security)
+-- ==========================================
+
+alter table public.comments enable row level security;
+
+-- POLÍTICA: Solo los miembros del tenant pueden ver los comentarios
+create policy "Users can see comments from their tenants"
+on public.comments
+for select
+to authenticated
+using (
+  tenant_id in (
+    select tenant_id 
+    from public.tenant_permissions 
+    where service_user_id in (
+      select id from public.service_users where auth_user_id = auth.uid()
+    )
+  )
+);
+
+-- POLÍTICA: Solo miembros del tenant pueden insertar comentarios en tickets de ese tenant
+create policy "Users can insert comments in their tenants"
+on public.comments
+for insert
+to authenticated
+with check (
+  tenant_id in (
+    select tenant_id 
+    from public.tenant_permissions 
+    where service_user_id in (
+      select id from public.service_users where auth_user_id = auth.uid()
+    )
+  )
+);
