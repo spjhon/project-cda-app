@@ -54,6 +54,8 @@ const [isLoading, setIsLoading] = useState(false);
     .select() // <--- OBLIGATORIO para recibir la fila actualizada
     .single();
 
+    console.log(finaleUpdateAvailability)
+
     if(errorUpdateAvailability || !finaleUpdateAvailability){
       console.log("Error actualizando el status.")
       throw new Error("Error actualizando el status.")

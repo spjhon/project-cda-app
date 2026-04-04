@@ -1,5 +1,5 @@
 import { AdminLogoutButton } from "@/features/admin/components/AdminLogoutButton";
-import { SignUpForm } from "@/features/admin/components/SignUpForm";
+import { AdminSignUpForm } from "@/features/admin/components/AdminSignUpForm";
 
 
 export default function DashboardAdminPage() {
@@ -12,7 +12,7 @@ export default function DashboardAdminPage() {
       <h2 className="text-3xl font-extrabold m-5">
         REGISTRAR NUEVO GERENTE EN TENANT
       </h2>
-      <SignUpForm tenant={"fullmotos"}></SignUpForm>
+      <AdminSignUpForm tenant={"fullmotos"}></AdminSignUpForm>
     </section>
   );
 }

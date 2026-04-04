@@ -1,29 +1,60 @@
 -- ==========================================
--- Tabla: tenant_permissions
+-- Tabla: tenant_permissions (Versión Actualizada)
 -- ==========================================
 
-create table public.tenant_permissions (
-  id uuid primary key default gen_random_uuid(),
+CREATE TABLE public.tenant_permissions (
+    -- Identificadores
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id         UUID NOT NULL,
+    service_user_id   UUID NOT NULL,
 
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  service_user_id uuid not null references public.service_users(id) on delete cascade,
+    -- Datos de Membresía
+    -- Nota: El default ahora es 'recepcionista' para coincidir con los nuevos roles
+    role              TEXT NOT NULL DEFAULT 'recepcionista',
 
-  role text not null default 'member' check (role in ('owner','admin','member')),
-
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-
-constraint tenant_permissions_unique_pair unique (tenant_id, service_user_id)
+    -- Auditoría
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ==========================================
--- Comentarios
+-- FOREIGN KEYS (Relaciones)
 -- ==========================================
 
-COMMENT ON TABLE public.tenant_permissions IS 'Version del schema v1';
+ALTER TABLE public.tenant_permissions
+    ADD CONSTRAINT tenant_permissions_tenant_id_fkey 
+    FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
 
-comment on table public.tenant_permissions is 'Maps service_users to tenants with role-based permissions.';
-comment on column public.tenant_permissions.role is 'Role of the user inside the tenant context.';
+ALTER TABLE public.tenant_permissions
+    ADD CONSTRAINT tenant_permissions_service_user_id_fkey 
+    FOREIGN KEY (service_user_id) REFERENCES public.service_users(id) ON DELETE CASCADE;
+
+-- ==========================================
+-- CONSTRAINTS (Validaciones y Unicidad)
+-- ==========================================
+
+-- 1. Restricción de Roles permitidos
+ALTER TABLE public.tenant_permissions
+    ADD CONSTRAINT tenant_permissions_role_check 
+    CHECK (role IN (
+        'gerente', 
+        'recepcionista', 
+        'aux_administrativo', 
+        'director_tecnico'
+    ));
+
+-- 2. Unicidad: Un usuario solo puede tener una entrada por Tenant
+-- (Si luego decides que un usuario puede tener varios roles, recuerda borrar esta)
+ALTER TABLE public.tenant_permissions
+    ADD CONSTRAINT tenant_permissions_unique_pair 
+    UNIQUE (tenant_id, service_user_id);
+
+-- ==========================================
+-- COMENTARIOS
+-- ==========================================
+
+COMMENT ON TABLE public.tenant_permissions IS 'Mapeo de usuarios a tenants con roles específicos del taller. v1.1';
+COMMENT ON COLUMN public.tenant_permissions.role IS 'Roles: gerente, recepcionista, auxadministrativo, directortecnico';
 
 -- ==========================================
 -- Índices estratégicos

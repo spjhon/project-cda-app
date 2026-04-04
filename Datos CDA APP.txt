@@ -21,7 +21,14 @@ quien lo creo
 
 PENDIENTES
 
-- agregar el tipo de cedula de los usuarios
+
 - ajustar rls para verificar si es activo o no para protección y en el login
 - revisar que las tablas que se les haga partition, el update funcione
 - el gerente puede crear ingeniero, y el ingeniero puede crear auxiliar y recepcionista.
+
+
+
+
+agregar el otp para auth, reenviar magic link, cuando se vrifique el correo, enviar a una pantalla de felicitación en lugar de llevarlo a dashboard
+
+vincular o desvincular a un usuario de un tenant, registro desde otro tenant, debe de estar desvinculado primero.

@@ -117,7 +117,7 @@ if (isMainDomain) {
 
     const isPlatformAdmin = (sessionUser?.app_metadata?.tenants?.includes("admin") ?? false)
 
-    //TODO: falta organizar cuando si esta autenticado pero no es admin
+   
 
 if (!sessionUser || !isPlatformAdmin) {
       // Si no hay usuario y esta en la seccion del dashboard del admin
@@ -145,13 +145,53 @@ if (!sessionUser || !isPlatformAdmin) {
 
 
 
+if (applicationPath.startsWith("/dashboard")) {
+    
+  const isActive = (sessionUser?.app_metadata?.is_active ?? false)
 
+    if (!sessionUser || !isActive) {
+      // 1. Mandamos explícitamente a la ruta de LOGIN, no a la raíz
+      const loginUrl = buildUrl("/auth/login", tenantName, request);
+      const response = NextResponse.redirect(loginUrl);
+
+      // --- PASO VITAL: Sincronizar cookies antes de retornar ---
+      supabaseResponse.cookies.getAll().forEach((c) => {
+        response.cookies.set(c.name, c.value, c);
+      });
+
+      request.cookies.getAll().forEach((c) => {
+        if (c.name.includes("auth-token")) response.cookies.delete(c.name);
+      });
+
+      return response;
+    }
+
+    // Si hay usuario, pero el tenant no está en su lista de acceso (app_metadata)
+    // Nota: Esto asume que en Supabase guardas un array de 'tenants' en el metadata del usuario
+    else if (!sessionUser.app_metadata?.tenants?.includes(tenantName)) {
+      const loginUrl = buildUrl("/auth/login", tenantName, request);
+      const response = NextResponse.redirect(loginUrl);
+
+      // --- PASO VITAL: Sincronizar cookies antes de retornar ---
+      supabaseResponse.cookies.getAll().forEach((c) => {
+        response.cookies.set(c.name, c.value, c);
+      });
+
+      request.cookies.getAll().forEach((c) => {
+        if (c.name.includes("auth-token")) response.cookies.delete(c.name);
+      });
+      return response;
+    }
+  }
 
 
 
 
 
   if (applicationPath.startsWith("/tickets")) {
+
+    const isActive = (sessionUser?.app_metadata?.is_active ?? false)
+    console.log(isActive)
     
 
     if (!sessionUser) {

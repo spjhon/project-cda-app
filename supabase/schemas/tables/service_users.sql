@@ -1,39 +1,81 @@
--- ===============================
--- Tabla: service_users
--- ===============================
+-- ==========================================
+-- Tabla: service_users (Versión Final v1.3)
+-- ==========================================
 
+CREATE TABLE public.service_users (
+    -- Identificadores
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- Relación con el usuario de Supabase Auth
+    auth_user_id      UUID NOT NULL,
 
+    -- Información Personal e Identificación
+    full_name         TEXT,
+    document_type     TEXT NOT NULL DEFAULT 'cedula',
+    document_number   TEXT NOT NULL,
+    
+    -- Estado Maestro
+    is_active         BOOLEAN NOT NULL DEFAULT true,
 
-CREATE table public.service_users (
-  id uuid primary key default gen_random_uuid(),
-
-  -- Relación con el usuario de Supabase Auth
-  auth_user_id uuid not null unique references auth.users(id) on delete cascade,
-
-  full_name text,
-
-  is_available boolean not null default true,
-  job_title text,
-
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-
+    -- Auditoría
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE public.service_users IS 'Version del schema v1';
-
 -- ==========================================
--- Indexes
+-- FOREIGN KEYS (Relaciones)
 -- ==========================================
 
--- 1. Índice para la unión con Supabase Auth (Crucial para el login y RLS)
--- Como auth_user_id es 'unique', Supabase crea un índice automáticamente para el constraint, 
--- pero es bueno tenerlo explícitamente si haces muchos JOINs.
-create index if not exists service_users_auth_user_id_idx on public.service_users (auth_user_id);
+ALTER TABLE public.service_users
+    ADD CONSTRAINT service_users_auth_user_id_fkey 
+    FOREIGN KEY (auth_user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- 2. Índice para búsquedas por disponibilidad
--- Si vas a listar usuarios disponibles para asignarles tickets, este es vital
-create index if not exists service_users_is_available_idx on public.service_users (is_available);
+-- ==========================================
+-- CONSTRAINTS (Validaciones y Unicidad)
+-- ==========================================
+
+-- 1. Unicidad de cuenta Auth (Un perfil por usuario auth)
+ALTER TABLE public.service_users
+    ADD CONSTRAINT service_users_auth_user_id_key UNIQUE (auth_user_id);
+
+-- 2. Unicidad Compuesta (Tipo + Número) - Evita duplicados legales
+ALTER TABLE public.service_users
+    ADD CONSTRAINT service_users_document_unique UNIQUE (document_type, document_number);
+
+-- 3. Validación de tipos de documento (Check Constraint)
+ALTER TABLE public.service_users
+    ADD CONSTRAINT service_users_document_type_check 
+    CHECK (document_type IN (
+        'cedula', 
+        'cedula_extrangeria', 
+        'pasaporte', 
+        'nit', 
+        'targeta_identidad'
+    ));
+
+-- ==========================================
+-- ÍNDICES (Rendimiento)
+-- ==========================================
+
+-- Búsqueda por número de identificación
+CREATE INDEX IF NOT EXISTS service_users_document_number_idx 
+    ON public.service_users USING btree (document_number);
+
+-- Búsqueda por estado activo
+CREATE INDEX IF NOT EXISTS service_users_is_active_idx 
+    ON public.service_users USING btree (is_active);
+
+-- Búsqueda difusa por nombre (Requiere extensión pg_trgm)
+CREATE INDEX IF NOT EXISTS service_users_full_name_trgm_idx 
+    ON public.service_users USING gin (full_name gin_trgm_ops);
+
+-- ==========================================
+-- COMENTARIOS DE DOCUMENTACIÓN
+-- ==========================================
+
+COMMENT ON TABLE public.service_users IS 'Perfil de identidad de los usuarios del sistema. v1.3';
+COMMENT ON COLUMN public.service_users.is_active IS 'Control maestro: false revoca acceso total.';
+COMMENT ON COLUMN public.service_users.document_type IS 'Tipos: cedula, cedula_extrangeria, pasaporte, nit, targeta_identidad';
 
 
 -- Índice para búsqueda de texto (GIN)

@@ -128,28 +128,31 @@ export type Database = {
         Row: {
           auth_user_id: string
           created_at: string
+          document_number: string
+          document_type: string
           full_name: string | null
           id: string
-          is_available: boolean
-          job_title: string | null
+          is_active: boolean
           updated_at: string
         }
         Insert: {
           auth_user_id: string
           created_at?: string
+          document_number: string
+          document_type?: string
           full_name?: string | null
           id?: string
-          is_available?: boolean
-          job_title?: string | null
+          is_active?: boolean
           updated_at?: string
         }
         Update: {
           auth_user_id?: string
           created_at?: string
+          document_number?: string
+          document_type?: string
           full_name?: string | null
           id?: string
-          is_available?: boolean
-          job_title?: string | null
+          is_active?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -287,132 +290,6 @@ export type Database = {
           },
         ]
       }
-      tickets_tenant_acme: {
-        Row: {
-          assignee: string | null
-          assignee_name: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          status: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id?: string
-          ticket_number?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      tickets_tenant_globex: {
-        Row: {
-          assignee: string | null
-          assignee_name: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          status: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id?: string
-          ticket_number?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      tickets_tenant_umbrella: {
-        Row: {
-          assignee: string | null
-          assignee_name: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          status: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id?: string
-          ticket_number?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -423,10 +300,11 @@ export type Database = {
         Returns: {
           auth_user_id: string
           created_at: string
+          document_number: string
+          document_type: string
           full_name: string | null
           id: string
-          is_available: boolean
-          job_title: string | null
+          is_active: boolean
           updated_at: string
         }[]
         SetofOptions: {

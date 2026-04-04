@@ -132,8 +132,9 @@ export const LoginForm = ({
         throw new Error("Error al crear el link y enviarlo: " + error)
         }
 
+        const emailSafe = encodeURIComponent(email);
         
-        router.push("/auth/magic-thanks")
+        router.push(`/auth/confirm-otp?email=${emailSafe}`)
         
 
       }catch(err: unknown){
@@ -153,30 +154,6 @@ export const LoginForm = ({
 
 
 
-  const handleLoginGoogle = async (e: React.FormEvent) => {
-    e.preventDefault();
-  
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const {error} = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin + "/auth/verify-oauth/api",
-          queryParams: {access_type: "offline", prompt: "consent"},
-        },
-      });
-
-      if (error) throw error;
-      
-
-
-    } catch (error: unknown) {
-      setError(error instanceof AuthError ? error.message : "Ah ocurrido un error al hacer login");
-    } finally {
-      //...
-    }
-  
-  }
 
 
 
@@ -227,7 +204,7 @@ export const LoginForm = ({
                 {!isLoading
                   ? isPasswordLogin
                     ? "Ingresa con contraseña"
-                    : "Ingresa con link magico"
+                    : "Enviar codigo al correo"
                   : ""}
                 {isLoading ? "Entrando" : ""}
               </Button>
@@ -235,25 +212,7 @@ export const LoginForm = ({
 
 
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full flex items-center justify-center gap-3 h-11"
-                onClick={handleLoginGoogle}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 48 48"
-                  className="w-5 h-5"
-                >
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.36 1.22 8.29 2.24l6.15-6.02C34.84 2.44 29.86 0 24 0 14.62 0 6.47 5.38 2.56 13.22l7.36 5.72C11.73 13.2 17.37 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.1 24.5c0-1.63-.15-3.2-.42-4.72H24v9.04h12.44c-.54 2.9-2.18 5.36-4.64 7.01l7.18 5.58C43.9 37.4 46.1 31.5 46.1 24.5z"/>
-                  <path fill="#FBBC05" d="M9.92 28.94A14.53 14.53 0 0 1 9.1 24c0-1.72.3-3.38.82-4.94l-7.36-5.72A23.94 23.94 0 0 0 0 24c0 3.86.92 7.52 2.56 10.66l7.36-5.72z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.92-2.13 15.9-5.8l-7.18-5.58c-2 1.34-4.56 2.13-8.72 2.13-6.63 0-12.27-3.7-14.08-9.44l-7.36 5.72C6.47 42.62 14.62 48 24 48z"/>
-                </svg>
-
-                Ingresa con Google
-              </Button>
+              
 
 
 
@@ -269,7 +228,7 @@ export const LoginForm = ({
                       query: { magicLink: "yes" },
                     }}
                   >
-                    Utilizar Link Magico para ingresar
+                    Solicitar codigo ingreso que llegue al correo
                   </Link>
                 ) : (
                   <Link
@@ -285,16 +244,7 @@ export const LoginForm = ({
               </p>
             </div>
 
-            <div className="mt-4 text-center text-sm">
-              Todavia no tienes cuenta?{" "}
-              <Link
-                 prefetch={false}
-                href={`/register`}
-                className="underline underline-offset-4"
-              >
-                Registrarse
-              </Link>
-            </div>
+            
 
 
 
