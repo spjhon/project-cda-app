@@ -94,7 +94,7 @@ export default function UsersTable() {
             usersData.map((user) => (
               <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                 <td className="py-3 px-4 flex items-center gap-2">
-                  {user.is_available ? (
+                  {user.is_active ? (
                     <Check className="text-green-500" />
                   ) : (
                     <UserX className="text-red-500" />
@@ -102,12 +102,12 @@ export default function UsersTable() {
                   <span className="font-medium">{user.full_name}</span>
                 </td>
 
-                <td className="py-3 px-4 text-gray-700">{user.job_title}</td>
+                <td className="py-3 px-4 text-gray-700">{user.document_number}</td>
 
                 <td className="py-3 px-4 text-center">
                   {currentAuthId === user.auth_user_id ? (
-                    <AvailabilitySelect user_id={user.id} is_available={user.is_available} setUsersData={setUsersData}/>
-                  ) : user.is_available ? (
+                    <AvailabilitySelect user_id={user.id} is_available={user.is_active} setUsersData={setUsersData}/>
+                  ) : user.is_active ? (
                     <span className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full font-semibold">
                       Disponible
                     </span>

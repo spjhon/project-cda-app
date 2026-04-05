@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       permanent: true,
     },
   ],
-  
+   allowedDevOrigins: ['127.0.0.1', 'cda-app', '*.cda-app',],
   images: {
     remotePatterns: [
       {
@@ -44,6 +44,3 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 
-module.exports = {
-  allowedDevOrigins: ['127.0.0.1', '**.cda-app'],
-}

@@ -29,6 +29,6 @@ PENDIENTES
 
 
 
-agregar el otp para auth, reenviar magic link, cuando se vrifique el correo, enviar a una pantalla de felicitación en lugar de llevarlo a dashboard
+reenviar magic link y otp,
 
 vincular o desvincular a un usuario de un tenant, registro desde otro tenant, debe de estar desvinculado primero.

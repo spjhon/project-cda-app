@@ -47,6 +47,8 @@ const [isLoading, setIsLoading] = useState(false);
     try{
 
  // Llamada DIRECTA a Supabase (Cuesta $0 en Vercel)
+
+ /** 
     const {data: finaleUpdateAvailability, error: errorUpdateAvailability } = await supabase
     .from("service_users")
     .update({ is_available: newStatus })
@@ -60,7 +62,7 @@ const [isLoading, setIsLoading] = useState(false);
       console.log("Error actualizando el status.")
       throw new Error("Error actualizando el status.")
     }
-
+*/
 
       setUsersData((prevUsers) => 
         prevUsers.map((user) => 
