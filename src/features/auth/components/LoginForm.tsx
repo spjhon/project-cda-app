@@ -33,8 +33,8 @@ export const LoginForm = ({
 }: LoginProps) => {
 
   
-  const [email, setEmail] = useState(`user01@${tenant}.com`);
-  const [password, setPassword] = useState("Manolo");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
