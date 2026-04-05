@@ -33,13 +33,13 @@ export async function updateSession(request: NextRequest) {
 
 
 
-const RESTRICTED_HOST = ["127.0.0.1", "cda-app"];
+const RESTRICTED_HOST = ["127.0.0.1", "cda-app.com", "cda-app"];
 
 const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found"];
 
 const isMainDomain = RESTRICTED_HOST.includes(hostname);
 
-
+console.log("este es el root domain: " + hostname)
 
 if (isMainDomain) {
   const isAllowedRoute = LANDING_ROUTES.includes(applicationPath);
