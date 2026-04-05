@@ -1,3 +1,5 @@
+import { Hero } from "@/features/LandingPage/Hero";
+import { HeroVideo } from "@/features/LandingPage/HeroVideo";
 import { LogoMarquee } from "@/features/LandingPage/LogoMarquee";
 import {
   AlertTriangle,
@@ -163,22 +165,9 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="relative mt-40 mb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              Next js - Supabase
-              <span className="block text-primary-600">DEMO</span>
-            </h1>
-            <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
-              Projecto multi-tenant por subdominios utilizando las capacidades
-              de Supabase. Database, Auth, Storage, Real Time. Web Apps Robustas
-              y Seguras
-            </p>
-            <div className="mt-10 flex gap-4 justify-center"></div>
-          </div>
-        </div>
-      </section>
+      <Hero></Hero>
+
+      
 
       {/* Sección de Selección de Organización */}
       <section className="my-20 bg-white">
@@ -202,7 +191,7 @@ export default function Home() {
                 <Link
                   prefetch={false}
                   key={tenant}
-                  href={`http://${tenant}.${rootDomain}/tickets`}
+                  href={`http://${tenant}.${rootDomain}/auth/login`}
                   className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20"
                 >
                   {/* Decoración sutil de fondo al hacer hover */}
@@ -228,6 +217,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
+      <HeroVideo></HeroVideo>
 
       <section className="my-20 bg-linear-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
