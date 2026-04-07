@@ -1,4 +1,4 @@
-import { urlPath } from "@/utils/url-helpers";
+import { urlPath } from "@/lib/url-helpers";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react"; // Shadcn usa mucho esta librería de iconos
 

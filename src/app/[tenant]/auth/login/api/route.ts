@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { buildUrl } from "@/utils/url-helpers";
+import { buildUrl } from "@/lib/url-helpers";
 
 /**
  *This is a route handler that handles login via API when JavaScript is disabled in the browser.

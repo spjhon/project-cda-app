@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { Database } from "../../../supabase/types/database.types";
-import { buildUrl, getHostnameAndPort } from "@/utils/url-helpers";
+import { buildUrl, getHostnameAndPort } from "@/lib/url-helpers";
 //import {  fetchTenantData } from "../dbFunctions/fetch_tenant_domain_cached";
 //import { PostgrestError } from "@supabase/supabase-js";
 
@@ -12,6 +12,9 @@ export async function updateSession(request: NextRequest) {
   const [hostname, port] = getHostnameAndPort(request); 
   const applicationPath = request.nextUrl.pathname;
  
+  console.log(`[${request.method}] Proxy path: ${applicationPath}`);
+
+
   const tenantSlug = hostname.split(".")[0];
 
   //RUTAS PUBLICAS PERMITIDAS
@@ -38,8 +41,6 @@ const RESTRICTED_HOST = ["127.0.0.1", "cda-app.com", "cda-app"];
 const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found"];
 
 const isMainDomain = RESTRICTED_HOST.includes(hostname);
-
-console.log("este es el root domain: " + hostname)
 
 if (isMainDomain) {
   const isAllowedRoute = LANDING_ROUTES.includes(applicationPath);
@@ -70,7 +71,7 @@ if (isMainDomain) {
     return supabaseResponse;
   }
 
-  console.log(`[${request.method}] Proxy path: ${applicationPath}`);
+  
 
   // 1. CLIENTE SUPABASE
   const supabase = createServerClient<Database>(
@@ -190,8 +191,6 @@ if (applicationPath.startsWith("/dashboard")) {
 
   if (applicationPath.startsWith("/tickets")) {
 
-    const isActive = (sessionUser?.app_metadata?.is_active ?? false)
-    console.log(isActive)
     
 
     if (!sessionUser) {

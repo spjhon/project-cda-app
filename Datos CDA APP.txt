@@ -7,17 +7,8 @@ AUXILIAR ADMINISTRATIVA
 DIRECTOR TECNICO
 
 
-Datos para registro
 
-Nombre
-Cedula
-teléfono
-correo electrónico
-Rol (puede estar en varios al mismo tiempo, ósea los permisos)
-Activo o no activo
-fecha de creación
-fecha de actualización
-quien lo creo
+
 
 PENDIENTES
 
@@ -25,10 +16,40 @@ PENDIENTES
 - ajustar rls para verificar si es activo o no para protección y en el login
 - revisar que las tablas que se les haga partition, el update funcione
 - el gerente puede crear ingeniero, y el ingeniero puede crear auxiliar y recepcionista.
+- reenviar magic link y otp,
+- vincular o desvincular a un usuario de un tenant, registro desde otro tenant, debe de estar desvinculado primero.
+- oojo con el botón de volver a inicio en el not found
+- validar usuario en el DAL con redireccionamiento a auth/login y que tales.
+- ojo, todos lo que se haga fetch en layouts, los hijos que pueden ser estáticos, NO LO VAN A HACER, se recomienda hacer el fetch de lado del cliente, con las funciones en el DAL y las promesas siendo llenadas en los use().
 
 
 
+ROOT LAYOUTS:
 
-reenviar magic link y otp,
+app/
+├── (marketing)/
+│   ├── layout.tsx      <-- Root Layout 1 (Con Navbar de venta)
+│   └── page.tsx        <-- URL: / (Landing Page)
+│
+├── (dashboard)/
+│   ├── layout.tsx      <-- Root Layout 2 (Con Sidebar de App)
+│   └── dashboard/
+│       └── page.tsx    <-- URL: /dashboard
+│
+└── (auth)/
+    ├── layout.tsx      <-- Root Layout 3 (Limpio, solo centrado)
+    └── login/
+        └── page.tsx    <-- URL: /login
 
-vincular o desvincular a un usuario de un tenant, registro desde otro tenant, debe de estar desvinculado primero.
+
+EN CUANTO AL DATA DASHBOARD
+
+- La idea es que el componente cliente cargue todos los datos a la memoria de los roles autorizados, que este maneje todos los roles y asi cuando se vaya al respectivo dashboard este todo cargado, si se cambia de rol, este todo cargado y se abran los canales de real time, si hay info que no se actualiza constantemente, que cargue solo con el refresco o un polling muy suave; la actualización del state se hace después del real time para que también este disponible en otros roles cargados en memoria cuando aplique, aunque la idea es que cada rol este separado. Real time no estaría en el cliente sino en el layout escuchando una sola tabla especial para todo el dashboard.
+
+buble background de los componentes extra de la comunidad de shadcn
+
+acuérdese del useFormStatus
+
+los client components como que corren una vez eenn  el server
+
+- se recomienda separar todo el código y separarlo en la lógica, db, componentes etc.

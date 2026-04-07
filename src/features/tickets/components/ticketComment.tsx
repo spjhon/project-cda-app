@@ -1,7 +1,7 @@
 "use client";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import {  urlPath } from "@/utils/url-helpers";
+import {  urlPath } from "@/lib/url-helpers";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 

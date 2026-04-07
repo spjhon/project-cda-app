@@ -22,7 +22,7 @@ import {
 import Link from "next/link";
 import { Suspense } from "react";
 
-export const dynamic = "force-static";
+
 
 interface Feature {
   icon: LucideIcon;

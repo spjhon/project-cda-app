@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { buildUrl, getHostnameAndPort } from "@/utils/url-helpers";
+import { buildUrl, getHostnameAndPort } from "@/lib/url-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 

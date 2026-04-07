@@ -1,4 +1,4 @@
-import { urlPath } from "@/utils/url-helpers";
+import { urlPath } from "@/lib/url-helpers";
 import Link from "next/link";
 import { Mail, CheckCircle2 } from "lucide-react";
 

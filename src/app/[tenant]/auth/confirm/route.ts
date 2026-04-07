@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { buildUrl, getHostnameAndPort } from "@/utils/url-helpers";
+import { buildUrl, getHostnameAndPort } from "@/lib/url-helpers";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from 'next/server';
 

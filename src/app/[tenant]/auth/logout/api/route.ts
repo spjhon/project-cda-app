@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { buildUrl } from "@/utils/url-helpers";
+import { buildUrl } from "@/lib/url-helpers";
 import { NextRequest, NextResponse } from "next/server";
 
 
