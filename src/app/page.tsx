@@ -20,7 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
+
 
 
 
@@ -187,7 +187,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {tenants.map((tenant) => (
-              <Suspense key={tenant} fallback={"Cargando..."}>
+             
                 <Link
                   prefetch={false}
                   key={tenant}
@@ -212,7 +212,7 @@ export default function Home() {
                     </div>
                   </div>
                 </Link>
-              </Suspense>
+            
             ))}
           </div>
         </div>

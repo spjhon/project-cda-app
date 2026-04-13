@@ -1,0 +1,156 @@
+plantilla_orden_de_entrada
+
+Field	Tipo de Dato
+id	UUID / SERIAL (PK)
+tenant_id	UUID (FK)
+nombre_plantilla	VARCHAR / TEXT
+version	VARCHAR / INTEGER
+esta_activo	BOOLEAN
+fecha_documento	DATE
+codigo_documento	VARCHAR
+logo_url	TEXT
+tipo_vehiculo_aplica	ENUM ('motocicleta', 'liviano', 'pesado', 'motocarro')
+texto_contractual_base	TEXT
+created_at	TIMESTAMP
+updated_at	TIMESTAMP
+creado_por	UUID (FK)
+deleted_at	TIMESTAMP
+
+condiciones_plantilla_orden_de_entrada
+
+	
+Field	Tipo de Dato
+id	UUID / SERIAL (PK)
+pantilla_orden_de_entrada_id	UUID (FK)
+label	TEXT
+is_special	BOOLEAN
+label_condicion_especial	TEXT
+default_value	ENUM ('si', 'no', 'na', 'vacio')
+orden_visual	INTEGER
+created_at	TIMESTAMP
+updated_at	TIMESTAMP
+deleted_at	TIMESTAMP
+
+
+firmas_plantilla_orden_de_entrada
+
+
+	
+Field	Tipo de Dato
+id	UUID / SERIAL (PK)
+pantilla_orden_de_entrada_id	UUID (FK)
+a_quien_representa	VARCHAR (Ej: 'cliente', 'recepcionista', 'dt')
+label_firma	VARCHAR (Ej: 'Firma del Cliente')
+orden_visual	INTEGER
+created_at	TIMESTAMP
+updated_at	TIMESTAMP
+deleted_at	TIMESTAMP
+
+condiciones_firmas_plantilla_orden_de_entrada
+
+Field	Tipo de Dato
+id	UUID / SERIAL (PK)
+firmas_plantilla_orden_de_entrada_id	UUID (FK)
+texto_declaracion	TEXT
+requiere_check_obligatorio	BOOLEAN
+created_at	TIMESTAMP
+updated_at	TIMESTAMP
+deleted_at	TIMESTAMP
+
+
+orden_de_entrada
+
+
+Field	Tipo de Dato	Notas
+id	UUID (PK)	Identificador único global.
+tenant_id	UUID (FK)	Indispensable para separar los datos de cada CDA.
+consecutivo	INTEGER / SERIAL	El número que ve el cliente (ej: 0001, 0002).
+fecha	TIMESTAMP	Fecha y hora exacta de la creación.
+vehiculo_id	UUID (FK)	Referencia al vehículo.
+propietario_id	UUID (FK)	Referencia al dueño actual.
+cliente_id	UUID (FK)	Quien trae el vehículo (puede ser diferente al dueño).
+funcionario_id	UUID (FK)	El recepcionista que atiende.
+plantilla_id	UUID (FK)	La plantilla de inspección que se usó.
+kilometraje	VARCHAR / NUMERIC	El valor que marca el odómetro.
+tipo_de_servicio	ENUM / VARCHAR	RTM, Preventiva, etc.
+es_reinspeccion	BOOLEAN	Indica si viene por rechazo previo.
+observaciones	TEXT	Notas generales del estado del vehículo.
+estado_orden	ENUM	abierta', 'en_prueba', 'finalizada', 'anulada'.
+soat_vencimiento_snapshot	DATE	Fecha del SOAT al momento de entrar.
+gas_numero_snapshot		
+gas_vencimiento_snapshot	DATE	Fecha de certificado de gas al momento de entrar.
+texto_contractual_snapshot	TEXT	El contrato legal exacto que firmó ese día.
+created_at	TIMESTAMP	Registro de creación en sistema.
+updated_at	TIMESTAMP	Registro de última edición.
+deleted_at	TIMESTAMP	Para anular la orden sin borrarla físicamente.
+
+
+respuestas_condiciones_orden_de_entrada
+
+Field	Tipo de Dato	Notas
+id	UUID (PK)	
+orden_de_entrada_id	UUID (FK)	
+condiciones_plantilla_orden_de_entrada_id	UUID (FK)	Cuál pregunta de la plantilla respondió.
+valor	ENUM ('si', 'no', 'na')	La respuesta del inspector/recepcionista.
+created_at	TIMESTAMP	Registro de creación en sistema.
+updated_at	TIMESTAMP	Registro de última edición.
+deleted_at	TIMESTAMP	Para anular la orden sin borrarla físicamente.
+
+
+firmas_orden_de_entrada
+
+
+Field	Tipo de Dato	Notas
+id	UUID (PK)	
+orden_de_entrada_id	UUID (FK)	Vincula a la orden de entrada.
+firmas_plantilla_orden_de_entrada_id	UUID (FK)	Vincula a la definición de la firma (ej. "Firma Cliente").
+firma_url	TEXT	Link al bucket de Supabase.
+nombre_firmante	VARCHAR	Quién firmó (por si no es el mismo cliente).
+documento_firmante	VARCHAR	Cédula del firmante.
+created_at	TIMESTAMP	Registro de creación en sistema.
+updated_at	TIMESTAMP	Registro de última edición.
+deleted_at	TIMESTAMP	Para anular la orden sin borrarla físicamente.
+
+
+vehiculo
+
+
+Field	Tipo de Dato	Notas
+id	UUID (PK)	
+placa	VARCHAR	Única por país (Indexada para búsqueda rápida).
+marca	VARCHAR	Ej: Chevrolet, Yamaha.
+linea	VARCHAR	Ej: Spark, NMAX.
+modelo	INTEGER	El año del vehículo.
+color	VARCHAR	
+tipo_vehiculo	ENUM	(motocicleta, liviano, pesado, motocarro).
+clase	VARCHAR	Automóvil, Camioneta, Motocicleta.
+combustible	VARCHAR	Gasolina, Diesel, Eléctrico, GNV.
+cilindrada	INTEGER	Vital para determinar tarifas y pruebas de gases.
+blindaje	BOOLEAN	
+capacidad_pasajeros	INTEGER	
+numero_ejes	INTEGER	
+es_ensenanza	BOOLEAN	
+soat_vencimiento	DATE	Fecha de vigencia actual.
+gas_numero	VARCHAR	Número del certificado de gas (si aplica).
+gas_vencimiento	DATE	Fecha de vigencia del certificado de gas.
+propietario_actual_id	UUID (FK)	Referencia a la tabla personas.
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+deleted_at	TIMESTAMP	
+
+
+personas
+
+
+Field	Tipo de Dato	Notas
+id	UUID (PK)	
+tenant_id	UUID (FK)	Para que los clientes de un CDA no se mezclen con otros.
+tipo_documento	ENUM	CC, CE, NIT, Pasaporte. (Fundamental para facturación).
+numero_documento	VARCHAR	La cédula o NIT (Indexado para búsqueda rápida).
+nombre_completo	VARCHAR / TEXT	Nombre o Razón Social.
+telefono	VARCHAR	Celular de contacto.
+correo	VARCHAR	Para envío del PDF de la orden o resultados.
+direccion	TEXT	Dirección de residencia o notificación.
+created_at	TIMESTAMP	
+updated_at	TIMESTAMP	
+deleted_at	TIMESTAMP	
