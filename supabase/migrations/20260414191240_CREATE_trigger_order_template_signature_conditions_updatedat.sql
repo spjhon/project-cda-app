@@ -1,0 +1,4 @@
+create trigger tr_order_template_signature_conditions_updated_at
+before update on public.order_template_signature_conditions
+for each row
+execute function public.set_updated_at();
