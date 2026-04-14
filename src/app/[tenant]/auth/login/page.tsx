@@ -65,7 +65,7 @@ export default async function Login({searchParams, params}: {searchParams: Promi
 
             
             <Link
-            prefetch={false}
+            
                 href="https://cda-app.com/"
                 className="absolute left-8 top-[1.6rem] flex items-center text-sm text-black hover:opacity-70 transition-colors font-medium z-20"
             >

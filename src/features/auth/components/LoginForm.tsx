@@ -46,7 +46,7 @@ export const LoginForm = ({
       <div className="flex items-center">
         <Label htmlFor="password">Contraseña</Label>
         <Link
-           prefetch={false}
+          
           href= {`/auth/forgot-password`}
           className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
         >
@@ -222,7 +222,7 @@ export const LoginForm = ({
               <p className="mt-4 text-center text-sm">
                 {isPasswordLogin ? (
                   <Link
-                     prefetch={false}
+                     
                     href={{
                       pathname: `/auth/login`,
                       query: { magicLink: "yes" },
@@ -232,7 +232,7 @@ export const LoginForm = ({
                   </Link>
                 ) : (
                   <Link
-                     prefetch={false}
+                     
                     href={{
                       pathname: `/auth/login`,
                       query: { magicLink: "no" },

@@ -116,7 +116,7 @@ export function TicketList() {
                 <tr key={ticket.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                   <td className="py-3 px-4 text-gray-500 font-medium">#{ticket.ticket_number}</td>
                   <td className="py-3 px-4">
-                    <Link  prefetch={false} href={`/tickets/details/${ticket.ticket_number}`} className="text-blue-600 hover:underline font-semibold block">
+                    <Link   href={`/tickets/details/${ticket.ticket_number}`} className="text-blue-600 hover:underline font-semibold block">
                       {ticket.title}
                     </Link>
                     <span className="text-xs text-gray-400">por {ticket.creator?.full_name}</span>
@@ -140,12 +140,12 @@ export function TicketList() {
         </div>
         <div className="flex gap-2">
           {pageSanitazed > 1 && !isLoading &&(
-            <Link  prefetch={false} href={getHref(pageSanitazed - 1)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-sm">
+            <Link  href={getHref(pageSanitazed - 1)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-sm">
               ← Anterior
             </Link>
           )}
           {fetchedTicketsState?.hasMore && !isLoading &&(
-            <Link  prefetch={false} href={getHref(pageSanitazed + 1)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-sm">
+            <Link  href={getHref(pageSanitazed + 1)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-sm">
               Siguiente →
             </Link>
           )}

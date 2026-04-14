@@ -108,7 +108,7 @@ export function ForgotPasswordForm({tenant}: ForgotPasswordFormProps ) {
               <div className="mt-4 text-center text-sm">
                 Ya tiene una cuenta?{" "}
                 <Link
-                 prefetch={false}
+                 
                   href={`/auth/login`}
                   className="underline underline-offset-4"
                 >

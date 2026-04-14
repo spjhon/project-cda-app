@@ -143,7 +143,7 @@ export default function Home() {
             {/* Lado Derecho: Links comprimibles */}
             <div className="flex items-center gap-3 sm:gap-6 md:gap-8 overflow-hidden">
               <Link
-                prefetch={false}
+                
                 href="#features"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 whitespace-nowrap transition-colors"
               >
@@ -151,7 +151,7 @@ export default function Home() {
               </Link>
 
               <Link
-                prefetch={false}
+                
                 href="https://github.com/spjhon/Book-Building-Production-Grade-with-Supabase"
                 className="inline-flex items-center gap-2 text-sm font-medium text-black hover:opacity-70 transition-all whitespace-nowrap"
                 target="_blank"
@@ -165,9 +165,18 @@ export default function Home() {
         </div>
       </nav>
 
+      
+
       <Hero></Hero>
 
-      
+      <Link
+              
+              href="/not-found"
+              
+              className="px-8 py-4 rounded-xl bg-background text-foreground font-bold hover:bg-secondary transition-all shadow-xl hover:-translate-y-1 active:scale-95"
+            >
+              Ver Perfil de LinkedIn
+            </Link>
 
       {/* Sección de Selección de Organización */}
       <section className="my-20 bg-white">
@@ -189,7 +198,7 @@ export default function Home() {
             {tenants.map((tenant) => (
              
                 <Link
-                  prefetch={false}
+                  
                   key={tenant}
                   href={`http://${tenant}.${rootDomain}/auth/login`}
                   className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20"
@@ -236,6 +245,8 @@ export default function Home() {
         </div>
       </section>
 
+      
+
       {/* Features Section */}
       <section id="features" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -277,7 +288,7 @@ export default function Home() {
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              prefetch={false}
+              
               href="https://www.linkedin.com/in/aristizabaljuan/"
               target="_blank"
               className="px-8 py-4 rounded-xl bg-background text-foreground font-bold hover:bg-secondary transition-all shadow-xl hover:-translate-y-1 active:scale-95"
@@ -286,7 +297,7 @@ export default function Home() {
             </Link>
 
             <Link
-              prefetch={false}
+              
               href="https://github.com/spjhon"
               target="_blank"
               className="px-8 py-4 rounded-xl border-2 border-primary-foreground text-primary-foreground font-bold hover:bg-primary-foreground/10 transition-all active:scale-95"
@@ -305,7 +316,7 @@ export default function Home() {
               <ul className="mt-4 space-y-2">
                 <li>
                   <Link
-                    prefetch={false}
+                   
                     href="#features"
                     className="text-gray-600 hover:text-gray-900"
                   >
@@ -314,7 +325,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    prefetch={false}
+                  
                     href="https://github.com/spjhon/Book-Building-Production-Grade-with-Supabase"
                     className="inline-flex items-center gap-2 text-sm font-medium text-black hover:opacity-70 transition-all whitespace-nowrap"
                     target="_blank"
@@ -331,7 +342,7 @@ export default function Home() {
               <ul className="mt-4 space-y-2">
                 <li>
                   <Link
-                    prefetch={false}
+                   
                     href="https://github.com/spjhon/Book-Building-Production-Grade-with-Supabase"
                     className="text-gray-600 hover:text-gray-900"
                   >
@@ -343,7 +354,7 @@ export default function Home() {
           </div>
           <div className="mt-8 pt-8 border-t border-gray-200">
             <Link
-              prefetch={false}
+             
               href="https://www.linkedin.com/in/aristizabaljuan/"
               target="_blank"
               rel="noopener noreferrer"

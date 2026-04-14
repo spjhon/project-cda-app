@@ -38,7 +38,7 @@ export const Navbar = () => {
       <div className="flex flex-row justify-end xl:justify-between items-center mx-auto max-w-2/3">
         
         <Link
-         prefetch={false}
+        
           href="https://cda-app.com/"
           className="fixed left-8 top-[1.6rem] flex items-center text-sm text-black hover:opacity-70 transition-colors font-medium z-20"
       >
@@ -48,7 +48,7 @@ export const Navbar = () => {
 
 
         <Link
-          prefetch={false}
+         
           rel="noreferrer noopener"
           href="/"
           className="font-bold text-xl hidden xl:flex"
@@ -64,7 +64,7 @@ export const Navbar = () => {
                 
                 return (
                   <Link
-                     prefetch={false}
+                    
                     href={route.href}
                     key={i}
                     className={cn(

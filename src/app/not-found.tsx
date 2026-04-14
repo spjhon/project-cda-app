@@ -19,7 +19,7 @@ export default function NotFound() {
 
       {/* Botón original de shadcn */}
       <Button size="lg" className="font-bold">
-        <Link href="http://127.0.0.1:3000" prefetch={false}>
+        <Link href="http://127.0.0.1:3000" >
           Volver al inicio
         </Link>
       </Button>

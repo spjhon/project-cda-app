@@ -1,3 +1,4 @@
+import Link from "next/link";
 
 
 export default function PageNotFound() {
@@ -8,9 +9,11 @@ export default function PageNotFound() {
       <p style={styles.text}>
         Lo sentimos, el subdominio al que intentas acceder no existe o no está registrado en nuestro sistema.
       </p>
-      <a href="http://127.0.0.1:3000" style={styles.button}>
+      <Link 
+      
+      href="http://127.0.0.1:3000" style={styles.button}>
         Volver al inicio
-      </a>
+      </Link>
     </div>
   );
 }
