@@ -58,15 +58,20 @@ ALTER TABLE public.order_template_conditions
     );
 
 -- ==========================================
--- 5. ÍNDICES (Rendimiento)
+-- 5. ÍNDICES (Rendimiento y Seguridad)
 -- ==========================================
 
--- Búsqueda rápida de condiciones por plantilla
-CREATE INDEX IF NOT EXISTS order_template_conditions_template_idx 
-    ON public.order_template_conditions USING btree (order_template_id);
+-- 1. Aislamiento Multi-tenant (Vital para RLS)
+-- Este resuelve el Issue de Supabase sobre la foreign key del tenant.
+CREATE INDEX IF NOT EXISTS otc_tenant_id_idx 
+    ON public.order_template_conditions (tenant_id);
 
--- Índice para cargar las preguntas en el orden correcto (Frontend)
-CREATE INDEX IF NOT EXISTS order_template_conditions_sorting_idx 
+-- 2. Índice Compuesto y Parcial (EL MÁS IMPORTANTE PARA EL FRONTEND)
+-- Este índice hace tres cosas a la vez:
+--   a) Cubre la relación con la plantilla (reemplaza a los otros dos duplicados).
+--   b) Ordena los datos por 'visual_order' directamente en el disco.
+--   c) Ignora registros borrados (WHERE deleted_at IS NULL), siendo más ligero.
+CREATE INDEX IF NOT EXISTS otc_template_sorting_idx 
     ON public.order_template_conditions (order_template_id, visual_order)
     WHERE (deleted_at IS NULL);
 
@@ -84,3 +89,68 @@ COMMENT ON COLUMN public.order_template_conditions.visual_order IS 'Determina la
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.order_template_conditions TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.order_template_conditions TO service_role;
+
+
+-- ==========================================
+-- 1. HABILITAR RLS: order_template_conditions
+-- ==========================================
+ALTER TABLE public.order_template_conditions ENABLE ROW LEVEL SECURITY;
+
+-- ==========================================
+-- 2. RLS: SELECT
+-- ==========================================
+-- POLÍTICA: Permite ver los ítems de las plantillas de sus tenants autorizados
+CREATE POLICY "Users can see template conditions from their allowed tenants"
+ON public.order_template_conditions
+FOR SELECT
+TO authenticated
+USING (
+    tenant_id IN (
+        SELECT tp.tenant_id 
+        FROM public.tenant_permissions tp
+        JOIN public.service_users su ON su.id = tp.service_user_id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+    )
+);
+
+-- ==========================================
+-- 3. RLS: INSERT (CREATE)
+-- ==========================================
+-- POLÍTICA: Permite crear ítems de plantilla vinculados a sus propios tenants
+CREATE POLICY "Users can create template conditions for their allowed tenants"
+ON public.order_template_conditions
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    tenant_id IN (
+        SELECT tp.tenant_id 
+        FROM public.tenant_permissions tp
+        JOIN public.service_users su ON su.id = tp.service_user_id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+    )
+);
+
+-- ==========================================
+-- 4. RLS: UPDATE
+-- ==========================================
+-- POLÍTICA: Permite modificar los ítems de plantilla existentes del tenant
+CREATE POLICY "Users can update template conditions from their allowed tenants"
+ON public.order_template_conditions
+FOR UPDATE
+TO authenticated
+USING (
+    tenant_id IN (
+        SELECT tp.tenant_id 
+        FROM public.tenant_permissions tp
+        JOIN public.service_users su ON su.id = tp.service_user_id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+    )
+)
+WITH CHECK (
+    tenant_id IN (
+        SELECT tp.tenant_id 
+        FROM public.tenant_permissions tp
+        JOIN public.service_users su ON su.id = tp.service_user_id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+    )
+);

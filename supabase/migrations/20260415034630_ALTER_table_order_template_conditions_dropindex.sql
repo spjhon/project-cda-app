@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS public.order_template_conditions_template_idx;

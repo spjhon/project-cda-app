@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS public.entry_orders_vehiculo_idx;
