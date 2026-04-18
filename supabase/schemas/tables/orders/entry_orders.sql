@@ -46,9 +46,6 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     -- El valor que marca el odómetro.
     kilometraje                 VARCHAR,
     
-    -- RTM, Preventiva, etc.
-    tipo_de_servicio            service_type_enum NOT NULL DEFAULT 'RTM',
-    
     -- Indica si viene por rechazo previo.
     es_reinspeccion             BOOLEAN DEFAULT false,
     

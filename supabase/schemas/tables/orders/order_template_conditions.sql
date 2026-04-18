@@ -23,9 +23,6 @@ CREATE TABLE IF NOT EXISTS public.order_template_conditions (
     is_special              BOOLEAN NOT NULL DEFAULT false,
     special_condition_label TEXT,
     default_value           condition_response_enum NOT NULL DEFAULT 'no_aplica',
-    
-    -- UI y Ordenamiento
-    visual_order            INTEGER NOT NULL DEFAULT 0,
 
     -- Auditoría
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -72,7 +69,7 @@ CREATE INDEX IF NOT EXISTS otc_tenant_id_idx
 --   b) Ordena los datos por 'visual_order' directamente en el disco.
 --   c) Ignora registros borrados (WHERE deleted_at IS NULL), siendo más ligero.
 CREATE INDEX IF NOT EXISTS otc_template_sorting_idx 
-    ON public.order_template_conditions (order_template_id, visual_order)
+    ON public.order_template_conditions (order_template_id)
     WHERE (deleted_at IS NULL);
 
 -- ==========================================

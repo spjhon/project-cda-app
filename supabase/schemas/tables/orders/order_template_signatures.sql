@@ -11,9 +11,6 @@ CREATE TABLE IF NOT EXISTS public.order_template_signatures (
     -- Configuración de la Firma
     representative_type     TEXT NOT NULL, -- Ahora es texto libre (Ej: 'Gerente', 'Secretaria', 'Inspector')
     signature_label         TEXT NOT NULL, -- Ej: 'Firma de quien recibe el vehículo'
-    
-    -- UI y Ordenamiento
-    visual_order            INTEGER NOT NULL DEFAULT 0,
 
     -- Auditoría
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -40,7 +37,7 @@ ALTER TABLE public.order_template_signatures
 -- Unicidad lógica: Evitar duplicados en el mismo orden visual por plantilla
 ALTER TABLE public.order_template_signatures
     ADD CONSTRAINT order_template_signatures_unique_pos 
-    UNIQUE (order_template_id, visual_order, deleted_at);
+    UNIQUE (order_template_id, deleted_at);
 
 -- ==========================================
 -- 4. ÍNDICES (Rendimiento)

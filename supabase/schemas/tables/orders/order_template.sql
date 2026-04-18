@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.order_template (
     document_date       DATE NOT NULL DEFAULT CURRENT_DATE,
     document_code       TEXT NOT NULL,
     logo_url            TEXT,
-    applies_to_vehicle  vehicle_type_enum NOT NULL,
+    service_type  service_type_enum NOT NULL DEFAULT 'RTM',
     base_contract_text  TEXT,
 
     -- Auditoría
@@ -73,9 +73,9 @@ ALTER TABLE public.order_template
 CREATE INDEX IF NOT EXISTS order_template_tenant_id_idx 
     ON public.order_template USING btree (tenant_id);
 
--- Búsqueda por tipo de vehículo (Para filtrar en la recepción)
-CREATE INDEX IF NOT EXISTS order_template_vehicle_type_idx 
-    ON public.order_template USING btree (applies_to_vehicle);
+-- Crear un índice para búsquedas rápidas (útil cuando filtres plantillas en el dashboard)
+CREATE INDEX IF NOT EXISTS order_templates_service_type_idx 
+ON public.order_template (service_type);
 
 -- Búsqueda por estado activo y no borrado
 CREATE INDEX IF NOT EXISTS order_template_active_not_deleted_idx 
@@ -98,6 +98,8 @@ COMMENT ON TABLE public.order_template IS 'Configuración maestra de las plantil
 COMMENT ON COLUMN public.order_template.is_active IS 'Indica si la plantilla está disponible para nuevas órdenes.';
 COMMENT ON COLUMN public.order_template.version IS 'Número incremental para control de cambios inmutables.';
 COMMENT ON COLUMN public.order_template.base_contract_text IS 'Texto legal/contrato que se copiará como snapshot a la orden.';
+-- Documentar la columna para claridad del equipo
+COMMENT ON COLUMN public.order_template.service_type IS 'Define si la plantilla es para RTM oficial, Preventiva o Peritaje comercial.';
 
 -- ==========================================
 -- 7. GRANTS
