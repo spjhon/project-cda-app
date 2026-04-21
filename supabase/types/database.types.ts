@@ -736,6 +736,7 @@ export type Database = {
           created_at: string
           domain: string
           id: string
+          logo_url: string | null
           name: string
           slug: string
           updated_at: string
@@ -744,6 +745,7 @@ export type Database = {
           created_at?: string
           domain: string
           id?: string
+          logo_url?: string | null
           name: string
           slug: string
           updated_at?: string
@@ -752,6 +754,7 @@ export type Database = {
           created_at?: string
           domain?: string
           id?: string
+          logo_url?: string | null
           name?: string
           slug?: string
           updated_at?: string
@@ -914,6 +917,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_full_order_template: { Args: { p_data: Json }; Returns: string }
+      fetch_orders_templates: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          base_contract_text: string
+          created_at: string
+          created_by: string
+          document_code: string
+          document_date: string
+          id: string
+          is_active: boolean
+          logo_url: string
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          template_name: string
+          tenant_id: string
+          updated_at: string
+          version: number
+        }[]
+      }
       get_service_users_with_tenant: {
         Args: { target_tenant_id: string }
         Returns: {
@@ -938,13 +960,13 @@ export type Database = {
         Returns: {
           domain: string
           id: string
+          logo_url: string
           name: string
         }[]
       }
       get_tenant_name: { Args: { p_tenant_slug: string }; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
-      test_receive_template: { Args: { p_data: Json }; Returns: string }
     }
     Enums: {
       condition_response_enum: "cumple" | "no_cumple" | "no_aplica"

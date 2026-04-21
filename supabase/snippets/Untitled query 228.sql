@@ -1,0 +1,1 @@
+SELECT raw_app_meta_data FROM auth.users

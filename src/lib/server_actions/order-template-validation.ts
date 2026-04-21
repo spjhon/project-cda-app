@@ -22,7 +22,9 @@ export async function createOrderTemplateAction(formData: OrderTemplateInput) {
   // 2. Si es válido, llamar a Supabase (RPC)
   const supabase = await createSupabaseServerClient()
   
-  const { data, error } = await supabase.rpc('test_receive_template', { 
+ 
+
+  const { data, error } = await supabase.rpc('create_full_order_template', { 
   p_data: {
     ...validatedFields.data,
     // Convertimos el objeto Date a un string que Postgres entiende perfectamente

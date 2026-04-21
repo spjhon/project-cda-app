@@ -1,13 +1,16 @@
 import { z } from "zod";
 
 export const orderTemplateSchema = z.object({
+  tenant_id:z.string(),
   template_name: z.string().min(3, "El nombre es muy corto"),
   version: z.number().int().positive(),
   is_active: z.boolean(),
   document_date: z.date(),
   document_code: z.string().min(1, "El código es obligatorio"),
+  logo_url:z.string(),
   service_type: z.enum(["RTM", "preventiva", "peritaje", "otros"]), // Validación del Enum
   base_contract_text: z.string().min(10, "El texto legal es muy corto"),
+  created_by: z.string(),
   
   
   

@@ -55,6 +55,12 @@ const NAV_DATA: NavItem[] = [
     href: "/dashboard/recepcionista/crear-orden-de-entrada",
     icon: TicketPlus,
   },
+  {
+    title: "Plantillas Creadas",
+    description: "Listado de plantillas creadas",
+    href: "/dashboard/recepcionista/plantillas-creadas",
+    icon: TicketPlus,
+  },
 ];
 
 export function AppSidebar() {

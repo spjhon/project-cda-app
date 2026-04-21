@@ -9,7 +9,7 @@ import { createSupabaseAdminClient } from "../supabase/admin";
  * Estilo minimalista Shadcn.
  */
 export async function enviarEmailMagicLink(email: string, tenant: string) {
-  console.log("aqui si se ejecuto")
+ 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabaseAdmin = createSupabaseAdminClient();
 

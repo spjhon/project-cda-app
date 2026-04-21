@@ -12,6 +12,7 @@ type TenantData = {
   domain: string,
   name: string,
   id: string,
+  logo_url: string
 }
 
 // Definimos la interfaz de lo que devuelve la función para que TS sea feliz
@@ -22,8 +23,12 @@ interface TenantFetchResult {
 
 
 
+
+
 export async function fetchTenantData(tenantSlug: string): Promise<TenantFetchResult> {
   try {
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    await delay(5000);
     if (!tenantSlug) return { data: null, error: "No slug provided" };
 
     const supabaseAdmin = createSupabaseAdminClient();
@@ -56,12 +61,12 @@ export async function fetchTenantData(tenantSlug: string): Promise<TenantFetchRe
  * - unstable_cache: Guarda el resultado en el servidor por 60 segundos (Data Cache).
  * - cache (React): Evita llamadas duplicadas durante el renderizado de una misma página (Memoization).
  */
-export const fetchTenantDataCached = cache(async (tenantSlug: string) => {
+export const fetchTenantDataCached = cache(async (tenantSlug: string) => { 
   return await unstable_cache(
     async () => fetchTenantData(tenantSlug),
     ["tenant-data", tenantSlug], // Llave única por cada tenant
     {
-      revalidate: 60, // TTL de 60 segundos
+      revalidate: 10, // TTL de 60 segundos
       tags: [`tenant-${tenantSlug}`, "all-tenants"], // Tags para invalidación manual
     }
   )();

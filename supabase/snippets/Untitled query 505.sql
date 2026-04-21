@@ -1,0 +1,1 @@
+SELECT raw_app_meta_data->'providers'->>1 as email3 FROM auth.users;

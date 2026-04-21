@@ -7,6 +7,9 @@
 create table public.tenants (
   id uuid primary key default gen_random_uuid(),
 
+  -- Nueva columna para el logo
+  logo_url text default 'https://pixabay.com/images/download/raphaelsilva-avatar-3814049_1920.png',
+
   name text not null,
   domain text not null unique,
   slug text not null unique,
@@ -35,6 +38,8 @@ comment on table public.tenants is 'Tenant root entity for multi-tenant isolatio
 comment on column public.tenants.domain is 'Primary custom domain for the tenant (must be unique).';
 
 comment on column public.tenants.slug is 'URL-safe identifier used for subdomain or routing. Lowercase, alphanumeric and hyphens only.';
+
+COMMENT ON COLUMN tenants.logo_url IS 'URL pública del logo del taller almacenado en Supabase Storage';
 
 -- ==========================================
 -- Índices adicionales

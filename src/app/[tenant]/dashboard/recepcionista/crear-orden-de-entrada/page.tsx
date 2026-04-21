@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { CalendarIcon, LayoutDashboard, FileText } from "lucide-react";
 import { format } from "date-fns";
 
@@ -28,7 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { createOrderTemplateAction } from "@/lib/server_actions/order-template-validation";
 import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
-
+import { ReceptionistContext } from "@/features/dashboard/DataLoaderContex";
 
 // Centralización de textos
 const COMPONENT_TEXT = {
@@ -80,17 +80,26 @@ const APLICA_O_NO_APLICA_LABELS = [
 
 export default function NewOrderTemplateForm() {
 
+  const contextRecived = useContext(ReceptionistContext);
+  const tenantId = contextRecived.ReceptionistContextValue.tenantObject.id
+  const logo_url = contextRecived.ReceptionistContextValue.tenantObject.logo_url
   
+
+  const user = contextRecived.ReceptionistContextValue.user;
+
 
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM
   const [formData, setFormData] = useState<OrderTemplateInput>({
+    tenant_id: tenantId,
     template_name: "",
     version: 1,
     is_active: true,
     document_date: new Date(),
     document_code: "",
+    logo_url: logo_url,
     service_type: "RTM",
     base_contract_text: "",
+    created_by: user.id,
     // Agregamos el array de condiciones aquí
     conditions: [
       {
@@ -117,9 +126,9 @@ export default function NewOrderTemplateForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+      
 
-  console.log("Enviando datos a validar:", formData);
+  
 
   // Llamamos a la Server Action pasándole nuestro estado
   const result = await createOrderTemplateAction(formData);
@@ -135,7 +144,7 @@ export default function NewOrderTemplateForm() {
     alert("Todo bien, los datos son válidos.");
   }
 
-    console.log("Datos capturados:", formData);
+    console.log("Datos capturados.");
   };
 
 
@@ -261,14 +270,19 @@ export default function NewOrderTemplateForm() {
                 <Input
                   id="version"
                   type="number"
-                  min="1"
-                  value={formData.version}
-                  onChange={(e) =>
+                  min={1}
+                  // Usamos un string vacío como fallback para que el input 
+                  // se vea limpio mientras el usuario borra y escribe
+                  value={isNaN(formData.version) ? "" : formData.version}
+                  onChange={(e) => {
+                    const val = e.target.value;
                     setFormData({
                       ...formData,
-                      version: parseInt(e.target.value),
-                    })
-                  }
+                      // Si el usuario borra todo, guardamos NaN (o 0), 
+                      // pero si hay texto, lo convertimos a número
+                      version: val === "" ? NaN : parseInt(val),
+                    });
+                  }}
                 />
               </div>
             </div>
