@@ -2,7 +2,7 @@ import { TicketList } from "@/features/tickets/components/TicketList";
 import { TicketFilters } from "@/features/tickets/components/TicketsFilter";
 import Link from "next/link";
 
-export const dynamic = "force-static";
+
 
 export default function TicketsPage() {
   return (

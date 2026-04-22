@@ -2,7 +2,7 @@
 import UsersTable from "@/features/tickets/components/UsersTable";
 
 
-export const dynamic = 'force-static' 
+
 
 export default function UserList() {
   
