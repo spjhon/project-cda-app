@@ -83,25 +83,25 @@ const APLICA_O_NO_APLICA_LABELS = [
 export default function NewOrderTemplateForm() {
 
   const contextRecived = useContext(ReceptionistContext);
-  const tenantId = contextRecived.ReceptionistContextValue.tenantObject.id
-  const logo_url = contextRecived.ReceptionistContextValue.tenantObject.logo_url
+  const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id
+  const logo_url = contextRecived?.ReceptionistContextValue.tenantObject?.logo_url
   
 
-  const user = contextRecived.ReceptionistContextValue.user;
+  const user = contextRecived?.ReceptionistContextValue.user;
 
 
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM
   const [formData, setFormData] = useState<OrderTemplateInput>({
-    tenant_id: tenantId,
+    tenant_id: tenantId || "",
     template_name: "",
     version: 1,
     is_active: true,
     document_date: new Date(),
     document_code: "",
-    logo_url: logo_url,
+    logo_url: logo_url || "",
     service_type: "RTM",
     base_contract_text: "",
-    created_by: user.id,
+    created_by: user?.id || "",
     // Agregamos el array de condiciones aquí
     conditions: [
       {
