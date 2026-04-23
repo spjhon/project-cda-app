@@ -21,7 +21,7 @@ export type OrderTemplate = {
   service_type: 'RTM' | 'peritaje' | 'otro' | 'preventiva'; // Ajusta según tu enum
 };
 
-interface TemplatesFetchResult {
+export interface TemplatesFetchResult {
   data: OrderTemplate[] | null;
   error: string | PostgrestError | null;
 }

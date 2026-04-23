@@ -11,13 +11,21 @@ import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cac
 import Loading from "@/components/ui/loading";
 import DataLoaderContext from "@/features/dashboard/DataLoaderContex";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { fetchAllTemplatesMemoized } from "@/lib/dbFunctions/fetch_orders_templates";
+import { fetchAllTemplatesMemoized, OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
 
 interface AdminDashboardLayout {
   children: ReactNode;
   params: Promise<{ tenant: string }>
 }
 
+export interface UserContextData {
+  authId: string;
+  email?: string;
+  name?: string;
+  id?: string; // Este es el UUID de la tabla service_users
+  document_type?: string | null;
+  document_number?: string | null;
+}
 
 
 export default async function ReceptionistDashboardLayout({
@@ -33,7 +41,7 @@ const tenantPromise = fetchTenantDataCached(tenant);
 
 
 
-const userPromise = (async () => {
+const userPromise: Promise<UserContextData | null> = (async () => {
   const supabase = await createSupabaseServerClient();
   
   // 1. Obtenemos la sesión/claims de autenticación
@@ -74,7 +82,7 @@ const userPromise = (async () => {
 
 
 // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
-  const templateTabelDataPromise = (async () => {
+  const templateTabelDataPromise: Promise<OrderTemplate[] | null> = (async () => {
     // Esperamos a que el tenant se resuelva para obtener su ID
     const tenantResult = await tenantPromise;
     
@@ -107,5 +115,5 @@ const userPromise = (async () => {
       </DataLoaderContext>
     </Suspense>
   );
-}
+};
 

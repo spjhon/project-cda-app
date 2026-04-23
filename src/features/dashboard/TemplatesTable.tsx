@@ -22,18 +22,20 @@ import {
   Download
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import OrderTemplate from "./pdfs/OrderTemplate";
+import OrderTemplatePDFComponent from "./pdfs/OrderTemplatePDFComponent";
+import { OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
 
-interface Props {
-  data: any[];
+
+interface CreatedTemplatesTableProps {
+  data: OrderTemplateType[] | null | undefined;
   isError: boolean;
-  error: any;
+  error: Error | null;
   refetch: () => void;
   isFetching: boolean;
   isSuccess: boolean;
 }
 
-export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess }: Props) {
+export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess }: CreatedTemplatesTableProps) {
   
 
 // Renderizado del Badge de Estado de Sincronización
@@ -243,7 +245,7 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
         </TableBody>
       </Table>
 
-      <OrderTemplate></OrderTemplate>
+      <OrderTemplatePDFComponent></OrderTemplatePDFComponent>
     </div>
      
   );

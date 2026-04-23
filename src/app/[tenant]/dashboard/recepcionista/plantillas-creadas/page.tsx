@@ -7,7 +7,6 @@ import CreatedTemplatesTable from "@/features/dashboard/TemplatesTable";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Edit3, Trash2 } from "lucide-react";
 import { useContext } from "react";
 
 
@@ -16,8 +15,8 @@ export default function CreatedTemplatesPage() {
 
 const contextRecived = useContext(ReceptionistContext);
 
-const templateTableData = contextRecived.ReceptionistContextValue.templateTableData;
-const tenantId = contextRecived.ReceptionistContextValue.tenantObject?.id;
+const templateTableData = contextRecived?.ReceptionistContextValue.templateTableData;
+const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id;
 
 
 
@@ -31,7 +30,7 @@ const {data, isFetching, isError, error, refetch, isSuccess} = useQuery({
     queryFn: async () => {
       // LLAMADA DIRECTA A SUPABASE
       const { data, error } = await supabaseBrowser.rpc("fetch_orders_templates", {
-        p_tenant_id: tenantId,
+        p_tenant_id: tenantId? tenantId : "",
       });
 
       if (error) throw new Error(error.message);
@@ -47,7 +46,7 @@ const {data, isFetching, isError, error, refetch, isSuccess} = useQuery({
 
 
 
-  console.log(data)
+  
 
   return (
     <CreatedTemplatesTable data={data} isError={isError} error={error} refetch={refetch} isFetching={isFetching} isSuccess={isSuccess}></CreatedTemplatesTable>
