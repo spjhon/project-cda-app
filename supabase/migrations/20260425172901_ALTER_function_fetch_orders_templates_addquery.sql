@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS fetch_orders_templates(p_tenant_id UUID);
+
 CREATE OR REPLACE FUNCTION fetch_orders_templates(p_tenant_id UUID)
 RETURNS TABLE (
     id UUID,
@@ -13,8 +15,8 @@ RETURNS TABLE (
     updated_at TIMESTAMPTZ,
     created_by UUID,
     service_type public.service_type_enum,
-    conditions JSONB,
-    signatures JSONB 
+    conditions JSONB,-- Nueva columna para las condiciones
+    signatures JSONB -- Nueva columna para las firmas
 ) 
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -37,8 +39,12 @@ BEGIN
         t.created_by,
         t.service_type,
         -- 1. AGREGACIÓN DE CONDICIONES DE LA PLANTILLA
+        --aqui el coalesce que esta hecho para devolver el primer valor no null que se encuentre, en este caso especifico solo tendria o el array de objects
+        --o null, y en el caso de null pues lo convierte a un array vacio [].
         COALESCE(
             (
+                --el jsonb_agg es como un agregador que va llenando el array [] con cada object que sale de jsonb_build_object, que se ejectua por cada
+                --c.order_template_id = t.id que se encuentre y eso dentro de cada t.tenant_id = p_tenant_id de la consulta externa
                 SELECT jsonb_agg(jsonb_build_object(
                     'id', c.id,
                     'label', c.label,
@@ -47,12 +53,15 @@ BEGIN
                     'default_value', c.default_value
                 ) ORDER BY c.created_at ASC)
                 FROM order_template_conditions c
+                --Por cada plantilla (t.id), Postgres va a la tabla de condiciones y busca todas las que le pertenecen. 
+                --Imagina que para la "Plantilla A" encuentra 3 filas.
                 WHERE c.order_template_id = t.id 
                   AND c.deleted_at IS NULL
             ), 
             '[]'::jsonb
         ) as conditions,
         -- 2. AGREGACIÓN DE FIRMAS CON SUS DECLARACIONES (ANIDADO)
+        -- Subconsulta para Firmas (Agregada)
         COALESCE(
             (
                 SELECT jsonb_agg(jsonb_build_object(

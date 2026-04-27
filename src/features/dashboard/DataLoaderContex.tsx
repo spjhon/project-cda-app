@@ -36,7 +36,6 @@ const user = use(userPromise);
 const templateTableData = use(templateTabelDataPromise);
 
 
-
 const ReceptionistContextValue = {
   tenantObject: result?.data,
   user: user,

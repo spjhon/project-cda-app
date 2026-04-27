@@ -4,6 +4,7 @@
 
 import { ReceptionistContext } from "@/features/dashboard/DataLoaderContex";
 import CreatedTemplatesTable from "@/features/dashboard/TemplatesTable";
+import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -23,13 +24,14 @@ const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id;
 
 
 
+
 const supabaseBrowser = createSupabaseBrowserClient();
 
 const {data, isFetching, isError, error, refetch, isSuccess} = useQuery({
     queryKey: ['templates', 'list'],
     queryFn: async () => {
       // LLAMADA DIRECTA A SUPABASE
-      const { data, error } = await supabaseBrowser.rpc("fetch_orders_templates", {
+      const { data , error } = await supabaseBrowser.rpc("fetch_orders_templates", {
         p_tenant_id: tenantId? tenantId : "",
       });
 
@@ -37,7 +39,7 @@ const {data, isFetching, isError, error, refetch, isSuccess} = useQuery({
 
 
       
-      return data;
+      return data as unknown as OrderTemplate[] || [];
     },
     initialData: templateTableData,
     staleTime: 10000,

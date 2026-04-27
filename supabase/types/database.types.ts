@@ -922,6 +922,7 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: {
           base_contract_text: string
+          conditions: Json
           created_at: string
           created_by: string
           document_code: string

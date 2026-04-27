@@ -28,10 +28,11 @@ const nextConfig: NextConfig = {
       // 3. PARA SUPABASE (Muy importante para que carguen tus PDFs/Images)
       {
         protocol: 'https',
-        hostname: 'hborskybnjzxsazqhhex.supabase.co',
+        hostname: 'lyktizihszlbmzzjrqye.supabase.co',
         port: '',
-        pathname: '/storage/v1/object/**',
+        pathname: '/storage/v1/object/public/**',
       },
+
       // 4. Si usas Google Auth, necesitas permitir sus fotos de perfil
       {
         protocol: 'https',

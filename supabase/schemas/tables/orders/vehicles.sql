@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS public.vehicles (
     
     -- Vital para determinar tarifas y pruebas de gases.
     cilindrada              INTEGER,
+
+    tipo_servicio_vehiculo public.vehicle_service_type_enum not null default 'particular'::public.vehicle_service_type_enum,
     
     -- Indica si el vehículo posee blindaje legal.
     blindaje                BOOLEAN DEFAULT false,
@@ -45,15 +47,6 @@ CREATE TABLE IF NOT EXISTS public.vehicles (
     
     -- Indica si es un vehículo de escuela de conducción.
     es_ensenanza            BOOLEAN DEFAULT false,
-    
-    -- Fecha de vigencia actual del SOAT.
-    soat_vencimiento        DATE,
-    
-    -- Número del certificado de gas (si aplica).
-    gas_numero              VARCHAR,
-    
-    -- Fecha de vigencia del certificado de gas.
-    gas_vencimiento         DATE,
 
     -- Referencia a la tabla personas (Dueño registrado).
     propietario_actual_id   UUID,
@@ -105,6 +98,18 @@ CREATE INDEX IF NOT EXISTS vehicles_propietario_idx
 -- Búsqueda por Tenant para RLS.
 CREATE INDEX IF NOT EXISTS vehicles_tenant_idx 
     ON public.vehicles USING btree (tenant_id);
+
+-- 3. (Opcional) Crear un índice para mejorar búsquedas por tipo de servicio
+CREATE INDEX IF NOT EXISTS vehicles_tipo_servicio_idx 
+    ON public.vehicles (tipo_servicio_vehiculo);
+
+
+-- ==========================================
+-- COMENTARIOS
+-- ==========================================
+
+COMMENT ON COLUMN public.vehicles.tipo_servicio_vehiculo IS 'Clasificación del servicio según la tarjeta de propiedad (Particular, Público, etc.)';
+
 
 -- ==========================================
 -- 5. GRANTS

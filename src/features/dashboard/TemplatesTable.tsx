@@ -18,11 +18,11 @@ import {
   RefreshCcw, 
   CheckCircle2,
   Loader2,
-  Eye,
-  Download
+  
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import OrderTemplatePDFComponent from "./pdfs/OrderTemplatePDFComponent";
+import OrderTemplateViewPDF from "./pdfs/OrderTemplateViewPDF";
+import OrderTemplateDownloadPDF from "./pdfs/OrderTemplateDownloadPDF";
 import { OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
 
 
@@ -200,24 +200,10 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
                 <div className="flex items-center justify-end gap-2 mt-3 md:mt-0">
                   
                   {/* Botón Ver (Ojo) */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50"
-                    title="Ver documento"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                   <OrderTemplateViewPDF data={template}></OrderTemplateViewPDF>
 
                   {/* Botón Descargar */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50"
-                    title="Descargar PDF"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  <OrderTemplateDownloadPDF data={template}></OrderTemplateDownloadPDF>
 
                   {/* Botón Editar */}
                   <Button 
@@ -245,7 +231,8 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
         </TableBody>
       </Table>
 
-      <OrderTemplatePDFComponent></OrderTemplatePDFComponent>
+      
+      
     </div>
      
   );

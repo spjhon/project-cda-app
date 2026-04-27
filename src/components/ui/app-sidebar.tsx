@@ -102,7 +102,7 @@ export function AppSidebar() {
                       isActive={active}
                     >
                       <Link
-                        
+                        prefetch={true}
                         href={item.href}
                         className={`group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 
                           ${
