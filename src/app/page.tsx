@@ -1,3 +1,4 @@
+import { CurrentYear } from "@/features/LandingPage/CurrentYear";
 import { Hero } from "@/features/LandingPage/Hero";
 import { HeroVideo } from "@/features/LandingPage/HeroVideo";
 import { LogoMarquee } from "@/features/LandingPage/LogoMarquee";
@@ -20,6 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 
 
@@ -32,6 +34,7 @@ interface Feature {
 }
 
 export default function Home() {
+  
   // Definimos los tenants para iterarlos fácilmente
   const tenants = ["fullmotos", "viterbocaldas", "tecnofresno", "autobig"];
 
@@ -363,8 +366,10 @@ export default function Home() {
               <FileUser className="w-4 h-4 text-[#0A66C2] group-hover:scale-110 transition-transform" />
               <span>
                 {" "}
-                {new Date().getFullYear()} {"Juan Camilo Patiño Aristizabal"}.
-                Código de libre uso.
+                <Suspense fallback={<span className="animate-pulse bg-slate-200 rounded px-2 text-transparent">0000</span>}>
+                <CurrentYear />
+                </Suspense>
+                {" Juan Camilo Patiño Aristizabal. Código de libre uso."}
               </span>
             </Link>
           </div>

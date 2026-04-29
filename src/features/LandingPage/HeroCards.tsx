@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
+  
 } from "@/components/ui/card";
 
 import Image from "next/image";
@@ -15,6 +15,8 @@ import HorizontalScanner from "../../../public/horizontalScanner.webp";
 import VerticalImage from "../../../public/verticalCar.webp";
 import GithubLogo from "./svgs/GithubLogo";
 import LinkedinLogo from "./svgs/LinkedinLogo";
+import shadcn from "../../../public/shadcn.jpg"
+import stockPhoto from "../../../public/150.jpg"
 
 export const HeroCards = () => {
   return (
@@ -25,7 +27,8 @@ export const HeroCards = () => {
           <Avatar>
             <AvatarImage
               alt="JP"
-              src="https://github.com/shadcn.png"
+             
+              src={shadcn.src}
             />
             <AvatarFallback>JP</AvatarFallback>
           </Avatar>
@@ -48,9 +51,10 @@ export const HeroCards = () => {
         
         
         <CardHeader className="mt-8 flex justify-center items-center pb-2 w-60">
-          <img
-          
-            src="https://i.pravatar.cc/150?img=58"
+          <Image
+            width={100}
+            height={100}
+            src={stockPhoto.src}
             alt="user avatar"
             className="absolute grayscale-[0%] -top-12 rounded-full w-24 h-24 aspect-square object-cover"
           />

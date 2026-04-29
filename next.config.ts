@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       permanent: true,
     },
   ],
+  cacheComponents: true,
    allowedDevOrigins: ['127.0.0.1', 'cda-app', '*.cda-app',],
   images: {
     remotePatterns: [

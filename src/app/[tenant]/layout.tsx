@@ -1,5 +1,7 @@
+import Loading from "@/components/ui/loading";
 import AuthListener from "@/features/auth/components/AuthListener";
 import TenantProviders from "@/features/TenantProviders";
+import { Suspense } from "react";
 
 export default function TenantLayout({
   children,
@@ -9,8 +11,11 @@ export default function TenantLayout({
     <TenantProviders> {/* <-- El motor de datos nace aquí */}
     <main className="bg-[#F5F5F5]">
       {/* El AuthListener es clave aquí para vigilar la sesión del tenant específico */}
+      <Suspense fallback={<Loading />}>
       <AuthListener />
+      
       {children}
+      </Suspense>
     </main>
     </TenantProviders>
   );

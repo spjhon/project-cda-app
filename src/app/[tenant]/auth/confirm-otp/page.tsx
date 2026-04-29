@@ -22,6 +22,9 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function ConfirmOtp() {
+
+
+ 
   const searchParams = useSearchParams();
   const router = useRouter();
   const [otp, setOtp] = useState("");

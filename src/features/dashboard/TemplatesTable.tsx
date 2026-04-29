@@ -24,6 +24,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import OrderTemplateViewPDF from "./pdfs/OrderTemplateViewPDF";
 import OrderTemplateDownloadPDF from "./pdfs/OrderTemplateDownloadPDF";
 import { OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 interface CreatedTemplatesTableProps {
@@ -33,9 +35,22 @@ interface CreatedTemplatesTableProps {
   refetch: () => void;
   isFetching: boolean;
   isSuccess: boolean;
+  onUpdateStatus: (id: string, is_active: boolean) => void;
+  isUpdating: boolean;
+
+  // NUEVOS TIPOS PARA EL ORDENAMIENTO
+  orderBy: string;
+  setOrderBy: (column: string) => void;
+  orderDir: "asc" | "desc";
+  setOrderDir: (direction: "asc" | "desc") => void;
 }
 
-export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess }: CreatedTemplatesTableProps) {
+
+
+
+
+
+export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess, onUpdateStatus, isUpdating, orderBy, setOrderBy, orderDir, setOrderDir }: CreatedTemplatesTableProps) {
   
 
 // Renderizado del Badge de Estado de Sincronización
@@ -111,6 +126,41 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
           Listado de Plantillas
         </h2>
         <div>{renderStatusBadge()}</div>
+
+
+        <div className="flex flex-wrap items-center gap-4 px-5 mt-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold uppercase text-slate-500">Ordenar por Columna</label>
+            <Select value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
+              <SelectTrigger className="w-[180px] h-9">
+                <SelectValue placeholder="Columna" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="template_name">Nombre</SelectItem>
+                <SelectItem value="document_code">Código</SelectItem>
+                <SelectItem value="version">Versión</SelectItem>
+                <SelectItem value="document_date">Fecha</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold uppercase text-slate-500">Orden</label>
+            <Select value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
+              <SelectTrigger className="w-[150px] h-9">
+                <SelectValue placeholder="Dirección" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asc">Ascendente</SelectItem>
+                <SelectItem value="desc">Descendente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+
+
+
       </div>
       <Table>
         <TableHeader className="hidden md:table-header-group bg-slate-50/50">
@@ -119,6 +169,7 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
             <TableHead className="font-bold text-slate-700">Nombre de Plantilla</TableHead>
             <TableHead className="w-[15%] font-bold text-slate-700">Tipo de Servicio</TableHead>
             <TableHead className="font-bold text-center text-slate-700">Versión</TableHead>
+            <TableHead className="font-bold text-center text-slate-700">Fecha Documento</TableHead>
             <TableHead className="font-bold text-slate-700">Estado</TableHead>
             <TableHead className="text-right font-bold text-slate-700">Acciones</TableHead>
           </TableRow>
@@ -174,25 +225,52 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
                 </Badge>
               </TableCell>
 
+              {/* Celda: Versión */}
+              <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
+                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                  Fecha Documento
+                </span>
+                <Badge variant="secondary" className="font-mono bg-slate-100 text-slate-700">
+                  v{template.document_date}
+                </Badge>
+              </TableCell>
 
 
               {/* Estado de la plantilla */}
               <TableCell className="md:table-cell py-2 md:py-4">
+                {/* Etiqueta para móvil */}
                 <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
                   Estado
                 </span>
-                <Badge 
-                  variant={template.is_active ? "outline" : "destructive"} 
-                  className={`
-                    capitalize 
-                    ${template.is_active 
-                      ? "border-emerald-500 text-emerald-700 bg-emerald-50" 
-                      : "bg-red-100 text-red-700 hover:bg-red-200 border-red-200"
-                    }
-                  `}
-                >
-                  {template.is_active ? "Activo" : "Inactivo"}
-                </Badge>
+
+                {/* Contenedor Flex para alinear verticalmente */}
+                <div className="flex flex-col items-start md:items-center gap-2">
+                  <Badge 
+                    variant={template.is_active ? "outline" : "destructive"} 
+                    className={`
+                      capitalize 
+                      ${template.is_active 
+                        ? "border-emerald-500 text-emerald-700 bg-emerald-50" 
+                        : "bg-red-100 text-red-700 hover:bg-red-200 border-red-200"
+                      }
+                    `}
+                  >
+                    {template.is_active ? "Activo" : "Inactivo"}
+                  </Badge>
+
+                  <Switch
+                    id={`is_active-${template.id}`} // ID único por fila
+                    checked={template.is_active}
+                    onCheckedChange={(checked) => {
+                      onUpdateStatus(template.id, checked); // Disparas la mutación
+                    }}
+                    disabled={isUpdating}
+
+                    // Si usas shadcn, recuerda que el Switch suele ser pequeño, 
+                    // podrías añadirle un transform scale si lo quieres más visual
+                    className={"data-checked:bg-emerald-500! data-unchecked:bg-red-500!" }
+                  />
+                </div>
               </TableCell>
 
               {/* Celda: Acciones */}

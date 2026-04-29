@@ -81,6 +81,9 @@ const userPromise: Promise<UserContextData | null> = (async () => {
 
 
 
+
+
+
 // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
   const templateTabelDataPromise: Promise<OrderTemplate[] | null> = (async () => {
     // Esperamos a que el tenant se resuelva para obtener su ID
@@ -93,6 +96,9 @@ const userPromise: Promise<UserContextData | null> = (async () => {
     
     return templatesResult.data; // Retornamos solo el array de objetos
   })();
+
+
+
 
 
   return (

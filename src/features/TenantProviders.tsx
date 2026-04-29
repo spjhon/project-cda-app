@@ -10,7 +10,7 @@ export default function TenantProviders({ children }: { children: React.ReactNod
     defaultOptions: {
       queries: {
         retry: 0,
-        staleTime: 60 * 1000,
+        
       },
     },
   }))
