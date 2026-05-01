@@ -1,12 +1,13 @@
 "use client"
 
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Check, UserX, Loader2 } from "lucide-react"; // Importamos un icono de carga
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AvailabilitySelect } from "./AvailabilitySelect";
 import { ServiceUser } from "./CreateTicketForm";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 
 export default function UsersTable() {
   const { tenant } = useParams();
@@ -23,7 +24,7 @@ export default function UsersTable() {
       try {
         setIsLoading(true); // Aseguramos que se active al cambiar de tenant
         
-        const { data: tenantData, error: errorTenantData } = await fetchTenantDataCached(tenant as string);
+        const { data: tenantData, error: errorTenantData } = await fetchTenantData(tenant as string);
 
         if (errorTenantData || !tenantData) {
           router.push(`/error?type=Error trayendo informacion del tenant`);

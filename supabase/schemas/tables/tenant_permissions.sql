@@ -46,8 +46,8 @@ ALTER TABLE public.tenant_permissions
 -- 2. Unicidad: Un usuario solo puede tener una entrada por Tenant
 -- (Si luego decides que un usuario puede tener varios roles, recuerda borrar esta)
 ALTER TABLE public.tenant_permissions
-    ADD CONSTRAINT tenant_permissions_unique_pair 
-    UNIQUE (tenant_id, service_user_id);
+    ADD CONSTRAINT tenant_permissions_unique_triplet 
+UNIQUE (tenant_id, service_user_id, role);
 
 -- ==========================================
 -- COMENTARIOS

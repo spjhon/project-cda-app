@@ -1,19 +1,21 @@
 "use client"
 
-import { ReceptionistContext } from "@/features/dashboard/DataLoaderContex";
+import { ReceptionistContext } from "@/features/dashboard/ReceptionistLoaderContex";
+import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
 import { useContext } from "react";
 
 
 export default function NewEntryOrder() {
 
  const contextRecived = useContext(ReceptionistContext);
-  const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id
-  const logo_url = contextRecived?.ReceptionistContextValue.tenantObject?.logo_url
-  const user = contextRecived?.ReceptionistContextValue.user;
+ const permissionscontextRecived = useContext(PermissionsContext);
+  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id
+  const logo_url = permissionscontextRecived?.PermissionsContextValue.tenantObject?.logo_url
+  const user = permissionscontextRecived?.PermissionsContextValue.user;
   const templateTableData = contextRecived?.ReceptionistContextValue.templateTableData;
 
   
-  console.log(templateTableData)
+ 
 
 
   return (

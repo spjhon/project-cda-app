@@ -2,8 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { Database } from "../../../supabase/types/database.types";
 import { buildUrl, getHostnameAndPort } from "@/lib/url-helpers";
-//import {  fetchTenantData } from "../dbFunctions/fetch_tenant_domain_cached";
-//import { PostgrestError } from "@supabase/supabase-js";
+
 
 export async function updateSession(request: NextRequest) {
   //funcion proxy especial de supabase, no es el proxy de next js
@@ -101,7 +100,7 @@ if (isMainDomain) {
 
   //OBTENCION Y VERIFICACION DEL TENANT DESDE LA DB CON UN CACHE DE 1 MINUTO
 
-  //const {data: tenantData, error} = await fetchTenantData(tenantSlug);
+  
   const tenantName = tenantSlug; //tenantData?.domain
 
   /** 

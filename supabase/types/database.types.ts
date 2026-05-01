@@ -836,16 +836,14 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           es_ensenanza: boolean | null
-          gas_numero: string | null
-          gas_vencimiento: string | null
           id: string
           linea: string | null
           marca: string | null
           modelo: number | null
           placa: string
           propietario_actual_id: string | null
-          soat_vencimiento: string | null
           tenant_id: string
+          tipo_servicio_vehiculo: Database["public"]["Enums"]["vehicle_service_type_enum"]
           tipo_vehiculo: Database["public"]["Enums"]["vehicle_type_enum"]
           updated_at: string
         }
@@ -859,16 +857,14 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           es_ensenanza?: boolean | null
-          gas_numero?: string | null
-          gas_vencimiento?: string | null
           id?: string
           linea?: string | null
           marca?: string | null
           modelo?: number | null
           placa: string
           propietario_actual_id?: string | null
-          soat_vencimiento?: string | null
           tenant_id: string
+          tipo_servicio_vehiculo?: Database["public"]["Enums"]["vehicle_service_type_enum"]
           tipo_vehiculo: Database["public"]["Enums"]["vehicle_type_enum"]
           updated_at?: string
         }
@@ -882,16 +878,14 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           es_ensenanza?: boolean | null
-          gas_numero?: string | null
-          gas_vencimiento?: string | null
           id?: string
           linea?: string | null
           marca?: string | null
           modelo?: number | null
           placa?: string
           propietario_actual_id?: string | null
-          soat_vencimiento?: string | null
           tenant_id?: string
+          tipo_servicio_vehiculo?: Database["public"]["Enums"]["vehicle_service_type_enum"]
           tipo_vehiculo?: Database["public"]["Enums"]["vehicle_type_enum"]
           updated_at?: string
         }
@@ -931,6 +925,7 @@ export type Database = {
           is_active: boolean
           logo_url: string
           service_type: Database["public"]["Enums"]["service_type_enum"]
+          signatures: Json
           template_name: string
           tenant_id: string
           updated_at: string
@@ -966,6 +961,7 @@ export type Database = {
         }[]
       }
       get_tenant_name: { Args: { p_tenant_slug: string }; Returns: string }
+      get_tenant_roles: { Args: { p_tenant_id: string }; Returns: string[] }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
@@ -983,6 +979,13 @@ export type Database = {
         | "ti2"
       order_status_enum: "abierta" | "en_prueba" | "finalizada" | "anulada"
       service_type_enum: "RTM" | "preventiva" | "peritaje" | "otro"
+      vehicle_service_type_enum:
+        | "particular"
+        | "enseñanza"
+        | "oficial"
+        | "publico"
+        | "diplomático"
+        | "especial"
       vehicle_type_enum: "motocicleta" | "liviano" | "pesado" | "motocarro"
     }
     CompositeTypes: {
@@ -1128,6 +1131,14 @@ export const Constants = {
       ],
       order_status_enum: ["abierta", "en_prueba", "finalizada", "anulada"],
       service_type_enum: ["RTM", "preventiva", "peritaje", "otro"],
+      vehicle_service_type_enum: [
+        "particular",
+        "enseñanza",
+        "oficial",
+        "publico",
+        "diplomático",
+        "especial",
+      ],
       vehicle_type_enum: ["motocicleta", "liviano", "pesado", "motocarro"],
     },
   },

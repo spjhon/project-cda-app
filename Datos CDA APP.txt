@@ -244,7 +244,10 @@ NTC 5385 - sección 4.20: Sobre los documentos que se necesita
 NTC 5375 - sección 5: Presentación y documentos que se pide
 
 
-
+PROTECCION DE FUNCIONES Y RUTAS POR APARTE
+MANEJO DE ERRORES
+DIAGRAMADO DE MINI FLUJOS
+TESTS
 
 
 

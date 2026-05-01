@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { Resend } from 'resend';
 
@@ -56,7 +56,7 @@ export async function registerUserAction(tenant: string, formData: FormData) {
 
 
   // 3. Validación del Tenant y se optiene el id
-  const { data: tenantData, error: errorFetchingTenantData } = await fetchTenantDataCached(tenant);
+  const { data: tenantData, error: errorFetchingTenantData } = await fetchTenantData(tenant);
   const tenantDomainValidatedInDb = tenantData?.domain;
 
   if (!tenantDomainValidatedInDb || errorFetchingTenantData) {

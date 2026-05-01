@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       if (redirect === "newpassword"){
         return NextResponse.redirect(buildUrl("/auth/update-password", tenant, request), { status: 303 });
       }else{
-        return NextResponse.redirect(buildUrl("/tickets", tenant, request), { status: 303 });
+        return NextResponse.redirect(buildUrl("/dashboard", tenant, request), { status: 303 });
       }
       
     } else {

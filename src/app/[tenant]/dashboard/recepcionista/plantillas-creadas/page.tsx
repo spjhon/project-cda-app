@@ -1,6 +1,7 @@
 "use client";
 
-import { ReceptionistContext } from "@/features/dashboard/DataLoaderContex";
+import { ReceptionistContext } from "@/features/dashboard/ReceptionistLoaderContex";
+import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
 import CreatedTemplatesTable from "@/features/dashboard/TemplatesTable";
 import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -16,15 +17,16 @@ export default function CreatedTemplatesPage() {
   const queryClient = useQueryClient();
 
   const contextRecived = useContext(ReceptionistContext);
+  const permissionscontextRecived = useContext(PermissionsContext);
 
   const templateTableData = contextRecived?.ReceptionistContextValue.templateTableData;
-  const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id;
+  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
 
 const [orderBy, setOrderBy] = useState<string>("document_name");
 const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
 
-console.log(orderBy)
+
   const supabaseBrowser = createSupabaseBrowserClient();
 
   //Llamado nuevaamente a los datos que llegaron inicialmente por medio de la promesa

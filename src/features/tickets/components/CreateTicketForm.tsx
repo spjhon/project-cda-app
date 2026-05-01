@@ -10,9 +10,10 @@ import { Database } from "../../../../supabase/types/database.types";
 import { useParams, useRouter } from "next/navigation";
 
 import { fetchServiceUsersCached } from "@/lib/dbFunctions/get_service_users_with_tenant_cached";
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+
 import { Button } from "@/components/ui/button";
 import { Loader2, TicketPlus } from "lucide-react";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 
 export type ServiceUser = Database['public']['Tables']['service_users']['Row'];
 export type TenantSummary = Pick<Database['public']['Tables']['tenants']['Row'], 'id' | 'name' | 'domain'>;
@@ -37,7 +38,7 @@ useEffect(() => {
         console.log("Cargando información del tenant para:", tenant);
         
         // Llamada a la promesa desde el cliente
-        const { data: tenantData, error: errorTenantData } = await fetchTenantDataCached(tenant as string);
+        const { data: tenantData, error: errorTenantData } = await fetchTenantData(tenant as string);
 
         if (errorTenantData || !tenantData) {
           console.log("Error al traer información del tenant:", errorTenantData);

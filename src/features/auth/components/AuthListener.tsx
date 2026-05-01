@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+
+
 
 
 
@@ -23,7 +25,8 @@ import { AuthChangeEvent, Session } from "@supabase/supabase-js";
  * * @return null - No renderiza contenido visual, actúa como un proveedor de efectos secundarios.
  */
 
-export default function AuthListener() {
+export default function AuthListener({children}: Readonly<{ children: React.ReactNode }>) {
+  const [isReady, setIsReady] = useState(false);
   // 1. Herramienta de enrutamiento de Next.js.
   const router = useRouter();
 
@@ -31,7 +34,7 @@ export default function AuthListener() {
   const tenant = params.tenant as string; // Captura el tenant de la URL automáticamente
 
   useEffect(() => {
-    
+
     // 2. Creación de la instancia del cliente de Supabase para el navegador.
     const supabase = createSupabaseBrowserClient();
 
@@ -44,8 +47,10 @@ export default function AuthListener() {
         console.log("el useEffect dice que el usuario esta signed INNNN")
         if (!session?.user.app_metadata.tenants?.includes(tenant)) {
           supabase.auth.signOut();
+          
           alert("No se puede ingresar, el tenant no concuerda");
         }
+      
       }
 
       // 5. Lógica para el evento SIGNED_OUT:
@@ -53,17 +58,23 @@ export default function AuthListener() {
       if (event === "SIGNED_OUT") {
         console.log("El useEffect dice que el usuario esta singed out")
         window.location.href = '/auth/login';
+        
       }
-      
+      setIsReady(true)
     });
 
     // 6. Limpieza de la suscripción al desmontar el componente.
-    return () => subscription.unsubscribe();
+     return () => subscription.unsubscribe();
+ 
+
+  
 
   }, [router, tenant]);
 
+  if (!isReady) return "Cargando el AuthListener..."; // BLOQUEO MANUAL
+
   // Este componente no renderiza nada, solo maneja efectos secundarios.
-  return null;
+  return <>{children}</>; // Ahora sí, adelante los niños
 }
 
 

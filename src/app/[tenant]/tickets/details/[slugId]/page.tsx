@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+
 import { fetchServiceUsersCached} from "@/lib/dbFunctions/get_service_users_with_tenant_cached";
 
 import TicketComments, { TicketComment } from "../../../../../features/tickets/components/ticketComment";
@@ -15,6 +15,7 @@ import TicketStatusSelect from "@/features/tickets/components/TicketStatusSelect
 import { Badge } from "@/components/ui/badge";
 import { ServiceUser } from "@/features/tickets/components/CreateTicketForm";
 import { getAuthorNameAction } from "@/lib/dbFunctions/fetch_autor_name_ticket";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 
 const statusStyles: Record<string, string> = {
   open: "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-100/80",
@@ -87,7 +88,7 @@ export default function TicketDetailPage() {
 
 
         // 1. Tenant Data
-        const { data: tenantData, error: tError } = await fetchTenantDataCached(tenant);
+        const { data: tenantData, error: tError } = await fetchTenantData(tenant);
         if (tError || !tenantData) throw new Error("No se pudo encontrar el Tenant.");
 
         // 2. Ticket con comentarios

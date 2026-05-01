@@ -24,7 +24,7 @@ export async function fetchServiceUsersCached(tenantId: string) {
   });
 
   if (error) {
-    console.log("RPC Error:", error);
+    console.log("RPC Error desde fetchserviceUserscached:", error);
     return { data: null, error: error as PostgrestError };
   }
 

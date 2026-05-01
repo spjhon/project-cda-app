@@ -31,7 +31,7 @@ export default async function Login({searchParams, params}: {searchParams: Promi
 
     //If a user already exists, instead of continuing with the login rendering, the redirection to the protected area is performed.
     if (data?.claims) {
-        redirect(`/tickets`)
+        redirect(`/dashboard`)
     }  
 
 

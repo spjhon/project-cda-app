@@ -7,92 +7,50 @@ import { ReactNode, Suspense } from "react";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 
 import HeaderSidebar from "@/features/dashboard/HeaderSidebar";
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 import Loading from "@/components/ui/loading";
-import DataLoaderContext from "@/features/dashboard/DataLoaderContex";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { fetchAllTemplatesMemoized, OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
 
-interface AdminDashboardLayout {
+
+import { fetchAllTemplates, OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { redirect } from "next/navigation";
+import ReceptionistLoaderContext from "@/features/dashboard/ReceptionistLoaderContex";
+
+interface ReceptionistDashboardLayoutProps {
   children: ReactNode;
   params: Promise<{ tenant: string }>
 }
 
-export interface UserContextData {
-  authId: string;
-  email?: string;
-  name?: string;
-  id?: string; // Este es el UUID de la tabla service_users
-  document_type?: string | null;
-  document_number?: string | null;
-}
 
 
-export default async function ReceptionistDashboardLayout({
+
+export default function ReceptionistDashboardLayout({
   children,
   params,
-}: AdminDashboardLayout) {
+}: ReceptionistDashboardLayoutProps) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
-
-const { tenant } = await params;
-
-
-const tenantPromise = fetchTenantDataCached(tenant);
-
-
-
-const userPromise: Promise<UserContextData | null> = (async () => {
-  const supabase = await createSupabaseServerClient();
-  
-  // 1. Obtenemos la sesión/claims de autenticación
-  const { data: authData, error: authError } = await supabase.auth.getClaims();
-  if (authError || !authData?.claims) return null;
-
-  const authId = authData.claims.sub;
-
-  // 2. Consultamos la tabla de negocio 'service_user'
-  // Ajusta 'auth_user_id' al nombre real de la columna que vincula con Auth
-  const { data: serviceUserData, error: serviceError } = await supabase
-    .from('service_users')
-    .select('id, document_type, document_number')
-    .eq('auth_user_id', authId)
-    .single();
-
-  if (serviceError) {
-    console.error("Error al obtener service_user:", serviceError);
-    // Decisión: ¿Retornar null o solo los datos de Auth? 
-    // Aquí retornamos los de Auth con los campos extra en null por seguridad.
-  }
-
-  // 3. Consolidamos toda la información en un solo objeto
-  return {
-    // Datos de la cuenta (Auth)
-    authId: authId,
-    email: authData.claims.email,
-    name: authData.claims.user_metadata?.name,
-    
-    // Datos de perfil de negocio (Base de datos pública)
-    // Usamos el ID de esta tabla para el 'created_by' de tus plantillas
-    id: serviceUserData?.id, 
-    document_type: serviceUserData?.document_type,
-    document_number: serviceUserData?.document_number,
-  };
-})();
-
-
-
 
 
 
 // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
   const templateTabelDataPromise: Promise<OrderTemplate[] | null> = (async () => {
+    const { tenant } = await params;
     // Esperamos a que el tenant se resuelva para obtener su ID
-    const tenantResult = await tenantPromise;
+    const tenantResult = await fetchTenantData(tenant);
     
-    if (!tenantResult?.data?.id) return null;
+    if (!tenantResult?.data?.id) {
+    redirect(`/error?type=Error, no existe tenant en templateTabelDataPromise`);
+  }
+
+  if (tenantResult.error !== null){
+    redirect(`/error?type=Error al extraer el tenant${tenantResult.error}`);
+  }
 
     // Ahora que tenemos el ID, llamamos a las plantillas
-    const templatesResult = await fetchAllTemplatesMemoized(tenantResult.data.id);
+    const templatesResult = await fetchAllTemplates(tenantResult.data.id);
+
+    if (templatesResult.error !== null){
+    redirect(`/error?type=Error al extraer las plantillas: ${tenantResult.error}`);
+  }
     
     return templatesResult.data; // Retornamos solo el array de objetos
   })();
@@ -103,7 +61,7 @@ const userPromise: Promise<UserContextData | null> = (async () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <DataLoaderContext tenantPromise={tenantPromise} userPromise={userPromise} templateTabelDataPromise={templateTabelDataPromise}>
+      <ReceptionistLoaderContext  templateTabelDataPromise={templateTabelDataPromise}>
         <SidebarProvider>
           
 
@@ -111,14 +69,18 @@ const userPromise: Promise<UserContextData | null> = (async () => {
 
           <SidebarInset>
             <HeaderSidebar></HeaderSidebar>
-            <main>{children}</main>
+            <main>
+              
+              {children}
+            
+            </main>
           </SidebarInset>
 
           
 
 
         </SidebarProvider>
-      </DataLoaderContext>
+      </ReceptionistLoaderContext>
     </Suspense>
   );
 };

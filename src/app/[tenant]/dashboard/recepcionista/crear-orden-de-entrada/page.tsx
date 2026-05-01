@@ -30,7 +30,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { createOrderTemplateAction } from "@/lib/server_actions/order-template-validation";
 import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
-import { ReceptionistContext } from "@/features/dashboard/DataLoaderContex";
+
+import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
 
 // Centralización de textos
 const COMPONENT_TEXT = {
@@ -82,12 +83,14 @@ const APLICA_O_NO_APLICA_LABELS = [
 
 export default function NewOrderTemplateForm() {
 
-  const contextRecived = useContext(ReceptionistContext);
-  const tenantId = contextRecived?.ReceptionistContextValue.tenantObject?.id
-  const logo_url = contextRecived?.ReceptionistContextValue.tenantObject?.logo_url
+  const contextRecived = useContext(PermissionsContext);
+
+
+  const tenantId = contextRecived?.PermissionsContextValue.tenantObject?.id
+  const logo_url = contextRecived?.PermissionsContextValue.tenantObject?.logo_url
   
 
-  const user = contextRecived?.ReceptionistContextValue.user;
+  const user = contextRecived?.PermissionsContextValue.user;
 
 
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM

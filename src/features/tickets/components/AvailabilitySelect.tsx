@@ -9,7 +9,7 @@ import {
   SelectValue,
   SelectGroup,
 } from "@/components/ui/select";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 
 import { ServiceUser } from "./CreateTicketForm";
 
@@ -27,7 +27,7 @@ export function AvailabilitySelect({
   setUsersData: React.Dispatch<React.SetStateAction<ServiceUser[]>>
 }) {
   
-  const supabase = createSupabaseBrowserClient();
+  
   
 
 
@@ -77,7 +77,7 @@ const [isLoading, setIsLoading] = useState(false);
 
 
     }catch(error){
-      const message = error instanceof Error? error.message : "Error actualizando el disponiblidad."
+      const message = error instanceof Error? "Error actualizando el disponiblidad: " + error.message : "Error inesperado actualizando el disponiblidad."
       console.log(message)
     }finally{
       setIsLoading(false);

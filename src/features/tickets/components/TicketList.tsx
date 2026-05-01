@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { fetchTenantDataCached } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
 import { getTicketsAction } from "@/lib/dbFunctions/fetch_tickets_with_comments";
 
 const statusStyles: Record<string, string> = {
@@ -55,7 +55,7 @@ export function TicketList() {
     async function loadTicketData() {
       setIsLoading(true);
       try {
-        const { data: tenantData } = await fetchTenantDataCached(tenant as string);
+        const { data: tenantData } = await fetchTenantData(tenant as string);
         if (!tenantData) return;
 
         const response = await getTicketsAction({
