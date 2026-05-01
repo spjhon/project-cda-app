@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, {params}: { params: Promise<{ t
   }
 
   //If everything goes well, you will be redirected to the protected area.
-  return NextResponse.redirect(buildUrl("/tickets", tenant, request), { status: 303 });
+  return NextResponse.redirect(buildUrl("/dashboard", tenant, request), { status: 303 });
 }
 
 /**

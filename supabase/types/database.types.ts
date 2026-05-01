@@ -34,96 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      comment_attachments: {
-        Row: {
-          comment_id: string
-          created_at: string
-          file_path: string
-          id: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          comment_id: string
-          created_at?: string
-          file_path: string
-          id?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          comment_id?: string
-          created_at?: string
-          file_path?: string
-          id?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comment_attachments_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comment_attachments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      comments: {
-        Row: {
-          author_name: string
-          comment_text: string
-          created_at: string
-          created_by: string
-          id: string
-          tenant_id: string
-          ticket_id: string
-          updated_at: string
-        }
-        Insert: {
-          author_name: string
-          comment_text: string
-          created_at?: string
-          created_by: string
-          id?: string
-          tenant_id: string
-          ticket_id: string
-          updated_at?: string
-        }
-        Update: {
-          author_name?: string
-          comment_text?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          tenant_id?: string
-          ticket_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "service_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_comments_to_tickets"
-            columns: ["ticket_id", "tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tickets"
-            referencedColumns: ["id", "tenant_id"]
-          },
-        ]
-      }
       entry_order_tire_pressures: {
         Row: {
           created_at: string
@@ -761,70 +671,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tickets: {
-        Row: {
-          assignee: string | null
-          assignee_name: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          status: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id: string
-          ticket_number: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assignee?: string | null
-          assignee_name?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          status?: string
-          tenant_id?: string
-          ticket_number?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tickets_assignee_fkey"
-            columns: ["assignee"]
-            isOneToOne: false
-            referencedRelation: "service_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "service_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       vehicles: {
         Row: {
           blindaje: boolean | null
@@ -931,25 +777,6 @@ export type Database = {
           updated_at: string
           version: number
         }[]
-      }
-      get_service_users_with_tenant: {
-        Args: { target_tenant_id: string }
-        Returns: {
-          auth_user_id: string
-          created_at: string
-          document_number: string
-          document_type: string
-          full_name: string | null
-          id: string
-          is_active: boolean
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "service_users"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_tenant_data: {
         Args: { p_tenant_slug: string }

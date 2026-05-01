@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { LogoutButton } from "../tickets/components/LogoutButton"
+import { LogoutButton } from "./LogoutButton"
 
 export default function HeaderSidebar() {
   const pathname = usePathname()

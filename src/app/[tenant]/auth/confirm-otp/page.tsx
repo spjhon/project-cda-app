@@ -66,7 +66,7 @@ export default function ConfirmOtp() {
             throw new Error("Error verificando el otp: " + errorVerifingOtp?.message)
         }
 
-      router.push("/tickets");
+      router.push("/dashboard");
 
 
 

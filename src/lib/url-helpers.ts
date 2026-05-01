@@ -40,7 +40,7 @@ export function buildUrl(applicationPath: string, tenant: string, request: NextR
   
   const tenantUrl = `${protocol}//${hostname}${portSuffix}`;
   
-  // Retornamos una URL absoluta: ej: http://fullmotos.cda-app.com:3000/tickets
+
   return new URL(urlPath(applicationPath, tenant), tenantUrl).toString();
 }
 

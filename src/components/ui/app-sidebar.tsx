@@ -18,7 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LogoutButton } from "@/features/tickets/components/LogoutButton";
+import { LogoutButton } from "@/features/dashboard/LogoutButton";
 
 // Estructura de datos para el usuario y navegación
 const DATA = {

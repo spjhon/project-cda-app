@@ -44,7 +44,7 @@ const isMainDomain = RESTRICTED_HOST.includes(hostname);
 if (isMainDomain) {
   const isAllowedRoute = LANDING_ROUTES.includes(applicationPath);
 
-  // Si intenta entrar a algo que no está en la lista (ej: /tickets o /auth)
+  // Si intenta entrar a algo que no está en la lista (ej: /dashboard o /auth)
   if (!isAllowedRoute) {
     
     const url = request.nextUrl.clone();
@@ -185,47 +185,6 @@ if (applicationPath.startsWith("/dashboard")) {
   }
 
 
-
-
-
-  if (applicationPath.startsWith("/tickets")) {
-
-    
-
-    if (!sessionUser) {
-      // 1. Mandamos explícitamente a la ruta de LOGIN, no a la raíz
-      const loginUrl = buildUrl("/auth/login", tenantName, request);
-      const response = NextResponse.redirect(loginUrl);
-
-      // --- PASO VITAL: Sincronizar cookies antes de retornar ---
-      supabaseResponse.cookies.getAll().forEach((c) => {
-        response.cookies.set(c.name, c.value, c);
-      });
-
-      request.cookies.getAll().forEach((c) => {
-        if (c.name.includes("auth-token")) response.cookies.delete(c.name);
-      });
-
-      return response;
-    }
-
-    // Si hay usuario, pero el tenant no está en su lista de acceso (app_metadata)
-    // Nota: Esto asume que en Supabase guardas un array de 'tenants' en el metadata del usuario
-    else if (!sessionUser.app_metadata?.tenants?.includes(tenantName)) {
-      const loginUrl = buildUrl("/auth/login", tenantName, request);
-      const response = NextResponse.redirect(loginUrl);
-
-      // --- PASO VITAL: Sincronizar cookies antes de retornar ---
-      supabaseResponse.cookies.getAll().forEach((c) => {
-        response.cookies.set(c.name, c.value, c);
-      });
-
-      request.cookies.getAll().forEach((c) => {
-        if (c.name.includes("auth-token")) response.cookies.delete(c.name);
-      });
-      return response;
-    }
-  }
 
   //REESCRITURA FINAL DE LA RUTA QUE VA PARA EL INTERIOR DE LA APP Y LA QUE VA DEVUELTA AL NAVEGADOR
   // Obtenemos los query params originales (ej: ?magicLink=yes)

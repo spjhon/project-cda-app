@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.derive_tenant_from_ticket() CASCADE;

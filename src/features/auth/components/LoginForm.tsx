@@ -103,7 +103,7 @@ export const LoginForm = ({
         }
         setIsLoading(false);
       } finally {
-        
+        setIsLoading(false);
       }
     }
 
