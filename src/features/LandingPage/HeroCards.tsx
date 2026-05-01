@@ -55,6 +55,7 @@ export const HeroCards = () => {
             width={100}
             height={100}
             src={stockPhoto.src}
+            loading="eager"
             alt="user avatar"
             className="absolute grayscale-[0%] -top-12 rounded-full w-24 h-24 aspect-square object-cover"
           />
@@ -134,7 +135,7 @@ export const HeroCards = () => {
       width={265}
       height={150}
       className="absolute top-[165px] left-[75px] rounded-xl border shadow-2xl  drop-shadow-xl shadow-black/10 dark:shadow-white/10"
-      
+      loading="eager"
       >
         </Image>
 

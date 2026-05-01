@@ -9,9 +9,9 @@ export default function DashboardPage() {
 
 const permissionscontextRecived = useContext(PermissionsContext);
 
-const roles = permissionscontextRecived?.PermissionsContextValue.RolesArray;
+const roles = permissionscontextRecived?.PermissionsContextValue
 
-console.log("Estos son los roles: " + roles)
+console.log( roles)
 
   return (
     <div>
