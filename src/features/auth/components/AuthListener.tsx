@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import Loading from "@/components/ui/loading";
 
 
 
@@ -71,7 +72,7 @@ export default function AuthListener({children}: Readonly<{ children: React.Reac
 
   }, [router, tenant]);
 
-  if (!isReady) return "Cargando el AuthListener..."; // BLOQUEO MANUAL
+  if (!isReady) return <Loading/>; // BLOQUEO MANUAL
 
   // Este componente no renderiza nada, solo maneja efectos secundarios.
   return <>{children}</>; // Ahora sí, adelante los niños
