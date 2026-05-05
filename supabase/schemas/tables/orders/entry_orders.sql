@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     
     -- Fecha y hora exacta de la creación.
     fecha                       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- tipo de servicio
+    service_type                service_type_enum NOT NULL DEFAULT 'RTM',
     
     -- Referencia al vehículo.
     vehiculo_id                 UUID NOT NULL,
@@ -100,8 +103,16 @@ ALTER TABLE public.entry_orders
 ALTER TABLE public.entry_orders
     ADD CONSTRAINT entry_orders_funcionario_id_fkey FOREIGN KEY (funcionario_id) REFERENCES public.service_users(id);
 
+
 -- ==========================================
--- 4. CONSTRAINTS (Unicidad)
+-- 4. COMENTARIOS
+-- ==========================================
+
+
+COMMENT ON COLUMN public.entry_orders.service_type IS 'Tipo de servicio legal o comercial asociado a esta orden de entrada';
+
+-- ==========================================
+-- 5. CONSTRAINTS (Unicidad)
 -- ==========================================
 
 -- El consecutivo debe ser único por cada CDA (Tenant)
@@ -109,7 +120,7 @@ ALTER TABLE public.entry_orders
     ADD CONSTRAINT entry_orders_consecutivo_tenant_key UNIQUE (tenant_id, consecutivo);
 
 -- ==========================================
--- 5. ÍNDICES (Rendimiento)
+-- 6. ÍNDICES (Rendimiento)
 -- ==========================================
 
 -- Búsquedas por fecha (Reportes)
@@ -136,8 +147,13 @@ CREATE INDEX IF NOT EXISTS entry_orders_funcionario_id_idx
 CREATE INDEX IF NOT EXISTS entry_orders_plantilla_id_idx 
     ON public.entry_orders (plantilla_id);
 
+-- Crear un índice para optimizar búsquedas por tipo de servicio
+-- Útil para reportes (ej: "¿Cuántas RTM se hicieron este mes?")
+CREATE INDEX IF NOT EXISTS entry_orders_service_type_idx 
+ON public.entry_orders USING btree (service_type);
+
 -- ==========================================
--- 6. GRANTS
+-- 7. GRANTS
 -- ==========================================
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.entry_orders TO authenticated;
@@ -145,7 +161,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.entry_orders TO service_rol
 
 
 -- ==========================================
--- 7. RLS para entry_orders (CREATE)
+-- 8. RLS para entry_orders (CREATE)
 -- ==========================================
 
 alter table public.entry_orders enable row level security;

@@ -4,7 +4,7 @@
 DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type_enum') THEN
-        CREATE TYPE vehicle_type_enum AS ENUM ('motocicleta', 'liviano', 'pesado', 'motocarro');
+        CREATE TYPE vehicle_type_enum AS ENUM ('liviano', 'pesado', 'motocicleta_4t', 'motocicleta_2t', 'motocarro_4t', 'motocarro_2t');
     END IF;
 END $$;
 
@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS public.order_template (
     document_date       DATE NOT NULL DEFAULT CURRENT_DATE,
     document_code       TEXT NOT NULL,
     logo_url            TEXT,
-    service_type  service_type_enum NOT NULL DEFAULT 'RTM',
     base_contract_text  TEXT,
 
     -- Auditoría

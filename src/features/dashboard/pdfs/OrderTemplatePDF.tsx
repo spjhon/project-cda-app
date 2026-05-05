@@ -368,7 +368,7 @@ export const OrderTemplatePDF = ({ data }: OrderTemplatePDFProps) => {
             <View style={styles.metaRow}>
               <Text style={styles.metaItem}>Doc: {data.document_code}</Text>
               <Text style={styles.metaItem}>| Ver: {data.version}</Text>
-              <Text style={styles.metaItem}>| Servicio: {data.service_type}</Text>
+              <Text style={styles.metaItem}>| Fecha Documento: {data.document_date}</Text>
             </View>
           </View>
         </View>
@@ -380,6 +380,7 @@ export const OrderTemplatePDF = ({ data }: OrderTemplatePDFProps) => {
             <Text style={styles.infoLabel}>Consecutivo</Text>
             <Text style={styles.infoValue}># ___________</Text>
           </View>
+
           <View style={styles.infoGroup}>
             <Text style={styles.infoLabel}>Fecha de Entrada</Text>
             <Text style={styles.infoValue}>____ / ____ / ________</Text>
@@ -394,6 +395,10 @@ export const OrderTemplatePDF = ({ data }: OrderTemplatePDFProps) => {
           {/* Fila 2 - Vehículo */}
           
           <View style={styles.infoGroup}>
+            <Text style={styles.infoLabel}>Tipo de Servicio</Text>
+            <Text style={styles.infoValue}>___________</Text>
+          </View>
+          <View style={styles.infoGroup}>
             <Text style={styles.infoLabel}>Kilometraje</Text>
             <Text style={styles.infoValue}>___________ km</Text>
           </View>
@@ -401,6 +406,7 @@ export const OrderTemplatePDF = ({ data }: OrderTemplatePDFProps) => {
             <Text style={styles.infoLabel}>Vencimiento SOAT</Text>
             <Text style={styles.infoValue}>____ / ____ / ________</Text>
           </View>
+          
 
           <View style={styles.divider} />
 

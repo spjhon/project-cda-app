@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS public.fetch_orders_templates(uuid);
+
 CREATE OR REPLACE FUNCTION fetch_orders_templates(p_tenant_id UUID)
 RETURNS TABLE (
     id UUID,

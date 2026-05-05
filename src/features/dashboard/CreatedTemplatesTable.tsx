@@ -23,9 +23,26 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import OrderTemplateViewPDF from "./pdfs/OrderTemplateViewPDF";
 import OrderTemplateDownloadPDF from "./pdfs/OrderTemplateDownloadPDF";
-import { OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+
+
+const SELECT_ORDENADO_POR = [
+  { label: "Codigo", value: "document_code" },
+  { label: "Nombre", value: "document_name" },
+  { label: "Tipo de Servicio", value: "service_type" },
+  { label: "Fecha", value: "document_date" },
+  { label: "Estado", value: "is_active" },
+
+];
+
+const SELECT_ORDEN = [
+  { label: "Ascendente", value: "asc" },
+  { label: "Descendente", value: "desc" },
+ 
+];
 
 
 interface CreatedTemplatesTableProps {
@@ -38,11 +55,7 @@ interface CreatedTemplatesTableProps {
   onUpdateStatus: (id: string, is_active: boolean) => void;
   isUpdating: boolean;
 
-  // NUEVOS TIPOS PARA EL ORDENAMIENTO
-  orderBy: string;
-  setOrderBy: (column: string) => void;
-  orderDir: "asc" | "desc";
-  setOrderDir: (direction: "asc" | "desc") => void;
+  
 }
 
 
@@ -50,8 +63,43 @@ interface CreatedTemplatesTableProps {
 
 
 
-export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess, onUpdateStatus, isUpdating, orderBy, setOrderBy, orderDir, setOrderDir }: CreatedTemplatesTableProps) {
+export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess, onUpdateStatus, isUpdating }: CreatedTemplatesTableProps) {
   
+const [orderBy, setOrderBy] = useState<string>("document_date");
+const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
+
+
+
+ const sortedData = [...(data ?? [])].sort((a, b) => {
+        // 1. Obtenemos los valores originales
+        const rawA = a[orderBy as keyof OrderTemplate];
+        const rawB = b[orderBy as keyof OrderTemplate];
+
+        // 2. Normalizamos: Si es null o undefined, lo convertimos en string vacío
+        // Usamos String() para que booleanos, números y nulls se puedan comparar como texto
+        const valueA = rawA ?? ""; 
+        const valueB = rawB ?? "";
+
+        // 3. Comparación segura
+        if (valueA < valueB) return orderDir === "asc" ? -1 : 1;
+        if (valueA > valueB) return orderDir === "asc" ? 1 : -1;
+        return 0;
+      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+
 
 // Renderizado del Badge de Estado de Sincronización
   const renderStatusBadge = () => {
@@ -131,22 +179,24 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
         <div className="flex flex-wrap items-center gap-4 px-5 mt-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold uppercase text-slate-500">Ordenar por Columna</label>
-            <Select value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
+            <Select items={SELECT_ORDENADO_POR} value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
               <SelectTrigger className="w-[180px] h-9">
                 <SelectValue placeholder="Columna" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="template_name">Nombre</SelectItem>
                 <SelectItem value="document_code">Código</SelectItem>
-                <SelectItem value="version">Versión</SelectItem>
+                <SelectItem value="document_name">Nombre</SelectItem>
+                <SelectItem value="service_type">Tipo de Servicio</SelectItem>
                 <SelectItem value="document_date">Fecha</SelectItem>
+                <SelectItem value="is_active">Estado</SelectItem>
+                
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold uppercase text-slate-500">Orden</label>
-            <Select value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
+            <Select items={SELECT_ORDEN} value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
               <SelectTrigger className="w-[150px] h-9">
                 <SelectValue placeholder="Dirección" />
               </SelectTrigger>
@@ -167,7 +217,6 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
           <TableRow>
             <TableHead className="font-bold text-slate-700">Código</TableHead>
             <TableHead className="font-bold text-slate-700">Nombre de Plantilla</TableHead>
-            <TableHead className="w-[15%] font-bold text-slate-700">Tipo de Servicio</TableHead>
             <TableHead className="font-bold text-center text-slate-700">Versión</TableHead>
             <TableHead className="font-bold text-center text-slate-700">Fecha Documento</TableHead>
             <TableHead className="font-bold text-slate-700">Estado</TableHead>
@@ -176,7 +225,7 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
         </TableHeader>
 
         <TableBody className="flex flex-col md:table-row-group">
-          {data.map((template) => (
+          {sortedData.map((template) => (
             <TableRow 
               key={template.id} 
               className="flex flex-col md:table-row p-4 md:p-0 hover:bg-slate-50/80 transition-colors border-b"
@@ -205,15 +254,6 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
                 </div>
               </TableCell>
 
-              {/* AGREGAR ESTA CELDA COMPLETA */}
-              <TableCell className="md:table-cell py-2 md:py-4">
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
-                  Tipo de Servicio
-                </span>
-                <div className="text-sm text-slate-500 italic">
-                  {template.service_type || "No especificado"}
-                </div>
-              </TableCell>
 
               {/* Celda: Versión */}
               <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
@@ -264,7 +304,7 @@ export default function CreatedTemplatesTable({ data, isError, error, refetch, i
                     onCheckedChange={(checked) => {
                       onUpdateStatus(template.id, checked); // Disparas la mutación
                     }}
-                    disabled={isUpdating}
+                    disabled={isUpdating || isFetching}
 
                     // Si usas shadcn, recuerda que el Switch suele ser pequeño, 
                     // podrías añadirle un transform scale si lo quieres más visual

@@ -1,3 +1,6 @@
+DROP FUNCTION IF EXISTS public.create_full_order_template(jsonb);
+
+
 CREATE OR REPLACE FUNCTION public.create_full_order_template(p_data jsonb)
 RETURNS uuid
 LANGUAGE plpgsql

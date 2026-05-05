@@ -102,7 +102,6 @@ export default function NewOrderTemplateForm() {
     document_date: new Date(),
     document_code: "",
     logo_url: logo_url || "",
-    service_type: "RTM",
     base_contract_text: "",
     created_by: user?.id || "",
     // Agregamos el array de condiciones aquí
@@ -292,35 +291,7 @@ export default function NewOrderTemplateForm() {
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label>{COMPONENT_TEXT.labels.service_type}</Label>
-              <Select
-                items={TIPO_DE_SERVICIO}
-                value={formData.service_type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, service_type: value ? value : "RTM" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={COMPONENT_TEXT.placeholders.selectVehicle}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {TIPO_DE_SERVICIO.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                        label={item.label}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+            
 
             <div className="grid gap-2">
               <Label>{COMPONENT_TEXT.labels.date}</Label>

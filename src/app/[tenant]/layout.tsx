@@ -1,6 +1,6 @@
 import Loading from "@/components/ui/loading";
 import AuthListener from "@/features/auth/components/AuthListener";
-import TenantProviders from "@/features/TenantProviders";
+import TanstackContext from "@/features/TanstackContext";
 import { Suspense } from "react";
 
 export default function TenantLayout({
@@ -8,7 +8,7 @@ export default function TenantLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     // 2. Usamos un fragmento <> o un <section> / <main>
-    <TenantProviders>
+    <TanstackContext>
       {" "}
       {/* <-- El motor de datos nace aquí */}
       <main className="bg-[#F5F5F5]">
@@ -17,6 +17,6 @@ export default function TenantLayout({
           <AuthListener>{children}</AuthListener>
         </Suspense>
       </main>
-    </TenantProviders>
+    </TanstackContext>
   );
 }

@@ -108,6 +108,7 @@ export type Database = {
           observaciones: string | null
           plantilla_id: string
           propietario_id: string
+          service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string | null
           tenant_id: string
           texto_contractual_snapshot: string | null
@@ -130,6 +131,7 @@ export type Database = {
           observaciones?: string | null
           plantilla_id: string
           propietario_id: string
+          service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id: string
           texto_contractual_snapshot?: string | null
@@ -152,6 +154,7 @@ export type Database = {
           observaciones?: string | null
           plantilla_id?: string
           propietario_id?: string
+          service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id?: string
           texto_contractual_snapshot?: string | null
@@ -314,7 +317,6 @@ export type Database = {
           id: string
           is_active: boolean
           logo_url: string | null
-          service_type: Database["public"]["Enums"]["service_type_enum"]
           template_name: string
           tenant_id: string
           updated_at: string
@@ -330,7 +332,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           logo_url?: string | null
-          service_type?: Database["public"]["Enums"]["service_type_enum"]
           template_name: string
           tenant_id: string
           updated_at?: string
@@ -346,7 +347,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           logo_url?: string | null
-          service_type?: Database["public"]["Enums"]["service_type_enum"]
           template_name?: string
           tenant_id?: string
           updated_at?: string
@@ -770,7 +770,6 @@ export type Database = {
           id: string
           is_active: boolean
           logo_url: string
-          service_type: Database["public"]["Enums"]["service_type_enum"]
           signatures: Json
           template_name: string
           tenant_id: string
@@ -813,7 +812,13 @@ export type Database = {
         | "publico"
         | "diplomático"
         | "especial"
-      vehicle_type_enum: "motocicleta" | "liviano" | "pesado" | "motocarro"
+      vehicle_type_enum:
+        | "liviano"
+        | "pesado"
+        | "motocicleta_4t"
+        | "motocicleta_2t"
+        | "motocarro_4t"
+        | "motocarro_2t"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -966,7 +971,14 @@ export const Constants = {
         "diplomático",
         "especial",
       ],
-      vehicle_type_enum: ["motocicleta", "liviano", "pesado", "motocarro"],
+      vehicle_type_enum: [
+        "liviano",
+        "pesado",
+        "motocicleta_4t",
+        "motocicleta_2t",
+        "motocarro_4t",
+        "motocarro_2t",
+      ],
     },
   },
 } as const

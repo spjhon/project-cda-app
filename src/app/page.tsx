@@ -62,7 +62,7 @@ export default function Home() {
     {
       icon: Clock,
       title: "Gestión de Tickets",
-      description: "Sistema de tickets con comentarios en tiempo real",
+      description: "Sistema dashboard con comentarios en tiempo real",
       color: "text-teal-600",
     },
 

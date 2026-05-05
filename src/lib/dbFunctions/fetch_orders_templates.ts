@@ -39,7 +39,6 @@ export type OrderTemplate = {
   created_at: string;
   updated_at: string;
   created_by: string | null;
-  service_type: 'RTM' | 'peritaje' | 'otro' | 'preventiva';
   conditions: OrderTemplateCondition[];
   signatures: OrderTemplateSignature[];
 };

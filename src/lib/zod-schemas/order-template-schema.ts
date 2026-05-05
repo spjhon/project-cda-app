@@ -8,7 +8,6 @@ export const orderTemplateSchema = z.object({
   document_date: z.date(),
   document_code: z.string().min(1, "El código es obligatorio"),
   logo_url:z.string(),
-  service_type: z.enum(["RTM", "preventiva", "peritaje", "otros"]), // Validación del Enum
   base_contract_text: z.string().min(10, "El texto legal es muy corto"),
   created_by: z.string(),
   
