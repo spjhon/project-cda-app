@@ -68,13 +68,6 @@ const COMPONENT_TEXT = {
   },
 };
 
-const TIPO_DE_SERVICIO = [
-  { label: "RTM", value: "RTM" },
-  { label: "Preventiva", value: "preventiva" },
-  { label: "Peritaje", value: "peritaje" },
-  { label: "Otros", value: "otros" },
-];
-
 const APLICA_O_NO_APLICA_LABELS = [
   { label: "Cumple", value: "cumple" },
   { label: "No Cumple", value: "no_cumple" },
