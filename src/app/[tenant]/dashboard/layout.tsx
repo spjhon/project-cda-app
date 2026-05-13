@@ -112,7 +112,13 @@ export default async function DashboardLayout({
 
   return (
     <>
+      {/**Este suspence se activa al tener que espera las promesas que se mandan al componente PermissionsLoaderContext*/}
       <Suspense fallback={<Loading />}>
+        {/**Componnete cliente que se carga paralelo a todo lo que se cargue dentro de children en modo client y tener acceso inmediato en el cliente a
+         * la informacion que se encuentra ya resuelta en PermissionsLoaderContext, esta informacion viaja por medio de context, como page.tsx que esta debajo
+         * de este layout es client tambien, entonces tiene acceso tambien al context.
+         * Como children esta dentro de PermissionsLoaderContext, estos children no van a cargar sino hasta que lo que este dentro de PermissionsLoaderContext termine de cargar
+         */}
         <PermissionsLoaderContext
           tenantPromise={tenantPromise}
           userPromise={userPromise}

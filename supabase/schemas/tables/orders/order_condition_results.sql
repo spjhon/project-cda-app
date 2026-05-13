@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS public.order_condition_results (
     
     -- El resultado marcado por el inspector
     value                   condition_response_enum NOT NULL,
-    -- Si era una condición especial (ej: checkbox de disco de freno), aquí se guarda si se marcó
-    special_value           BOOLEAN DEFAULT false,
+   
     
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),

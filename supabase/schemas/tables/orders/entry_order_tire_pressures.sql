@@ -24,8 +24,6 @@ CREATE TABLE IF NOT EXISTS public.entry_order_tire_pressures (
     -- Si el cliente la infló/desinfló, se registra aquí el nuevo valor.
     presion_ajustada        NUMERIC,
     
-    -- Indica si la medida corresponde a la llanta de auxilio.
-    es_repuesto             BOOLEAN DEFAULT false,
 
     -- Registro de creación en sistema.
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -46,10 +44,15 @@ ALTER TABLE public.entry_order_tire_pressures
     ADD CONSTRAINT tire_pressures_tenant_id_fkey 
     FOREIGN KEY (tenant_id) REFERENCES public.tenants(id) ON DELETE CASCADE;
 
--- Relación con la orden (si la orden se borra, las presiones también)
+-- Relación con la orden
 ALTER TABLE public.entry_order_tire_pressures
     ADD CONSTRAINT tire_pressures_order_id_fkey 
     FOREIGN KEY (entry_order_id) REFERENCES public.entry_orders(id) ON DELETE CASCADE;
+
+-- Restricción de valores permitidos para posicion (ISO 17020 compliance)
+ALTER TABLE public.entry_order_tire_pressures
+    ADD CONSTRAINT check_tire_position 
+    CHECK (posicion IN ('izquierda', 'derecha', 'interno_izquierdo', 'interno_derecho', 'repuesto'));
 
 -- ==========================================
 -- 3. ÍNDICES (Rendimiento)
@@ -64,15 +67,22 @@ CREATE INDEX IF NOT EXISTS tire_pressures_order_idx
 CREATE INDEX IF NOT EXISTS tire_pressures_tenant_idx 
     ON public.entry_order_tire_pressures USING btree (tenant_id);
 
+
 -- ==========================================
--- 4. GRANTS
+-- 4. COMENTARIOS
+-- ==========================================
+
+COMMENT ON COLUMN public.entry_order_tire_pressures.posicion IS 'Posición de la llanta: izquierda, derecha o repuesto';
+
+-- ==========================================
+-- 5. GRANTS
 -- ==========================================
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.entry_order_tire_pressures TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.entry_order_tire_pressures TO service_role;
 
 -- ==========================================
--- 5. RLS (Row Level Security)
+-- 6. RLS (Row Level Security)
 -- ==========================================
 
 alter table public.entry_order_tire_pressures enable row level security;

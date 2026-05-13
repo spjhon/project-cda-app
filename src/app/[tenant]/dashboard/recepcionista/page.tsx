@@ -46,6 +46,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import TirePressureSection from "@/features/dashboard/TirePressureSection";
+import ConditionsSwitchSections from "@/features/dashboard/ConditionsSwitchSections";
+import SignatureSection from "@/features/dashboard/SignatureSection";
+import { PersonSection } from "@/features/dashboard/PersonSection";
 
 //FUNCION GENERICA PARA EXTRAER ICONOS CON COLORES PERZONALIZADOS
 const getTemplateIcon = (index: number) => {
@@ -114,21 +117,150 @@ type TipoServicioVehiculo =
   | "DIPLOMATICO"
   | "ESPECIAL";
 
+
+type TirePosition =
+  | "izquierda"
+  | "derecha"
+  | "centro"
+  | "izquierda_interior"
+  | "derecha_interior"
+  | "repuesto";
+
+
+
+// Usamos esto para el manejo de datos en el formulario antes de enviarlos
+export interface PersonFormData {
+  id: string | null; // UUID si existe en DB
+  tipo_documento: string;
+  numero_documento: string;
+  nombre_completo: string;
+  telefono: string;
+  correo: string;
+  direccion: string;
+}
+
+
+
+// Estructura idéntica a la tabla entry_order_tire_pressures
+export interface TirePressureEntry {
+  eje: number;
+  posicion: TirePosition;
+  presion_encontrada: string;
+  presion_ajustada: string;
+  // Propiedad auxiliar solo para la lógica de la UI
+  _requiere_ajuste: boolean;
+}
+
+
+
+// En tu archivo de tipos
+export interface SignatureResult {
+  template_signature_id: string; // El ID de la firma en el template
+  representative_type: string;   // Para control interno del componente
+  signature_url: string;         // Aquí irá el base64 o la URL final
+  // signer_name lo manejaremos luego como dijiste
+}
+
+
+
+
+export interface VehicleData {
+  id: string | null;
+  placa: string;
+  marca: string;
+  linea: string;
+  modelo: string | number;
+  color: string;
+  tipo_vehiculo: TipoVehiculo;
+  clase: ClaseVehiculo;
+  combustible: Combustible;
+  cilindrada: string | number;
+  blindaje: boolean;
+  capacidad_pasajeros: string | number;
+  es_ensenanza: boolean;
+  tipo_servicio_vehiculo: TipoServicioVehiculo;
+  propietario_actual_id: string | null;
+  es_extranjero: boolean;
+}
+
+// 1. Tipos de apoyo (puedes tenerlos en este archivo o en un types.ts)
+export type ConditionResponse = "cumple" | "no_cumple" | "no_aplica";
+
+export interface ConditionResultEntry {
+  template_condition_id: string; // UUID de la tabla template_conditions
+  value: ConditionResponse;
+}
+
+
+// ESTADO GLOBAL DEL PADRE
+export interface FullFormData {
+  // --- CONTROL E INFRAESTRUCTURA ---
+  tenant_id: string;
+  funcionario_id: string;
+  plantilla_id: string;
+  
+  // --- DATOS DE LA ORDEN (VALORES DINÁMICOS) ---
+  kilometraje: string;
+  es_reinspeccion: boolean;
+  service_type: string;
+  estado_orden: string;
+  observaciones: string;
+  
+  // --- SNAPSHOTS (DATOS CONGELADOS EN EL TIEMPO) ---
+  soat_vencimiento_snapshot: string;
+  gas_numero_snapshot: string;
+  gas_vencimiento_snapshot: string;
+  texto_contractual_snapshot: string;
+  
+  // --- VEHÍCULO ---
+  vehicle: VehicleData;
+
+  // --- LÓGICA DE PERSONAS ---
+  // Estos IDs son los que finalmente se guardan en la tabla entry_orders
+  propietario_id: string; 
+  cliente_id: string;
+
+  // Objetos para el manejo del estado en el formulario (Frontend)
+  // Ayudan a controlar el "espejo" y la edición de datos
+  customer_data: PersonFormData;
+  owner_data: PersonFormData;
+  is_owner_same_as_customer: boolean; // El switch que controla el espejo
+
+  // --- DETALLES DE LA ORDEN ---
+  tire_pressures: TirePressureEntry[];
+  
+  /**
+   * Resultados de la inspección visual/preparación.
+   * Se mapean a la tabla 'order_condition_results' en la DB.
+   */
+  condition_results: ConditionResultEntry[];
+  
+  // Firmas capturadas
+  signatures: SignatureResult[]; 
+};
+
+
+
+
 export default function NewEntryOrder() {
+
+
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
 
-  const templateTableData =
-    ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
+  const templateTableData = ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
+
+
+//FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
+  const activeTemplates = templateTableData?.query.data?.filter((t) => t.is_active) || [];
+
+
 
   //STATE PRINCIPAL DEL FORMULARIO
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FullFormData>({
     // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
-    tenant_id:
-      PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id ||
-      "",
-    funcionario_id:
-      PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
+    tenant_id: PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "",
+    funcionario_id: PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
     plantilla_id: "",
 
     // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
@@ -168,32 +300,99 @@ export default function NewEntryOrder() {
     // IDs para las relaciones de la orden de entrada
     propietario_id: "", // Persona que figura en la tarjeta de propiedad
     cliente_id: "", // Persona que trae el vehículo al CDA (quien paga)
+
+    // --- REGISTRO DE PRESIONES DE LLANTAS (Detalle de la Orden) ---
+    // Array aplanado para facilitar el envío a la tabla entry_order_tire_pressures
+    tire_pressures: [
+      { eje: 1, posicion: "izquierda", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+      { eje: 1, posicion: "derecha", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+      { eje: 2, posicion: "izquierda", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+      { eje: 2, posicion: "derecha", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+    ] as TirePressureEntry[],
+    // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
+  // Este array se llenará dinámicamente cuando el usuario cargue la plantilla
+  condition_results: [] as ConditionResultEntry[],
+  signatures: [] as SignatureResult[], // <-- Nueva propiedad
+  // Dentro de tu useState inicial:
+customer_data: {
+  id: null,
+  tipo_documento: "CC",
+  numero_documento: "",
+  nombre_completo: "",
+  telefono: "",
+  correo: "",
+  direccion: "",
+},
+owner_data: {
+  id: null,
+  tipo_documento: "CC",
+  numero_documento: "",
+  nombre_completo: "",
+  telefono: "",
+  correo: "",
+  direccion: "",
+},
+is_owner_same_as_customer: true, // Switch maestro
   });
 
-  //FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
-  const activeTemplates =
-    templateTableData?.query.data?.filter((t) => t.is_active) || [];
+  
+
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
-  const selectedTemplate = activeTemplates.find(
-    (t) => t.id === formData.plantilla_id,
-  );
+  const selectedTemplate = activeTemplates.find((t) => t.id === formData.plantilla_id);
+
+
+
 
   //STATES DEL CUADRO DE DIALOGO
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tempPlaca, setTempPlaca] = useState("");
 
-  //ESTE ES EL MANEJADOR DEL SELECT: Para saber de entre los templates activos (array) es el que se selecciono en el select y pasarlo al state
-  //ojo, hay que cambiar el state tambien de las plantillas, aqui por ahora solo se esta cambiando el texto contractual
-  const handleTemplateSelect = (id: string, checked: boolean) => {
-    const template = activeTemplates.find((t) => t.id === id);
-    setFormData((prev) => ({
+
+// MANEJADOR DE SELECCIÓN DE PLANTILLA
+const handleTemplateSelect = (id: string, checked: boolean) => {
+  // 1. Buscamos la plantilla completa en el array de activas
+  const template = activeTemplates.find((t) => t.id === id);
+
+  setFormData((prev) => {
+    // 2. Preparamos los resultados iniciales de condiciones
+    const initialConditionResults = checked && template?.conditions
+      ? template.conditions.map((cond) => ({
+          template_condition_id: cond.id,
+          value: cond.default_value,
+        }))
+      : [];
+
+    // 3. Preparamos la estructura inicial de las firmas
+    // Esto es clave: ya dejamos el objeto listo con el ID del template y el tipo de representante
+    const initialSignatures = checked && template?.signatures
+      ? template.signatures.map((sig) => ({
+          template_signature_id: sig.id,
+          representative_type: sig.representative_type,
+          signature_url: "", // Inicia vacío hasta que firmen en el Pad
+        }))
+      : [];
+
+    return {
       ...prev,
       plantilla_id: checked ? id : "",
       texto_contractual_snapshot: checked
         ? template?.base_contract_text || ""
         : "",
-    }));
-  };
+      
+      // Inyectamos las condiciones iniciales
+      condition_results: initialConditionResults,
+      
+      // Inyectamos la estructura de firmas inicial
+      // Si desmarca la plantilla, esto se limpia solo ([])
+      signatures: initialSignatures,
+    };
+  });
+};
+
+
+
+
+
 
   //MANEJADOR DEL SELECT DEL SERVICE TYPE
   const handleServiceTypeChange = (type: string) => {
@@ -246,13 +445,9 @@ export default function NewEntryOrder() {
     }));
   };
 
-  /**
-   *
-   */
-  console.log(
-    "Datos del state actual cada vez que alguino de sus integrantes lo cambia",
-  );
-  console.log(formData);
+
+
+  
 
   return (
     <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8">
@@ -653,10 +848,23 @@ export default function NewEntryOrder() {
           </div>
         </div>
 
+
+
+
+{/**SECCION DE LAS PERSONAS */}
+
+
+<PersonSection formData={formData} setFormData={setFormData} />
+
+
+
+
+
+
         {/**SECCION DE DATOS DEL VEHICULO */}
         <div
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
-        >
+         >
           <div className="border-t pt-6">
             <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
               3. Datos del vehiculo
@@ -1183,6 +1391,7 @@ export default function NewEntryOrder() {
                         >
                           {item.icon}
                         </div>
+                        {/*#a11 ACTION */}
                         <Checkbox
                           checked={item.checked}
                           onCheckedChange={(checked) =>
@@ -1216,7 +1425,15 @@ export default function NewEntryOrder() {
 
 
 
-        {/**SECCION DE DATOS DEL VEHICULO */}
+
+
+
+
+
+
+
+
+        {/**SECCION DE LAS PRESIONES DEL VEHICULO */}
         <div
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
         >
@@ -1225,12 +1442,36 @@ export default function NewEntryOrder() {
               4. Presiones
             </legend>
 
-            <TirePressureSection />
+            <TirePressureSection 
+              tirePressures={formData.tire_pressures} 
+              setFormData={setFormData}
+            />
           </div>
         </div>
 
 
+        {/**SECCION DE LAS CONDICIONES A CUMPLIR */}
+        <ConditionsSwitchSections 
+          conditions={selectedTemplate?.conditions} 
+          results={formData.condition_results} 
+          setFormData={setFormData}
+        />
+          
+
+
+
+      {/**SECCION DE LAS FIRMAS */}
+      
+      <SignatureSection 
+        signatures={selectedTemplate?.signatures} 
+        contractText={selectedTemplate?.base_contract_text}
+        setFormData={setFormData}
         
+      />
+              
+
+
+
       </div>
     </form>
   );

@@ -3,7 +3,7 @@
 
 
 import React, { useContext, useState } from "react";
-import { CalendarIcon, LayoutDashboard, FileText } from "lucide-react";
+import { CalendarIcon, LayoutDashboard, FileText, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -32,6 +32,9 @@ import { createOrderTemplateAction } from "@/lib/server_actions/order-template-v
 import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
 
 import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
+import ConditionDialog from "@/features/dashboard/ConditionDialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 // Centralización de textos
 const COMPONENT_TEXT = {
@@ -99,13 +102,7 @@ export default function NewOrderTemplateForm() {
     created_by: user?.id || "",
     // Agregamos el array de condiciones aquí
     conditions: [
-      {
-        label: "",
-        is_special: false,
-        special_condition_label: "",
-        default_value: "no_aplica",
-        
-      },
+     
     ],
     signatures: [
       {
@@ -148,31 +145,7 @@ export default function NewOrderTemplateForm() {
 
 
   //FUNCIONES PARA CREAR, EDITAR O ELIMINAR UNA CONDICION AGREGADA
-  const addCondition = () => {
-    setFormData({
-      ...formData,
-      conditions: [
-        ...formData.conditions,
-        {
-          label: "",
-          is_special: false,
-          special_condition_label: "",
-          default_value: "no_aplica",
-          
-        },
-      ],
-    });
-  };
-
-  const updateCondition = (
-    index: number,
-    field: string,
-    value: string | boolean,
-  ) => {
-    const newConditions = [...formData.conditions];
-    newConditions[index] = { ...newConditions[index], [field]: value };
-    setFormData({ ...formData, conditions: newConditions });
-  };
+  
 
   const removeCondition = (index: number) => {
     setFormData({
@@ -180,6 +153,10 @@ export default function NewOrderTemplateForm() {
       conditions: formData.conditions.filter((_, i) => i !== index),
     });
   };
+
+
+
+
 
   //FUNCIONES PARA CREAR, EDITAR O ELIMINAR UNA DELCARACION PARA LA FIRMA
   const addSignature = () => {
@@ -370,165 +347,106 @@ export default function NewOrderTemplateForm() {
 
 
 
-      {/* SECCIÓN DE CONDICIONES: Integrada en formData */}
 
-      <Card className="mt-6 border-border bg-card text-card-foreground shadow-none rounded-lg">
-        <CardHeader className="border-b border-border mb-4 flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <LayoutDashboard className="size-5 text-primary" />
-            {COMPONENT_TEXT.conditions.headerTittle}
-          </CardTitle>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addCondition}
-          >
-            {COMPONENT_TEXT.conditions.buttonNewItem}
-          </Button>
-        </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            {formData.conditions.map((item, index) => (
-              <Card
-                key={index}
-                className="border-border bg-background shadow-none rounded-lg overflow-hidden relative"
-              >
-                {/* Botón para eliminar condición */}
+
+{/* SECCIÓN DE CONDICIONES EN FORMATO TABLA */}
+<Card className="mt-6 border-border shadow-none rounded-lg overflow-hidden">
+
+
+  <CardHeader className="border-b bg-muted/30 flex flex-row items-center justify-between py-4">
+    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+      <LayoutDashboard className="size-5 text-primary" />
+      {COMPONENT_TEXT.conditions.headerTittle}
+    </CardTitle>
+    
+
+
+    {/* El diálogo ahora maneja la creación */}
+    <ConditionDialog 
+       
+      setFormData={setFormData}
+    />
+      
+    
+
+
+  </CardHeader>
+
+
+
+
+  <CardContent className="p-0">
+    {formData.conditions.length > 0 ? (
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/20">
+            <TableHead className="w-[50%]">Condición</TableHead>
+            <TableHead>Valor Inicial</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead className="text-right">Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {formData.conditions.map((item, index) => (
+            <TableRow key={index} className="group">
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-sm line-clamp-2">{item.label}</span>
+                  {item.is_special && (
+                    <span className="text-[10px] text-primary font-bold uppercase tracking-tight">
+                      Aplica a: {item.special_condition_label}
+                    </span>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="capitalize font-medium">
+                  {item.default_value.replace("_", " ")}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {item.is_special ? (
+                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 text-[10px] uppercase">
+                    Especial
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px] uppercase text-slate-500">
+                    Estándar
+                  </Badge>
+                )}
+              </TableCell>
+              <TableCell className="text-right">
                 <Button
-                  type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 text-destructive hover:bg-destructive/10"
+                  className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => removeCondition(index)}
                 >
-                  ✕
+                  <Trash2 className="size-4" />
                 </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ) : (
+      <div className="text-center py-12 text-muted-foreground bg-background">
+        <LayoutDashboard className="size-10 mx-auto mb-3 opacity-20" />
+        <p className="text-sm italic">No hay condiciones definidas para este template.</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
 
-                <CardContent className="p-5 space-y-4">
-                  {/* Título de la sección */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-primary">
-                      Condición o preparación de ingreso
-                    </Label>
-                    <Textarea
-                      placeholder="Describa qué debe cumplir el vehículo (ej: traerlo limpio, sin carga, etc.)"
-                      className="min-h-[90px] resize-none border-input bg-muted/5 focus-visible:ring-primary"
-                      value={item.label}
-                      onChange={(e) =>
-                        updateCondition(index, "label", e.target.value)
-                      }
-                    />
-                  </div>
 
-                  {/* Controles: Valor Inicial y Switch Especial */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        Valor Inicial por defecto
-                      </Label>
-                      <Select
-                        items={APLICA_O_NO_APLICA_LABELS}
-                        value={item.default_value}
-                        onValueChange={(val) =>
-                          updateCondition(
-                            index,
-                            "default_value",
-                            val ? val : "",
-                          )
-                        }
-                      >
-                        <SelectTrigger className="h-10 bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Fruits</SelectLabel>
-                            {APLICA_O_NO_APLICA_LABELS.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
 
-                    <div className="flex items-end pb-2">
-                      <div className="flex items-center gap-3 p-2 rounded-md border border-dashed border-border w-full">
-                        <Switch
-                          id={`special-${index}`}
-                          checked={item.is_special}
-                          onCheckedChange={(checked) =>
-                            updateCondition(index, "is_special", checked)
-                          }
-                        />
-                        <div className="grid gap-0.5">
-                          <Label
-                            htmlFor={`special-${index}`}
-                            className="cursor-pointer font-medium"
-                          >
-                            ¿Es una condición especial?
-                          </Label>
-                          <p className="text-[11px] text-muted-foreground">
-                            Habilita un campo de texto adicional en la orden.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Campo de Aplicación Especial: Solo visible si is_special es true */}
-                  {item.is_special && (
-                    <div className="space-y-2 pt-2 border-t border-border animate-in fade-in slide-in-from-top-2 duration-200">
-                      <Label className="text-sm font-bold flex items-center gap-2">
-                        ¿A qué vehículo se le aplica esta condición especial?
-                      </Label>
-                      <Input
-                        placeholder="Ejemplo: Solo a vehículos 4x4 o solo a motocicletas con freno de disco"
-                        className="h-10 bg-primary/5 border-primary/20 focus-visible:ring-primary"
-                        value={item.special_condition_label || ""}
-                        onChange={(e) =>
-                          updateCondition(
-                            index,
-                            "special_condition_label",
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
 
-            {/* Estado vacío con diseño consistente */}
-            {formData.conditions.length === 0 && (
-              <div className="text-center py-16 border-2 border-dashed border-border rounded-xl text-muted-foreground bg-muted/5">
-                <p className="text-sm">
-                  No has definido condiciones para el ingreso de vehículos.
-                </p>
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={addCondition}
-                  className="mt-2 text-primary font-bold"
-                >
-                  Agregar la primera condición
-                </Button>
-              </div>
-            )}
-          </div>
 
-          {formData.conditions.length === 0 && (
-            <div className="text-center py-8 border-2 border-dashed border-border rounded-lg text-muted-foreground">
-              No hay condiciones agregadas. Haz clic en -Agregar Ítem- para
-              comenzar.
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+
+
 
 
 

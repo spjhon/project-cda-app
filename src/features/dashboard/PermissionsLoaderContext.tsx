@@ -20,8 +20,14 @@ interface PermissionsLoaderContextProps {
   children: ReactNode;
 }
 
+/**Creacion del context con el tipado de que es lo que devuelve y deja listo en el contexto */
 export const PermissionsContext = createContext<RolesContextType | null>(null);
 
+/**
+ * 
+ * @param param0 Entran las tres promesas que se crean desde el layout y los children que no se van a renderizar sino hasta que se resuelvan las promesas
+ * @returns Retorna el provider del context que se creo aqui para que los componentes cliente que esten en children tengan acceso al context PermissionsContextValue
+ */
 export default function PermissionsLoaderContext({
   tenantPromise,
   userPromise,

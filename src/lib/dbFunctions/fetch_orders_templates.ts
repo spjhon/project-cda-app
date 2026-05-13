@@ -35,7 +35,7 @@ export type OrderTemplate = {
   document_date: string;
   document_code: string;
   logo_url: string | null;
-  base_contract_text: string | null;
+  base_contract_text: string;
   created_at: string;
   updated_at: string;
   created_by: string | null;

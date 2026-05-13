@@ -40,7 +40,6 @@ export type Database = {
           deleted_at: string | null
           eje: number
           entry_order_id: string
-          es_repuesto: boolean | null
           id: string
           posicion: string
           presion_ajustada: number | null
@@ -53,7 +52,6 @@ export type Database = {
           deleted_at?: string | null
           eje: number
           entry_order_id: string
-          es_repuesto?: boolean | null
           id?: string
           posicion: string
           presion_ajustada?: number | null
@@ -66,7 +64,6 @@ export type Database = {
           deleted_at?: string | null
           eje?: number
           entry_order_id?: string
-          es_repuesto?: boolean | null
           id?: string
           posicion?: string
           presion_ajustada?: number | null
@@ -682,6 +679,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           es_ensenanza: boolean | null
+          es_extranjero: boolean
           id: string
           linea: string | null
           marca: string | null
@@ -703,6 +701,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           es_ensenanza?: boolean | null
+          es_extranjero?: boolean
           id?: string
           linea?: string | null
           marca?: string | null
@@ -724,6 +723,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           es_ensenanza?: boolean | null
+          es_extranjero?: boolean
           id?: string
           linea?: string | null
           marca?: string | null

@@ -9,3 +9,21 @@ Make full local system backup: `pnpx supabase db dump --local > backup_completo.
 To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzjrqye`
 actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
 ver que falta por actualizar: `pnpm update --interactive --latest`
+
+## Documentacion del codigo
+
+/dashboard
+    Layout (suspence bundary)
+            PermissionsLoaderContext (contexto)
+                tenantPromise
+                userPromise
+                RolesDataPromise
+            _____________________________________________________________
+            children (page.tsx)
+            /recepcionista
+                Layout (suspence boundary)
+                ReceptionistLoaderContext
+                    templateTabelDataPromise
+                ____________________________________________
+                children (page.tsx)
+                
