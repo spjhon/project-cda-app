@@ -3,7 +3,7 @@
 
 
 import React, { useContext, useState } from "react";
-import { CalendarIcon, LayoutDashboard, FileText, Plus, Trash2 } from "lucide-react";
+import { CalendarIcon, LayoutDashboard, FileText, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -12,15 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Popover,
   PopoverContent,
@@ -71,11 +63,6 @@ const COMPONENT_TEXT = {
   },
 };
 
-const APLICA_O_NO_APLICA_LABELS = [
-  { label: "Cumple", value: "cumple" },
-  { label: "No Cumple", value: "no_cumple" },
-  { label: "No Aplica", value: "no_aplica" },
-];
 
 export default function NewOrderTemplateForm() {
 
@@ -329,7 +316,7 @@ export default function NewOrderTemplateForm() {
             <Textarea
               id="base_contract_text"
               placeholder={COMPONENT_TEXT.placeholders.contract}
-              className="flex-1 min-h-[350px] resize-none border-input focus-visible:ring-primary bg-background"
+              className="flex-1 min-h-87.5 resize-none border-input focus-visible:ring-primary bg-background"
               value={formData.base_contract_text}
               onChange={(e) =>
                 setFormData({ ...formData, base_contract_text: e.target.value })
@@ -450,6 +437,7 @@ export default function NewOrderTemplateForm() {
 
 
 
+
     {/* SECCION DE CONFIGURACION DE LA FIRMA */}
       <Card className="mt-6 border-border bg-card text-card-foreground shadow-none rounded-lg">
         <CardHeader className="border-b border-border mb-4 flex flex-row items-center justify-between">
@@ -548,7 +536,7 @@ export default function NewOrderTemplateForm() {
                     <div className="flex-1 space-y-2">
                       <Textarea
                         placeholder="Escriba aquí el texto legal que debe ser aceptado..."
-                        className="min-h-[70px] text-sm resize-none border-none focus-visible:ring-0 p-0 shadow-none bg-transparent"
+                        className="min-h-17.5 text-sm resize-none border-none focus-visible:ring-0 p-0 shadow-none bg-transparent"
                         value={dec.texto_declaracion}
                         onChange={(e) => {
                           const newSigs = [...formData.signatures];
@@ -590,6 +578,11 @@ export default function NewOrderTemplateForm() {
           )}
         </CardContent>
       </Card>
+
+
+
+
+
 
 
 

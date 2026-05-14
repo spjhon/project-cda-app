@@ -9,6 +9,8 @@ Make full local system backup: `pnpx supabase db dump --local > backup_completo.
 To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzjrqye`
 actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
 ver que falta por actualizar: `pnpm update --interactive --latest`
+Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest typescript@latest`
+otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/supabase-js@latest`
 
 ## Documentacion del codigo
 

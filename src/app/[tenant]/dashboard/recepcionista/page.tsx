@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { useState, useContext, ReactNode } from "react";
 import { ReceptionistContext } from "@/features/dashboard/ReceptionistLoaderContex";
 
 // UI Components
@@ -26,6 +26,8 @@ import {
   X,
   Shield,
   GraduationCap,
+  SendHorizontal,
+
 } from "lucide-react";
 import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
 import {
@@ -49,6 +51,89 @@ import TirePressureSection from "@/features/dashboard/TirePressureSection";
 import ConditionsSwitchSections from "@/features/dashboard/ConditionsSwitchSections";
 import SignatureSection from "@/features/dashboard/SignatureSection";
 import { PersonSection } from "@/features/dashboard/PersonSection";
+import { Textarea } from "@/components/ui/textarea";
+
+import {ClaseVehiculoType, CombustibleType, ServiceType, ZodFullFormDataType} from "@/lib/zod-schemas/order-schema";
+
+
+
+
+// El tipo ServiceType es: "rtm" | "preventiva" | "peritaje"
+interface ServiceOption {
+  id: ServiceType;
+  label: string;
+  desc: string;
+  icon: ReactNode;
+}
+
+interface CombustibleOption {
+  value: CombustibleType;
+  label: string;
+}
+
+interface ClaseOption {
+  value: ClaseVehiculoType;
+  label: string;
+}
+
+
+const SERVICE_TYPES: ServiceOption[] = [
+  {
+    id: "rtm",
+    label: "REVISIÓN TÉCNICO MECÁNICA",
+    desc: "Normatividad vigente",
+    icon: <ClipboardCheck className="h-5 w-5 text-blue-600" />,
+  },
+  {
+    id: "preventiva",
+    label: "PREVENTIVA",
+    desc: "Control de seguridad",
+    icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
+  },
+  {
+    id: "peritaje",
+    label: "PERITAJE",
+    desc: "Valoración comercial",
+    icon: <Search className="h-5 w-5 text-purple-600" />,
+  },
+];
+
+
+export const FUEL_OPTIONS: CombustibleOption[] = [
+  { value: "gasolina", label: "Gasolina" },
+  { value: "gas_natural_vehicular", label: "Gas Natural Vehicular" },
+  { value: "diesel", label: "Diesel" },
+  { value: "gas_gasolina", label: "Gas-Gasolina" },
+  { value: "hibrido", label: "Híbrido" },
+  { value: "electrico", label: "Eléctrico" },
+  { value: "etanol", label: "Etanol" },
+  { value: "biodiesel", label: "Biodiesel" },
+  { value: "hidrogeno", label: "Hidrógeno" },
+];
+
+
+export const CLASE_OPTIONS: ClaseOption[] = [
+  { value: "automovil", label: "Automóvil" },
+  { value: "bus", label: "Bus" },
+  { value: "buseta", label: "Buseta" },
+  { value: "camion", label: "Camión" },
+  { value: "camioneta", label: "Camioneta" },
+  { value: "campero", label: "Campero" },
+  { value: "microbus", label: "Microbús" },
+  { value: "tractocamion", label: "Tractocamión" },
+  { value: "motocicleta", label: "Motocicleta" },
+  { value: "motocarro", label: "Motocarro" },
+  { value: "mototriciclo", label: "Mototriciclo" },
+  { value: "cuatrimoto", label: "Cuatrimoto" },
+  { value: "remolque", label: "Remolque" },
+  { value: "semiremolque", label: "Semirremolque" },
+  { value: "volqueta", label: "Volqueta" },
+  { value: "sin_clase", label: "Sin Clase" },
+  { value: "maquinaria_construccion_o_minera", label: "Maquinaria de Construcción o Minera" },
+  { value: "ciclomotor", label: "Ciclomotor" },
+  { value: "tricimoto", label: "Tricimoto" },
+  { value: "cuadriciclo", label: "Cuadriciclo" },
+];
 
 //FUNCION GENERICA PARA EXTRAER ICONOS CON COLORES PERZONALIZADOS
 const getTemplateIcon = (index: number) => {
@@ -61,183 +146,6 @@ const getTemplateIcon = (index: number) => {
   return icons[index % icons.length];
 };
 
-type TipoVehiculo =
-  | "liviano"
-  | "pesado"
-  | "motocicleta_4t"
-  | "motocicleta_2t"
-  | "motocarro_4t"
-  | "motocarro_2t"
-  | null;
-
-type ClaseVehiculo =
-  | null
-  | "AUTOMÓVIL"
-  | "BUS"
-  | "BUSETA"
-  | "CAMIÓN"
-  | "CAMIONETA"
-  | "CAMPERO"
-  | "MICROBÚS"
-  | "TRACTOCAMIÓN"
-  | "VOLQUETA"
-  | "MOTOCICLETA"
-  | "MAQUINARIA AGRÍCOLA"
-  | "MAQUINARIA INDUSTRIAL"
-  | "SEMIRREMOLQUE"
-  | "MOTOCARRO"
-  | "REMOLQUE"
-  | "SIN CLASE"
-  | "MOTOTRICICLO"
-  | "CUADRIMOTO"
-  | "CICLOMOTOR"
-  | "TRICIMOTO"
-  | "CUADRICICLO"
-  | "MAQUINARIA DE CONSTRUCCIÓN O MINERA"
-  | "TRICIMÓVIL";
-
-type Combustible =
-  | null
-  | "GASOLINA"
-  | "GAS NATURAL VEHICULAR"
-  | "DIESEL"
-  | "GAS-GASOLINA"
-  | "HÍBRIDO"
-  | "ELÉCTRICO"
-  | "ETANOL"
-  | "BIODIESEL"
-  | "HIDRÓGENO";
-
-type TipoServicioVehiculo =
-  | null
-  | "PARTICULAR"
-  | "ENSEÑANZA"
-  | "OFICIAL"
-  | "PUBLICO"
-  | "DIPLOMATICO"
-  | "ESPECIAL";
-
-
-type TirePosition =
-  | "izquierda"
-  | "derecha"
-  | "centro"
-  | "izquierda_interior"
-  | "derecha_interior"
-  | "repuesto";
-
-
-
-// Usamos esto para el manejo de datos en el formulario antes de enviarlos
-export interface PersonFormData {
-  id: string | null; // UUID si existe en DB
-  tipo_documento: string;
-  numero_documento: string;
-  nombre_completo: string;
-  telefono: string;
-  correo: string;
-  direccion: string;
-}
-
-
-
-// Estructura idéntica a la tabla entry_order_tire_pressures
-export interface TirePressureEntry {
-  eje: number;
-  posicion: TirePosition;
-  presion_encontrada: string;
-  presion_ajustada: string;
-  // Propiedad auxiliar solo para la lógica de la UI
-  _requiere_ajuste: boolean;
-}
-
-
-
-// En tu archivo de tipos
-export interface SignatureResult {
-  template_signature_id: string; // El ID de la firma en el template
-  representative_type: string;   // Para control interno del componente
-  signature_url: string;         // Aquí irá el base64 o la URL final
-  // signer_name lo manejaremos luego como dijiste
-}
-
-
-
-
-export interface VehicleData {
-  id: string | null;
-  placa: string;
-  marca: string;
-  linea: string;
-  modelo: string | number;
-  color: string;
-  tipo_vehiculo: TipoVehiculo;
-  clase: ClaseVehiculo;
-  combustible: Combustible;
-  cilindrada: string | number;
-  blindaje: boolean;
-  capacidad_pasajeros: string | number;
-  es_ensenanza: boolean;
-  tipo_servicio_vehiculo: TipoServicioVehiculo;
-  propietario_actual_id: string | null;
-  es_extranjero: boolean;
-}
-
-// 1. Tipos de apoyo (puedes tenerlos en este archivo o en un types.ts)
-export type ConditionResponse = "cumple" | "no_cumple" | "no_aplica";
-
-export interface ConditionResultEntry {
-  template_condition_id: string; // UUID de la tabla template_conditions
-  value: ConditionResponse;
-}
-
-
-// ESTADO GLOBAL DEL PADRE
-export interface FullFormData {
-  // --- CONTROL E INFRAESTRUCTURA ---
-  tenant_id: string;
-  funcionario_id: string;
-  plantilla_id: string;
-  
-  // --- DATOS DE LA ORDEN (VALORES DINÁMICOS) ---
-  kilometraje: string;
-  es_reinspeccion: boolean;
-  service_type: string;
-  estado_orden: string;
-  observaciones: string;
-  
-  // --- SNAPSHOTS (DATOS CONGELADOS EN EL TIEMPO) ---
-  soat_vencimiento_snapshot: string;
-  gas_numero_snapshot: string;
-  gas_vencimiento_snapshot: string;
-  texto_contractual_snapshot: string;
-  
-  // --- VEHÍCULO ---
-  vehicle: VehicleData;
-
-  // --- LÓGICA DE PERSONAS ---
-  // Estos IDs son los que finalmente se guardan en la tabla entry_orders
-  propietario_id: string; 
-  cliente_id: string;
-
-  // Objetos para el manejo del estado en el formulario (Frontend)
-  // Ayudan a controlar el "espejo" y la edición de datos
-  customer_data: PersonFormData;
-  owner_data: PersonFormData;
-  is_owner_same_as_customer: boolean; // El switch que controla el espejo
-
-  // --- DETALLES DE LA ORDEN ---
-  tire_pressures: TirePressureEntry[];
-  
-  /**
-   * Resultados de la inspección visual/preparación.
-   * Se mapean a la tabla 'order_condition_results' en la DB.
-   */
-  condition_results: ConditionResultEntry[];
-  
-  // Firmas capturadas
-  signatures: SignatureResult[]; 
-};
 
 
 
@@ -245,22 +153,28 @@ export interface FullFormData {
 export default function NewEntryOrder() {
 
 
+
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
 
   const templateTableData = ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
 
-
-//FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
+  //FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
   const activeTemplates = templateTableData?.query.data?.filter((t) => t.is_active) || [];
 
 
 
+
+
+
   //STATE PRINCIPAL DEL FORMULARIO
-  const [formData, setFormData] = useState<FullFormData>({
+  const [formData, setFormData] = useState<ZodFullFormDataType>({
     // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
-    tenant_id: PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "",
-    funcionario_id: PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
+    tenant_id:
+      PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id ||
+      "",
+    funcionario_id:
+      PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
     plantilla_id: "",
 
     // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
@@ -284,109 +198,156 @@ export default function NewEntryOrder() {
       linea: "",
       modelo: "", // integer en tu DB
       color: "",
-      tipo_vehiculo: null as TipoVehiculo,
-      clase: null as ClaseVehiculo,
-      combustible: null as Combustible,
+      tipo_vehiculo: "liviano",
+      clase: "automovil",
+      combustible: "gasolina",
       cilindrada: "", // integer en tu DB
       blindaje: false,
       capacidad_pasajeros: "", // integer en tu DB
       es_ensenanza: false,
-      tipo_servicio_vehiculo: null as TipoServicioVehiculo, // Enum: particular, publico, etc.
+      tipo_servicio_vehiculo: "particular", // Enum: particular, publico, etc.
       propietario_actual_id: null, // Referencia a la tabla personas
       es_extranjero: false,
     },
 
-    // --- REFERENCIAS ADICIONALES ---
-    // IDs para las relaciones de la orden de entrada
-    propietario_id: "", // Persona que figura en la tarjeta de propiedad
-    cliente_id: "", // Persona que trae el vehículo al CDA (quien paga)
+    
 
     // --- REGISTRO DE PRESIONES DE LLANTAS (Detalle de la Orden) ---
     // Array aplanado para facilitar el envío a la tabla entry_order_tire_pressures
     tire_pressures: [
-      { eje: 1, posicion: "izquierda", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
-      { eje: 1, posicion: "derecha", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
-      { eje: 2, posicion: "izquierda", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
-      { eje: 2, posicion: "derecha", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
-    ] as TirePressureEntry[],
+      {
+        eje: 1,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 1,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        _requiere_ajuste: false,
+      },
+    ] ,
     // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
-  // Este array se llenará dinámicamente cuando el usuario cargue la plantilla
-  condition_results: [] as ConditionResultEntry[],
-  signatures: [] as SignatureResult[], // <-- Nueva propiedad
-  // Dentro de tu useState inicial:
-customer_data: {
-  id: null,
-  tipo_documento: "CC",
-  numero_documento: "",
-  nombre_completo: "",
-  telefono: "",
-  correo: "",
-  direccion: "",
-},
-owner_data: {
-  id: null,
-  tipo_documento: "CC",
-  numero_documento: "",
-  nombre_completo: "",
-  telefono: "",
-  correo: "",
-  direccion: "",
-},
-is_owner_same_as_customer: true, // Switch maestro
+    // Este array se llenará dinámicamente cuando el usuario cargue la plantilla
+    condition_results: [],
+    signatures: [], // <-- Nueva propiedad
+    // Dentro de tu useState inicial:
+    customer_data: {
+      id: null,
+      tipo_documento: "cedula_ciudadania",
+      numero_documento: "",
+      nombre_completo: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+    },
+    owner_data: {
+      id: null,
+      tipo_documento: "cedula_ciudadania",
+      numero_documento: "",
+      nombre_completo: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+    },
+    is_owner_same_as_customer: true, // Switch maestro
   });
 
-  
-
-  //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
-  const selectedTemplate = activeTemplates.find((t) => t.id === formData.plantilla_id);
 
 
 
 
-  //STATES DEL CUADRO DE DIALOGO
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [tempPlaca, setTempPlaca] = useState("");
 
 
-// MANEJADOR DE SELECCIÓN DE PLANTILLA
-const handleTemplateSelect = (id: string, checked: boolean) => {
-  // 1. Buscamos la plantilla completa en el array de activas
-  const template = activeTemplates.find((t) => t.id === id);
+const fillMockData = () => {
+  setFormData(MOCK_DATA as ZodFullFormDataType);
+  console.log("Formulario precargado con éxito");
+};
 
-  setFormData((prev) => {
-    // 2. Preparamos los resultados iniciales de condiciones
-    const initialConditionResults = checked && template?.conditions
-      ? template.conditions.map((cond) => ({
-          template_condition_id: cond.id,
-          value: cond.default_value,
-        }))
-      : [];
 
-    // 3. Preparamos la estructura inicial de las firmas
-    // Esto es clave: ya dejamos el objeto listo con el ID del template y el tipo de representante
-    const initialSignatures = checked && template?.signatures
-      ? template.signatures.map((sig) => ({
-          template_signature_id: sig.id,
-          representative_type: sig.representative_type,
-          signature_url: "", // Inicia vacío hasta que firmen en el Pad
-        }))
-      : [];
 
-    return {
-      ...prev,
-      plantilla_id: checked ? id : "",
-      texto_contractual_snapshot: checked
-        ? template?.base_contract_text || ""
-        : "",
-      
-      // Inyectamos las condiciones iniciales
-      condition_results: initialConditionResults,
-      
-      // Inyectamos la estructura de firmas inicial
-      // Si desmarca la plantilla, esto se limpia solo ([])
-      signatures: initialSignatures,
-    };
-  });
+const MOCK_DATA = {
+  tenant_id: "aaaaaaaa-0000-0000-0000-000000000001",
+  funcionario_id: "6800852e-2312-454c-aed8-6cfdc0feca47",
+  plantilla_id: "2290a44a-b947-403c-8010-4dd63e28f02c",
+  kilometraje: "25336",
+  es_reinspeccion: false,
+  service_type: "rtm",
+  estado_orden: "abierta",
+  observaciones: "",
+  soat_vencimiento_snapshot: "2026-03-12",
+  gas_numero_snapshot: "123456",
+  gas_vencimiento_snapshot: "2026-05-13",
+  texto_contractual_snapshot: "condicones para la plantilla que debe de enter algo",
+  vehicle: {
+    id: null,
+    placa: "HDC05",
+    marca: "SUZUKI",
+    linea: "GN-125",
+    modelo: "2026",
+    color: "ROJO",
+    tipo_vehiculo: "motocicleta_4t",
+    clase: "motocicleta",
+    combustible: "GASOLINA",
+    cilindrada: "125",
+    blindaje: false,
+    capacidad_pasajeros: "2",
+    es_ensenanza: true,
+    tipo_servicio_vehiculo: "PARTICULAR",
+    propietario_actual_id: null,
+    es_extranjero: true,
+  },
+ 
+  tire_pressures: [
+    { eje: 1, posicion: "centro", presion_encontrada: "30", presion_ajustada: "", _requiere_ajuste: false },
+    { eje: 2, posicion: "centro", presion_encontrada: "36", presion_ajustada: "30", _requiere_ajuste: true }
+  ],
+  condition_results: [
+    { template_condition_id: "026eaa3d-50e3-449e-b91d-4d0e988c009a", value: "cumple" }
+  ],
+  signatures: [
+    {
+      template_signature_id: "c9711272-1b15-43eb-a0f9-55caa041a40a",
+      representative_type: "cliente",
+      signature_url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..." // Tu base64 aquí
+    }
+  ],
+  customer_data: {
+    id: null,
+    tipo_documento: "CC",
+    numero_documento: "1053782464",
+    nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
+    telefono: "3215224586",
+    correo: "SPJHON@GMAIL.COM",
+    direccion: "Carrera 25 #17-66"
+  },
+  owner_data: {
+    id: null,
+    tipo_documento: "CC",
+    numero_documento: "1053782464",
+    nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
+    telefono: "3215224586",
+    correo: "SPJHON@GMAIL.COM",
+    direccion: "Carrera 25 #17-66"
+  },
+  is_owner_same_as_customer: true
 };
 
 
@@ -394,8 +355,84 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
+  const selectedTemplate = activeTemplates.find(
+    (t) => t.id === formData.plantilla_id,
+  );
+
+  //STATES DEL CUADRO DE DIALOGO
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [tempPlaca, setTempPlaca] = useState("");
+
+
+
+
+
+
+  // MANEJADOR DE SELECCIÓN DE PLANTILLA
+  const handleTemplateSelect = (id: string, checked: boolean) => {
+    // 1. Buscamos la plantilla completa en el array de activas
+    const template = activeTemplates.find((t) => t.id === id);
+
+    setFormData((prev) => {
+      // 2. Preparamos los resultados iniciales de condiciones
+      const initialConditionResults =
+        checked && template?.conditions
+          ? template.conditions.map((cond) => ({
+              template_condition_id: cond.id,
+              value: cond.default_value,
+            }))
+          : [];
+
+      // 3. Preparamos la estructura inicial de las firmas
+      // Esto es clave: ya dejamos el objeto listo con el ID del template y el tipo de representante
+      const initialSignatures =
+        checked && template?.signatures
+          ? template.signatures.map((sig) => ({
+              template_signature_id: sig.id,
+              representative_type: sig.representative_type,
+              signature_url: "", // Inicia vacío hasta que firmen en el Pad
+            }))
+          : [];
+
+      return {
+        ...prev,
+        plantilla_id: checked ? id : "",
+        texto_contractual_snapshot: checked
+          ? template?.base_contract_text || ""
+          : "",
+
+        // Inyectamos las condiciones iniciales
+        condition_results: initialConditionResults,
+
+        // Inyectamos la estructura de firmas inicial
+        // Si desmarca la plantilla, esto se limpia solo ([])
+        signatures: initialSignatures,
+      };
+    });
+  };
+
+
+
+
+
   //MANEJADOR DEL SELECT DEL SERVICE TYPE
-  const handleServiceTypeChange = (type: string) => {
+  const handleServiceTypeChange = (type: ServiceType) => {
     setFormData((prev) => ({ ...prev, service_type: type }));
   };
 
@@ -447,10 +484,29 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
 
 
 
-  
+
+console.log(formData)
+
+
 
   return (
     <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8">
+
+
+
+<div className="flex justify-end mb-4">
+    <button
+      type="button"
+      onClick={fillMockData}
+      className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded shadow-lg transition-all text-xs"
+    >
+      ⚡ CARGAR PRUEBA (HDC05)
+    </button>
+  </div>
+
+
+
+
       {/**TITULO SUPERIOR */}
       <div className="space-y-2">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -464,6 +520,8 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
 
       {/**El div que contiene todas las secciones del formulario */}
       <div className="flex flex-col gap-6">
+
+        {/**badge de refresco de datos */}
         <div className="flex justify-start">
           {templateTableData?.query.isFetching ? (
             <Badge
@@ -483,6 +541,8 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
             </Badge>
           )}
         </div>
+
+
 
         {/**SECCION DE SELECCION DE PLANTILLA */}
         <fieldset>
@@ -530,8 +590,9 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
           </div>
         </fieldset>
 
+
         {/**SECCION DE BUSQUEDA DE PLACA */}
-        <div
+        <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
         >
           <div className="border-t pt-6">
@@ -571,30 +632,7 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
                   <div className="h-px flex-1 bg-slate-200"></div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {[
-                    {
-                      id: "rtm",
-                      label: "REVISIÓN TÉCNICO MECÁNICA",
-                      desc: "Normatividad vigente",
-                      icon: (
-                        <ClipboardCheck className="h-5 w-5 text-blue-600" />
-                      ),
-                    },
-                    {
-                      id: "preventiva",
-                      label: "PREVENTIVA",
-                      desc: "Control de seguridad",
-                      icon: (
-                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                      ),
-                    },
-                    {
-                      id: "peritaje",
-                      label: "PERITAJE",
-                      desc: "Valoración comercial",
-                      icon: <Search className="h-5 w-5 text-purple-600" />,
-                    },
-                  ].map((tipo) => (
+                  {SERVICE_TYPES.map((tipo) => (
                     <Label
                       key={tipo.id}
                       className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-white hover:border-blue-300 ${formData.service_type === tipo.id ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600" : "border-slate-200"}`}
@@ -846,28 +884,20 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
               </div>
             </div>
           </div>
-        </div>
+        </fieldset>
 
 
-
-
-{/**SECCION DE LAS PERSONAS */}
-
-
-<PersonSection formData={formData} setFormData={setFormData} />
-
-
-
-
+        {/**SECCION DE LAS PERSONAS */}
+        <PersonSection formData={formData} setFormData={setFormData} />
 
 
         {/**SECCION DE DATOS DEL VEHICULO */}
-        <div
+        <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
          >
           <div className="border-t pt-6">
             <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
-              3. Datos del vehiculo
+              4. Datos del vehiculo
             </legend>
 
             <div className="bg-slate-50/80 border rounded-xl p-6 space-y-10">
@@ -1014,45 +1044,27 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
                           ...prev,
                           vehicle: {
                             ...prev.vehicle,
-                            combustible: value,
+                            combustible: value?value:"gasolina",
                           },
                         }))
                       }
-                      items={[
-                        { label: "Escoje Combustible", value: null },
-                        { label: "Gasolina", value: "GASOLINA" },
-                        {
-                          label: "Gas Natural Vehicular",
-                          value: "GAS NATURAL VEHICULAR",
-                        },
-                        { label: "Diesel", value: "DIESEL" },
-                        { label: "Gas-Gasolina", value: "GAS-GASOLINA" },
-                        { label: "Híbrido", value: "HÍBRIDO" },
-                        { label: "Eléctrico", value: "ELÉCTRICO" },
-                        { label: "Etanol", value: "ETANOL" },
-                        { label: "Biodiesel", value: "BIODIESEL" },
-                        { label: "Hidrógeno", value: "HIDRÓGENO" },
-                      ]}
-                    >
-                      <SelectTrigger className="h-10 w-full bg-background">
+                     >
+                      <SelectTrigger className="h-10 w-full bg-background text-left">
                         <SelectValue placeholder="Selecciona combustible" />
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value={null}>Escoje Combustible</SelectItem>
-                        <SelectItem value="GASOLINA">Gasolina</SelectItem>
-                        <SelectItem value="GAS NATURAL VEHICULAR">
-                          Gas Natural Vehicular
+                        {/* Opción nula o inicial */}
+                        <SelectItem value="none" disabled>
+                          Escoja Combustible
                         </SelectItem>
-                        <SelectItem value="DIESEL">Diesel</SelectItem>
-                        <SelectItem value="GAS-GASOLINA">
-                          Gas-Gasolina
-                        </SelectItem>
-                        <SelectItem value="HÍBRIDO">Híbrido</SelectItem>
-                        <SelectItem value="ELÉCTRICO">Eléctrico</SelectItem>
-                        <SelectItem value="ETANOL">Etanol</SelectItem>
-                        <SelectItem value="BIODIESEL">Biodiesel</SelectItem>
-                        <SelectItem value="HIDRÓGENO">Hidrógeno</SelectItem>
+                        
+                        {/* Mapeo dinámico */}
+                        {FUEL_OPTIONS.map((opcion) => (
+                          <SelectItem key={opcion.value} value={opcion.value}>
+                            {opcion.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1069,87 +1081,25 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
                           ...prev,
                           vehicle: {
                             ...prev.vehicle,
-                            clase: value,
+                            clase: value?value:"automovil",
                           },
                         }))
                       }
-                      items={[
-                        { label: "Escoje Clase", value: null },
-                        { label: "Automóvil", value: "AUTOMÓVIL" },
-                        { label: "Bus", value: "BUS" },
-                        { label: "Buseta", value: "BUSETA" },
-                        { label: "Camión", value: "CAMIÓN" },
-                        { label: "Camioneta", value: "CAMIONETA" },
-                        { label: "Campero", value: "CAMPERO" },
-                        { label: "Microbús", value: "MICROBÚS" },
-                        { label: "Tractocamión", value: "TRACTOCAMIÓN" },
-                        { label: "Volqueta", value: "VOLQUETA" },
-                        { label: "Motocicleta", value: "MOTOCICLETA" },
-                        {
-                          label: "Maquinaria Agrícola",
-                          value: "MAQUINARIA AGRÍCOLA",
-                        },
-                        {
-                          label: "Maquinaria Industrial",
-                          value: "MAQUINARIA INDUSTRIAL",
-                        },
-                        { label: "Semirremolque", value: "SEMIRREMOLQUE" },
-                        { label: "Motocarro", value: "MOTOCARRO" },
-                        { label: "Remolque", value: "REMOLQUE" },
-                        { label: "Sin Clase", value: "SIN CLASE" },
-                        { label: "Mototriciclo", value: "MOTOTRICICLO" },
-                        { label: "Cuadrimoto", value: "CUADRIMOTO" },
-                        { label: "Ciclomotor", value: "CICLOMOTOR" },
-                        { label: "Tricimoto", value: "TRICIMOTO" },
-                        { label: "Cuadriciclo", value: "CUADRICICLO" },
-                        {
-                          label: "Maquinaria de Construcción o Minera",
-                          value: "MAQUINARIA DE CONSTRUCCIÓN O MINERA",
-                        },
-                        { label: "Tricimóvil", value: "TRICIMÓVIL" },
-                      ]}
                     >
-                      <SelectTrigger className="h-10 bg-background w-full">
+                      <SelectTrigger className="h-10 w-full bg-background text-left">
                         <SelectValue placeholder="Selecciona una clase" />
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value={null}>Escoje Clase</SelectItem>
-                        <SelectItem value="AUTOMÓVIL">Automóvil</SelectItem>
-                        <SelectItem value="BUS">Bus</SelectItem>
-                        <SelectItem value="BUSETA">Buseta</SelectItem>
-                        <SelectItem value="CAMIÓN">Camión</SelectItem>
-                        <SelectItem value="CAMIONETA">Camioneta</SelectItem>
-                        <SelectItem value="CAMPERO">Campero</SelectItem>
-                        <SelectItem value="MICROBÚS">Microbús</SelectItem>
-                        <SelectItem value="TRACTOCAMIÓN">
-                          Tractocamión
+                        <SelectItem value="none" disabled>
+                          Escoja Clase
                         </SelectItem>
-                        <SelectItem value="VOLQUETA">Volqueta</SelectItem>
-                        <SelectItem value="MOTOCICLETA">Motocicleta</SelectItem>
-                        <SelectItem value="MAQUINARIA AGRÍCOLA">
-                          Maquinaria Agrícola
-                        </SelectItem>
-                        <SelectItem value="MAQUINARIA INDUSTRIAL">
-                          Maquinaria Industrial
-                        </SelectItem>
-                        <SelectItem value="SEMIRREMOLQUE">
-                          Semirremolque
-                        </SelectItem>
-                        <SelectItem value="MOTOCARRO">Motocarro</SelectItem>
-                        <SelectItem value="REMOLQUE">Remolque</SelectItem>
-                        <SelectItem value="SIN CLASE">Sin Clase</SelectItem>
-                        <SelectItem value="MOTOTRICICLO">
-                          Mototriciclo
-                        </SelectItem>
-                        <SelectItem value="CUADRIMOTO">Cuadrimoto</SelectItem>
-                        <SelectItem value="CICLOMOTOR">Ciclomotor</SelectItem>
-                        <SelectItem value="TRICIMOTO">Tricimoto</SelectItem>
-                        <SelectItem value="CUADRICICLO">Cuadriciclo</SelectItem>
-                        <SelectItem value="MAQUINARIA DE CONSTRUCCIÓN O MINERA">
-                          Maquinaria de Construcción o Minera
-                        </SelectItem>
-                        <SelectItem value="TRICIMÓVIL">Tricimóvil</SelectItem>
+                        
+                        {CLASE_OPTIONS.map((opcion) => (
+                          <SelectItem key={opcion.value} value={opcion.value}>
+                            {opcion.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1166,7 +1116,7 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
                           ...prev,
                           vehicle: {
                             ...prev.vehicle,
-                            tipo_vehiculo: value,
+                            tipo_vehiculo: value?value:"liviano",
                           },
                         }))
                       }
@@ -1212,7 +1162,7 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
                           ...prev,
                           vehicle: {
                             ...prev.vehicle,
-                            tipo_servicio_vehiculo: value,
+                            tipo_servicio_vehiculo: value?value:"particular",
                           },
                         }))
                       }
@@ -1421,58 +1371,127 @@ const handleTemplateSelect = (id: string, checked: boolean) => {
               </div>
             </div>
           </div>
-        </div>
-
-
-
-
-
-
-
-
+        </fieldset>
 
 
 
         {/**SECCION DE LAS PRESIONES DEL VEHICULO */}
         <div
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
-        >
+         >
           <div className="border-t pt-6">
             <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
-              4. Presiones
+              5. Presiones
             </legend>
 
-            <TirePressureSection 
-              tirePressures={formData.tire_pressures} 
+            <TirePressureSection
+              tirePressures={formData.tire_pressures}
               setFormData={setFormData}
             />
           </div>
         </div>
 
 
+
+        {/**Seccion de las observaciones */}
+        <div className="mt-8 space-y-6">
+          <div className="border-t border-slate-100 pt-6">
+            <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+              
+              6. Observaciones Adicionales
+            </legend>
+
+            <div className="bg-white p-1">
+              <Textarea
+                placeholder="Escriba aquí detalles relevantes sobre el estado del vehículo, hallazgos específicos o notas de la inspección..."
+                className="min-h-30 resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400 text-sm leading-relaxed"
+                value={formData.observaciones}
+                onChange={(e) => 
+                  setFormData(prev => ({ ...prev, observaciones: e.target.value }))
+                }
+              />
+              <p className="mt-2 text-[10px] text-slate-400 italic font-medium">
+                * Estas observaciones quedarán registradas en el reporte final de la orden de entrada.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/**SECCION DE LAS CONDICIONES A CUMPLIR */}
-        <ConditionsSwitchSections 
-          conditions={selectedTemplate?.conditions} 
-          results={formData.condition_results} 
+        <ConditionsSwitchSections
+          conditions={selectedTemplate?.conditions}
+          results={formData.condition_results}
           setFormData={setFormData}
         />
-          
+
+        {/**SECCION DE LAS FIRMAS */}
+
+        <SignatureSection
+          signatures={selectedTemplate?.signatures}
+          contractText={selectedTemplate?.base_contract_text}
+          setFormData={setFormData}
+        />
 
 
+<div className="mt-12 mb-20 px-4 space-y-8">
+  <div className="flex flex-col items-center justify-center p-6 sm:p-10 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
+    <div className="p-3 bg-blue-100 rounded-full mb-4">
+      <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+    </div>
+    
+    <div className="text-center max-w-md mb-8">
+      <h3 className="text-base sm:text-lg font-bold text-slate-900 uppercase tracking-tight">
+        Finalizar Registro de Orden
+      </h3>
+      <p className="text-xs sm:text-sm text-slate-500 mt-2">
+        Asegúrese de que todos los datos hayan sido capturados correctamente antes de proceder.
+      </p>
+    </div>
 
-      {/**SECCION DE LAS FIRMAS */}
+    {/* EL BOTÓN CORREGIDO */}
+    <Button 
+      type="button"
+      className="group relative h-16 sm:h-20 w-full max-w-xl bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] overflow-hidden px-4"
+    >
+      {/* Efecto Shimmer mejorado */}
+      <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
       
-      <SignatureSection 
-        signatures={selectedTemplate?.signatures} 
-        contractText={selectedTemplate?.base_contract_text}
-        setFormData={setFormData}
+      <div className="flex items-center justify-between w-full sm:justify-center sm:gap-6">
+        {/* Texto con ajuste de tamaño responsivo */}
+        <span className="text-sm sm:text-lg md:text-xl font-black uppercase tracking-[0.15em] sm:tracking-[0.3em] truncate">
+          Crear Orden de Entrada
+        </span>
         
-      />
-              
+        {/* Contenedor del icono con espacio reservado para la animación */}
+        <div className="shrink-0 bg-white/10 p-2 rounded-xl group-hover:bg-white/20 transition-colors ml-2">
+          <SendHorizontal className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1" />
+        </div>
+      </div>
+    </Button>
+
+    {/* Metadata inferior responsiva */}
+    <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
+      <span className="flex items-center gap-1.5 whitespace-nowrap">
+        <div className="h-1 w-1 bg-slate-300 rounded-full" />
+        ISO 17020 COMPLIANT
+      </span>
+      <span className="flex items-center gap-1.5 whitespace-nowrap">
+        <div className="h-1 w-1 bg-slate-300 rounded-full" />
+        ALMACENAMIENTO EN TIEMPO REAL
+      </span>
+    </div>
+  </div>
+</div>
 
 
 
       </div>
+
+
+
+
+
+
     </form>
   );
 }

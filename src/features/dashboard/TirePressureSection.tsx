@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/select";
 import { Plus, Minus, Gauge } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FullFormData, TirePressureEntry } from "@/app/[tenant]/dashboard/recepcionista/page";
+import { TirePressureEntry, ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 
 // ─── Tipos ─────────────────────────────────────────────────────────
 
 interface TirePressureSectionProps {
   tirePressures: TirePressureEntry[];// O usa el tipo de tu formData si lo tienes definido
-  setFormData: React.Dispatch<React.SetStateAction<FullFormData>>;
+  setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
 }
 
 // ─── Utilidades ────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
   // Tomamos el número de ejes (el máximo en el state.eje) y se le suma uno
   const nextEje = numEjes + 1;
 
-  setFormData((prev: FullFormData) => ({
+  setFormData((prev: ZodFullFormDataType) => ({
     ...prev,
     // Actualizamos solo la propiedad tire_pressures
     tire_pressures: [
@@ -90,7 +90,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
 
   const removeAxle = () => {
     if (numEjes <= 1) return;
-    setFormData((prev: FullFormData) => ({
+    setFormData((prev: ZodFullFormDataType) => ({
       ...prev,
       tire_pressures: prev.tire_pressures.filter((p: TirePressureEntry) => p.eje !== numEjes)
     }));
@@ -108,7 +108,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
       _requiere_ajuste: false,
     };
 
-    setFormData((prev: FullFormData) => {
+    setFormData((prev: ZodFullFormDataType) => {
       const currentPressures = [...prev.tire_pressures];
       const lastIndexInAxle = [...currentPressures].reverse().findIndex((p) => p.eje === ejeNumero);
       const insertAt = lastIndexInAxle === -1 ? currentPressures.length : currentPressures.length - lastIndexInAxle;
@@ -119,6 +119,9 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
     });
   };
 
+
+
+  
  const removeTire = (ejeNumero: number) => {
   // 1. Obtenemos las llantas actuales del estado del padre
   const currentPressures = pressures;
@@ -136,7 +139,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
   const actualIndex = currentPressures.length - 1 - lastIndexInAxle;
 
   // 5. Actualizamos el estado del padre filtrando por ese índice
-  setFormData((prev: FullFormData) => ({
+  setFormData((prev: ZodFullFormDataType) => ({
     ...prev,
     tire_pressures: prev.tire_pressures.filter((_: TirePressureEntry, idx: number) => idx !== actualIndex)
   }));
@@ -144,7 +147,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
 
   // ─── Manejadores de Campos ─────────────────────────────────────
 
-const updateField = (index: number, field: keyof TirePressureEntry, value: boolean | string | TirePressureEntry | null) => {
+const updateField = (index: number, field: keyof TirePressureEntry, value: TirePressureEntry | string | boolean) => {
   setFormData(prev => ({
     ...prev,
     tire_pressures: prev.tire_pressures.map((item, idx) => {
@@ -314,7 +317,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: boole
                             {/*#a11 ACTION */}
                             <Select
                               value={llanta.posicion}
-                              onValueChange={(val) => updateField(idx, "posicion", val)}
+                              onValueChange={(val) => updateField(idx, "posicion", val?val:"centro")}
                               // Pasamos el array de posiciones directamente como prop
                               items={POSITIONS.map((p) => ({
                                 value: p.value,

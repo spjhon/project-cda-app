@@ -180,7 +180,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold uppercase text-slate-500">Ordenar por Columna</label>
             <Select items={SELECT_ORDENADO_POR} value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
-              <SelectTrigger className="w-[180px] h-9">
+              <SelectTrigger className="w-45 h-9">
                 <SelectValue placeholder="Columna" />
               </SelectTrigger>
               <SelectContent>
@@ -197,7 +197,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold uppercase text-slate-500">Orden</label>
             <Select items={SELECT_ORDEN} value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
-              <SelectTrigger className="w-[150px] h-9">
+              <SelectTrigger className="w-37.5 h-9">
                 <SelectValue placeholder="Dirección" />
               </SelectTrigger>
               <SelectContent>

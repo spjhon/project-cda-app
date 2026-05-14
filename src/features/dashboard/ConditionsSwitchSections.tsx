@@ -7,15 +7,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ShieldAlert, CheckCircle2, XCircle, Ban } from "lucide-react";
-import { FullFormData, ConditionResponse, ConditionResultEntry, } from "@/app/[tenant]/dashboard/recepcionista/page";
+
 import { OrderTemplateCondition } from "@/lib/dbFunctions/fetch_orders_templates";
+import { ConditionResponse, ConditionResultEntry, ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 
 // ─── Tipos ─────────────────────────────────────────────────────────
 
 interface ConditionsSectionProps {
   conditions: OrderTemplateCondition[] | undefined;
   results: ConditionResultEntry[]; // El array del state: formData.condition_results
-  setFormData: React.Dispatch<React.SetStateAction<FullFormData>>;
+  setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
 }
 
 export default function ConditionsSwitchSections({ conditions, results, setFormData }: ConditionsSectionProps) {
@@ -32,7 +33,7 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
   // ─── Manejadores de Estado ─────────────────────────────────────
 
   const updateConditionValue = (id: string, newValue: ConditionResponse) => {
-    setFormData((prev: FullFormData) => ({
+    setFormData((prev: ZodFullFormDataType) => ({
       ...prev,
       // Usamos el mismo patrón de .map con el objeto previo
       condition_results: prev.condition_results.map((item) =>
@@ -47,7 +48,7 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
     <div className="mt-2">
       <div className="border-t pt-6">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
-          5. Condiciones de Inspección
+          7. Condiciones de Inspección
         </legend>
 
         <div className="bg-slate-50/80 border rounded-xl p-6 space-y-4">
