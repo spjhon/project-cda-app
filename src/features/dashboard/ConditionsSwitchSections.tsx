@@ -17,9 +17,11 @@ interface ConditionsSectionProps {
   conditions: OrderTemplateCondition[] | undefined;
   results: ConditionResultEntry[]; // El array del state: formData.condition_results
   setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
+  selectedTemplate: boolean;
+  hayPlaca: boolean;
 }
 
-export default function ConditionsSwitchSections({ conditions, results, setFormData }: ConditionsSectionProps) {
+export default function ConditionsSwitchSections({ conditions, results, setFormData, selectedTemplate, hayPlaca }: ConditionsSectionProps) {
   
   // Ordenar para que las especiales aparezcan primero, igual que antes
   const orderedConditions = useMemo(() => {
@@ -45,7 +47,7 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
   };
 
   return (
-    <div className="mt-2">
+    <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
       <div className="border-t pt-6">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
           7. Condiciones de Inspección
@@ -151,6 +153,6 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
           </div>
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 }

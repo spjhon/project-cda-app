@@ -1,47 +1,51 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Signature, { SignatureCanvasRef } from '@uiw/react-signature/canvas';
+import Signature, { SignatureCanvasRef } from "@uiw/react-signature/canvas";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { PenTool, FileText, Trash2, CheckCircle2, ScrollText } from "lucide-react";
+import {
+  PenTool,
+  FileText,
+  Trash2,
+  CheckCircle2,
+  ScrollText,
+} from "lucide-react";
 import { OrderTemplateSignature } from "@/lib/dbFunctions/fetch_orders_templates";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
-
 
 interface SignatureSectionProps {
   signatures: OrderTemplateSignature[] | undefined;
   setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
   contractText: string | undefined;
+  selectedTemplate: boolean;
+  hayPlaca: boolean
 }
 
-
-
-
-
-
-
-export default function SignatureSection({ signatures, contractText, setFormData }: SignatureSectionProps) {
-
-
+export default function SignatureSection({
+  signatures,
+  contractText,
+  setFormData,
+  selectedTemplate,
+  hayPlaca
+}: SignatureSectionProps) {
   // Referencias individuales para cada canvas de firma
   const canvasRefs = useRef<Record<string, SignatureCanvasRef | null>>({});
-
-
 
   // Estado local para los checks de declaraciones (UI)
   const [acceptedDeclarations, setAcceptedDeclarations] = useState<Record<string, boolean>>({});
 
-
-
-  if (!signatures || signatures.length === 0) return null;
-
-
-
-
+  
 
   const handleSignatureUpdate = (
     pointsData: number[][],
@@ -86,29 +90,27 @@ export default function SignatureSection({ signatures, contractText, setFormData
     }
   };
 
+  const clearAll = (sigId: string) => {
+    // 1. Limpiamos visualmente el canvas
+    const target = canvasRefs.current[sigId];
+    if (target) {
+      target.clear();
+    }
 
+    // 2. Limpiamos el dato en el state principal
+    setFormData((prev) => ({
+      ...prev,
+      signatures: prev.signatures.map((sig) =>
+        sig.template_signature_id === sigId
+          ? { ...sig, signature_url: "" } // Reseteamos la URL a vacío
+          : sig,
+      ),
+    }));
+  };
 
- const clearAll = (sigId: string) => {
-  // 1. Limpiamos visualmente el canvas
-  const target = canvasRefs.current[sigId];
-  if (target) {
-    target.clear();
-  }
-
-  // 2. Limpiamos el dato en el state principal
-  setFormData((prev) => ({
-    ...prev,
-    signatures: prev.signatures.map((sig) =>
-      sig.template_signature_id === sigId
-        ? { ...sig, signature_url: "" } // Reseteamos la URL a vacío
-        : sig
-    ),
-  }));
-};
-
-//Esta línea crea un ID único combinando el ID de la firma y el ID de la declaración.
-//Así, el estado sabe exactamente cuál checkbox se está marcando.
-//al comienzo el state de acceptedDeclarations esta vacio y se va llenando a medida que se van haciendo check
+  //Esta línea crea un ID único combinando el ID de la firma y el ID de la declaración.
+  //Así, el estado sabe exactamente cuál checkbox se está marcando.
+  //al comienzo el state de acceptedDeclarations esta vacio y se va llenando a medida que se van haciendo check
   const toggleLocalCheck = (sigId: string, decId: string) => {
     const key = `${sigId}-${decId}`;
     //Invierte el valor. Si era undefined o false (no marcado), lo vuelve true. Si ya era true, lo vuelve false.
@@ -116,52 +118,45 @@ export default function SignatureSection({ signatures, contractText, setFormData
     canvasRefs.current[sigId]?.clear();
   };
 
-
-
-
   return (
-    <div className="mt-8 space-y-6">
+    <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
       <div className="border-t border-slate-100 pt-6">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
           8. Autorización y Firmas Digitales
         </legend>
 
         <div className="space-y-6">
-
-
           {/* --- BLOQUE DE CONTRATO FIJO --- */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-10 transition-all hover:bg-slate-100/50">
-            
-            
             <div className="flex items-center gap-4">
               <Checkbox
                 id="fixed-contract"
                 // Usamos una llave fija "contrato-general" dentro de tu estado actual
                 checked={!!acceptedDeclarations["contrato-general"]}
                 onCheckedChange={(checked: boolean) => {
-  // 1. Actualizamos el estado de los checks
-  setAcceptedDeclarations((prev) => ({
-    ...prev,
-    ["contrato-general"]: checked,
-  }));
+                  // 1. Actualizamos el estado de los checks
+                  setAcceptedDeclarations((prev) => ({
+                    ...prev,
+                    ["contrato-general"]: checked,
+                  }));
 
-  // 2. Si desmarcan el contrato, LIMPIEZA GENERAL
-  if (!checked) {
-    // Limpiamos todos los canvas visualmente
-    Object.values(canvasRefs.current).forEach((canvas) => {
-      canvas?.clear();
-    });
+                  // 2. Si desmarcan el contrato, LIMPIEZA GENERAL
+                  if (!checked) {
+                    // Limpiamos todos los canvas visualmente
+                    Object.values(canvasRefs.current).forEach((canvas) => {
+                      canvas?.clear();
+                    });
 
-    // Limpiamos todas las firmas en el state principal de una sola vez
-    setFormData((prev) => ({
-      ...prev,
-      signatures: prev.signatures.map((sig) => ({
-        ...sig,
-        signature_url: "",
-      })),
-    }));
-  }
-}}
+                    // Limpiamos todas las firmas en el state principal de una sola vez
+                    setFormData((prev) => ({
+                      ...prev,
+                      signatures: prev.signatures.map((sig) => ({
+                        ...sig,
+                        signature_url: "",
+                      })),
+                    }));
+                  }
+                }}
                 className="h-10 w-10 border-slate-300 data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900"
               />
               <div className="space-y-0.5">
@@ -230,10 +225,12 @@ export default function SignatureSection({ signatures, contractText, setFormData
             </div>
           </div>
 
-          {signatures.map((signature) => {
+          {signatures?.map((signature) => {
             //El Valor: Busca el valor asociado a esa llave. Si el checkbox está marcado, encontrará un true.
             const allChecked = signature.declarations.every(
-              (dec) => acceptedDeclarations[`${signature.id}-${dec.id}`] && acceptedDeclarations["contrato-general"],
+              (dec) =>
+                acceptedDeclarations[`${signature.id}-${dec.id}`] &&
+                acceptedDeclarations["contrato-general"],
             );
 
             return (
@@ -336,7 +333,9 @@ export default function SignatureSection({ signatures, contractText, setFormData
                         }`}
                       >
                         <Signature
-                          ref={(el) => { canvasRefs.current[signature.id] = el; }}
+                          ref={(el) => {
+                            canvasRefs.current[signature.id] = el;
+                          }}
                           height={200}
                           width={390}
                           style={{
@@ -345,7 +344,9 @@ export default function SignatureSection({ signatures, contractText, setFormData
                             height: "auto",
                             border: "1px solid #e2e8f0",
                           }}
-                          onPointer={(points) => handleSignatureUpdate(points, signature.id)}
+                          onPointer={(points) =>
+                            handleSignatureUpdate(points, signature.id)
+                          }
                         />
 
                         {!allChecked && (
@@ -367,10 +368,6 @@ export default function SignatureSection({ signatures, contractText, setFormData
                         reporte de inspección.
                       </p>
                     </div>
-
-
-
-
                   </div>
                 </div>
               </Card>
@@ -378,6 +375,6 @@ export default function SignatureSection({ signatures, contractText, setFormData
           })}
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 }

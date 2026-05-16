@@ -302,7 +302,39 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
                     id={`is_active-${template.id}`} // ID único por fila
                     checked={template.is_active}
                     onCheckedChange={(checked) => {
-                      onUpdateStatus(template.id, checked); // Disparas la mutación
+
+                      // 1. Si se intenta desactivar, pasa directo sin problema
+                      if (!checked) {
+                        onUpdateStatus(template.id, false);
+                        return;
+                      }
+
+
+
+
+                  // 2. Si se intenta ACTIVAR, validamos duplicados en memoria local
+                      const yaExisteActivaConMismoCodigo = data?.some(
+                        (t) => 
+                          t.document_code === template.document_code && 
+                          t.is_active === true && 
+                          t.id !== template.id // Asegura que no se compare consigo misma
+                      );
+
+                      if (yaExisteActivaConMismoCodigo) {
+                        // Opción rápida de feedback (Abajo te muestro cómo hacerlo más profesional)
+                        alert(
+                          `Error: Ya existe una plantilla activa con el código "${template.document_code}". Desactívala primero.`
+                        );
+                        return; // 🛑 Bloqueamos la petición, no llamamos a onUpdateStatus
+                      }
+
+                      // 3. Si está libre, se dispara la mutación a Supabase normalmente
+                      onUpdateStatus(template.id, true);
+
+
+
+
+
                     }}
                     disabled={isUpdating || isFetching}
 

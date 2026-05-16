@@ -29,12 +29,13 @@ const ID_DOCUMENT_OPTIONS = [
 interface PersonSectionProps {
   formData: ZodFullFormDataType;
   setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
-  
+  selectedTemplate: boolean;
+  hayPlaca: boolean;
 }
 
 
 
-export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
+export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca}: PersonSectionProps) => {
 
 
 
@@ -44,8 +45,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
 
   // Manejador para el Cliente (con lógica de espejo manual)
   const handleCustomerChange = (field: string, value: string) => {
-    const formattedValue =
-      field === "nombre_completo" ? value.toUpperCase() : value;
+    const formattedValue = field === "nombre_completo" ? value.toUpperCase() : value;
 
     setFormData((prev: ZodFullFormDataType) => {
       const newCustomerData = {
@@ -89,7 +89,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
 
   
   return (
-    <fieldset className="mt-10 space-y-8">
+    <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
       <div className="border-t border-slate-200 pt-8">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
           3. Identificación de Personas
@@ -159,6 +159,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                     N° Identificación
                   </Label>
                   <Input
+                  required
                     className="h-11"
                     placeholder="Ej: 10203040"
                     value={formData.customer_data.numero_documento}
@@ -174,6 +175,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                   Nombre Completo / Razón Social
                 </Label>
                 <Input
+                required
                   className="h-11"
                   placeholder="NOMBRE COMPLETO DEL CLIENTE"
                   value={formData.customer_data.nombre_completo}
@@ -189,6 +191,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                     Teléfono de contacto
                   </Label>
                   <Input
+                  required
                     className="h-11"
                     placeholder="Ej: 3101234567"
                     value={formData.customer_data.telefono}
@@ -202,6 +205,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                     Correo Electrónico
                   </Label>
                   <Input
+                  required
                     className="h-11"
                     type="email"
                     placeholder="ejemplo@correo.com"
@@ -218,6 +222,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                   Dirección de Residencia
                 </Label>
                 <Input
+                required
                   className="h-11"
                   placeholder="Ej: Calle 10 # 20-30"
                   value={formData.customer_data.direccion}
@@ -280,6 +285,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                       N° Identificación
                     </Label>
                     <Input
+                    required
                       disabled={formData.is_owner_same_as_customer}
                       className="h-11 bg-white"
                       placeholder="Ej: 10203040"
@@ -296,6 +302,7 @@ export const PersonSection = ({formData, setFormData}: PersonSectionProps) => {
                     Nombre del Propietario
                   </Label>
                   <Input
+                  required
                     disabled={formData.is_owner_same_as_customer}
                     className="h-11 bg-white"
                     placeholder="SEGÚN TARJETA DE PROPIEDAD"

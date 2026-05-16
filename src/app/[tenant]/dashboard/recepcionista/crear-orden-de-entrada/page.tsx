@@ -27,6 +27,7 @@ import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContex
 import ConditionDialog from "@/features/dashboard/ConditionDialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Centralización de textos
 const COMPONENT_TEXT = {
@@ -66,6 +67,8 @@ const COMPONENT_TEXT = {
 
 export default function NewOrderTemplateForm() {
 
+ const queryClient = useQueryClient();
+
   const contextRecived = useContext(PermissionsContext);
 
 
@@ -76,12 +79,13 @@ export default function NewOrderTemplateForm() {
   const user = contextRecived?.PermissionsContextValue.user;
 
 
+
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM
   const [formData, setFormData] = useState<OrderTemplateInput>({
     tenant_id: tenantId || "",
     template_name: "",
     version: 1,
-    is_active: true,
+    is_active: false,
     document_date: new Date(),
     document_code: "",
     logo_url: logo_url || "",
@@ -92,16 +96,11 @@ export default function NewOrderTemplateForm() {
      
     ],
     signatures: [
-      {
-        a_quien_representa: "cliente", // 'cliente', 'recepcionista', 'dt'
-        label_firma: "Firma del Cliente",
-        declarations: [
-          { texto_declaracion: ""},
-        ],
-      },
+      
     ],
   });
   
+
 
 
 
@@ -119,8 +118,9 @@ export default function NewOrderTemplateForm() {
     // TypeScript ahora sabe que result.details es un array de ZodIssue
     
     
-    alert("Error en la informacion, fallo en la validacion, no se enviaron los datos")
+    alert("Error, reviza que el codigo con esta version, no se encuentren ya registrados")
   } else {
+    queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
     console.log("✅ ¡Validación exitosa!:", result.message);
     alert("Todo bien, los datos son válidos.");
   }
@@ -279,7 +279,10 @@ export default function NewOrderTemplateForm() {
               </Popover>
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/20">
+
+
+{/**
+ * <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/20">
               <div className="space-y-0.5">
                 <Label htmlFor="is_active">
                   {COMPONENT_TEXT.labels.active}
@@ -296,6 +299,11 @@ export default function NewOrderTemplateForm() {
                 }
               />
             </div>
+ */}
+
+            
+
+
           </CardContent>
         </Card>
 
@@ -377,11 +385,13 @@ export default function NewOrderTemplateForm() {
         <TableBody>
           {formData.conditions.map((item, index) => (
             <TableRow key={index} className="group">
-              <TableCell>
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium text-sm line-clamp-2">{item.label}</span>
+             <TableCell className="max-w-75 md:max-w-100"> 
+                <div className="flex flex-col gap-1 w-full min-w-0">
+                  <span className="font-medium text-sm block whitespace-normal wrap-break-word">
+                    {item.label}
+                  </span>
                   {item.is_special && (
-                    <span className="text-[10px] text-primary font-bold uppercase tracking-tight">
+                    <span className="text-[10px] text-primary font-bold uppercase tracking-tight block wrap-break-word">
                       Aplica a: {item.special_condition_label}
                     </span>
                   )}

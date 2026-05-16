@@ -54,6 +54,9 @@ import { PersonSection } from "@/features/dashboard/PersonSection";
 import { Textarea } from "@/components/ui/textarea";
 
 import {ClaseVehiculoType, CombustibleType, ServiceType, ZodFullFormDataType} from "@/lib/zod-schemas/order-schema";
+import { createOrderAction } from "@/lib/server_actions/createOrderAction";
+import { ZodErrorDialog } from "@/features/dashboard/ZodErrorDialog";
+import { $ZodIssue } from "zod/v4/core";
 
 
 
@@ -164,7 +167,11 @@ export default function NewEntryOrder() {
 
 
 
-
+  // Estados para controlar el Dialog de errores
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+// Estado local para el cargando (reemplaza a isPending de useActionState)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<$ZodIssue[] | null>(null);
 
 
   //STATE PRINCIPAL DEL FORMULARIO
@@ -198,14 +205,14 @@ export default function NewEntryOrder() {
       linea: "",
       modelo: "", // integer en tu DB
       color: "",
-      tipo_vehiculo: "liviano",
-      clase: "automovil",
-      combustible: "gasolina",
+      tipo_vehiculo: "",
+      clase: "",
+      combustible: "",
       cilindrada: "", // integer en tu DB
       blindaje: false,
       capacidad_pasajeros: "", // integer en tu DB
       es_ensenanza: false,
-      tipo_servicio_vehiculo: "particular", // Enum: particular, publico, etc.
+      tipo_servicio_vehiculo: "", // Enum: particular, publico, etc.
       propietario_actual_id: null, // Referencia a la tabla personas
       es_extranjero: false,
     },
@@ -267,7 +274,7 @@ export default function NewEntryOrder() {
       correo: "",
       direccion: "",
     },
-    is_owner_same_as_customer: true, // Switch maestro
+    is_owner_same_as_customer: false, // Switch maestro
   });
 
 
@@ -305,14 +312,14 @@ const MOCK_DATA = {
     color: "ROJO",
     tipo_vehiculo: "motocicleta_4t",
     clase: "motocicleta",
-    combustible: "GASOLINA",
+    combustible: "",
     cilindrada: "125",
     blindaje: false,
     capacidad_pasajeros: "2",
     es_ensenanza: true,
-    tipo_servicio_vehiculo: "PARTICULAR",
+    tipo_servicio_vehiculo: "particular",
     propietario_actual_id: null,
-    es_extranjero: true,
+    es_extranjero: false,
   },
  
   tire_pressures: [
@@ -331,16 +338,16 @@ const MOCK_DATA = {
   ],
   customer_data: {
     id: null,
-    tipo_documento: "CC",
+    tipo_documento: "cedula_ciudadania",
     numero_documento: "1053782464",
     nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
     telefono: "3215224586",
-    correo: "SPJHON@GMAIL.COM",
+    correo: "SPJHONGMAIL.COM",
     direccion: "Carrera 25 #17-66"
   },
   owner_data: {
     id: null,
-    tipo_documento: "CC",
+    tipo_documento: "cedula_ciudadania",
     numero_documento: "1053782464",
     nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
     telefono: "3215224586",
@@ -462,11 +469,43 @@ const MOCK_DATA = {
     setDialogOpen(false);
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Datos a enviar: ");
-    console.log(formData);
+
+    setIsSubmitting(true);
+    setServerError(null);
+
+    if (formData.vehicle.placa === "") {
+      alert("No hay placa selecionada");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Llamas a la Server Action directamente pasándole el objeto
+      const { data, error } = await createOrderAction(formData);
+
+      if (error || !data) {
+        setServerError(error);
+        setShowErrorDialog(true);
+        return; // Detenemos la ejecución aquí
+      } else {
+        // Éxito: Redirigir o limpiar formulario
+        alert(data);
+      }
+    } catch (error: unknown) {
+      alert("Ocurrio un error inesperado en la validacion: " + error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+
+
+
+
 
   //MANEJADOR DEL BOTON DEL RUNT
   const handleRuntQuery = () => {
@@ -485,7 +524,8 @@ const MOCK_DATA = {
 
 
 
-console.log(formData)
+
+
 
 
 
@@ -779,6 +819,7 @@ console.log(formData)
                             </Label>
                             {/*#a11 ACTION */}
                             <Input
+                            required
                               id="dialog-placa"
                               value={tempPlaca}
                               onChange={(e) =>
@@ -888,7 +929,7 @@ console.log(formData)
 
 
         {/**SECCION DE LAS PERSONAS */}
-        <PersonSection formData={formData} setFormData={setFormData} />
+        <PersonSection formData={formData} setFormData={setFormData} selectedTemplate={selectedTemplate?true:false} hayPlaca={formData.vehicle.placa?true:false}/>
 
 
         {/**SECCION DE DATOS DEL VEHICULO */}
@@ -914,6 +955,7 @@ console.log(formData)
                     <Label className="text-xs font-semibold">Marca</Label>
                     {/*#a11 ACTION */}
                     <Input
+                    required
                       placeholder="Ej: Chevrolet"
                       value={formData.vehicle.marca}
                       onChange={(e) =>
@@ -957,7 +999,10 @@ console.log(formData)
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          vehicle: { ...prev.vehicle, modelo: e.target.value },
+                          vehicle: { 
+                            ...prev.vehicle, 
+                            modelo: e.target.value 
+                          },
                         }))
                       }
                     />
@@ -1038,6 +1083,7 @@ console.log(formData)
                     <Label className="text-xs font-semibold">Combustible</Label>
 
                     <Select
+                    items={FUEL_OPTIONS}
                       value={formData.vehicle.combustible}
                       onValueChange={(value) =>
                         setFormData((prev) => ({
@@ -1054,10 +1100,7 @@ console.log(formData)
                       </SelectTrigger>
 
                       <SelectContent>
-                        {/* Opción nula o inicial */}
-                        <SelectItem value="none" disabled>
-                          Escoja Combustible
-                        </SelectItem>
+                        
                         
                         {/* Mapeo dinámico */}
                         {FUEL_OPTIONS.map((opcion) => (
@@ -1075,6 +1118,7 @@ console.log(formData)
                     </Label>
 
                     <Select
+                    items={CLASE_OPTIONS}
                       value={formData.vehicle.clase}
                       onValueChange={(value) =>
                         setFormData((prev) => ({
@@ -1091,9 +1135,7 @@ console.log(formData)
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value="none" disabled>
-                          Escoja Clase
-                        </SelectItem>
+                       
                         
                         {CLASE_OPTIONS.map((opcion) => (
                           <SelectItem key={opcion.value} value={opcion.value}>
@@ -1116,12 +1158,12 @@ console.log(formData)
                           ...prev,
                           vehicle: {
                             ...prev.vehicle,
-                            tipo_vehiculo: value?value:"liviano",
+                            tipo_vehiculo: value?value:"",
                           },
                         }))
                       }
                       items={[
-                        { label: "Escoje Tipo", value: null },
+                        
                         { label: "Liviano", value: "liviano" },
                         { label: "Pesado", value: "pesado" },
                         { label: "Moto 4T", value: "motocicleta_4t" },
@@ -1131,17 +1173,17 @@ console.log(formData)
                       ]}
                     >
                       <SelectTrigger className="h-10 bg-background w-full">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecciona un tipo"/>
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value={null}>Escoje Tipo</SelectItem>
+                       
                         <SelectItem value="liviano">Liviano</SelectItem>
                         <SelectItem value="pesado">Pesado</SelectItem>
                         <SelectItem value="motocicleta_4t">Moto 4T</SelectItem>
                         <SelectItem value="motocicleta_2t">Moto 2T</SelectItem>
                         <SelectItem value="motocarro_4t">
-                          Motocarr 4T
+                          Motocarro 4T
                         </SelectItem>
                         <SelectItem value="motocarro_2t">
                           Motocarro 2T
@@ -1167,13 +1209,13 @@ console.log(formData)
                         }))
                       }
                       items={[
-                        { label: "Escoje Tipo de Servicio", value: null },
-                        { label: "Particular", value: "PARTICULAR" },
-                        { label: "Enseñanza", value: "ENSEÑANZA" },
-                        { label: "Oficial", value: "OFICIAL" },
-                        { label: "Público", value: "PUBLICO" },
-                        { label: "Diplomático", value: "DIPLOMATICO" },
-                        { label: "Especial", value: "ESPECIAL" },
+                       
+                        { label: "Particular", value: "particular" },
+                        { label: "Enseñanza", value: "ensenanza" },
+                        { label: "Oficial", value: "oficial" },
+                        { label: "Público", value: "publico" },
+                        { label: "Diplomático", value: "diplomatico" },
+                        { label: "Especial", value: "especial" },
                       ]}
                     >
                       <SelectTrigger className="h-10 w-full bg-background">
@@ -1181,15 +1223,13 @@ console.log(formData)
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value={null}>
-                          Escoje Tipo de Servicio
-                        </SelectItem>
-                        <SelectItem value="PARTICULAR">Particular</SelectItem>
-                        <SelectItem value="ENSEÑANZA">Enseñanza</SelectItem>
-                        <SelectItem value="OFICIAL">Oficial</SelectItem>
-                        <SelectItem value="PUBLICO">Público</SelectItem>
-                        <SelectItem value="DIPLOMATICO">Diplomático</SelectItem>
-                        <SelectItem value="ESPECIAL">Especial</SelectItem>
+                        
+                        <SelectItem value="particular">Particular</SelectItem>
+                        <SelectItem value="ensenanza">Enseñanza</SelectItem>
+                        <SelectItem value="oficial">Oficial</SelectItem>
+                        <SelectItem value="publico">Público</SelectItem>
+                        <SelectItem value="diplomatico">Diplomático</SelectItem>
+                        <SelectItem value="especial">Especial</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1269,6 +1309,7 @@ console.log(formData)
                     </Label>
                     {/*#a11 ACTION */}
                     <Input
+                    min={0}
                       type="number"
                       placeholder="000000"
                       className="h-12 text-lg font-mono font-bold"
@@ -1376,7 +1417,7 @@ console.log(formData)
 
 
         {/**SECCION DE LAS PRESIONES DEL VEHICULO */}
-        <div
+        <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
          >
           <div className="border-t pt-6">
@@ -1389,12 +1430,12 @@ console.log(formData)
               setFormData={setFormData}
             />
           </div>
-        </div>
+        </fieldset>
 
 
 
         {/**Seccion de las observaciones */}
-        <div className="mt-8 space-y-6">
+        <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
           <div className="border-t border-slate-100 pt-6">
             <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
               
@@ -1415,13 +1456,15 @@ console.log(formData)
               </p>
             </div>
           </div>
-        </div>
+        </fieldset>
 
         {/**SECCION DE LAS CONDICIONES A CUMPLIR */}
         <ConditionsSwitchSections
           conditions={selectedTemplate?.conditions}
           results={formData.condition_results}
           setFormData={setFormData}
+          selectedTemplate={selectedTemplate?true:false}
+          hayPlaca={formData.vehicle.placa?true:false}
         />
 
         {/**SECCION DE LAS FIRMAS */}
@@ -1430,10 +1473,12 @@ console.log(formData)
           signatures={selectedTemplate?.signatures}
           contractText={selectedTemplate?.base_contract_text}
           setFormData={setFormData}
+          selectedTemplate={selectedTemplate?true:false}
+          hayPlaca={formData.vehicle.placa?true:false}
         />
 
 
-<div className="mt-12 mb-20 px-4 space-y-8">
+<fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
   <div className="flex flex-col items-center justify-center p-6 sm:p-10 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
     <div className="p-3 bg-blue-100 rounded-full mb-4">
       <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
@@ -1450,7 +1495,7 @@ console.log(formData)
 
     {/* EL BOTÓN CORREGIDO */}
     <Button 
-      type="button"
+      type="submit"
       className="group relative h-16 sm:h-20 w-full max-w-xl bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] overflow-hidden px-4"
     >
       {/* Efecto Shimmer mejorado */}
@@ -1459,7 +1504,7 @@ console.log(formData)
       <div className="flex items-center justify-between w-full sm:justify-center sm:gap-6">
         {/* Texto con ajuste de tamaño responsivo */}
         <span className="text-sm sm:text-lg md:text-xl font-black uppercase tracking-[0.15em] sm:tracking-[0.3em] truncate">
-          Crear Orden de Entrada
+          {isSubmitting ? "Procesando..." : "Crear Orden de Entrada"}
         </span>
         
         {/* Contenedor del icono con espacio reservado para la animación */}
@@ -1468,6 +1513,22 @@ console.log(formData)
         </div>
       </div>
     </Button>
+
+
+
+
+    
+{/* COMPONENTE DEL DIALOG INVOCADO */}
+      <ZodErrorDialog 
+        isOpen={showErrorDialog} 
+        setIsOpen={setShowErrorDialog} 
+        errors={serverError} 
+      />
+
+
+
+
+    
 
     {/* Metadata inferior responsiva */}
     <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
@@ -1481,7 +1542,7 @@ console.log(formData)
       </span>
     </div>
   </div>
-</div>
+</fieldset>
 
 
 
@@ -1493,5 +1554,6 @@ console.log(formData)
 
 
     </form>
+
   );
 }

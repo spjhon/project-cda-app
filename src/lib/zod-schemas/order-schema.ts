@@ -1,5 +1,8 @@
 // lib/schemas/order-form.schema.ts
 
+
+
+
 import { z } from "zod";
 
 /* =========================================================
@@ -121,13 +124,10 @@ export const PersonFormSchema = z.object({
     .min(3, "Nombre completo requerido"),
 
   telefono: z
-    .string()
-    .min(7, "Teléfono inválido"),
+    .string(),
+  
 
-  correo: z
-    .string()
-    .email("Correo inválido")
-    .or(z.literal("")),
+  correo: z.email("Correo inválido").or(z.literal("")),
 
   direccion: z.string(),
 });
@@ -137,50 +137,83 @@ export const PersonFormSchema = z.object({
 ========================================================= */
 
 export const VehicleDataSchema = z.object({
-  id: z.string().uuid().nullable(),
+  id: z.uuid().nullable(),
 
-  placa: z
-    .string()
-    .min(5, "La placa es requerida")
-    .max(10)
-    .transform((val) => val.toUpperCase().trim()),
+ placa: z
+  .string()
+  .trim() // 1. Limpiamos espacios primero
+  .min(5, "La placa debe tener al menos 5 caracteres") // 2. Validamos tamaño mínimo
+  .max(10, "La placa no puede exceder los 10 caracteres") // 3. Validamos tamaño máximo
+  .toUpperCase(), // 4. Al final, si todo es válido, lo transformamos a MAYÚSCULAS
 
   marca: z.string().min(1, "La marca es requerida"),
 
   linea: z.string().min(1, "La línea es requerida"),
 
   modelo: z
-    .union([
-      z.string(),
-      z.number(),
-    ])
-    .refine((val) => String(val).length >= 4, {
-      message: "Modelo inválido",
-    }),
+  .string()
+  .length(4, { message: "El modelo debe tener exactamente 4 dígitos" })
+  .regex(/^\d+$/, { message: "El modelo solo debe contener números" }),
 
   color: z.string().min(1, "El color es requerido"),
 
-  tipo_vehiculo: z.enum(TipoVehiculoEnum),
+  tipo_vehiculo: z.union([
+ z.enum(TipoVehiculoEnum),
+ z.literal("")
+  ],{error: () => ({ message: "El tipo de vehiculo es requerido o es invalido" })}),
+  
+  
+  
+  
+ 
 
-  clase: z.enum(ClaseVehiculoEnum),
+  clase: z.union([
+     z.enum(ClaseVehiculoEnum),
+     z.literal("")
 
-  combustible: z.enum(CombustibleEnum),
+  ], {error: () => ({ message: "La clase de vehiculo es requerido o es invalido" })}),
+  
+  
+ 
 
-  cilindrada: z.union([
-    z.string(),
-    z.number(),
-  ]),
+  combustible: z.union([
+    z.enum(CombustibleEnum),
+    z.literal("")
+  ], {error: () => ({ message: "El tipo de combustible es requerido o es invalido" })}),
+
+  cilindrada: z
+  .string()
+  .min(2, { message: "Cilindrada inválida" }) // Al menos 2 dígitos (ej. 50)
+  .regex(/^\d+$/, { message: "La cilindrada solo debe contener números" })
+  .refine((val) => Number(val) >= 50, {
+    message: "La cilindrada mínima es 50",
+  }),
 
   blindaje: z.boolean(),
 
-  capacidad_pasajeros: z.union([
-    z.string(),
-    z.number(),
-  ]),
+  capacidad_pasajeros: z
+  .string()
+  .min(1, { message: "La capacidad es obligatoria" })
+  .regex(/^\d+$/, { message: "Solo se permiten números" })
+  .refine((val) => Number(val) >= 1, {
+    message: "La capacidad mínima es 1 pasajero",
+  }),
 
   es_ensenanza: z.boolean(),
 
-  tipo_servicio_vehiculo: z.enum(TipoServicioVehiculoEnum),
+  //tipo_servicio_vehiculo: z.enum(TipoServicioVehiculoEnum, "Tipo de servicio requerido o esta erroneo").or(z.literal("", "El campo puede estar erroneo")),
+
+
+tipo_servicio_vehiculo: z.union(
+  [
+    z.enum(TipoServicioVehiculoEnum),
+    z.literal("")
+  ],
+  {
+    // En lugar de errorMap, se usa 'error' así:
+    error: () => ({ message: "El tipo de servicio es requerido o es inválido" })
+  }
+),
 
   propietario_actual_id: z.uuid().nullable(),
 
@@ -194,9 +227,12 @@ export const VehicleDataSchema = z.object({
 export const TirePressureEntrySchema = z.object({
   eje: z.number().min(1),
 
-  posicion: z.enum(TirePositionEnum),
+  posicion: z.enum(TirePositionEnum, "Se requeire tener una posicion o esta errada"),
 
-  presion_encontrada: z.string(),
+  presion_encontrada: z
+  .string()
+  .trim()
+  .min(1, "La presión es requerida"), // Evita que envíen campos vacíos
 
   presion_ajustada: z.string(),
 
@@ -208,7 +244,7 @@ export const TirePressureEntrySchema = z.object({
 ========================================================= */
 
 export const ConditionResultEntrySchema = z.object({
-  template_condition_id: z.string().uuid(),
+  template_condition_id: z.uuid(),
 
   value: z.enum(ConditionResponseEnum),
 });
@@ -218,7 +254,7 @@ export const ConditionResultEntrySchema = z.object({
 ========================================================= */
 
 export const SignatureResultSchema = z.object({
-  template_signature_id: z.string().uuid(),
+  template_signature_id: z.uuid(),
 
   representative_type: z.string(),
 
@@ -237,11 +273,11 @@ export const ZodFullFormDataSchema = z.object({
      CONTROL
   ---------------------------- */
 
-  tenant_id: z.string().uuid(),
+  tenant_id: z.string(),
 
-  funcionario_id: z.string().uuid(),
+  funcionario_id: z.uuid(),
 
-  plantilla_id: z.string().uuid(),
+  plantilla_id: z.uuid(),
 
   /* ---------------------------
      ORDEN
@@ -291,25 +327,19 @@ export const ZodFullFormDataSchema = z.object({
      LLANTAS
   ---------------------------- */
 
-  tire_pressures: z.array(
-    TirePressureEntrySchema
-  ),
+  tire_pressures: z.array(TirePressureEntrySchema),
 
   /* ---------------------------
      RESULTADOS
   ---------------------------- */
 
-  condition_results: z.array(
-    ConditionResultEntrySchema
-  ),
+  condition_results: z.array(ConditionResultEntrySchema),
 
   /* ---------------------------
      FIRMAS
   ---------------------------- */
 
-  signatures: z.array(
-    SignatureResultSchema
-  ),
+  signatures: z.array(SignatureResultSchema),
 });
 
 /* =========================================================
@@ -332,3 +362,8 @@ export type ServiceType = (typeof ServiceTypeEnum)[number];
 export type CombustibleType = (typeof CombustibleEnum)[number];
 
 export type ClaseVehiculoType = (typeof ClaseVehiculoEnum)[number];
+
+
+
+
+

@@ -54,15 +54,20 @@ ALTER TABLE public.order_template
 -- ==========================================
 
 -- 1. Unicidad de Versión por Plantilla y Tenant
--- Evita que un mismo CDA tenga dos "v1" de la misma plantilla
+-- Evita que se repita la combinación de Código + Versión por cada CDA (tenant_id)
 ALTER TABLE public.order_template
-    ADD CONSTRAINT order_template_name_version_tenant_key 
-    UNIQUE (tenant_id, template_name, version);
+    ADD CONSTRAINT order_template_code_version_tenant_key 
+    UNIQUE (tenant_id, document_code, version);
 
 -- 2. Validación de código de documento no vacío
 ALTER TABLE public.order_template
     ADD CONSTRAINT order_template_document_code_check 
     CHECK (char_length(document_code) > 0);
+
+     --  Creamos TU restricción exacta: Nombre + Versión + Código Únicos por Tenant
+ALTER TABLE public.order_template
+    ADD CONSTRAINT order_template_name_version_code_tenant_key 
+    UNIQUE (tenant_id, template_name, version, document_code);
 
 -- ==========================================
 -- 5. ÍNDICES (Rendimiento)

@@ -33,3 +33,9 @@ export const orderTemplateSchema = z.object({
 
 // Esto crea automáticamente el tipo TypeScript basado en el esquema
 export type OrderTemplateInput = z.infer<typeof orderTemplateSchema>;
+
+
+/**
+ * Sí, funciona exactamente como dices: si el array signatures está vacío, Zod lo deja pasar; pero si tiene aunque sea un objeto dentro, le aplica todas las reglas internas (como el .min(1)).
+ * Por defecto, un arreglo con cero elementos ([]) sigue siendo un arreglo válido. Zod no asume que el arreglo deba tener elementos obligatoriamente a menos que tú se lo pidas de forma explícita.
+ */
