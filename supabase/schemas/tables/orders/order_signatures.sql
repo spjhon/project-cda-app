@@ -5,8 +5,7 @@ CREATE TABLE IF NOT EXISTS public.order_signatures (
     -- Referencia a qué rol de firma de la plantilla corresponde
     template_signature_id   UUID NOT NULL,
     
-    -- El nombre de quien firmó (Snapshot por si el cliente cambia)
-    signer_name             TEXT NOT NULL,
+   
     -- URL del archivo en Supabase Storage
     signature_url           TEXT NOT NULL,
 

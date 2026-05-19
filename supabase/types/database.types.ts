@@ -208,7 +208,6 @@ export type Database = {
           created_at: string
           entry_order_id: string
           id: string
-          special_value: boolean | null
           template_condition_id: string
           tenant_id: string
           updated_at: string
@@ -218,7 +217,6 @@ export type Database = {
           created_at?: string
           entry_order_id: string
           id?: string
-          special_value?: boolean | null
           template_condition_id: string
           tenant_id: string
           updated_at?: string
@@ -228,7 +226,6 @@ export type Database = {
           created_at?: string
           entry_order_id?: string
           id?: string
-          special_value?: boolean | null
           template_condition_id?: string
           tenant_id?: string
           updated_at?: string
@@ -757,6 +754,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_full_order: { Args: { p_data: Json }; Returns: string }
       create_full_order_template: { Args: { p_data: Json }; Returns: string }
       fetch_orders_templates: {
         Args: { p_tenant_id: string }

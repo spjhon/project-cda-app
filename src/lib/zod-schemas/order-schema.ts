@@ -79,7 +79,7 @@ const TirePositionEnum = [
 ] as const;
 
 const ServiceTypeEnum = [
-    "rtm", 
+    "RTM", 
     "preventiva", 
     "peritaje"] as const;
 
@@ -272,6 +272,7 @@ export const ZodFullFormDataSchema = z.object({
   /* ---------------------------
      CONTROL
   ---------------------------- */
+  id: z.string().nullable(),
 
   tenant_id: z.string(),
 

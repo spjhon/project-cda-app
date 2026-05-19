@@ -140,12 +140,16 @@ export default function SignatureSection({
                     ["contrato-general"]: checked,
                   }));
 
+
+
                   // 2. Si desmarcan el contrato, LIMPIEZA GENERAL
                   if (!checked) {
                     // Limpiamos todos los canvas visualmente
                     Object.values(canvasRefs.current).forEach((canvas) => {
                       canvas?.clear();
                     });
+
+
 
                     // Limpiamos todas las firmas en el state principal de una sola vez
                     setFormData((prev) => ({
@@ -155,6 +159,9 @@ export default function SignatureSection({
                         signature_url: "",
                       })),
                     }));
+
+
+                    
                   }
                 }}
                 className="h-10 w-10 border-slate-300 data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900"

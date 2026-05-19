@@ -13,40 +13,40 @@ CREATE TABLE IF NOT EXISTS public.vehicles (
     placa                   VARCHAR NOT NULL,
     
     -- Ej: Chevrolet, Yamaha.
-    marca                   VARCHAR,
+    marca                   VARCHAR NOT NULL,
     
     -- Ej: Spark, NMAX.
-    linea                   VARCHAR,
+    linea                   VARCHAR NOT NULL,
     
     -- El año del vehículo.
-    modelo                  INTEGER,
+    modelo                  INTEGER NOT NULL,
     
     -- Color actual del vehículo.
-    color                   VARCHAR,
+    color                   VARCHAR NOT NULL,
     
     -- (motocicleta, liviano, pesado, motocarro).
     tipo_vehiculo           vehicle_type_enum NOT NULL,
     
     -- Automóvil, Camioneta, Motocicleta.
-    clase                   VARCHAR,
+    clase                   VARCHAR NOT NULL,
     
     -- Gasolina, Diesel, Eléctrico, GNV.
-    combustible             VARCHAR,
+    combustible             VARCHAR NOT NULL,
     
     -- Vital para determinar tarifas y pruebas de gases.
-    cilindrada              INTEGER,
+    cilindrada              INTEGER NOT NULL,
 
     tipo_servicio_vehiculo public.vehicle_service_type_enum not null default 'particular'::public.vehicle_service_type_enum,
     
     -- Indica si el vehículo posee blindaje legal.
-    blindaje                BOOLEAN DEFAULT false,
+    blindaje                BOOLEAN DEFAULT false NOT NULL,
     
     -- Cantidad máxima de personas permitidas.
-    capacidad_pasajeros     INTEGER,
+    capacidad_pasajeros     INTEGER NOT NULL,
     
     
     -- Indica si es un vehículo de escuela de conducción.
-    es_ensenanza            BOOLEAN DEFAULT false,
+    es_ensenanza            BOOLEAN DEFAULT false NOT NULL,
 
     -- Referencia a la tabla personas (Dueño registrado).
     propietario_actual_id   UUID,

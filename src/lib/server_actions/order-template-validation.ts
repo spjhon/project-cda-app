@@ -30,11 +30,16 @@ export async function createOrderTemplateAction(formData: OrderTemplateInput) {
     // Convertimos el objeto Date a un string que Postgres entiende perfectamente
     document_date: validatedFields.data.document_date.toISOString() 
   } 
-});
+  });
 
-if (error) {
-  return { error: "Error en la base de datos", details: error.message };
-}
+  if (error) {
+    return { error: "Error en la base de datos", details: error.message };
+  }
 
-return { success: true, message: data };
+  
+  return { success: true, message: data };
+
+
+
+
 }

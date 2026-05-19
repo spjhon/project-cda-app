@@ -49,10 +49,25 @@ ALTER TABLE public.entry_order_tire_pressures
     ADD CONSTRAINT tire_pressures_order_id_fkey 
     FOREIGN KEY (entry_order_id) REFERENCES public.entry_orders(id) ON DELETE CASCADE;
 
--- Restricción de valores permitidos para posicion (ISO 17020 compliance)
+
+
+
 ALTER TABLE public.entry_order_tire_pressures
-    ADD CONSTRAINT check_tire_position 
-    CHECK (posicion IN ('izquierda', 'derecha', 'interno_izquierdo', 'interno_derecho', 'repuesto'));
+    ADD CONSTRAINT check_tire_position CHECK (
+        posicion::text = ANY (
+            ARRAY[
+                'izquierda'::text,
+                'derecha'::text,
+                'centro'::text,
+                'izquierda_interior'::text,
+                'derecha_interior'::text,
+                'repuesto'::text
+            ]
+        )
+    );
+
+
+
 
 -- ==========================================
 -- 3. ÍNDICES (Rendimiento)

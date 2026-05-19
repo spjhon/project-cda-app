@@ -82,7 +82,7 @@ interface ClaseOption {
 
 const SERVICE_TYPES: ServiceOption[] = [
   {
-    id: "rtm",
+    id: "RTM",
     label: "REVISIÓN TÉCNICO MECÁNICA",
     desc: "Normatividad vigente",
     icon: <ClipboardCheck className="h-5 w-5 text-blue-600" />,
@@ -171,11 +171,12 @@ export default function NewEntryOrder() {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
 // Estado local para el cargando (reemplaza a isPending de useActionState)
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<$ZodIssue[] | null>(null);
+  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(null);
 
 
   //STATE PRINCIPAL DEL FORMULARIO
   const [formData, setFormData] = useState<ZodFullFormDataType>({
+    id: null,
     // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
     tenant_id:
       PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id ||
@@ -188,7 +189,7 @@ export default function NewEntryOrder() {
     // Estos datos cambian en cada inspección y deben quedar congelados en entry_orders
     kilometraje: "",
     es_reinspeccion: false,
-    service_type: "rtm", // Default según tu enum
+    service_type: "RTM", // Default según tu enum
     estado_orden: "abierta",
     observaciones: "",
     soat_vencimiento_snapshot: "",
@@ -278,32 +279,42 @@ export default function NewEntryOrder() {
   });
 
 
-
+console.log(formData)
 
 
 
 
 const fillMockData = () => {
-  setFormData(MOCK_DATA as ZodFullFormDataType);
+
+  setFormData((prev) => ({
+    ...prev,
+    ...(MOCK_DATA as ZodFullFormDataType) // Esparcimos los datos encima del estado previo
+  }));
+
+  handleTemplateSelect("48b5a341-f611-4532-88c3-db2d7149e403", true)
   console.log("Formulario precargado con éxito");
 };
 
 
 
+
+
+
+
 const MOCK_DATA = {
+  id: "065f6fec-f4cb-4de0-af89-c831b8940131",
   tenant_id: "aaaaaaaa-0000-0000-0000-000000000001",
   funcionario_id: "6800852e-2312-454c-aed8-6cfdc0feca47",
-  plantilla_id: "2290a44a-b947-403c-8010-4dd63e28f02c",
+  plantilla_id: "",
   kilometraje: "25336",
   es_reinspeccion: false,
-  service_type: "rtm",
+  service_type: "RTM",
   estado_orden: "abierta",
-  observaciones: "",
+  observaciones: "Obserrvaciones en la seccion de oervaciones",
   soat_vencimiento_snapshot: "2026-03-12",
   gas_numero_snapshot: "123456",
   gas_vencimiento_snapshot: "2026-05-13",
-  texto_contractual_snapshot: "condicones para la plantilla que debe de enter algo",
-  vehicle: {
+    vehicle: {
     id: null,
     placa: "HDC05",
     marca: "SUZUKI",
@@ -312,7 +323,7 @@ const MOCK_DATA = {
     color: "ROJO",
     tipo_vehiculo: "motocicleta_4t",
     clase: "motocicleta",
-    combustible: "",
+    combustible: "gasolina",
     cilindrada: "125",
     blindaje: false,
     capacidad_pasajeros: "2",
@@ -321,20 +332,9 @@ const MOCK_DATA = {
     propietario_actual_id: null,
     es_extranjero: false,
   },
- 
   tire_pressures: [
     { eje: 1, posicion: "centro", presion_encontrada: "30", presion_ajustada: "", _requiere_ajuste: false },
     { eje: 2, posicion: "centro", presion_encontrada: "36", presion_ajustada: "30", _requiere_ajuste: true }
-  ],
-  condition_results: [
-    { template_condition_id: "026eaa3d-50e3-449e-b91d-4d0e988c009a", value: "cumple" }
-  ],
-  signatures: [
-    {
-      template_signature_id: "c9711272-1b15-43eb-a0f9-55caa041a40a",
-      representative_type: "cliente",
-      signature_url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..." // Tu base64 aquí
-    }
   ],
   customer_data: {
     id: null,
@@ -342,7 +342,7 @@ const MOCK_DATA = {
     numero_documento: "1053782464",
     nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
     telefono: "3215224586",
-    correo: "SPJHONGMAIL.COM",
+    correo: "SPJHON@GMAIL.COM",
     direccion: "Carrera 25 #17-66"
   },
   owner_data: {
