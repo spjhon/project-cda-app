@@ -364,7 +364,7 @@ export type CombustibleType = (typeof CombustibleEnum)[number];
 
 export type ClaseVehiculoType = (typeof ClaseVehiculoEnum)[number];
 
-
+export type TipoDocumentoType = (typeof TipoDocumentoEnum)[number];
 
 
 

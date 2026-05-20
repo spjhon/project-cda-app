@@ -3,18 +3,12 @@ import { User, UserCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { SearchPersonDialog } from "./SearchPersonDialog";
 
 // Opciones de identificación según tu lista
-const ID_DOCUMENT_OPTIONS = [
+export const ID_DOCUMENT_OPTIONS = [
   { label: "Cédula de Ciudadanía", value: "cedula_ciudadania" },
   { label: "NIT", value: "nit" },
   { label: "Pasaporte", value: "pasaporte" },
@@ -52,6 +46,8 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
         ...prev.customer_data,
         [field]: formattedValue,
       };
+
+      
       return {
         ...prev,
         customer_data: newCustomerData,
@@ -62,6 +58,11 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
     });
   };
 
+
+
+
+
+
   // Manejador para el Dueño
   const handleOwnerChange = (field: string, value: string) => {
     const formattedValue =
@@ -71,6 +72,9 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
       owner_data: { ...prev.owner_data, [field]: formattedValue },
     }));
   };
+
+
+
 
   // Manejador del Checkbox (Click en toda el área)
   const toggleSameOwner = () => {
@@ -88,8 +92,12 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
 
 
   
+
+
   return (
-    <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
+    <fieldset
+      className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
+    >
       <div className="border-t border-slate-200 pt-8">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
           3. Identificación de Personas
@@ -126,56 +134,72 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                 </span>
               </span>
             </div>
-
             <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-bold text-slate-500 uppercase">
-                    Tipo Documento
-                  </Label>
-                  <Select
-                    items={ID_DOCUMENT_OPTIONS}
-                    value={formData.customer_data.tipo_documento}
-                    onValueChange={(v) =>
-                      handleCustomerChange("tipo_documento", v?v:"")
-                    }
-                  >
-                    <SelectTrigger className="h-11 bg-slate-50/50 border-slate-200">
-                      <SelectValue placeholder="Seleccione tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {/* MAPEO DINÁMICO DE OPCIONES */}
-                      {ID_DOCUMENT_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+
+
+
+
+
+
+
+              <div className="flex gap-2">
+                {/* DISPLAY DOCUMENTO */}
+                <div className="flex-1 h-11 rounded-md border border-slate-200 bg-slate-50 px-4 flex items-center overflow-hidden">
+                  <div className="flex flex-col leading-tight overflow-hidden">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 truncate">
+                      {ID_DOCUMENT_OPTIONS.find(
+                        (d) =>
+                          d.value === formData.customer_data.tipo_documento,
+                      )?.label || "Tipo documento"}
+                    </span>
+
+                    <span className="text-sm font-semibold text-slate-700 truncate">
+                      {formData.customer_data.numero_documento ||
+                        "Sin documento"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-bold text-slate-500 uppercase">
-                    N° Identificación
-                  </Label>
-                  <Input
-                  required
-                    className="h-11"
-                    placeholder="Ej: 10203040"
-                    value={formData.customer_data.numero_documento}
-                    onChange={(e) =>
-                      handleCustomerChange("numero_documento", e.target.value)
-                    }
+                {/* BOTÓN */}
+                <div className="flex-1">
+
+                  {/**Cuando pasas una arrow function, el hijo recibe una función nueva que tú controlas, y esa función puede hacer lógica extra antes de llamar al setter real. */}
+                  <SearchPersonDialog
+                    currentDocumentType={formData.customer_data.tipo_documento}
+                    currentDocumentNumber={formData.customer_data.numero_documento}
+                    onUpdate={(data) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        customer_data: {
+                          ...prev.customer_data,
+                          tipo_documento: data.tipo_documento,
+                          numero_documento: data.numero_documento,
+
+                          ...(data.foundData ?? {}), //aqui dice que si se encuentra data en el hijo despues de hacer el fetch, actualize tambien el resto de datos en el padre
+                        },
+                      }));
+                    }}
                   />
+
                 </div>
               </div>
+
+
+
+
+
+
+
+
+
 
               <div className="space-y-2">
                 <Label className="text-[11px] font-bold text-slate-500 uppercase">
                   Nombre Completo / Razón Social
                 </Label>
                 <Input
-                required
+                  required
                   className="h-11"
                   placeholder="NOMBRE COMPLETO DEL CLIENTE"
                   value={formData.customer_data.nombre_completo}
@@ -191,7 +215,7 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                     Teléfono de contacto
                   </Label>
                   <Input
-                  required
+                    required
                     className="h-11"
                     placeholder="Ej: 3101234567"
                     value={formData.customer_data.telefono}
@@ -205,7 +229,7 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                     Correo Electrónico
                   </Label>
                   <Input
-                  required
+                    required
                     className="h-11"
                     type="email"
                     placeholder="ejemplo@correo.com"
@@ -222,7 +246,7 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                   Dirección de Residencia
                 </Label>
                 <Input
-                required
+                  required
                   className="h-11"
                   placeholder="Ej: Calle 10 # 20-30"
                   value={formData.customer_data.direccion}
@@ -254,55 +278,115 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
               <div
                 className={`bg-white border-2 rounded-2xl p-6 space-y-5 shadow-sm ${formData.is_owner_same_as_customer ? "border-slate-100" : "border-emerald-500/30 bg-emerald-50/5"}`}
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[11px] font-bold text-slate-400 uppercase">
-                      Tipo Documento Propietario
-                    </Label>
-                    <Select
-                      items={ID_DOCUMENT_OPTIONS}
-                      disabled={formData.is_owner_same_as_customer}
-                      value={formData.owner_data.tipo_documento}
-                      onValueChange={(v) =>
-                        handleOwnerChange("tipo_documento", v?v:"")
-                      }
-                    >
-                      <SelectTrigger className="h-11 bg-white border-slate-200">
-                        <SelectValue placeholder="Seleccione tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {/* EL MISMO MAPEO SE REUTILIZA AQUÍ */}
-                        {ID_DOCUMENT_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-bold text-slate-400 uppercase">
+                    Documento Propietario
+                  </Label>
+
+                  <div className="flex gap-2">
+
+
+                    {/* DISPLAY */}
+                    <div
+                      className={`flex-1 h-11 rounded-md border px-4 flex items-center overflow-hidden transition-all ${
+                        formData.is_owner_same_as_customer
+                          ? "bg-slate-100 border-slate-100 opacity-60"
+                          : "bg-white border-slate-200"
+                      }`}
+                     >
+                      <div className="flex flex-col leading-tight overflow-hidden">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 truncate">
+                          {ID_DOCUMENT_OPTIONS.find(
+                            (d) =>
+                              d.value === formData.owner_data.tipo_documento,
+                          )?.label || "Tipo documento"}
+                        </span>
+
+                        <span className="text-sm font-semibold text-slate-700 truncate">
+                          {formData.owner_data.numero_documento ||
+                            "Sin documento"}
+                        </span>
+                      </div>
+                    </div>
+
+
+
+                    {/* BOTÓN / DIALOG */}
+                    <div className="flex-1">
+                      <SearchPersonDialog
+                        disabled={formData.is_owner_same_as_customer}
+                        currentDocumentType={formData.owner_data.tipo_documento}
+                        currentDocumentNumber={formData.owner_data.numero_documento}
+
+                        onUpdate={(data) => {
+
+                          handleOwnerChange(
+                            "tipo_documento",
+                            data.tipo_documento,
+                          );
+
+                          handleOwnerChange(
+                            "numero_documento",
+                            data.numero_documento,
+                          );
+
+                          if (data.foundData) {
+                            Object.entries(data.foundData).forEach(
+                              ([key, value]) => {
+                                if (value) {
+                                  handleOwnerChange(key, value);
+                                }
+                              },
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+
+
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[11px] font-bold text-slate-400 uppercase">
-                      N° Identificación
-                    </Label>
-                    <Input
-                    required
-                      disabled={formData.is_owner_same_as_customer}
-                      className="h-11 bg-white"
-                      placeholder="Ej: 10203040"
-                      value={formData.owner_data.numero_documento}
-                      onChange={(e) =>
-                        handleOwnerChange("numero_documento", e.target.value)
-                      }
-                    />
-                  </div>
+
+                  {/* MENSAJE CUANDO ESTÁ SINCRONIZADO */}
+                  {formData.is_owner_same_as_customer && (
+                    <p className="text-[11px] text-slate-400 font-medium px-1">
+                      El propietario utiliza automáticamente la información del
+                      cliente.
+                    </p>
+                  )}
+
+
                 </div>
+
+
+
+
+
+
+
+
+
+
+
 
                 <div className="space-y-2">
                   <Label className="text-[11px] font-bold text-slate-400 uppercase">
                     Nombre del Propietario
                   </Label>
                   <Input
-                  required
+                    required
                     disabled={formData.is_owner_same_as_customer}
                     className="h-11 bg-white"
                     placeholder="SEGÚN TARJETA DE PROPIEDAD"

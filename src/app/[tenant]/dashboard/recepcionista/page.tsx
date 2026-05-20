@@ -172,7 +172,7 @@ export default function NewEntryOrder() {
 // Estado local para el cargando (reemplaza a isPending de useActionState)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(null);
-
+  const [signatureKey, setSignatureKey] = useState(0); //este state es para reiniciar el componete de las firmas
 
   //STATE PRINCIPAL DEL FORMULARIO
   const [formData, setFormData] = useState<ZodFullFormDataType>({
@@ -420,9 +420,7 @@ const MOCK_DATA = {
       return {
         ...prev,
         plantilla_id: checked ? id : "",
-        texto_contractual_snapshot: checked
-          ? template?.base_contract_text || ""
-          : "",
+        texto_contractual_snapshot: checked? template?.base_contract_text || "" : "",
 
         // Inyectamos las condiciones iniciales
         condition_results: initialConditionResults,
@@ -457,8 +455,11 @@ const MOCK_DATA = {
     setDialogOpen(false);
   };
 
+
+
   //Funcion para buscar la placa saleccionada
   const handleBuscarPlaca = () => {
+    
     setFormData((prev) => ({
       ...prev,
       vehicle: {
@@ -468,6 +469,10 @@ const MOCK_DATA = {
     }));
     setDialogOpen(false);
   };
+
+
+
+
 
 
 
@@ -494,6 +499,107 @@ const MOCK_DATA = {
       } else {
         // Éxito: Redirigir o limpiar formulario
         alert(data);
+        setFormData((prev)=> ({
+          ...prev,
+
+          id: null,
+          // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
+
+          // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
+          // Estos datos cambian en cada inspección y deben quedar congelados en entry_orders
+          kilometraje: "",
+          es_reinspeccion: false,
+          service_type: "RTM", // Default según tu enum
+          estado_orden: "abierta",
+          observaciones: "",
+          soat_vencimiento_snapshot: "",
+          gas_numero_snapshot: "",
+          gas_vencimiento_snapshot: "",
+          texto_contractual_snapshot: "",
+
+          vehicle: {
+            id: null, // UUID si el vehículo existe en DB, null si es nuevo
+            placa: "",
+            marca: "",
+            linea: "",
+            modelo: "", // integer en tu DB
+            color: "",
+            tipo_vehiculo: "",
+            clase: "",
+            combustible: "",
+            cilindrada: "", // integer en tu DB
+            blindaje: false,
+            capacidad_pasajeros: "", // integer en tu DB
+            es_ensenanza: false,
+            tipo_servicio_vehiculo: "", // Enum: particular, publico, etc.
+            propietario_actual_id: null, // Referencia a la tabla personas
+            es_extranjero: false,
+          },
+
+          // --- REGISTRO DE PRESIONES DE LLANTAS (Detalle de la Orden) ---
+          // Array aplanado para facilitar el envío a la tabla entry_order_tire_pressures
+          tire_pressures: [
+            {
+              eje: 1,
+              posicion: "izquierda",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
+            {
+              eje: 1,
+              posicion: "derecha",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
+            {
+              eje: 2,
+              posicion: "izquierda",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
+            {
+              eje: 2,
+              posicion: "derecha",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
+          ] ,
+
+          // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
+          // Este array se llenará dinámicamente cuando el usuario cargue la plantilla
+          condition_results: [],
+          signatures: [], // <-- Nueva propiedad
+          // Dentro de tu useState inicial:
+          customer_data: {
+            id: null,
+            tipo_documento: "cedula_ciudadania",
+            numero_documento: "",
+            nombre_completo: "",
+            telefono: "",
+            correo: "",
+            direccion: "",
+          },
+          owner_data: {
+            id: null,
+            tipo_documento: "cedula_ciudadania",
+            numero_documento: "",
+            nombre_completo: "",
+            telefono: "",
+            correo: "",
+            direccion: "",
+          },
+          is_owner_same_as_customer: false, // Switch maestro
+
+
+        }));
+        // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+      setSignatureKey((prev) => prev + 1);
+        handleTemplateSelect(formData.plantilla_id, true)
+        
       }
     } catch (error: unknown) {
       alert("Ocurrio un error inesperado en la validacion: " + error);
@@ -534,15 +640,15 @@ const MOCK_DATA = {
 
 
 
-<div className="flex justify-end mb-4">
-    <button
-      type="button"
-      onClick={fillMockData}
-      className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded shadow-lg transition-all text-xs"
-    >
-      ⚡ CARGAR PRUEBA (HDC05)
-    </button>
-  </div>
+    <div className="flex justify-end mb-4">
+        <button
+          type="button"
+          onClick={fillMockData}
+          className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded shadow-lg transition-all text-xs"
+        >
+          ⚡ CARGAR PRUEBA (HDC05)
+        </button>
+    </div>
 
 
 
@@ -778,6 +884,9 @@ const MOCK_DATA = {
                 </div>
               </div>
 
+
+
+
               {/* SECCIÓN: Placa del Vehículo */}
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
@@ -854,6 +963,9 @@ const MOCK_DATA = {
                             Buscar
                           </Button>
                         </DialogFooter>
+
+
+
                       </DialogContent>
                     </Dialog>
                   </div>
@@ -923,13 +1035,26 @@ const MOCK_DATA = {
                   )}
                 </div>
               </div>
+
+
+
+
             </div>
           </div>
         </fieldset>
 
 
+
+
+
+
         {/**SECCION DE LAS PERSONAS */}
         <PersonSection formData={formData} setFormData={setFormData} selectedTemplate={selectedTemplate?true:false} hayPlaca={formData.vehicle.placa?true:false}/>
+
+
+
+
+
 
 
         {/**SECCION DE DATOS DEL VEHICULO */}
@@ -1470,6 +1595,7 @@ const MOCK_DATA = {
         {/**SECCION DE LAS FIRMAS */}
 
         <SignatureSection
+          key={signatureKey}
           signatures={selectedTemplate?.signatures}
           contractText={selectedTemplate?.base_contract_text}
           setFormData={setFormData}
