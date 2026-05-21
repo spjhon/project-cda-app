@@ -1,10 +1,10 @@
 "use client";
 
-import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext } from "react";
-import { PermissionsContext } from "./PermissionsLoaderContext";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 
 

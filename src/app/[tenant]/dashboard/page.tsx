@@ -3,7 +3,7 @@
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 // Componentes de Shadcn (Base UI)
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

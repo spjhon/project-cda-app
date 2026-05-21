@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { HeroCards } from "./HeroCards";
-import WassapLogo from "@/features/LandingPage/svgs/WassapLogo";
+import WassapLogo from "@/components/landingPage/svgs/WassapLogo";
 
 export const Hero = () => {
   return (

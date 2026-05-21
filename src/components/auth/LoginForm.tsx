@@ -16,7 +16,7 @@ import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { AuthError } from "@supabase/supabase-js";
-import { enviarEmailMagicLink } from "@/lib/server_actions/emails";
+import { enviarEmailMagicLink } from "@/lib/server-actions/emails";
 
 
 type LoginProps = React.ComponentPropsWithoutRef<"div"> & {

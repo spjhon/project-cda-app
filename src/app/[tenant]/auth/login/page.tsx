@@ -1,5 +1,5 @@
 
-import { LoginForm } from "@/features/auth/components/LoginForm";
+import { LoginForm } from "@/components/auth/LoginForm";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

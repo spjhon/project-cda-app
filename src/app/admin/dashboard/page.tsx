@@ -1,5 +1,5 @@
-import { AdminLogoutButton } from "@/features/admin/components/AdminLogoutButton";
-import { AdminSignUpForm } from "@/features/admin/components/AdminSignUpForm";
+import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
+import { AdminSignUpForm } from "@/components/admin/AdminSignUpForm";
 
 
 export default function DashboardAdminPage() {

@@ -1,6 +1,6 @@
 import Loading from "@/components/ui/loading";
-import AuthListener from "@/features/auth/components/AuthListener";
-import TanstackContext from "@/features/TanstackContext";
+import AuthListener from "@/components/auth/AuthListener";
+import TanstackContext from "@/contexts/TanstackContext";
 import { Suspense } from "react";
 
 export default function TenantLayout({

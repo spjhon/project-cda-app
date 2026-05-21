@@ -6,14 +6,14 @@ import {
 import { ReactNode, Suspense } from "react";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 
-import HeaderSidebar from "@/features/dashboard/HeaderSidebar";
-import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import HeaderSidebar from "@/components/dashboard/HeaderSidebar";
+import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import Loading from "@/components/ui/loading";
 
 
-import { fetchAllTemplates, OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { redirect } from "next/navigation";
-import ReceptionistLoaderContext from "@/features/dashboard/ReceptionistLoaderContex";
+import ReceptionistLoaderContext from "@/contexts/ReceptionistLoaderContex";
 
 interface ReceptionistDashboardLayoutProps {
   children: ReactNode;

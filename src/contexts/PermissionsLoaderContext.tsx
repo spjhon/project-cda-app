@@ -1,7 +1,7 @@
 "use client";
 
 import { UserContextData } from "@/app/[tenant]/dashboard/layout";
-import { TenantFetchResult } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { TenantFetchResult } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { createContext, ReactNode, use } from "react";
 
 interface RolesContextType {

@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   ScrollText,
 } from "lucide-react";
-import { OrderTemplateSignature } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplateSignature } from "@/lib/server-actions/fetch_orders_templates";
 import {
   Dialog,
   DialogClose,

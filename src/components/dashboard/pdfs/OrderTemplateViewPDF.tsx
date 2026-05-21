@@ -5,7 +5,7 @@ import { BlobProvider } from "@react-pdf/renderer";
 import { Eye, Loader2, FileType } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
-import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
 // Importamos el documento (Asumo que lo tienes en el mismo directorio o ajusta la ruta)
 import { OrderTemplatePDF } from "./OrderTemplatePDF";

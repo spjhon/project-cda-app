@@ -1,8 +1,8 @@
 import Loading from "@/components/ui/loading";
-import { fetchUserTenantRoles } from "@/lib/dbFunctions/fetch_get_tenant_roles";
-import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { fetchUserTenantRoles } from "@/lib/server-actions/fetch_get_tenant_roles";
+import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { redirect } from "next/navigation";
-import PermissionsLoaderContext from "@/features/dashboard/PermissionsLoaderContext";
+import PermissionsLoaderContext from "@/contexts/PermissionsLoaderContext";
 import { ReactNode, Suspense } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 

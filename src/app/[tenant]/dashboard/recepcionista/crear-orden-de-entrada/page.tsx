@@ -19,12 +19,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Switch } from "@/components/ui/switch";
-import { createOrderTemplateAction } from "@/lib/server_actions/order-template-validation";
+
+import { createOrderTemplateAction } from "@/lib/server-actions/order-template-validation";
 import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
 
-import { PermissionsContext } from "@/features/dashboard/PermissionsLoaderContext";
-import ConditionDialog from "@/features/dashboard/ConditionDialog";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import ConditionDialog from "@/components/dashboard/ConditionDialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";

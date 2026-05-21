@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchTenantData } from "@/lib/dbFunctions/fetch_tenant_domain_cached";
+import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { Resend } from 'resend';
 

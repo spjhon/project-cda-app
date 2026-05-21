@@ -1,7 +1,7 @@
-import { CurrentYear } from "@/features/LandingPage/CurrentYear";
-import { Hero } from "@/features/LandingPage/Hero";
-import { HeroVideo } from "@/features/LandingPage/HeroVideo";
-import { LogoMarquee } from "@/features/LandingPage/LogoMarquee";
+import { CurrentYear } from "@/components/landingPage/CurrentYear";
+import { Hero } from "@/components/landingPage/Hero";
+import { HeroVideo } from "@/components/landingPage/HeroVideo";
+import { LogoMarquee } from "@/components/landingPage/LogoMarquee";
 import {
   AlertTriangle,
   ArrowRight,

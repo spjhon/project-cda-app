@@ -1,7 +1,7 @@
 "use client";
 
-import CreatedTemplatesTable from "@/features/dashboard/CreatedTemplatesTable";
-import { ReceptionistContext } from "@/features/dashboard/ReceptionistLoaderContex";
+import CreatedTemplatesTable from "@/components/dashboard/CreatedTemplatesTable";
+import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 
 import { useContext } from "react";
 

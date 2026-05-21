@@ -1,5 +1,5 @@
 
-import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 
 
 

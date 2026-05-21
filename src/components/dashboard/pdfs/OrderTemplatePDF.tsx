@@ -1,7 +1,7 @@
 "use client";
 
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
-import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
 const colors = {
   primary: "#1e293b",

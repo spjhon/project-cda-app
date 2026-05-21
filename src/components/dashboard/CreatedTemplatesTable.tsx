@@ -23,7 +23,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import OrderTemplateViewPDF from "./pdfs/OrderTemplateViewPDF";
 import OrderTemplateDownloadPDF from "./pdfs/OrderTemplateDownloadPDF";
-import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";

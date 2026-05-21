@@ -1,8 +1,8 @@
 
 import { Marquee } from "@/components/ui/marquee";
-import NextjsLogo from "@/features/LandingPage/svgStack/NextjsLogo"
-import TailwindLogo from "@/features/LandingPage/svgStack/TailwindLogo"
-import ReactLogo from  "@/features/LandingPage/svgStack/ReactLogo"
+import NextjsLogo from "@/components/landingPage/svgStack/NextjsLogo"
+import TailwindLogo from "@/components/landingPage/svgStack/TailwindLogo"
+import ReactLogo from  "@/components/landingPage/svgStack/ReactLogo"
 import JavascriptLogo from "./svgStack/JavascriptLogo";
 import BemLogo from "./svgStack/BemLogo";
 import CloudfareLogo from "./svgStack/CloudfareLogo";

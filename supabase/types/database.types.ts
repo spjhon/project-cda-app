@@ -114,7 +114,7 @@ export type Database = {
         }
         Insert: {
           cliente_id: string
-          consecutivo?: number
+          consecutivo: number
           created_at?: string
           deleted_at?: string | null
           es_reinspeccion?: boolean | null
@@ -254,7 +254,6 @@ export type Database = {
           entry_order_id: string
           id: string
           signature_url: string
-          signer_name: string
           template_signature_id: string
           tenant_id: string
         }
@@ -263,7 +262,6 @@ export type Database = {
           entry_order_id: string
           id?: string
           signature_url: string
-          signer_name: string
           template_signature_id: string
           tenant_id: string
         }
@@ -272,7 +270,6 @@ export type Database = {
           entry_order_id?: string
           id?: string
           signature_url?: string
-          signer_name?: string
           template_signature_id?: string
           tenant_id?: string
         }
@@ -667,20 +664,20 @@ export type Database = {
       }
       vehicles: {
         Row: {
-          blindaje: boolean | null
-          capacidad_pasajeros: number | null
-          cilindrada: number | null
-          clase: string | null
-          color: string | null
-          combustible: string | null
+          blindaje: boolean
+          capacidad_pasajeros: number
+          cilindrada: number
+          clase: string
+          color: string
+          combustible: string
           created_at: string
           deleted_at: string | null
-          es_ensenanza: boolean | null
+          es_ensenanza: boolean
           es_extranjero: boolean
           id: string
-          linea: string | null
-          marca: string | null
-          modelo: number | null
+          linea: string
+          marca: string
+          modelo: number
           placa: string
           propietario_actual_id: string | null
           tenant_id: string
@@ -689,20 +686,20 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          blindaje?: boolean | null
-          capacidad_pasajeros?: number | null
-          cilindrada?: number | null
-          clase?: string | null
-          color?: string | null
-          combustible?: string | null
+          blindaje?: boolean
+          capacidad_pasajeros: number
+          cilindrada: number
+          clase: string
+          color: string
+          combustible: string
           created_at?: string
           deleted_at?: string | null
-          es_ensenanza?: boolean | null
+          es_ensenanza?: boolean
           es_extranjero?: boolean
           id?: string
-          linea?: string | null
-          marca?: string | null
-          modelo?: number | null
+          linea: string
+          marca: string
+          modelo: number
           placa: string
           propietario_actual_id?: string | null
           tenant_id: string
@@ -711,20 +708,20 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          blindaje?: boolean | null
-          capacidad_pasajeros?: number | null
-          cilindrada?: number | null
-          clase?: string | null
-          color?: string | null
-          combustible?: string | null
+          blindaje?: boolean
+          capacidad_pasajeros?: number
+          cilindrada?: number
+          clase?: string
+          color?: string
+          combustible?: string
           created_at?: string
           deleted_at?: string | null
-          es_ensenanza?: boolean | null
+          es_ensenanza?: boolean
           es_extranjero?: boolean
           id?: string
-          linea?: string | null
-          marca?: string | null
-          modelo?: number | null
+          linea?: string
+          marca?: string
+          modelo?: number
           placa?: string
           propietario_actual_id?: string | null
           tenant_id?: string
@@ -756,6 +753,10 @@ export type Database = {
     Functions: {
       create_full_order: { Args: { p_data: Json }; Returns: string }
       create_full_order_template: { Args: { p_data: Json }; Returns: string }
+      fetch_data_with_placa: {
+        Args: { p_placa: string; p_tenant_id: string }
+        Returns: Json
+      }
       fetch_orders_templates: {
         Args: { p_tenant_id: string }
         Returns: {

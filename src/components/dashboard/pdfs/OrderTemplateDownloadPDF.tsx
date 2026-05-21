@@ -5,7 +5,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { Download, Loader2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
-import { OrderTemplate } from "@/lib/dbFunctions/fetch_orders_templates";
+import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
 // Importamos el documento
 import { OrderTemplatePDF } from "./OrderTemplatePDF";

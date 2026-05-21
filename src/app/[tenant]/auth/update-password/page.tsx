@@ -1,5 +1,5 @@
 
-import { UpdatePasswordForm } from "../../../../features/auth/components/update-password-form";
+import { UpdatePasswordForm } from "../../../../components/auth/update-password-form";
 
 
 
