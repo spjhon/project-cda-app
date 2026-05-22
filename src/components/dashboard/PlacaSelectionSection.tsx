@@ -76,12 +76,8 @@ const SERVICE_TYPES: ServiceOption[] = [
 
 export interface PlacaSelectionSectionProps {
   selectedTemplate: OrderTemplate | undefined;
-
   formData: ZodFullFormDataType;
-
-  setFormData: Dispatch<
-    SetStateAction<ZodFullFormDataType>
-  >;
+  setFormData: Dispatch<SetStateAction<ZodFullFormDataType>>;
 }
 
 type SearchStatus =
@@ -91,147 +87,196 @@ type SearchStatus =
   | "not_found"
   | "error";
 
-export default function PlacaSelectionSection({
-  selectedTemplate,
-  setFormData,
-  formData,
-}: PlacaSelectionSectionProps) {
+export default function PlacaSelectionSection({selectedTemplate, setFormData, formData,}: PlacaSelectionSectionProps) {
+
+  
   // DIALOG STATES
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const [tempPlaca, setTempPlaca] = useState("");
-
-  const [searchStatus, setSearchStatus] =
-    useState<SearchStatus>("idle");
-
+  const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [message, setMessage] = useState("");
+  const [isNewVehicle, setIsNewVehicle] = useState<boolean | null>(null);
 
-  const [isNewVehicle, setIsNewVehicle] =
-    useState<boolean | null>(null);
+
 
   // SERVICE TYPE
-  const handleServiceTypeChange = (
-    type: ServiceType
-  ) => {
+  const handleServiceTypeChange = (type: ServiceType) => {
     setFormData((prev) => ({
       ...prev,
       service_type: type,
     }));
   };
 
+
+
+
   // REINSPECCIÓN
-  const handleReinspeccionChange = (
-    checked: boolean
-  ) => {
+  const handleReinspeccionChange = (checked: boolean) => {
     setFormData((prev) => ({
       ...prev,
       es_reinspeccion: checked,
     }));
   };
 
+
+
+
   // ABRIR DIALOG
   const handleOpenChange = (open: boolean) => {
+
     setDialogOpen(open);
 
     if (open) {
       setTempPlaca(formData.vehicle.placa || "");
-
       setSearchStatus("idle");
-
       setMessage("");
     }
+
   };
+
+
+
 
   // BUSCAR PLACA
   const handleBuscarPlaca = async () => {
-    const placaLimpia = tempPlaca
-      .trim()
-      .toUpperCase();
+    const placaLimpia = tempPlaca.trim().toUpperCase();
 
     if (!placaLimpia) return;
 
     const tenantId = formData.tenant_id;
-
     setSearchStatus("loading");
-
     setMessage("");
 
     try {
-      const { data, error, found } =
-        await fetchDataWithPlaca(
-          placaLimpia,
-          tenantId
-        );
+      const { data, error, found } = await fetchDataWithPlaca(placaLimpia, tenantId);
 
       if (error) {
         setSearchStatus("error");
-
-        setMessage(
-          typeof error === "string"
-            ? error
-            : error.message
-        );
-
+        setMessage(typeof error === "string"? error : error.message);
         return;
       }
 
       // ACTUALIZA LA PLACA SIEMPRE
       setFormData((prev) => ({
         ...prev,
-
         vehicle: {
           ...prev.vehicle,
-
           placa: placaLimpia,
         },
       }));
 
+
       if (found) {
         console.log(data);
-
         setIsNewVehicle(false);
-
         setSearchStatus("found");
+        setMessage("Vehículo encontrado correctamente en la base de datos.");
 
-        setMessage(
-          "Vehículo encontrado correctamente en la base de datos."
-        );
+
+        setFormData((prev) => {
+          // 1. Extraemos los flags para trabajar más cómodo
+          const isOwnerSame = data?.is_owner_same_as_customer ?? false;
+          
+
+          return {
+            ...prev,
+            // Seteamos el flag calculado por el RPC
+            is_owner_same_as_customer: isOwnerSame,
+
+            // 🚗 SECCIÓN: VEHÍCULO
+            vehicle: {
+              ...prev.vehicle,
+              placa: placaLimpia, // Forzamos la placa que se buscó con éxito
+              blindaje: data?.vehicle?.blindaje ?? prev.vehicle?.blindaje ?? false,
+              capacidad_pasajeros: data?.vehicle?.capacidad_pasajeros ?? prev.vehicle?.capacidad_pasajeros ?? "",
+              cilindrada: data?.vehicle?.cilindrada ?? prev.vehicle?.cilindrada ?? "",
+              clase: data?.vehicle?.clase ?? prev.vehicle?.clase ?? "",
+              color: data?.vehicle?.color ?? prev.vehicle?.color ?? "",
+              combustible: data?.vehicle?.combustible ?? prev.vehicle?.combustible ?? "",
+              es_ensenanza: data?.vehicle?.es_ensenanza ?? prev.vehicle?.es_ensenanza ?? false,
+              es_extranjero: data?.vehicle?.es_extranjero ?? prev.vehicle?.es_extranjero ?? false,
+              linea: data?.vehicle?.linea ?? prev.vehicle?.linea ?? "",
+              marca: data?.vehicle?.marca ?? prev.vehicle?.marca ?? "",
+              modelo: data?.vehicle?.modelo ?? prev.vehicle?.modelo ?? "",
+              propietario_actual_id: data?.vehicle?.propietario_actual_id ?? prev.vehicle?.propietario_actual_id ?? null,
+              tipo_servicio_vehiculo: data?.vehicle?.tipo_servicio_vehiculo ?? prev.vehicle?.tipo_servicio_vehiculo ?? "",
+              tipo_vehiculo: data?.vehicle?.tipo_vehiculo ?? prev.vehicle?.tipo_vehiculo ?? "",
+            },
+
+            // 👤 SECCIÓN: PROPIETARIO (OWNER)
+            owner_data: {
+              ...prev.owner_data,
+              id: data?.owner_data?.id ?? prev.owner_data?.id ?? null,
+              tipo_documento: data?.owner_data?.tipo_documento ?? prev.owner_data?.tipo_documento ?? "cedula_ciudadania",
+              numero_documento: data?.owner_data?.numero_documento ?? prev.owner_data?.numero_documento ?? "",
+              nombre_completo: data?.owner_data?.nombre_completo ?? prev.owner_data?.nombre_completo ?? "",
+              telefono: data?.owner_data?.telefono ?? prev.owner_data?.telefono ?? "",
+              correo: data?.owner_data?.correo ?? prev.owner_data?.correo ?? "",
+              direccion: data?.owner_data?.direccion ?? prev.owner_data?.direccion ?? "",
+            },
+
+            // 🤝 SECCIÓN NUEVA: CLIENTE HISTÓRICO (CUSTOMER)
+            customer_data: {
+              ...prev.customer_data,
+              id: data?.customer_data?.id ?? prev.customer_data?.id ?? null,
+              tipo_documento: data?.customer_data?.tipo_documento ?? prev.customer_data?.tipo_documento ?? "cedula_ciudadania",
+              numero_documento: data?.customer_data?.numero_documento ?? prev.customer_data?.numero_documento ?? "",
+              nombre_completo: data?.customer_data?.nombre_completo ?? prev.customer_data?.nombre_completo ?? "",
+              telefono: data?.customer_data?.telefono ?? prev.customer_data?.telefono ?? "",
+              correo: data?.customer_data?.correo ?? prev.customer_data?.correo ?? "",
+              direccion: data?.customer_data?.direccion ?? prev.customer_data?.direccion ?? "",
+            },
+          };
+        });
+
+
+
+
       } else {
         setIsNewVehicle(true);
-
         setSearchStatus("not_found");
-
-        setMessage(
-          "No se encontraron registros previos. Puedes continuar con el registro manual."
-        );
+        setMessage("No se encontraron registros previos. Puedes continuar con el registro manual.");
       }
+
+
     } catch (error) {
+
       console.log(error);
-
       setSearchStatus("error");
+      setMessage("Ocurrió un error al consultar la información.");
 
-      setMessage(
-        "Ocurrió un error al consultar la información."
-      );
     }
+
+
   };
+
+
+
+
 
   // ACEPTAR
   const handleAccept = () => {
+
     setDialogOpen(false);
-
     setSearchStatus("idle");
-
     setMessage("");
+
   };
+
+
+
 
   // RUNT
   const handleRuntQuery = () => {
+
     console.log(
       "Consultando RUNT para:",
       formData.vehicle.placa
     );
+
   };
+
+
 
   return (
     <fieldset
@@ -240,7 +285,7 @@ export default function PlacaSelectionSection({
           ? "opacity-100"
           : "opacity-40 pointer-events-none translate-y-4"
       }`}
-    >
+     >
       <div className="border-t pt-6">
         <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
           2. Datos del Servicio

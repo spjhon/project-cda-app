@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cache } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
+import { ClaseVehiculoType, CombustibleType, TipoDocumentoType, TipoServicioVehiculoEnumType, TipoVehiculoEnumType } from "../zod-schemas/order-schema";
 //import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 
 // --- Interfaces de Salida (Estructuradas para encajar en el formData) ---
@@ -14,21 +15,21 @@ export interface ExtractedVehicleData {
   linea: string;
   modelo: string;
   color: string;
-  tipo_vehiculo: string;
-  clase: string;
-  combustible: string;
+  tipo_vehiculo: TipoVehiculoEnumType;
+  clase: ClaseVehiculoType;
+  combustible: CombustibleType;
   cilindrada: string;
   blindaje: boolean;
   capacidad_pasajeros: string;
   es_ensenanza: boolean;
-  tipo_servicio_vehiculo: string;
+  tipo_servicio_vehiculo: TipoServicioVehiculoEnumType;
   propietario_actual_id: string | null;
   es_extranjero: boolean;
 }
 
 export interface ExtractedPersonData {
   id: string | null;
-  tipo_documento: string;
+  tipo_documento: TipoDocumentoType;
   numero_documento: string;
   nombre_completo: string;
   telefono: string;
@@ -43,9 +44,7 @@ export interface ExtensiveVehicleQueryResult {
   owner_data: ExtractedPersonData | null;
   is_owner_same_as_customer: boolean;
   // Podemos prever snapshots pasados si el CDA los requiere visualizar de inmediato
-  last_soat_vencimiento: string | null;
-  last_gas_numero: string | null;
-  last_gas_vencimiento: string | null;
+  
 }
 
 export interface VehicleFetchResult {

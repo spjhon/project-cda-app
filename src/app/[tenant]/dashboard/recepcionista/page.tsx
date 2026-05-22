@@ -62,11 +62,8 @@ export default function NewEntryOrder() {
   const [formData, setFormData] = useState<ZodFullFormDataType>({
     id: null,
     // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
-    tenant_id:
-      PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id ||
-      "",
-    funcionario_id:
-      PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
+    tenant_id: PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "",
+    funcionario_id: PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
     plantilla_id: "",
 
     // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
@@ -163,7 +160,7 @@ export default function NewEntryOrder() {
 
 
 
-
+console.log(formData)
   
 
 

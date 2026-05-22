@@ -366,5 +366,6 @@ export type ClaseVehiculoType = (typeof ClaseVehiculoEnum)[number];
 
 export type TipoDocumentoType = (typeof TipoDocumentoEnum)[number];
 
+export type TipoServicioVehiculoEnumType = (typeof TipoServicioVehiculoEnum)[number];
 
-
+export type TipoVehiculoEnumType = (typeof TipoVehiculoEnum)[number];

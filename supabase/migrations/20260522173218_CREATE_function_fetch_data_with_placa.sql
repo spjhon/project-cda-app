@@ -1,5 +1,3 @@
---OJO OJO QUE TODAVIA NO SE HA HECHO LA MIGRACION
-
 
 CREATE OR REPLACE FUNCTION fetch_data_with_placa(
     p_placa TEXT,
