@@ -13,12 +13,12 @@ export interface ExtractedVehicleData {
   placa: string;
   marca: string;
   linea: string;
-  modelo: string;
+  modelo: number;
   color: string;
   tipo_vehiculo: TipoVehiculoEnumType;
   clase: ClaseVehiculoType;
   combustible: CombustibleType;
-  cilindrada: string;
+  cilindrada: number;
   blindaje: boolean;
   capacidad_pasajeros: string;
   es_ensenanza: boolean;

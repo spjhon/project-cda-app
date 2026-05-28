@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 import { SearchPersonDialog } from "./SearchPersonDialog";
 
+
 // Opciones de identificación según tu lista
 export const ID_DOCUMENT_OPTIONS = [
   { label: "Cédula de Ciudadanía", value: "cedula_ciudadania" },
@@ -65,8 +66,8 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
 
   // Manejador para el Dueño
   const handleOwnerChange = (field: string, value: string) => {
-    const formattedValue =
-      field === "nombre_completo" ? value.toUpperCase() : value;
+    const formattedValue = field === "nombre_completo" ? value.toUpperCase() : value;
+
     setFormData((prev: ZodFullFormDataType) => ({
       ...prev,
       owner_data: { ...prev.owner_data, [field]: formattedValue },
@@ -78,16 +79,28 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
 
   // Manejador del Checkbox (Click en toda el área)
   const toggleSameOwner = () => {
-    setFormData((prev: ZodFullFormDataType) => {
-      const newState = !prev.is_owner_same_as_customer;
-      return {
-        ...prev,
-        is_owner_same_as_customer: newState,
-        owner_data: newState ? { ...prev.customer_data } : prev.owner_data,
-      };
-    });
-  };
-
+  setFormData((prev: ZodFullFormDataType) => {
+    const newState = !prev.is_owner_same_as_customer;
+    
+    return {
+      ...prev,
+      is_owner_same_as_customer: newState,
+      // Si newState es true, clona el cliente. 
+      // Si es false, vacía los campos del propietario.
+      owner_data: newState 
+        ? { ...prev.customer_data } 
+        : {
+            id: "",
+            tipo_documento: "cedula_ciudadania", // O tu valor por defecto del enum (ej: "CC")
+            numero_documento: "",
+            nombre_completo: "",
+            telefono: "",
+            correo: "",
+            direccion: "",
+          },
+    };
+  });
+};
 
 
 
@@ -169,16 +182,36 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                     currentDocumentType={formData.customer_data.tipo_documento}
                     currentDocumentNumber={formData.customer_data.numero_documento}
                     onUpdate={(data) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        customer_data: {
+                      setFormData((prev) => {
+                        // 1. Preparamos el bloque de datos actualizado (ya sea con datos encontrados o vacíos)
+                        const updatedCustomerData = {
                           ...prev.customer_data,
                           tipo_documento: data.tipo_documento,
                           numero_documento: data.numero_documento,
+                          ...(data.foundData ?? {}),
+                        };
 
-                          ...(data.foundData ?? {}), //aqui dice que si se encuentra data en el hijo despues de hacer el fetch, actualize tambien el resto de datos en el padre
-                        },
-                      }));
+                        // 2. Si el propietario es el mismo cliente, clonamos estos datos en owner_data también
+                        if (prev.is_owner_same_as_customer) {
+                          return {
+                            ...prev,
+                            customer_data: updatedCustomerData,
+                            owner_data: {
+                              ...prev.owner_data,
+                              // Mantenemos los datos sincronizados exactamente igual
+                              tipo_documento: data.tipo_documento,
+                              numero_documento: data.numero_documento,
+                              ...(data.foundData ?? {}),
+                            },
+                          };
+                        }
+
+                        // 3. Si NO son el mismo, solo actualizamos el cliente (comportamiento normal)
+                        return {
+                          ...prev,
+                          customer_data: updatedCustomerData,
+                        };
+                      });
                     }}
                   />
 
@@ -330,28 +363,16 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
                         disabled={formData.is_owner_same_as_customer}
                         currentDocumentType={formData.owner_data.tipo_documento}
                         currentDocumentNumber={formData.owner_data.numero_documento}
-
                         onUpdate={(data) => {
-
-                          handleOwnerChange(
-                            "tipo_documento",
-                            data.tipo_documento,
-                          );
-
-                          handleOwnerChange(
-                            "numero_documento",
-                            data.numero_documento,
-                          );
-
-                          if (data.foundData) {
-                            Object.entries(data.foundData).forEach(
-                              ([key, value]) => {
-                                if (value) {
-                                  handleOwnerChange(key, value);
-                                }
-                              },
-                            );
-                          }
+                          setFormData((prev) => ({
+                            ...prev,
+                            owner_data: {
+                              ...prev.owner_data,
+                              tipo_documento: data.tipo_documento,
+                              numero_documento: data.numero_documento,
+                              ...(data.foundData ?? {}), // Esto sobrescribe con "" si no lo encuentra
+                            },
+                          }));
                         }}
                       />
                     </div>

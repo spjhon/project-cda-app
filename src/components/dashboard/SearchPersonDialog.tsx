@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Search, Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/select";
 import { TipoDocumentoType } from "@/lib/zod-schemas/order-schema";
 import { ID_DOCUMENT_OPTIONS } from "./PersonSection";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 
 
@@ -60,6 +62,13 @@ type SearchState = "idle" | "loading" | "found" | "not_found";
 
 
 export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, onUpdate, disabled,}: SearchPersonDialogProps) => {
+
+  const PermissionsContextReceived = useContext(PermissionsContext);
+
+  const tenantID = PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "";
+
+
+
 
 
   //state para el dialog
@@ -103,23 +112,32 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
   const handleSubmit = async () => {
 
     try {
+
+
       setSearchState("loading");
       setMessage("");
 
-      // Simulación temporal
-      console.log({
-        tipo_documento: documentType,
-        numero_documento: documentNumber,
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Simulación encontrada / no encontrada
-      const found = Math.random() > 0.5;
-
-      if (found) {
+      
 
 
+      const supabaseBrowser = createSupabaseBrowserClient();
+
+      // 1. Realizar la consulta a Supabase
+      // NOTA: Asegúrate de tener disponible 'supabase' (el cliente instanciado) 
+      // y 'tenantId' (el ID del tenant actual en tu estado/contexto).
+      const { data: persona, error } = await supabaseBrowser
+        .from('personas')
+        .select('nombre_completo, telefono, correo, direccion')
+        .eq('tenant_id', tenantID)
+        .eq('tipo_documento', documentType)
+        .eq('numero_documento', documentNumber)
+        .is('deleted_at', null) // Filtrar si usas soft-delete
+        .maybeSingle(); // Retorna el objeto directamente o null si no existe (evita lanzar error de rango)
+
+      if (error) throw error;
+
+      // 2. Evaluar si se encontró el registro
+      if (persona) {
         setSearchState("found");
         setMessage("Persona encontrada correctamente.");
 
@@ -127,25 +145,30 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
           tipo_documento: documentType,
           numero_documento: documentNumber,
           foundData: {
-            nombre_completo: "JUAN PABLO PEREZ",
-            telefono: "3101234567",
-            correo: "juan@email.com",
-            direccion: "CALLE 10 #20-30",
+            nombre_completo: persona.nombre_completo,
+            telefono: persona.telefono || "",
+            correo: persona.correo || "",
+            direccion: persona.direccion || "",
           },
         });
-
       } else {
-
         setSearchState("not_found");
         setMessage("No se encontró información. Puedes continuar el registro manualmente.");
 
-        // IMPORTANTE:
-        // Aún actualiza el state externo con la cédula
         onUpdate({
           tipo_documento: documentType,
           numero_documento: documentNumber,
+          foundData: {
+            nombre_completo: "",
+            telefono: "",
+            correo: "",
+            direccion: "",
+          },
         });
       }
+
+
+
     } catch (error) {
       console.log(error);
 

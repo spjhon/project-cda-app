@@ -134,6 +134,7 @@ export default function VehicleDataSection({
                 <Label className="text-xs font-semibold">Línea</Label>
                 {/*#a11 ACTION */}
                 <Input
+                  required
                   placeholder="Ej: Spark GT"
                   value={formData.vehicle.linea}
                   onChange={(e) =>
@@ -151,6 +152,7 @@ export default function VehicleDataSection({
                 <Label className="text-xs font-semibold">Modelo (Año)</Label>
                 {/*#a11 ACTION */}
                 <Input
+                  required
                   type="number"
                   min={1900}
                   placeholder="Ej: 2026"
@@ -170,6 +172,7 @@ export default function VehicleDataSection({
                 <Label className="text-xs font-semibold">Color</Label>
                 {/*#a11 ACTION */}
                 <Input
+                  required
                   placeholder="Ej: Blanco Galaxia"
                   value={formData.vehicle.color}
                   onChange={(e) =>
@@ -199,6 +202,7 @@ export default function VehicleDataSection({
                 <Label className="text-xs font-semibold">Cilindrada (cc)</Label>
                 {/*#a11 ACTION */}
                 <Input
+                  required
                   type="number"
                   min={0}
                   placeholder="Ej: 1600"
@@ -220,6 +224,7 @@ export default function VehicleDataSection({
                 </Label>
                 {/*#a11 ACTION */}
                 <Input
+                  required
                   type="number"
                   min={0}
                   placeholder="Ej: 5"
@@ -229,7 +234,7 @@ export default function VehicleDataSection({
                       ...prev,
                       vehicle: {
                         ...prev.vehicle,
-                        capacidad_pasajeros: e.target.value,
+                        capacidad_pasajeros: e.target.value.toString(),
                       },
                     }))
                   }
@@ -240,6 +245,7 @@ export default function VehicleDataSection({
                 <Label className="text-xs font-semibold">Combustible</Label>
 
                 <Select
+                  required
                   items={FUEL_OPTIONS}
                   value={formData.vehicle.combustible}
                   onValueChange={(value) =>
@@ -273,6 +279,7 @@ export default function VehicleDataSection({
                 </Label>
 
                 <Select
+                  required
                   items={CLASE_OPTIONS}
                   value={formData.vehicle.clase}
                   onValueChange={(value) =>
@@ -305,6 +312,7 @@ export default function VehicleDataSection({
                 </Label>
                 {/*#a11 ACTION */}
                 <Select
+                  required
                   value={formData.vehicle.tipo_vehiculo}
                   onValueChange={(value) =>
                     setFormData((prev) => ({
@@ -345,6 +353,7 @@ export default function VehicleDataSection({
                 </Label>
 
                 <Select
+                  required
                   value={formData.vehicle.tipo_servicio_vehiculo}
                   onValueChange={(value) =>
                     setFormData((prev) => ({
