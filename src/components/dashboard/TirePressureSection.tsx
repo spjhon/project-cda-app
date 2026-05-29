@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Minus, Gauge } from "lucide-react";
+import { Plus, Minus, Gauge, Truck, Car, Bike } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TirePressureEntry, ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 
@@ -54,8 +54,144 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
 
 
 
+  // ─── Valores Predeterminados ───────────────────────────────────────
 
+  const setMotoPreset = () => {
+  setFormData((prev) => ({
+    ...prev,
+    tire_pressures: [
+      {
+        eje: 1,
+        posicion: "centro",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "centro",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+    ],
+  }));
+};
 
+const setCarroPreset = () => {
+  setFormData((prev) => ({
+    ...prev,
+    tire_pressures: [
+      {
+        eje: 1,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 1,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "repuesto",
+        presion_encontrada: "",
+        presion_ajustada: "",
+       
+        _requiere_ajuste: false,
+      },
+    ],
+  }));
+};
+
+const setCamionPreset = () => {
+  setFormData((prev) => ({
+    ...prev,
+    tire_pressures: [
+      {
+        eje: 1,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 1,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+
+      {
+        eje: 2,
+        posicion: "izquierda",
+        presion_encontrada: "",
+        presion_ajustada: "",
+       
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "izquierda_interior",
+        presion_encontrada: "",
+        presion_ajustada: "",
+       
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "derecha_interior",
+        presion_encontrada: "",
+        presion_ajustada: "",
+       
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "derecha",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "repuesto",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
+    ],
+  }));
+};
 
   // ─── Manejadores de Ejes ───────────────────────────────────────
 
@@ -73,7 +209,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
         posicion: "izquierda",
         presion_encontrada: "",
         presion_ajustada: "",
-        es_repuesto: false,
+       
         _requiere_ajuste: false,
       },
       {
@@ -81,7 +217,7 @@ export default function TirePressureSection({ tirePressures, setFormData }: Tire
         posicion: "derecha",
         presion_encontrada: "",
         presion_ajustada: "",
-        es_repuesto: false,
+        
         _requiere_ajuste: false,
       },
     ],
@@ -180,6 +316,56 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
 
   return (
     <div className="space-y-6">
+
+
+
+<div className="space-y-3">
+  <span className="text-xs font-bold uppercase text-slate-400 tracking-widest">
+    Predeterminados
+  </span>
+
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <Button
+      type="button"
+      variant="outline"
+      onClick={setMotoPreset}
+      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all"
+    >
+      <Bike className="h-7 w-7 text-blue-600" />
+      <span className="text-sm font-bold">Moto</span>
+      <span className="text-[11px] text-slate-400 font-medium">
+        2 llantas
+      </span>
+    </Button>
+
+    <Button
+      type="button"
+      variant="outline"
+      onClick={setCarroPreset}
+      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+    >
+      <Car className="h-7 w-7 text-emerald-600" />
+      <span className="text-sm font-bold">Carro</span>
+      <span className="text-[11px] text-slate-400 font-medium">
+        2 ejes + repuesto
+      </span>
+    </Button>
+
+    <Button
+      type="button"
+      variant="outline"
+      onClick={setCamionPreset}
+      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all"
+    >
+      <Truck className="h-7 w-7 text-amber-600" />
+      <span className="text-sm font-bold">Camión</span>
+      <span className="text-[11px] text-slate-400 font-medium">
+        Doble llanta + repuesto
+      </span>
+    </Button>
+  </div>
+</div>
+
 
 
       {/* Header General */}
@@ -341,6 +527,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                             <div className="relative">
                               {/*#a11 ACTION */}
                               <Input
+                                required
                                 type="text"
                                 inputMode="decimal"
                                 value={llanta.presion_encontrada}
@@ -369,6 +556,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                           <TableCell className="py-2 px-2">
                             <div className="relative">
                               <Input
+                                required
                                 type="text"
                                 inputMode="decimal"
                                 value={llanta.presion_ajustada}

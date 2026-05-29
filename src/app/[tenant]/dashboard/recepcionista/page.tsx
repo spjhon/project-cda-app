@@ -104,30 +104,18 @@ export default function NewEntryOrder() {
     tire_pressures: [
       {
         eje: 1,
-        posicion: "izquierda",
+        posicion: "centro",
         presion_encontrada: "",
         presion_ajustada: "",
-        _requiere_ajuste: false,
-      },
-      {
-        eje: 1,
-        posicion: "derecha",
-        presion_encontrada: "",
-        presion_ajustada: "",
+        
         _requiere_ajuste: false,
       },
       {
         eje: 2,
-        posicion: "izquierda",
+        posicion: "centro",
         presion_encontrada: "",
         presion_ajustada: "",
-        _requiere_ajuste: false,
-      },
-      {
-        eje: 2,
-        posicion: "derecha",
-        presion_encontrada: "",
-        presion_ajustada: "",
+        
         _requiere_ajuste: false,
       },
     ],
@@ -160,96 +148,9 @@ export default function NewEntryOrder() {
 
 
 
-console.log(formData)
-  
-
-
-
-
-
-  const fillMockData = () => {
-    setFormData((prev) => ({
-      ...prev,
-      ...(MOCK_DATA as ZodFullFormDataType), // Esparcimos los datos encima del estado previo
-    }));
-
-    handleTemplateSelect("48b5a341-f611-4532-88c3-db2d7149e402", true);
-    console.log("Formulario precargado con éxito");
-  };
-
-  const MOCK_DATA = {
-    id: "065f6fec-f4cb-4de0-af89-c831b8940131",
-    tenant_id: "aaaaaaaa-0000-0000-0000-000000000001",
-    funcionario_id: "6800852e-2312-454c-aed8-6cfdc0feca47",
-    plantilla_id: "",
-    kilometraje: "25336",
-    es_reinspeccion: false,
-    service_type: "RTM",
-    estado_orden: "abierta",
-    observaciones: "Obserrvaciones en la seccion de oervaciones",
-    soat_vencimiento_snapshot: "2026-03-12",
-    gas_numero_snapshot: "123456",
-    gas_vencimiento_snapshot: "2026-05-13",
-    vehicle: {
-      id: null,
-      placa: "HDC05",
-      marca: "SUZUKI",
-      linea: "GN-125",
-      modelo: "2026",
-      color: "ROJO",
-      tipo_vehiculo: "motocicleta_4t",
-      clase: "motocicleta",
-      combustible: "gasolina",
-      cilindrada: "125",
-      blindaje: false,
-      capacidad_pasajeros: "2",
-      es_ensenanza: true,
-      tipo_servicio_vehiculo: "particular",
-      propietario_actual_id: null,
-      es_extranjero: false,
-    },
-    tire_pressures: [
-      {
-        eje: 1,
-        posicion: "centro",
-        presion_encontrada: "30",
-        presion_ajustada: "",
-        _requiere_ajuste: false,
-      },
-      {
-        eje: 2,
-        posicion: "centro",
-        presion_encontrada: "36",
-        presion_ajustada: "30",
-        _requiere_ajuste: true,
-      },
-    ],
-    customer_data: {
-      id: null,
-      tipo_documento: "cedula_ciudadania",
-      numero_documento: "1053782464",
-      nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
-      telefono: "3215224586",
-      correo: "SPJHON@GMAIL.COM",
-      direccion: "Carrera 25 #17-66",
-    },
-    owner_data: {
-      id: null,
-      tipo_documento: "cedula_ciudadania",
-      numero_documento: "1053782464",
-      nombre_completo: "JUAN CAMILO PATIÑO ARISTIZABAL",
-      telefono: "3215224586",
-      correo: "SPJHON@GMAIL.COM",
-      direccion: "Carrera 25 #17-66",
-    },
-    is_owner_same_as_customer: true,
-  };
 
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
   const selectedTemplate = activeTemplates.find( (t) => t.id === formData.plantilla_id);
-
-
-
 
 
 
@@ -365,33 +266,21 @@ console.log(formData)
           // Array aplanado para facilitar el envío a la tabla entry_order_tire_pressures
           tire_pressures: [
             {
-              eje: 1,
-              posicion: "izquierda",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
-            {
-              eje: 1,
-              posicion: "derecha",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
-            {
-              eje: 2,
-              posicion: "izquierda",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
-            {
-              eje: 2,
-              posicion: "derecha",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
+        eje: 1,
+        posicion: "centro",
+        presion_encontrada: "",
+        presion_ajustada: "",
+       
+        _requiere_ajuste: false,
+      },
+      {
+        eje: 2,
+        posicion: "centro",
+        presion_encontrada: "",
+        presion_ajustada: "",
+        
+        _requiere_ajuste: false,
+      },
           ],
 
           // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
@@ -444,15 +333,7 @@ console.log(formData)
     <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8">
 
 
-      <div className="flex justify-end mb-4">
-        <button
-          type="button"
-          onClick={fillMockData}
-          className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded shadow-lg transition-all text-xs"
-        >
-          ⚡ CARGAR PRUEBA (HDC05)
-        </button>
-      </div>
+      
 
 
 

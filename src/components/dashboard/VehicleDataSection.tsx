@@ -93,6 +93,15 @@ export default function VehicleDataSection({
   formData,
   setFormData,
 }: VehicleDataSectionProps) {
+
+
+
+
+const requiereGas =
+  formData.vehicle.combustible === "gas_natural_vehicular" ||
+  formData.vehicle.combustible === "gas_gasolina";
+
+
   return (
     <fieldset
       className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
@@ -407,6 +416,7 @@ export default function VehicleDataSection({
                   </Label>
                   {/*#a11 ACTION */}
                   <Input
+                    required
                     type="date"
                     className="border-blue-100 focus:ring-blue-500"
                     value={formData.soat_vencimiento_snapshot || ""}
@@ -419,12 +429,14 @@ export default function VehicleDataSection({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className={`space-y-2 ${requiereGas ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
                   <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
                     <Globe className="h-3.5 w-3.5" /> Número Certificado Gas
                   </Label>
-                  {/*#a11 ACTION */}
+
                   <Input
+                    required={requiereGas}
+                    disabled={!requiereGas}
                     placeholder="N° de certificado"
                     className="border-emerald-100 focus:ring-emerald-500"
                     value={formData.gas_numero_snapshot}
@@ -437,11 +449,17 @@ export default function VehicleDataSection({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div 
+                  className={`space-y-2 transition-all duration-300 ${
+                    formData.vehicle.combustible === "gas_natural_vehicular" || 
+                    formData.vehicle.combustible === "gas_gasolina" 
+                      ? "opacity-100" 
+                      : "opacity-40 pointer-events-none"
+                  }`}
+                 >
                   <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
                     <CalendarDays className="h-3.5 w-3.5" /> Vencimiento Gas
                   </Label>
-                  {/*#a11 ACTION */}
                   <Input
                     type="date"
                     className="border-emerald-100 focus:ring-emerald-500"
@@ -454,6 +472,9 @@ export default function VehicleDataSection({
                     }
                   />
                 </div>
+
+
+
               </div>
 
               <div className="space-y-2">
