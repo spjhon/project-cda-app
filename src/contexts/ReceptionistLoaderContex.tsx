@@ -6,6 +6,7 @@ import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanst
 import { createContext, ReactNode, use, useContext } from "react";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
+import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 
 
 
@@ -32,6 +33,16 @@ export interface ReceptionistContextType {
       query: TemplateQuery;
       mutation: TemplateMutation; // Corregido el typo de muetation
     };
+    entryOrdersTableData: {
+  query: {
+    data: EntryOrderListItem[] | null;
+    isFetching: boolean;
+    isError: boolean;
+    error: Error | null;
+    refetch: () => void;
+    isSuccess: boolean;
+  };
+};
   };
 }
 
@@ -45,28 +56,38 @@ export const ReceptionistContext = createContext<ReceptionistContextType | null>
 interface ReceptionistLoaderContext {
   children: ReactNode;
   templateTabelDataPromise: Promise<OrderTemplate[] | null>;
+  entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
+ 
 }
 
 
 
 
 
-export default function ReceptionistLoaderContext({templateTabelDataPromise, children}: ReceptionistLoaderContext) {
+export default function ReceptionistLoaderContext({templateTabelDataPromise, entryOrdersTableDataPromise, children}: ReceptionistLoaderContext) {
 
  const queryClient = useQueryClient();
  
   const permissionscontextRecived = useContext(PermissionsContext);
   const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
   const templateTableData = use(templateTabelDataPromise);
+  const entryOrdersTableData = use(entryOrdersTableDataPromise)
 
 const pathname = usePathname();
 
 
  const supabaseBrowser = createSupabaseBrowserClient();
 
+
+
+
+ //--------------------------------------------
+ //TANSTAK QUERY PARA LOS TEMPLATES
+ //--------------------------------------------
+
   //Llamado nuevaamente a los datos que llegaron inicialmente por medio de la promesa
   const { data, isFetching, isError, error, refetch, isSuccess } = useQuery({
-    queryKey: ["templates", "list", pathname],
+    queryKey: ["templates", "list", pathname], //TODO, HAY QUE CUADRAR ESTE PATH NAME PARA QUE SOLO SE ACTUALIZE CUANDO SE ENTRE EN EL PAGE.TSX CORRECTO
     queryFn: async () => {
       console.log("se llamo la funcion de query")
       // LLAMADA DIRECTA A SUPABASE
@@ -89,14 +110,8 @@ const pathname = usePathname();
   });
 
 
-
-
-
-
-
-
  //useMutation utilizado para cambiar el state de is_active que esta en un switch en el componente hijo
-  const { mutate, isPending: isUpdating } = useMutation({
+  const { mutate, isPending: isUpdating, } = useMutation({
     mutationFn: async ({id, is_active}: {id: string;is_active: boolean}) => {
 
       const { error } = await supabaseBrowser
@@ -125,6 +140,46 @@ const pathname = usePathname();
 
 
 
+//--------------------------------------------
+ //TANSTAK QUERY PARA LAS ORDENES DE ENTRADA
+ //--------------------------------------------
+
+
+
+const {
+  data: entryOrdersData,
+  isFetching: isFetchingEntryOrders,
+  isError: isEntryOrdersError,
+  error: entryOrdersError,
+  refetch: refetchEntryOrders,
+  isSuccess: isEntryOrdersSuccess,
+} = useQuery({
+  queryKey: ["entry-orders", "list", pathname],
+
+  queryFn: async () => {
+    console.log("se llamó la query de entry orders");
+
+    const { data, error } = await supabaseBrowser.rpc(
+      "fetch_entry_orders_list",
+      {
+        p_tenant_id: tenantId ?? "",
+      }
+    );
+
+    if (error) throw new Error(error.message);
+
+    return (data as EntryOrderListItem[]) || [];
+  },
+
+  initialData: entryOrdersTableData,
+
+  staleTime: 10000,
+});
+
+
+
+
+
 
   const ReceptionistContextValue = {
     templateTableData: {
@@ -142,6 +197,16 @@ const pathname = usePathname();
       }
       
     },
+    entryOrdersTableData: {
+      query: {
+        data: entryOrdersData,
+        isFetching: isFetchingEntryOrders,
+        isError: isEntryOrdersError,
+        error: entryOrdersError,
+        refetch: refetchEntryOrders,
+        isSuccess: isEntryOrdersSuccess,
+      }
+    }
   };
 
 

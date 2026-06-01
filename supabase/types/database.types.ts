@@ -757,6 +757,32 @@ export type Database = {
         Args: { p_placa: string; p_tenant_id: string }
         Returns: Json
       }
+      fetch_entry_orders_list: {
+        Args: {
+          p_cliente_documento?: string
+          p_estado?: Database["public"]["Enums"]["order_status_enum"]
+          p_fecha_desde?: string
+          p_fecha_hasta?: string
+          p_limit?: number
+          p_offset?: number
+          p_placa?: string
+          p_propietario_documento?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          cliente_documento: string
+          cliente_nombre: string
+          estado_orden: Database["public"]["Enums"]["order_status_enum"]
+          fecha: string
+          id: string
+          linea: string
+          marca: string
+          placa: string
+          propietario_documento: string
+          propietario_nombre: string
+          total_count: number
+        }[]
+      }
       fetch_orders_templates: {
         Args: { p_tenant_id: string }
         Returns: {

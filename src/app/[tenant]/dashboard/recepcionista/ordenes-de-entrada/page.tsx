@@ -1,8 +1,11 @@
 
 
+import CreatedOrdersTable from "@/components/dashboard/createdOrdersTable";
+
 
 export default function EntryOrdersPage() {
+
   return (
-    <div>EntryOrdersPage</div>
+    <CreatedOrdersTable></CreatedOrdersTable>
   )
 }

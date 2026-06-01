@@ -14,6 +14,7 @@ import Loading from "@/components/ui/loading";
 import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { redirect } from "next/navigation";
 import ReceptionistLoaderContext from "@/contexts/ReceptionistLoaderContex";
+import { EntryOrderListItem, fetchEntryOrders } from "@/lib/server-actions/fetch_entry_orders_list";
 
 interface ReceptionistDashboardLayoutProps {
   children: ReactNode;
@@ -23,10 +24,7 @@ interface ReceptionistDashboardLayoutProps {
 
 
 
-export default function ReceptionistDashboardLayout({
-  children,
-  params,
-}: ReceptionistDashboardLayoutProps) {
+export default function ReceptionistDashboardLayout({children, params}: ReceptionistDashboardLayoutProps) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
 
@@ -59,9 +57,64 @@ export default function ReceptionistDashboardLayout({
 
 
 
+
+
+
+const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
+  (async () => {
+
+    const { tenant } = await params;
+
+    // ==========================================
+    // 1. Resolver tenant slug -> tenant real
+    // ==========================================
+    const tenantResult = await fetchTenantData(tenant);
+
+    if (!tenantResult?.data?.id) {
+      redirect( `/error?type=Error, no existe tenant en entryOrdersTableDataPromise`);
+    }
+
+    if (tenantResult.error !== null) {
+      redirect( `/error?type=Error al extraer tenant: ${tenantResult.error}`);
+    }
+
+    // ==========================================
+    // 2. Calcular rango "hoy"
+    // ==========================================
+    const today = new Date().toISOString().split("T")[0];
+
+    // ==========================================
+    // 3. Traer órdenes iniciales
+    // ==========================================
+    const ordersResult = await fetchEntryOrders({
+      tenantId: tenantResult.data.id,
+
+      limit: 20,
+      offset: 0,
+
+      fechaDesde: today,
+      fechaHasta: today,
+    });
+
+    if (ordersResult.error !== null) {
+      redirect( `/error?type=Error al extraer órdenes: ${ordersResult.error}`);
+    }
+
+    return ordersResult.data;
+  })();
+
+
+
+
+
+
+
+  
+
+
   return (
     <Suspense fallback={<Loading />}>
-      <ReceptionistLoaderContext  templateTabelDataPromise={templateTabelDataPromise}>
+      <ReceptionistLoaderContext  templateTabelDataPromise={templateTabelDataPromise} entryOrdersTableDataPromise={entryOrdersTableDataPromise}>
         <SidebarProvider>
           
 
