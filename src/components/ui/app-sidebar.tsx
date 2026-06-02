@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, TicketPlus, LucideIcon } from "lucide-react";
+import { LucideIcon, PlusCircle, FileStack, FilePenLine, ClipboardList, UserCog,  } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -19,15 +19,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
+import { useContext } from "react";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import { Separator } from "./separator";
 
-// Estructura de datos para el usuario y navegación
-const DATA = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avataricon.jpg",
-  },
-};
+
 
 interface NavItem {
   title: string;
@@ -39,31 +35,48 @@ interface NavItem {
 const NAV_DATA: NavItem[] = [
   {
     title: "Nueva Orden de Entrada",
-    description: "Crear Una Nueva Orden de Entrada",
+    description: "Crear una nueva orden de entrada",
     href: "/dashboard/recepcionista",
-    icon: LayoutDashboard,
+    icon: PlusCircle, // ✨ Limpio, directo, invita a la acción
   },
   {
     title: "Órdenes de Entrada",
-    description: "Listado de Ordenes de Entrada",
+    description: "Listado de órdenes de entrada",
     href: "/dashboard/recepcionista/ordenes-de-entrada",
-    icon: TicketPlus,
+    icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
   },
   {
-    title: "Nueva Orden de Entrada",
-    description: "Creacion y edicion de ordenes de entrada",
+    title: "Nueva Orden de Entrada", // Ojo: podrías renombrarlo a "Editor de Órdenes" para diferenciarlo de la primera
+    description: "Creación y edición de órdenes de entrada",
     href: "/dashboard/recepcionista/crear-orden-de-entrada",
-    icon: TicketPlus,
+    icon: FilePenLine, // ✨ El lápiz sobre el documento grita "creación / edición"
   },
   {
     title: "Plantillas Creadas",
     description: "Listado de plantillas creadas",
     href: "/dashboard/recepcionista/plantillas-creadas",
-    icon: TicketPlus,
+    icon: ClipboardList, // ✨ Representa fielmente los formatos de inspección ISO
+  },
+  {
+    title: "Mi Perfil", // 🔥 NUEVO MÓDULO
+    description: "Gestionar tu cuenta, firma y credenciales",
+    href: "/dashboard/recepcionista/perfil",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
   },
 ];
 
 export function AppSidebar() {
+
+
+const contextRecived = useContext(PermissionsContext);
+
+
+  const tenantData = contextRecived?.PermissionsContextValue.tenantObject
+  const user = contextRecived?.PermissionsContextValue.user;
+
+
+
+
   const pathname = usePathname();
 
   // Función para verificar si la ruta está activa
@@ -71,17 +84,69 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="inset">
-      <SidebarHeader>
-        <div className="flex flex-row gap-3">
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src={DATA.user.avatar} alt={DATA.user.name} />
-            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-          </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">{DATA.user.name}</span>
-            <span className="truncate text-xs">{DATA.user.email}</span>
-          </div>
-        </div>
+      <SidebarHeader className="flex flex-col gap-2.5 px-4 py-3 border-b border-sidebar-border/50">
+        {/* Funciones helper internas para las iniciales */}
+        {(() => {
+          const getTenantInitials = (name?: string) => {
+            if (!name) return "CDA";
+            return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+          };
+
+          const getUserInitials = (name?: string) => {
+            if (!name) return "U";
+            return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+          };
+
+          return (
+            <>
+              {/* BLOQUE 1: DATOS DEL TENANT (CDA / ORGANIZACIÓN) */}
+              <div className="flex items-center gap-3 group/tenant">
+                <Avatar className="h-9 w-9 rounded-lg border border-border/60 shadow-xs bg-background transition-transform duration-200 group-hover/tenant:scale-102">
+                  <AvatarImage 
+                    src={tenantData?.logo_url || undefined} 
+                    alt={tenantData?.name || "Organización"} 
+                    className="object-contain p-1"
+                  />
+                  <AvatarFallback className="rounded-lg bg-primary/5 text-primary text-xs font-bold">
+                    {getTenantInitials(tenantData?.name)}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div className="grid flex-1 text-left leading-tight">
+                  <span className="truncate font-semibold text-sm text-foreground tracking-tight">
+                    {tenantData?.name || "Cargando CDA..."}
+                  </span>
+                  <span className="truncate text-[10px] text-muted-foreground/90 font-normal tracking-wideACL">
+                    {tenantData?.domain || "cda-sistema.com"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Separador minimalista estilo Shadcn */}
+              <Separator className="bg-sidebar-border/60 my-0.5" />
+
+              {/* BLOQUE 2: DATOS DEL USUARIO LOGUEADO */}
+              <div className="flex items-center gap-3 px-0.5 opacity-85 hover:opacity-100 transition-opacity duration-200">
+                <Avatar className="h-7 w-7 rounded-full border border-sidebar-border bg-sidebar-accent">
+                  <AvatarFallback className="rounded-full bg-muted text-[10px] font-medium text-muted-foreground">
+                    {getUserInitials(user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div className="grid flex-1 text-left leading-none space-y-0.5">
+                  <span className="truncate text-xs font-medium text-sidebar-foreground">
+                    {user?.name || "Usuario Activo"}
+                  </span>
+                  {user?.email && (
+                    <span className="truncate text-[10px] text-muted-foreground font-normal">
+                      {user.email}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </SidebarHeader>
 
       <SidebarContent>
@@ -97,38 +162,41 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
-                      render={<div className="w-full" />}
-                      className="h-20"
+                      // 🔥 Fusiona el botón directamente con el Link
                       isActive={active}
+                      className={`group relative h-20 w-full justify-start gap-4 rounded-xl px-4 py-3 transition-all duration-300 ease-out
+                        ${
+                          active
+                            ? "bg-primary/[0.04] font-medium text-primary shadow-xs before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1.5 before:rounded-r-full before:bg-primary"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        }`}
                     >
-                      <Link
-                        prefetch={true}
-                        href={item.href}
-                        className={`group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 
-                          ${
-                            active
-                              ? "border-primary/40 bg-sidebar-accent shadow-sm"
-                              : "border-transparent hover:border-border hover:bg-sidebar-accent"
-                          }`}
-                      >
+                      <Link prefetch={true} href={item.href} className="flex w-full items-center gap-4">
+                        {/* Contenedor del Icono - Estilizado pero espacioso */}
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors 
-                          ${
-                            active
-                              ? "border-primary/40 bg-primary/10"
-                              : "bg-background shadow-xs group-hover:border-primary/40 group-hover:bg-primary/5"
-                          }`}
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ease-out
+                            ${
+                              active
+                                ? "border-primary/20 bg-primary/10 text-primary scale-102"
+                                : "border-transparent bg-muted/40 text-muted-foreground group-hover:bg-sidebar-accent-foreground/5 group-hover:text-sidebar-accent-foreground group-hover:scale-105"
+                            }`}
                         >
-                          <Icon
-                            className={`size-4.5 transition-colors 
-                            ${active ? "text-primary" : "text-muted-foreground group-hover:text-primary"}`}
-                          />
+                          <Icon className="size-5 transition-transform duration-300 ease-out group-hover:rotate-1" />
                         </div>
-                        <div className="flex flex-col text-left">
-                          <span className="leading-none">{item.title}</span>
-                          <span className="text-[10px] text-muted-foreground font-normal">
-                            {item.description}
+
+                        {/* Bloque de Textos con el espaciado original */}
+                        <div className="flex flex-col text-left space-y-0.5">
+                          <span className="text-sm font-semibold tracking-tight leading-none">
+                            {item.title}
                           </span>
+                          {item.description && (
+                            <span 
+                              className={`text-[11px] font-normal tracking-wide leading-relaxed transition-colors duration-300
+                                ${active ? "text-primary/70" : "text-muted-foreground/80 group-hover:text-sidebar-accent-foreground/70"}`}
+                            >
+                              {item.description}
+                            </span>
+                          )}
                         </div>
                       </Link>
                     </SidebarMenuButton>

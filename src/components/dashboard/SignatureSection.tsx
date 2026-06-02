@@ -116,6 +116,7 @@ export default function SignatureSection({
     //Invierte el valor. Si era undefined o false (no marcado), lo vuelve true. Si ya era true, lo vuelve false.
     setAcceptedDeclarations((prev) => ({ ...prev, [key]: !prev[key] }));
     canvasRefs.current[sigId]?.clear();
+    clearAll(sigId);
   };
 
   return (
@@ -297,6 +298,7 @@ export default function SignatureSection({
                               `}
                             >
                               <Checkbox
+                                
                                 checked={isChecked}
                                 onCheckedChange={() =>
                                   toggleLocalCheck(signature.id, dec.id)

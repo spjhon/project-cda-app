@@ -247,6 +247,7 @@ export const ConditionResultEntrySchema = z.object({
   template_condition_id: z.uuid(),
 
   value: z.enum(ConditionResponseEnum),
+  is_especial: z.boolean()
 });
 
 /* =========================================================

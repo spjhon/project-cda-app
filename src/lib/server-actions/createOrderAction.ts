@@ -15,19 +15,6 @@ export async function createOrderAction(formData: ZodFullFormDataType) {
 
 
 
-// 1. Verificamos si al menos uno de los resultados tiene el valor "no_cumple"
-const tieneCondicionesNoCumplidas = formData.condition_results.some(
-  (result) => result.value === "no_cumple"
-);
-
-// 2. Si encuentra alguna, disparamos el error de inmediato
-if (tieneCondicionesNoCumplidas) {
-  return {
-    data: null,
-    error: "Error: No se puede enviar la orden de entrada ya que existen condiciones que no se cumplen en la inspección."
-  };
-}
-
 
 
 

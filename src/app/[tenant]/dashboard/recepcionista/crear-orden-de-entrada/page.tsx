@@ -110,20 +110,20 @@ export default function NewOrderTemplateForm() {
 
   
 
-  // Llamamos a la Server Action pasándole nuestro estado
-  const result = await createOrderTemplateAction(formData);
+    // Llamamos a la Server Action pasándole nuestro estado
+    const result = await createOrderTemplateAction(formData);
 
-  if (result.error) {
-    console.log("❌ Falló la validación:", result.details);
-    // TypeScript ahora sabe que result.details es un array de ZodIssue
-    
-    
-    alert("Error, reviza que el codigo con esta version, no se encuentren ya registrados")
-  } else {
-    queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
-    console.log("✅ ¡Validación exitosa!:", result.message);
-    alert("Todo bien, los datos son válidos.");
-  }
+    if (result.error) {
+      console.log("❌ Falló la validación:", result.details);
+      // TypeScript ahora sabe que result.details es un array de ZodIssue
+      
+      
+      alert("Error, reviza que el codigo con esta version, no se encuentren ya registrados")
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
+      console.log("✅ ¡Validación exitosa!:", result.message);
+      alert("Todo bien, los datos son válidos.");
+    }
 
     console.log("Datos capturados.");
   };

@@ -166,6 +166,7 @@ export default function NewEntryOrder() {
           ? template.conditions.map((cond) => ({
               template_condition_id: cond.id,
               value: cond.default_value,
+              is_especial: cond.is_special
             }))
           : [];
 
@@ -201,22 +202,54 @@ export default function NewEntryOrder() {
 
 
 
-  //manejador del boton submit del final
+ 
+ // manejador del boton submit del final
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
 
     setIsSubmitting(true);
     setServerError(null);
 
+
+
     if (formData.vehicle.placa === "") {
-      alert("No hay placa selecionada");
+      alert("No hay placa seleccionada");
       setIsSubmitting(false);
       return;
     }
 
+    // 1. Verificamos si al menos uno de los resultados tiene el valor "no_cumple"
+const tieneCondicionesNoCumplidas = formData.condition_results.some(
+  (result) => result.value === "no_cumple"
+);
+
+// 2. Si encuentra alguna, disparamos el error de inmediato
+if (tieneCondicionesNoCumplidas) {
+  setServerError("Error: No se puede enviar la orden de entrada ya que existen condiciones que no se cumplen en la inspección.")
+  setShowErrorDialog(true);
+  setIsSubmitting(false);
+  return
+}
+
+    
+
     try {
-      // Llamas a la Server Action directamente pasándole el objeto
-      const { data, error } = await createOrderAction(formData);
+      // 🔥 FILTRADO TÉCNICO: Creamos un payload limpio para la Server Action
+      // Excluimos todo excepto las condiciones especiales que SÍ cumplen.
+      const filteredConditionResults = formData.condition_results.filter(
+        (condition) => condition.is_especial === true && condition.value === "cumple"
+      );
+
+      // Reensamblamos el objeto para enviarlo purificado
+      const payloadToSubmit = {
+        ...formData,
+        condition_results: filteredConditionResults,
+      };
+
+      // Enviamos el payload filtrado a la Server Action
+      const { data, error } = await createOrderAction(payloadToSubmit);
 
       if (error || !data) {
         setServerError(error);
@@ -232,10 +265,9 @@ export default function NewEntryOrder() {
           // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
 
           // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
-          // Estos datos cambian en cada inspección y deben quedar congelados en entry_orders
           kilometraje: "",
           es_reinspeccion: false,
-          service_type: "RTM", // Default según tu enum
+          service_type: "RTM", 
           estado_orden: "abierta",
           observaciones: "",
           soat_vencimiento_snapshot: "",
@@ -244,50 +276,45 @@ export default function NewEntryOrder() {
           texto_contractual_snapshot: "",
 
           vehicle: {
-            id: null, // UUID si el vehículo existe en DB, null si es nuevo
+            id: null, 
             placa: "",
             marca: "",
             linea: "",
-            modelo: "", // integer en tu DB
+            modelo: "", 
             color: "",
             tipo_vehiculo: "",
             clase: "",
             combustible: "",
-            cilindrada: "", // integer en tu DB
+            cilindrada: "", 
             blindaje: false,
-            capacidad_pasajeros: "", // integer en tu DB
+            capacidad_pasajeros: "", 
             es_ensenanza: false,
-            tipo_servicio_vehiculo: "", // Enum: particular, publico, etc.
-            propietario_actual_id: null, // Referencia a la tabla personas
+            tipo_servicio_vehiculo: "", 
+            propietario_actual_id: null, 
             es_extranjero: false,
           },
 
           // --- REGISTRO DE PRESIONES DE LLANTAS (Detalle de la Orden) ---
-          // Array aplanado para facilitar el envío a la tabla entry_order_tire_pressures
           tire_pressures: [
             {
-        eje: 1,
-        posicion: "centro",
-        presion_encontrada: "",
-        presion_ajustada: "",
-       
-        _requiere_ajuste: false,
-      },
-      {
-        eje: 2,
-        posicion: "centro",
-        presion_encontrada: "",
-        presion_ajustada: "",
-        
-        _requiere_ajuste: false,
-      },
+              eje: 1,
+              posicion: "centro",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
+            {
+              eje: 2,
+              posicion: "centro",
+              presion_encontrada: "",
+              presion_ajustada: "",
+              _requiere_ajuste: false,
+            },
           ],
 
           // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
-          // Este array se llenará dinámicamente cuando el usuario cargue la plantilla
           condition_results: [],
-          signatures: [], // <-- Nueva propiedad
-          // Dentro de tu useState inicial:
+          signatures: [], 
           customer_data: {
             id: null,
             tipo_documento: "cedula_ciudadania",
@@ -306,8 +333,9 @@ export default function NewEntryOrder() {
             correo: "",
             direccion: "",
           },
-          is_owner_same_as_customer: false, // Switch maestro
+          is_owner_same_as_customer: false, 
         }));
+        
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);
         handleTemplateSelect(formData.plantilla_id, true);
@@ -318,6 +346,7 @@ export default function NewEntryOrder() {
       setIsSubmitting(false);
     }
   };
+
 
 
 

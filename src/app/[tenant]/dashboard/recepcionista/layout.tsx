@@ -78,10 +78,7 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
       redirect( `/error?type=Error al extraer tenant: ${tenantResult.error}`);
     }
 
-    // ==========================================
-    // 2. Calcular rango "hoy"
-    // ==========================================
-    const today = new Date().toISOString().split("T")[0];
+    
 
     // ==========================================
     // 3. Traer órdenes iniciales
@@ -92,8 +89,7 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
       limit: 20,
       offset: 0,
 
-      fechaDesde: today,
-      fechaHasta: today,
+   
     });
 
     if (ordersResult.error !== null) {

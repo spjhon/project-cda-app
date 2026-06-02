@@ -95,8 +95,10 @@ export const fetchEntryOrders = cache(
 
       const supabase = await createSupabaseServerClient();
 
-      const { data, error } = await supabase.rpc(
-        "fetch_entry_orders_list",
+
+    
+
+      const { data, error } = await supabase.rpc("fetch_entry_orders_list",
         {
           p_tenant_id: tenantId,
           p_limit: limit,
@@ -110,6 +112,8 @@ export const fetchEntryOrders = cache(
         }
       );
 
+     
+
       if (error) {
         console.error(`❌ RPC Error (fetch_entry_orders_list):`, error.message);
 
@@ -118,6 +122,8 @@ export const fetchEntryOrders = cache(
           error: error.message,
         };
       }
+
+      
 
       return {
         data: (data as EntryOrderListItem[]) || [],

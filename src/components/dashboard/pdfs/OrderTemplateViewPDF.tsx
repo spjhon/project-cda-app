@@ -55,7 +55,7 @@ function OrderTemplateViewPDF({ data }: OrderTemplateViewPDFProps) {
               className="h-8 gap-2 text-slate-400 px-2"
             >
               <Loader2 className="h-3 w-3 animate-spin" />
-              <span className="text-xs font-medium">Cocinando...</span>
+              <span className="text-xs font-medium">Creando...</span>
             </Button>
           );
         }

@@ -757,6 +757,51 @@ export type Database = {
         Args: { p_placa: string; p_tenant_id: string }
         Returns: Json
       }
+      fetch_entry_order_by_id: {
+        Args: { p_order_id: string; p_tenant_id?: string }
+        Returns: {
+          cliente_id: string
+          consecutivo: number
+          created_at: string
+          es_reinspeccion: boolean
+          estado_orden: Database["public"]["Enums"]["order_status_enum"]
+          fecha: string
+          funcionario_id: string
+          gas_numero_snapshot: string
+          gas_vencimiento_snapshot: string
+          id: string
+          kilometraje: string
+          observaciones: string
+          plantilla_codigo_documento: string
+          plantilla_fecha_documento: string
+          plantilla_id: string
+          plantilla_logo_url: string
+          plantilla_nombre: string
+          plantilla_version: number
+          presiones_llantas: Json
+          propietario_id: string
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          soat_vencimiento_snapshot: string
+          tenant_id: string
+          texto_contractual_snapshot: string
+          updated_at: string
+          vehiculo_blindaje: boolean
+          vehiculo_capacidad_pasajeros: number
+          vehiculo_cilindrada: number
+          vehiculo_clase: string
+          vehiculo_color: string
+          vehiculo_combustible: string
+          vehiculo_es_ensenanza: boolean
+          vehiculo_es_extranjero: boolean
+          vehiculo_id: string
+          vehiculo_linea: string
+          vehiculo_marca: string
+          vehiculo_modelo: number
+          vehiculo_placa: string
+          vehiculo_tipo_servicio_vehiculo: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_vehiculo: Database["public"]["Enums"]["vehicle_type_enum"]
+        }[]
+      }
       fetch_entry_orders_list: {
         Args: {
           p_cliente_documento?: string

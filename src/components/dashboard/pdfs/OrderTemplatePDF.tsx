@@ -359,6 +359,7 @@ export const OrderTemplatePDF = ({ data }: OrderTemplatePDFProps) => {
         <View style={styles.header}>
           {data.logo_url && (
             <Image 
+             
               src={data.logo_url} 
               style={styles.logo} 
             />
