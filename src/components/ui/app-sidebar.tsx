@@ -46,7 +46,7 @@ const NAV_DATA: NavItem[] = [
     icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
   },
   {
-    title: "Nueva Orden de Entrada", // Ojo: podrías renombrarlo a "Editor de Órdenes" para diferenciarlo de la primera
+    title: "Nueva Plantilla Orden de Entrada", // Ojo: podrías renombrarlo a "Editor de Órdenes" para diferenciarlo de la primera
     description: "Creación y edición de órdenes de entrada",
     href: "/dashboard/recepcionista/crear-orden-de-entrada",
     icon: FilePenLine, // ✨ El lápiz sobre el documento grita "creación / edición"
@@ -167,7 +167,7 @@ const contextRecived = useContext(PermissionsContext);
                       className={`group relative h-20 w-full justify-start gap-4 rounded-xl px-4 py-3 transition-all duration-300 ease-out
                         ${
                           active
-                            ? "bg-primary/[0.04] font-medium text-primary shadow-xs before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1.5 before:rounded-r-full before:bg-primary"
+                            ? "bg-primary/4 font-medium text-primary shadow-xs before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1.5 before:rounded-r-full before:bg-primary"
                             : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         }`}
                     >

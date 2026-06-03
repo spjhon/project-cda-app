@@ -14,6 +14,9 @@ CREATE TABLE public.service_users (
     document_type     TEXT NOT NULL DEFAULT 'cedula',
     document_number   TEXT NOT NULL,
     
+    -- Firma Digitalizada en Base64
+    signature_base64  TEXT,
+
     -- Estado Maestro
     is_active         BOOLEAN NOT NULL DEFAULT true,
 
@@ -76,6 +79,8 @@ CREATE INDEX IF NOT EXISTS service_users_full_name_trgm_idx
 COMMENT ON TABLE public.service_users IS 'Perfil de identidad de los usuarios del sistema. v1.3';
 COMMENT ON COLUMN public.service_users.is_active IS 'Control maestro: false revoca acceso total.';
 COMMENT ON COLUMN public.service_users.document_type IS 'Tipos: cedula, cedula_extrangeria, pasaporte, nit, targeta_identidad';
+-- Comentario de auditoría técnica explicativo
+COMMENT ON COLUMN public.service_users.signature_base64 IS 'Snapshot de la firma del recepcionista codificada en Base64 (JPEG, calidad 0.4) para incrustación directa en PDFs.';
 
 
 -- Índice para búsqueda de texto (GIN)

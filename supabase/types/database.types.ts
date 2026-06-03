@@ -566,6 +566,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          signature_base64: string | null
           updated_at: string
         }
         Insert: {
@@ -576,6 +577,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          signature_base64?: string | null
           updated_at?: string
         }
         Update: {
@@ -586,6 +588,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          signature_base64?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -761,6 +764,7 @@ export type Database = {
         Args: { p_order_id: string; p_tenant_id?: string }
         Returns: {
           cliente_id: string
+          condiciones_plantilla: Json
           consecutivo: number
           created_at: string
           es_reinspeccion: boolean

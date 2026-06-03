@@ -156,6 +156,15 @@ export default function NewEntryOrder() {
 
   // MANEJADOR DE SELECCIÓN DE PLANTILLA
   const handleTemplateSelect = (id: string, checked: boolean) => {
+
+
+if (!PermissionsContextReceived?.PermissionsContextValue.user?.signature_base64){
+      setServerError("Error: El inspector no posee una firma registrada, por fa registralo la seccion del perfil")
+  setShowErrorDialog(true);
+  return
+    }
+
+
     // 1. Buscamos la plantilla completa en el array de activas
     const template = activeTemplates.find((t) => t.id === id);
 
@@ -219,6 +228,10 @@ export default function NewEntryOrder() {
       setIsSubmitting(false);
       return;
     }
+
+    
+
+
 
     // 1. Verificamos si al menos uno de los resultados tiene el valor "no_cumple"
 const tieneCondicionesNoCumplidas = formData.condition_results.some(

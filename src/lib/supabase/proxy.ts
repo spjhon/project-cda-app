@@ -149,7 +149,7 @@ if (applicationPath.startsWith("/dashboard")) {
     
   const isActive = (sessionUser?.app_metadata?.is_active ?? false)
 
-    if (!sessionUser || !isActive) {
+    if (!sessionUser) {
       // 1. Mandamos explícitamente a la ruta de LOGIN, no a la raíz
       const loginUrl = buildUrl("/auth/login", tenantName, request);
       const response = NextResponse.redirect(loginUrl);
@@ -163,8 +163,38 @@ if (applicationPath.startsWith("/dashboard")) {
         if (c.name.includes("auth-token")) response.cookies.delete(c.name);
       });
 
+
+
       return response;
+
+      
+  
     }
+
+    if (sessionUser && !isActive){
+
+      const errorUrl = buildUrl("/error?type=Usuario no autorizado", tenantName, request);
+      const response = NextResponse.redirect(errorUrl);
+
+      // --- PASO VITAL: Sincronizar cookies antes de retornar ---
+      supabaseResponse.cookies.getAll().forEach((c) => {
+        response.cookies.set(c.name, c.value, c);
+      });
+
+      request.cookies.getAll().forEach((c) => {
+        if (c.name.includes("auth-token")) response.cookies.delete(c.name);
+      });
+
+      return response;
+
+
+    }
+
+
+
+
+
+    
 
     // Si hay usuario, pero el tenant no está en su lista de acceso (app_metadata)
     // Nota: Esto asume que en Supabase guardas un array de 'tenants' en el metadata del usuario
