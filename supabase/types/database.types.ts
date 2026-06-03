@@ -108,7 +108,6 @@ export type Database = {
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string | null
           tenant_id: string
-          texto_contractual_snapshot: string | null
           updated_at: string
           vehiculo_id: string
         }
@@ -131,7 +130,6 @@ export type Database = {
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id: string
-          texto_contractual_snapshot?: string | null
           updated_at?: string
           vehiculo_id: string
         }
@@ -154,7 +152,6 @@ export type Database = {
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id?: string
-          texto_contractual_snapshot?: string | null
           updated_at?: string
           vehiculo_id?: string
         }
@@ -770,6 +767,7 @@ export type Database = {
           es_reinspeccion: boolean
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
+          firmas_orden: Json
           funcionario_id: string
           gas_numero_snapshot: string
           gas_vencimiento_snapshot: string
@@ -781,13 +779,13 @@ export type Database = {
           plantilla_id: string
           plantilla_logo_url: string
           plantilla_nombre: string
+          plantilla_texto_contractual: string
           plantilla_version: number
           presiones_llantas: Json
           propietario_id: string
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string
           tenant_id: string
-          texto_contractual_snapshot: string
           updated_at: string
           vehiculo_blindaje: boolean
           vehiculo_capacidad_pasajeros: number

@@ -1,3 +1,6 @@
+DROP FUNCTION IF EXISTS public.create_full_order(jsonb);
+
+
 
 
 -- 1. CREACIÓN DE LA FUNCIÓN MAESTRA CON BLINDAJE TOTAL ANTI-NULL

@@ -1,3 +1,8 @@
+DROP FUNCTION IF EXISTS public.create_full_order(jsonb);
+
+
+
+
 
 
 -- 1. CREACIÓN DE LA FUNCIÓN MAESTRA CON BLINDAJE TOTAL ANTI-NULL
@@ -207,7 +212,7 @@ BEGIN
         soat_vencimiento_snapshot,
         gas_numero_snapshot,
         gas_vencimiento_snapshot,
-        
+        texto_contractual_snapshot,
         service_type
     )
     VALUES (
@@ -228,7 +233,7 @@ BEGIN
         (p_data->>'gas_numero_snapshot'),
         NULLIF(p_data->>'gas_vencimiento_snapshot', '')::date,
         
-        
+        (p_data->>'texto_contractual_snapshot'),
         COALESCE((p_data->>'service_type')::public.service_type_enum, 'RTM'::public.service_type_enum)
     )
     ON CONFLICT (id) 
@@ -244,7 +249,7 @@ BEGIN
         soat_vencimiento_snapshot = EXCLUDED.soat_vencimiento_snapshot,
         gas_numero_snapshot = EXCLUDED.gas_numero_snapshot,
         gas_vencimiento_snapshot = EXCLUDED.gas_vencimiento_snapshot,
-        
+        texto_contractual_snapshot = EXCLUDED.texto_contractual_snapshot,
         service_type = EXCLUDED.service_type
     RETURNING id INTO v_order_id;
 

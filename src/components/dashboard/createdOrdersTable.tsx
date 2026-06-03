@@ -35,7 +35,7 @@ export default function CreatedOrdersTable() {
   const logo_url = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.logo_url
   const data = ReceptionistcontextReceived?.ReceptionistContextValue.entryOrdersTableData.query.data || [];
 
-
+  const user = PermissioncontextRecived?.PermissionsContextValue.user;
  
 
   
@@ -99,7 +99,7 @@ export default function CreatedOrdersTable() {
           
           return (
             <div className="flex gap-2">
-              <OrderViewPDF orderId={orden.id} tenantId={tenantId} logoURL={logo_url}></OrderViewPDF>
+              <OrderViewPDF orderId={orden.id} tenantId={tenantId} logoURL={logo_url} user={user}></OrderViewPDF>
               
               <button
                 onClick={handleDescargar}
@@ -121,7 +121,7 @@ export default function CreatedOrdersTable() {
         },
       }),
     ],
-    [tenantId, logo_url] // Dependencias vacías porque las funciones son internas
+    [tenantId, logo_url, user] // Dependencias vacías porque las funciones son internas
   );
 
 

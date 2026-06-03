@@ -7,7 +7,7 @@ import { createContext, ReactNode, use } from "react";
 interface RolesContextType {
   PermissionsContextValue: {
     tenantObject: TenantFetchResult["data"] | undefined;
-    user: UserContextData | null;
+    user: UserContextData;
     RolesArray: string[];
   };
 }

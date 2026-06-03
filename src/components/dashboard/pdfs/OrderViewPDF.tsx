@@ -10,14 +10,16 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 // Importamos el documento
 import OrderPDF from "./OrderPDF";
+import { UserContextData } from "@/app/[tenant]/dashboard/layout";
 
 interface OrderViewPDFProps {
   orderId: string | undefined;
   logoURL: string | undefined;
   tenantId: string | undefined;
+  user: UserContextData | undefined;
 }
 
-function OrderViewPDF({ orderId, logoURL, tenantId }: OrderViewPDFProps) {
+function OrderViewPDF({ orderId, logoURL, tenantId, user }: OrderViewPDFProps) {
 
 
 
@@ -98,7 +100,7 @@ function OrderViewPDF({ orderId, logoURL, tenantId }: OrderViewPDFProps) {
   // Una vez solicitado, evaluamos si el Query está cargando antes de renderizar el BlobProvider
   // NOTA: Si necesitas pasar orderData a <OrderPDF />, deberías hacerlo aquí: <OrderPDF data={orderData} />
   return (
-    <BlobProvider document={<OrderPDF logoURL={logoURL} orderData={orderData} />}>
+    <BlobProvider document={<OrderPDF logoURL={logoURL} orderData={orderData} user={user}/>}>
       {({ url, loading, error: pdfError }) => {
         if (error || pdfError) {
           return (

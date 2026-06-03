@@ -1,10 +1,10 @@
 -- ============================================================================
--- 1. LIMPIEZA DE FIRMAS ANTERIORES
+-- 1. LIMPIEZA DE LA FUNCIÓN ANTERIOR (Para evitar conflictos de firmas)
 -- ============================================================================
 DROP FUNCTION IF EXISTS public.fetch_entry_order_by_id(UUID, UUID);
 
 -- ============================================================================
--- 2. CREACIÓN DE LA FUNCIÓN MULTI-TENANT CON CONDICIONES DE PLANTILLA
+-- 2. CREACIÓN DE LA FUNCIÓN MULTI-TENANT OPTIMIZADA
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.fetch_entry_order_by_id(
     p_order_id UUID,
@@ -61,8 +61,11 @@ RETURNS TABLE (
     -- Colección de Mediciones de Presión
     presiones_llantas JSONB,
 
-    -- 🔥 NUEVO CAMPO: Estructura de condiciones de inspección configuradas en el formato
-    condiciones_plantilla JSONB
+    -- Estructura de condiciones de inspección configuradas en el formato
+    condiciones_plantilla JSONB,
+
+    -- 🔥 NUEVO CAMPO: Colección ordenada de firmas requeridas y capturadas
+    firmas_orden JSONB
 )
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -133,10 +136,7 @@ BEGIN
               AND tp.deleted_at IS NULL
         ) AS presiones_llantas,
 
-        -- 🔥 Bloque Subconsulta: Lista ordenada de condiciones requeridas por la plantilla
-        -- --------------------------------------------------------------------
-        -- 🔥 Subconsulta 2: MAROMA TÉCNICA - Lógica de Inferencia de Resultados
-        -- --------------------------------------------------------------------
+        -- Bloque Subconsulta: Lista ordenada de condiciones de control
         (
             SELECT jsonb_agg(
                 jsonb_build_object(
@@ -144,33 +144,59 @@ BEGIN
                     'label', tc.label,
                     'is_special', tc.is_special,
                     'special_condition_label', tc.special_condition_label,
-                    
-                    -- AQUÍ ESTÁ LA MAGIA: Calculamos el valor final según tus reglas
                     'value', CASE 
-                        -- REGLA 1: Si hay un dato real guardado en la DB, ese manda sobre todo.
                         WHEN ocr.value IS NOT NULL THEN ocr.value
-                        
-                        -- REGLA 2: Si NO está guardado y es especial, hereda su default ('no_aplica')
                         WHEN tc.is_special = TRUE THEN tc.default_value
-                        
-                        -- REGLA 3: Si NO está guardado y es normal, intuimos que está todo OK ('cumple')
                         ELSE 'cumple'::public.condition_response_enum
                     END
                 )
                 ORDER BY tc.is_special DESC, tc.created_at ASC
             )
             FROM public.order_template_conditions tc
-            
-            -- Buscamos si existe un resultado guardado para ESTA orden y ESTA condición
             LEFT JOIN public.order_condition_results ocr
                 ON ocr.template_condition_id = tc.id
-                AND ocr.entry_order_id = o.id -- Amarrado a la orden actual del SELECT principal
-                AND ocr.tenant_id = o.tenant_id -- Seguridad y rendimiento Multi-tenant
-                
+               AND ocr.entry_order_id = o.id
+               AND ocr.tenant_id = o.tenant_id
             WHERE tc.order_template_id = o.plantilla_id
               AND tc.tenant_id = o.tenant_id
               AND tc.deleted_at IS NULL
-        ) AS condiciones_plantilla
+        ) AS condiciones_plantilla,
+
+        -- 🔥 Bloque Subconsulta 3: Extracción e Inferencia de Firmas con Textos Legales
+        -- --------------------------------------------------------------------
+        (
+            SELECT jsonb_agg(
+                jsonb_build_object(
+                    'template_signature_id', ots.id,
+                    'representative_type', ots.representative_type,
+                    'signature_label', ots.signature_label,
+                    
+                    -- Si la orden ya fue firmada, trae la URL de Supabase Storage, si no, NULL
+                    'signature_url', os.signature_url,
+                    
+                    -- Traemos la declaración de responsabilidad mapeada a esta firma específica
+                    'declaration_text', os_cond.declaration_text
+                )
+                ORDER BY ots.created_at ASC
+            )
+            FROM public.order_template_signatures ots
+            
+            -- 1. Buscamos la firma física guardada de esta orden
+            LEFT JOIN public.order_signatures os
+                ON os.template_signature_id = ots.id
+               AND os.entry_order_id = o.id
+               AND os.tenant_id = o.tenant_id
+               
+            -- 2. Buscamos el texto legal anidado a este tipo de firma en la plantilla
+            LEFT JOIN public.order_template_signature_conditions os_cond
+                ON os_cond.order_template_signature_id = ots.id
+               AND os_cond.tenant_id = o.tenant_id
+               AND os_cond.deleted_at IS NULL
+               
+            WHERE ots.order_template_id = o.plantilla_id
+              AND ots.tenant_id = o.tenant_id
+              AND ots.deleted_at IS NULL
+        ) AS firmas_orden
 
     FROM public.entry_orders o
     

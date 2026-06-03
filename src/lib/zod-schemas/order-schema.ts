@@ -307,8 +307,6 @@ export const ZodFullFormDataSchema = z.object({
 
   gas_vencimiento_snapshot: z.string(),
 
-  texto_contractual_snapshot: z.string(),
-
   /* ---------------------------
      VEHÍCULO
   ---------------------------- */

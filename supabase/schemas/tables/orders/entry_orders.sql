@@ -66,9 +66,6 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     
     -- Fecha de certificado de gas al momento de entrar.
     gas_vencimiento_snapshot    DATE,
-    
-    -- El contrato legal exacto que firmó ese día.
-    texto_contractual_snapshot  TEXT,
 
     -- Registro de creación en sistema.
     created_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -76,7 +76,7 @@ export default function NewEntryOrder() {
     soat_vencimiento_snapshot: "",
     gas_numero_snapshot: "",
     gas_vencimiento_snapshot: "",
-    texto_contractual_snapshot: "",
+    
 
     // --- ENTIDAD VEHÍCULO (Para la tabla public.vehicles) ---
     // La placa vive aquí adentro porque es parte de la identidad del vehículo
@@ -286,7 +286,7 @@ if (tieneCondicionesNoCumplidas) {
           soat_vencimiento_snapshot: "",
           gas_numero_snapshot: "",
           gas_vencimiento_snapshot: "",
-          texto_contractual_snapshot: "",
+         
 
           vehicle: {
             id: null, 
