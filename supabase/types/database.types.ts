@@ -90,70 +90,160 @@ export type Database = {
       }
       entry_orders: {
         Row: {
+          cliente_direccion_snapshot: string | null
+          cliente_email_snapshot: string | null
           cliente_id: string
+          cliente_nombre_snapshot: string
+          cliente_numero_documento_snapshot: string
+          cliente_telefono_snapshot: string | null
+          cliente_tipo_documento_snapshot: string
           consecutivo: number
           created_at: string
           deleted_at: string | null
           es_reinspeccion: boolean | null
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
+          funcionario_firma_base64_snapshot: string
           funcionario_id: string
+          funcionario_nombre_snapshot: string
+          funcionario_numero_documento_snapshot: string
+          funcionario_tipo_documento_snapshot: string
           gas_numero_snapshot: string | null
           gas_vencimiento_snapshot: string | null
           id: string
           kilometraje: string | null
           observaciones: string | null
           plantilla_id: string
+          propietario_direccion_snapshot: string | null
+          propietario_email_snapshot: string | null
           propietario_id: string
+          propietario_nombre_snapshot: string
+          propietario_numero_documento_snapshot: string
+          propietario_telefono_snapshot: string | null
+          propietario_tipo_documento_snapshot: string
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string | null
           tenant_id: string
           updated_at: string
+          vehiculo_blindaje_snapshot: boolean
+          vehiculo_capacidad_pasajeros_snapshot: number
+          vehiculo_cilindrada_snapshot: number
+          vehiculo_clase_snapshot: string
+          vehiculo_color_snapshot: string
+          vehiculo_combustible_snapshot: string
+          vehiculo_es_ensenanza_snapshot: boolean
+          vehiculo_es_extranjero_snapshot: boolean
           vehiculo_id: string
+          vehiculo_linea_snapshot: string
+          vehiculo_marca_snapshot: string
+          vehiculo_modelo_snapshot: number
+          vehiculo_placa_snapshot: string
+          vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
         }
         Insert: {
+          cliente_direccion_snapshot?: string | null
+          cliente_email_snapshot?: string | null
           cliente_id: string
+          cliente_nombre_snapshot: string
+          cliente_numero_documento_snapshot: string
+          cliente_telefono_snapshot?: string | null
+          cliente_tipo_documento_snapshot: string
           consecutivo: number
           created_at?: string
           deleted_at?: string | null
           es_reinspeccion?: boolean | null
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
+          funcionario_firma_base64_snapshot: string
           funcionario_id: string
+          funcionario_nombre_snapshot: string
+          funcionario_numero_documento_snapshot: string
+          funcionario_tipo_documento_snapshot: string
           gas_numero_snapshot?: string | null
           gas_vencimiento_snapshot?: string | null
           id?: string
           kilometraje?: string | null
           observaciones?: string | null
           plantilla_id: string
+          propietario_direccion_snapshot?: string | null
+          propietario_email_snapshot?: string | null
           propietario_id: string
+          propietario_nombre_snapshot: string
+          propietario_numero_documento_snapshot: string
+          propietario_telefono_snapshot?: string | null
+          propietario_tipo_documento_snapshot: string
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id: string
           updated_at?: string
+          vehiculo_blindaje_snapshot: boolean
+          vehiculo_capacidad_pasajeros_snapshot: number
+          vehiculo_cilindrada_snapshot: number
+          vehiculo_clase_snapshot: string
+          vehiculo_color_snapshot: string
+          vehiculo_combustible_snapshot: string
+          vehiculo_es_ensenanza_snapshot: boolean
+          vehiculo_es_extranjero_snapshot: boolean
           vehiculo_id: string
+          vehiculo_linea_snapshot: string
+          vehiculo_marca_snapshot: string
+          vehiculo_modelo_snapshot: number
+          vehiculo_placa_snapshot: string
+          vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
         }
         Update: {
+          cliente_direccion_snapshot?: string | null
+          cliente_email_snapshot?: string | null
           cliente_id?: string
+          cliente_nombre_snapshot?: string
+          cliente_numero_documento_snapshot?: string
+          cliente_telefono_snapshot?: string | null
+          cliente_tipo_documento_snapshot?: string
           consecutivo?: number
           created_at?: string
           deleted_at?: string | null
           es_reinspeccion?: boolean | null
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
+          funcionario_firma_base64_snapshot?: string
           funcionario_id?: string
+          funcionario_nombre_snapshot?: string
+          funcionario_numero_documento_snapshot?: string
+          funcionario_tipo_documento_snapshot?: string
           gas_numero_snapshot?: string | null
           gas_vencimiento_snapshot?: string | null
           id?: string
           kilometraje?: string | null
           observaciones?: string | null
           plantilla_id?: string
+          propietario_direccion_snapshot?: string | null
+          propietario_email_snapshot?: string | null
           propietario_id?: string
+          propietario_nombre_snapshot?: string
+          propietario_numero_documento_snapshot?: string
+          propietario_telefono_snapshot?: string | null
+          propietario_tipo_documento_snapshot?: string
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id?: string
           updated_at?: string
+          vehiculo_blindaje_snapshot?: boolean
+          vehiculo_capacidad_pasajeros_snapshot?: number
+          vehiculo_cilindrada_snapshot?: number
+          vehiculo_clase_snapshot?: string
+          vehiculo_color_snapshot?: string
+          vehiculo_combustible_snapshot?: string
+          vehiculo_es_ensenanza_snapshot?: boolean
+          vehiculo_es_extranjero_snapshot?: boolean
           vehiculo_id?: string
+          vehiculo_linea_snapshot?: string
+          vehiculo_marca_snapshot?: string
+          vehiculo_modelo_snapshot?: number
+          vehiculo_placa_snapshot?: string
+          vehiculo_tipo_servicio_snapshot?: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_snapshot?: Database["public"]["Enums"]["vehicle_type_enum"]
         }
         Relationships: [
           {
@@ -760,7 +850,10 @@ export type Database = {
       fetch_entry_order_by_id: {
         Args: { p_order_id: string; p_tenant_id?: string }
         Returns: {
+          cliente_documento: string
           cliente_id: string
+          cliente_nombre: string
+          cliente_tipo_documento: string
           condiciones_plantilla: Json
           consecutivo: number
           created_at: string
@@ -768,7 +861,10 @@ export type Database = {
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
           firmas_orden: Json
+          funcionario_documento: string
+          funcionario_firma: string
           funcionario_id: string
+          funcionario_nombre: string
           gas_numero_snapshot: string
           gas_vencimiento_snapshot: string
           id: string
@@ -782,7 +878,10 @@ export type Database = {
           plantilla_texto_contractual: string
           plantilla_version: number
           presiones_llantas: Json
+          propietario_documento: string
           propietario_id: string
+          propietario_nombre: string
+          propietario_tipo_documento: string
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string
           tenant_id: string

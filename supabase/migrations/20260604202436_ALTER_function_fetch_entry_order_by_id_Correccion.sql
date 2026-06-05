@@ -1,11 +1,7 @@
--- ============================================================================
--- 1. LIMPIEZA DE LA FUNCIÓN ANTERIOR (Para evitar conflictos de firmas)
--- ============================================================================
+-- 1. ELIMINAR LA FUNCIÓN EXISTENTE PARA PODER CAMBIAR EL RETURNS TABLE
 DROP FUNCTION IF EXISTS public.fetch_entry_order_by_id(UUID, UUID);
 
--- ============================================================================
--- 2. CREACIÓN DE LA FUNCIÓN MULTI-TENANT OPTIMIZADA
--- ============================================================================
+-- 2. CREAR LA FUNCIÓN EXACTAMENTE COMO LA TENÍAS
 CREATE OR REPLACE FUNCTION public.fetch_entry_order_by_id(
     p_order_id UUID,
     p_tenant_id UUID DEFAULT NULL
@@ -23,7 +19,7 @@ RETURNS TABLE (
     soat_vencimiento_snapshot DATE,
     gas_numero_snapshot VARCHAR,
     gas_vencimiento_snapshot DATE,
-    texto_contractual_snapshot TEXT,
+    
     service_type service_type_enum,
     created_at TIMESTAMPTZ,
     updated_at TIMESTAMPTZ,
@@ -41,8 +37,9 @@ RETURNS TABLE (
     plantilla_fecha_documento DATE,
     plantilla_codigo_documento TEXT,
     plantilla_logo_url TEXT,
+    plantilla_texto_contractual TEXT,
 
-    -- Atributos Técnicos del Vehículo Asociado
+    -- Atributos Técnicos del Vehículo Asociado (AHORA DESDE EL SNAPSHOT - INMUTABLE)
     vehiculo_placa VARCHAR,
     vehiculo_marca VARCHAR,
     vehiculo_linea VARCHAR,
@@ -58,13 +55,20 @@ RETURNS TABLE (
     vehiculo_tipo_servicio_vehiculo public.vehicle_service_type_enum,
     vehiculo_es_extranjero BOOLEAN,
 
-    -- Colección de Mediciones de Presión
+    -- Snapshots de Personas (Nuevos campos para eliminar dependencias externas en el PDF)
+    propietario_nombre TEXT,
+    propietario_documento TEXT,
+    propietario_tipo_documento TEXT,
+    cliente_nombre TEXT,
+    cliente_documento TEXT,
+    cliente_tipo_documento TEXT,
+    funcionario_nombre TEXT,
+    funcionario_documento TEXT,
+    funcionario_firma TEXT, -- Nueva columna añadida
+
+    -- Colecciones de Datos Detalle
     presiones_llantas JSONB,
-
-    -- Estructura de condiciones de inspección configuradas en el formato
     condiciones_plantilla JSONB,
-
-    -- 🔥 NUEVO CAMPO: Colección ordenada de firmas requeridas y capturadas
     firmas_orden JSONB
 )
 LANGUAGE plpgsql
@@ -86,7 +90,7 @@ BEGIN
         o.soat_vencimiento_snapshot,
         o.gas_numero_snapshot,
         o.gas_vencimiento_snapshot,
-        o.texto_contractual_snapshot,
+        
         o.service_type,
         o.created_at,
         o.updated_at,
@@ -96,29 +100,41 @@ BEGIN
         o.funcionario_id,
         o.plantilla_id,
         
-        -- Bloque: Metadatos del Formato / Plantilla
+        -- Bloque: Metadatos de la Plantilla
         t.template_name AS plantilla_nombre,
         t.version AS plantilla_version,
         t.document_date AS plantilla_fecha_documento,
         t.document_code AS plantilla_codigo_documento,
         t.logo_url AS plantilla_logo_url,
+        t.base_contract_text AS plantilla_texto_contractual,
 
-        -- Bloque: Especificaciones del Vehículo
-        v.placa AS vehiculo_placa,
-        v.marca AS vehiculo_marca,
-        v.linea AS vehiculo_linea,
-        v.modelo AS vehiculo_modelo,
-        v.color AS vehiculo_color,
-        v.tipo_vehiculo AS vehiculo_tipo_vehiculo,
-        v.clase AS vehiculo_clase,
-        v.combustible AS vehiculo_combustible,
-        v.cilindrada AS vehiculo_cilindrada,
-        v.blindaje AS vehiculo_blindaje,
-        v.capacidad_pasajeros AS vehiculo_capacidad_pasajeros,
-        v.es_ensenanza AS vehiculo_es_ensenanza,
-        v.tipo_servicio_vehiculo AS vehiculo_tipo_servicio_vehiculo,
-        v.es_extranjero AS vehiculo_es_extranjero,
+        -- Bloque: Especificaciones del Vehículo EXTRAÍDAS DEL SNAPSHOT (Rendimiento puro)
+        o.vehiculo_placa_snapshot AS vehiculo_placa,
+        o.vehiculo_marca_snapshot AS vehiculo_marca,
+        o.vehiculo_linea_snapshot AS vehiculo_linea,
+        o.vehiculo_modelo_snapshot AS vehiculo_modelo,
+        o.vehiculo_color_snapshot AS vehiculo_color,
+        o.vehiculo_tipo_snapshot AS vehiculo_tipo_vehiculo,
+        o.vehiculo_clase_snapshot AS vehiculo_clase,
+        o.vehiculo_combustible_snapshot AS vehiculo_combustible,
+        o.vehiculo_cilindrada_snapshot AS vehiculo_cilindrada,
+        o.vehiculo_blindaje_snapshot AS vehiculo_blindaje,
+        o.vehiculo_capacidad_pasajeros_snapshot AS vehiculo_capacidad_pasajeros,
+        o.vehiculo_es_ensenanza_snapshot AS vehiculo_es_ensenanza,
+        o.vehiculo_tipo_servicio_snapshot AS vehiculo_tipo_servicio_vehiculo,
+        o.vehiculo_es_extranjero_snapshot AS vehiculo_es_extranjero,
         
+        -- Bloque: Snapshots de Personas (Evita consultar la tabla personas)
+        o.propietario_nombre_snapshot AS propietario_nombre,
+        o.propietario_numero_documento_snapshot::TEXT AS propietario_documento,
+        o.propietario_tipo_documento_snapshot::TEXT AS propietario_tipo_documento,
+        o.cliente_nombre_snapshot AS cliente_nombre,
+        o.cliente_numero_documento_snapshot::TEXT AS cliente_documento,
+        o.cliente_tipo_documento_snapshot::TEXT AS cliente_tipo_documento,
+        o.funcionario_nombre_snapshot AS funcionario_nombre,
+        o.funcionario_numero_documento_snapshot::TEXT AS funcionario_documento,
+        o.funcionario_firma_base64_snapshot AS funcionario_firma,
+
         -- Bloque Subconsulta: Mediciones de Presión
         (
             SELECT jsonb_agg(
@@ -136,7 +152,7 @@ BEGIN
               AND tp.deleted_at IS NULL
         ) AS presiones_llantas,
 
-        -- Bloque Subconsulta: Lista ordenada de condiciones de control
+        -- Bloque Subconsulta: Condiciones de Control
         (
             SELECT jsonb_agg(
                 jsonb_build_object(
@@ -162,8 +178,7 @@ BEGIN
               AND tc.deleted_at IS NULL
         ) AS condiciones_plantilla,
 
-        -- 🔥 Bloque Subconsulta 3: Extracción e Inferencia de Firmas con Textos Legales
-        -- --------------------------------------------------------------------
+        -- Bloque Subconsulta 3: Firmas Dinámicas Complementarias (EXCLUSIVO CLIENTE / PROPIETARIO / OTROS)
         (
             SELECT jsonb_agg(
                 jsonb_build_object(
@@ -171,30 +186,41 @@ BEGIN
                     'representative_type', ots.representative_type,
                     'signature_label', ots.signature_label,
                     
-                    -- Si la orden ya fue firmada, trae la URL de Supabase Storage, si no, NULL
-                    'signature_url', os.signature_url,
+                    -- Aquí NUNCA entra el inspector. Es puramente para las firmas dinámicas de la tabla order_signatures
+                    'signature_url', COALESCE(os.signature_url, ''),
                     
-                    -- Traemos la declaración de responsabilidad mapeada a esta firma específica
-                    'declaration_text', os_cond.declaration_text
+                    'conditions', COALESCE(
+                        (
+                            SELECT jsonb_agg(
+                                jsonb_build_object(
+                                    'condition_id', os_cond.id,
+                                    'declaration_text', os_cond.declaration_text
+                                )
+                                ORDER BY os_cond.created_at ASC
+                            )
+                            FROM public.order_template_signature_conditions os_cond
+                            WHERE os_cond.order_template_signature_id = ots.id
+                              AND os_cond.tenant_id = o.tenant_id
+                              AND os_cond.deleted_at IS NULL
+                        ), 
+                        '[]'::jsonb
+                    )
                 )
                 ORDER BY ots.created_at ASC
             )
             FROM public.order_template_signatures ots
             
-            -- 1. Buscamos la firma física guardada de esta orden
+            -- LEFT JOIN puro para traer la firma de la tabla dinámica
             LEFT JOIN public.order_signatures os
                 ON os.template_signature_id = ots.id
                AND os.entry_order_id = o.id
                AND os.tenant_id = o.tenant_id
                
-            -- 2. Buscamos el texto legal anidado a este tipo de firma en la plantilla
-            LEFT JOIN public.order_template_signature_conditions os_cond
-                ON os_cond.order_template_signature_id = ots.id
-               AND os_cond.tenant_id = o.tenant_id
-               AND os_cond.deleted_at IS NULL
-               
             WHERE ots.order_template_id = o.plantilla_id
               AND ots.tenant_id = o.tenant_id
+              -- ¡CLAVE! Excluimos cualquier intento de mapear al inspector en este bloque dinámico
+              AND LOWER(ots.representative_type) NOT LIKE '%inspector%'
+              AND LOWER(ots.representative_type) NOT LIKE '%funcionario%'
               AND ots.deleted_at IS NULL
         ) AS firmas_orden
 
@@ -203,10 +229,6 @@ BEGIN
     LEFT JOIN public.order_template t 
         ON o.plantilla_id = t.id 
         AND t.deleted_at IS NULL
-        
-    LEFT JOIN public.vehicles v
-        ON o.vehiculo_id = v.id
-        AND v.deleted_at IS NULL
         
     WHERE o.id = p_order_id
       AND o.tenant_id = p_tenant_id

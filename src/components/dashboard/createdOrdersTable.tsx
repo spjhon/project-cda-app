@@ -21,9 +21,10 @@ import {
 } from "@/components/ui/table";
 
 // Importar iconos de Lucide
-import { Download, Ban } from "lucide-react";
+import { Ban } from "lucide-react";
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -32,10 +33,9 @@ export default function CreatedOrdersTable() {
   const PermissioncontextRecived = useContext(PermissionsContext);
 
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id
-  const logo_url = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.logo_url
+  
   const data = ReceptionistcontextReceived?.ReceptionistContextValue.entryOrdersTableData.query.data || [];
 
-  const user = PermissioncontextRecived?.PermissionsContextValue.user;
  
 
   
@@ -87,10 +87,7 @@ export default function CreatedOrdersTable() {
         cell: ({ row }) => {
           const orden = row.original;
         
-          const handleDescargar = () => {
-            console.log("Descargar orden:", orden);
-            // Aquí tu lógica para descargar
-          };
+          
           
           const handleAnular = () => {
             console.log("Anular orden:", orden);
@@ -99,15 +96,9 @@ export default function CreatedOrdersTable() {
           
           return (
             <div className="flex gap-2">
-              <OrderViewPDF orderId={orden.id} tenantId={tenantId} logoURL={logo_url} user={user}></OrderViewPDF>
+              <OrderViewPDF orderId={orden.id} tenantId={tenantId}></OrderViewPDF>
               
-              <button
-                onClick={handleDescargar}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-                title="Descargar"
-              >
-                <Download className="h-4 w-4 text-green-600" />
-              </button>
+             <OrderDownloadPDF orderId={orden.id} tenantId={tenantId}></OrderDownloadPDF>
               
               <button
                 onClick={handleAnular}
@@ -121,7 +112,7 @@ export default function CreatedOrdersTable() {
         },
       }),
     ],
-    [tenantId, logo_url, user] // Dependencias vacías porque las funciones son internas
+    [tenantId] // Dependencias vacías porque las funciones son internas
   );
 
 

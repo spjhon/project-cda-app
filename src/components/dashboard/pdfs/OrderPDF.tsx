@@ -1,7 +1,8 @@
 "use client";
 
-import { UserContextData } from '@/app/[tenant]/dashboard/layout';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
+import { FetchEntryOrderResult, OrderSignatureDetail, TirePressureDetail } from '@/lib/client-actions/fetch_entry_order_by_id';
+import {  OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
 
 // ============================================================
 // ESTILOS POR SECCIÓN
@@ -480,8 +481,256 @@ const inspectorStyles = StyleSheet.create({
   },
 });
 
+
+
+
+
 // --------------------------------------------------
-// 9. ESTILOS DEL PIE DE PÁGINA
+// 09. ESTILOS DE DATOS DEL PROPIETARIO
+// --------------------------------------------------
+const ownerStyles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 4,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  header: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  headerTitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  content: {
+    padding: 8,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  gridRowLast: {
+    flexDirection: 'row',
+  },
+  labelCell: {
+    width: '35%',
+  },
+  valueCell: {
+    width: '65%',
+  },
+  label: {
+    fontSize: 7.5,
+    fontWeight: 'bold',
+    color: '#64748b',
+  },
+  value: {
+    fontSize: 8,
+    color: '#0f172a',
+    fontWeight: 'medium',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
+    marginVertical: 6,
+  },
+});
+
+// --------------------------------------------------
+// 10. ESTILOS DE DATOS DEL CLIENTE
+// --------------------------------------------------
+const clientStyles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 4,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  header: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  headerTitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  content: {
+    padding: 8,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  gridRowLast: {
+    flexDirection: 'row',
+  },
+  labelCell: {
+    width: '35%',
+  },
+  valueCell: {
+    width: '65%',
+  },
+  label: {
+    fontSize: 7.5,
+    fontWeight: 'bold',
+    color: '#64748b',
+  },
+  value: {
+    fontSize: 8,
+    color: '#0f172a',
+    fontWeight: 'medium',
+  },
+  sameAsOwnerBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 3,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  sameAsOwnerText: {
+    fontSize: 6.5,
+    color: '#15803d',
+    fontWeight: 'bold',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
+    marginVertical: 6,
+  },
+});
+
+
+
+
+
+
+
+// --------------------------------------------------
+// 11. ESTILOS DE FIRMAS COMPLEMENTARIAS (CLIENTES/OTROS)
+// --------------------------------------------------
+const complementaryStyles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 4,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  header: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  headerTitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  signatureItem: {
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  signatureItemLast: {
+    marginBottom: 0,
+  },
+  signatureHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    backgroundColor: '#fafafa',
+  },
+  signatureLabel: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    flex: 1,
+  },
+  representativeType: {
+    fontSize: 7,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  signatureImage: {
+    width: 150,
+    height: 50,
+    objectFit: 'contain',
+  },
+  noSignatureText: {
+    fontSize: 7,
+    color: '#94a3b8',
+    fontStyle: 'italic',
+  },
+  declarationsContainer: {
+    padding: 8,
+    backgroundColor: '#ffffff',
+  },
+  declarationsTitle: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    color: '#475569',
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  declarationRow: {
+    flexDirection: 'row',
+    marginBottom: 4,
+    paddingVertical: 2,
+  },
+  bulletPoint: {
+    fontSize: 7,
+    color: '#4f46e5',
+    width: 12,
+  },
+  declarationText: {
+    fontSize: 7,
+    color: '#334155',
+    flex: 1,
+    lineHeight: 1.4,
+    textAlign: 'justify',
+  },
+  emptyDeclarations: {
+    fontSize: 7,
+    color: '#94a3b8',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 6,
+  },
+});
+
+
+
+// --------------------------------------------------
+// 12. ESTILOS DEL PIE DE PÁGINA
 // --------------------------------------------------
 const footerStyles = StyleSheet.create({
   footerContainer: {
@@ -512,13 +761,18 @@ const footerStyles = StyleSheet.create({
   },
 });
 
+
+
+
+
 // ============================================================
 // INTERFACES
 // ============================================================
 interface OrderPDFProps {
-  logoURL: string | undefined;
-  orderData: any;
-  user: UserContextData | undefined;
+  
+  orderData?: FetchEntryOrderResult;
+  templateData?: OrderTemplateType;
+ 
 }
 
 // ============================================================
@@ -528,16 +782,17 @@ interface OrderPDFProps {
 // --------------------------------------------------
 // 1. ENCABEZADO
 // --------------------------------------------------
-function HeaderSection({ finalLogo, orderData, fechaDoc }: {
-  finalLogo: string | undefined;
-  orderData: any;
+function HeaderSection({ orderData, fechaDoc, templateData }: {
+ 
+  orderData?: FetchEntryOrderResult;
   fechaDoc: string;
+  templateData: OrderTemplateType | undefined;
 }) {
   return (
     <View style={headerStyles.headerContainer}>
       <View style={headerStyles.logoSection}>
-        {finalLogo ? (
-          <Image src={finalLogo} style={headerStyles.logo} />
+        {orderData?.plantilla_logo_url ? (
+          <Image src={orderData.plantilla_logo_url??""} style={headerStyles.logo}/>
         ) : (
           <Text style={headerStyles.logoFallback}>TU LOGO</Text>
         )}
@@ -583,7 +838,7 @@ function HeaderSection({ finalLogo, orderData, fechaDoc }: {
 // 2. INFORMACIÓN GENERAL
 // --------------------------------------------------
 function GeneralInfoSection({ orderData, fechaEntrada }: {
-  orderData: any;
+  orderData: FetchEntryOrderResult | undefined;
   fechaEntrada: string;
 }) {
   const formatServiceType = (type: string) => {
@@ -607,7 +862,7 @@ function GeneralInfoSection({ orderData, fechaEntrada }: {
         <View style={sectionStyles.gridCell}>
           <Text style={sectionStyles.cellLabel}>Tipo Servicio:</Text>
           <Text style={[sectionStyles.cellValue, { fontWeight: 'medium' }]}>
-            {formatServiceType(orderData?.service_type)}
+            {formatServiceType(orderData?.service_type || "")}
           </Text>
         </View>
       </View>
@@ -643,7 +898,7 @@ function GeneralInfoSection({ orderData, fechaEntrada }: {
 // --------------------------------------------------
 // 3. DATOS DEL VEHÍCULO
 // --------------------------------------------------
-function VehicleSection({ orderData }: { orderData: any }) {
+function VehicleSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
   const formatFechaSnapshot = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('es-CO');
@@ -757,7 +1012,7 @@ function VehicleSection({ orderData }: { orderData: any }) {
         <View style={[sectionStyles.gridCell, sectionStyles.gridCellBorderRight]}>
           <Text style={sectionStyles.cellLabel}>Vence SOAT:</Text>
           <Text style={sectionStyles.cellValue}>
-            {formatFechaSnapshot(orderData?.soat_vencimiento_snapshot)}
+            {formatFechaSnapshot(orderData?.soat_vencimiento_snapshot ?? undefined)}
           </Text>
         </View>
         <View style={sectionStyles.gridCell}>
@@ -772,7 +1027,7 @@ function VehicleSection({ orderData }: { orderData: any }) {
         <View style={[sectionStyles.gridCell, sectionStyles.gridCellBorderRight]}>
           <Text style={sectionStyles.cellLabel}>Vence Gas:</Text>
           <Text style={sectionStyles.cellValue}>
-            {formatFechaSnapshot(orderData?.gas_vencimiento_snapshot)}
+            {formatFechaSnapshot(orderData?.gas_vencimiento_snapshot ?? undefined)}
           </Text>
         </View>
         <View style={sectionStyles.gridCell}>
@@ -808,7 +1063,7 @@ function VehicleSection({ orderData }: { orderData: any }) {
 // --------------------------------------------------
 // 4. PRESIONES DE NEUMÁTICOS
 // --------------------------------------------------
-function PressureSection({ orderData }: { orderData: any }) {
+function PressureSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -833,8 +1088,8 @@ function PressureSection({ orderData }: { orderData: any }) {
       </View>
 
       {orderData?.presiones_llantas && orderData.presiones_llantas.length > 0 ? (
-        orderData.presiones_llantas.map((tp: any, index: number) => {
-          const isLast = index === orderData.presiones_llantas.length - 1;
+        orderData.presiones_llantas.map((tp: TirePressureDetail, index: number) => {
+          const isLast = index === (orderData?.presiones_llantas?.length || 0) - 1;
           return (
             <View
               key={index}
@@ -882,7 +1137,7 @@ function PressureSection({ orderData }: { orderData: any }) {
 // --------------------------------------------------
 // 5. CONDICIONES DE INSPECCIÓN
 // --------------------------------------------------
-function ConditionsSection({ orderData }: { orderData: any }) {
+function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -911,8 +1166,8 @@ function ConditionsSection({ orderData }: { orderData: any }) {
 
       {orderData?.condiciones_plantilla &&
       orderData.condiciones_plantilla.length > 0 ? (
-        orderData.condiciones_plantilla.map((cond: any, index: number) => {
-          const isLast = index === orderData.condiciones_plantilla.length - 1;
+        orderData.condiciones_plantilla.map((cond, index: number) => {
+          const isLast = index === (orderData?.condiciones_plantilla?.length || 0) - 1;
           return (
             <View
               key={cond.id || index}
@@ -955,7 +1210,7 @@ function ConditionsSection({ orderData }: { orderData: any }) {
 // --------------------------------------------------
 // 6. OBSERVACIONES
 // --------------------------------------------------
-function ObservationsSection({ orderData }: { orderData: any }) {
+function ObservationsSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -985,7 +1240,7 @@ function ObservationsSection({ orderData }: { orderData: any }) {
 // --------------------------------------------------
 // 7. TÉRMINOS CONTRACTUALES
 // --------------------------------------------------
-function ContractSection({ orderData }: { orderData: any }) {
+function ContractSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -1012,39 +1267,45 @@ function ContractSection({ orderData }: { orderData: any }) {
     </View>
   );
 }
-
 // --------------------------------------------------
 // 8. FIRMA E INSPECTOR
 // --------------------------------------------------
-function InspectorSection({ user }: { user: UserContextData | undefined }) {
+function InspectorSection({
+  orderData,
+}: {
+  orderData: FetchEntryOrderResult | undefined;
+}) {
   return (
     <View style={inspectorStyles.inspectorSectionContainer}>
       <View style={inspectorStyles.inspectorSectionHeader}>
         <Text style={inspectorStyles.inspectorSectionTitle}>
-          7. Datos y Reconocimiento del Inspector Responsable
+          7. Recepcionista Responsable
         </Text>
       </View>
 
       <View style={inspectorStyles.inspectorTableCard}>
         <View style={inspectorStyles.inspectorTableHeader}>
           <Text style={inspectorStyles.inspectorHeaderText}>
-            DATOS Y RECONOCIMIENTO DEL INSPECTOR RESPONSABLE
+            Datos y Reconocimiento del Recepcionista Responsable
           </Text>
         </View>
 
         <View style={inspectorStyles.inspectorTableBody}>
-          {/* COLUMNA 1: FIRMA DIGITALIZADA */}
+          {/* COLUMNA 1: FIRMA */}
           <View
             style={[
               inspectorStyles.inspectorColumn,
               inspectorStyles.inspectorColumnSignature,
             ]}
           >
-            <Text style={inspectorStyles.infoLabel}>FIRMA DIGITALIZADA</Text>
+            <Text style={inspectorStyles.infoLabel}>
+              FIRMA DIGITALIZADA
+            </Text>
+
             <View style={inspectorStyles.signatureWrapper}>
-              {user?.signature_base64 ? (
+              {orderData?.funcionario_firma ? (
                 <Image
-                  src={user.signature_base64}
+                  src={orderData.funcionario_firma} // Si ya entró al 'if', TS sabe que es un string válido
                   style={inspectorStyles.signatureImage}
                 />
               ) : (
@@ -1055,7 +1316,7 @@ function InspectorSection({ user }: { user: UserContextData | undefined }) {
             </View>
           </View>
 
-          {/* COLUMNA 2: INFORMACIÓN DEL FUNCIONARIO */}
+          {/* COLUMNA 2: DATOS DEL FUNCIONARIO */}
           <View
             style={[
               inspectorStyles.inspectorColumn,
@@ -1066,52 +1327,67 @@ function InspectorSection({ user }: { user: UserContextData | undefined }) {
               <Text style={inspectorStyles.infoLabel}>
                 NOMBRE COMPLETO DEL RESPONSABLE
               </Text>
+
               <Text style={inspectorStyles.infoValue}>
-                {user?.name || 'N/A'}
+                {orderData?.funcionario_nombre || 'N/A'}
               </Text>
             </View>
 
-            <View style={[inspectorStyles.infoBlock, { marginTop: 8 }]}>
+            <View
+              style={[
+                inspectorStyles.infoBlock,
+                { marginTop: 8 },
+              ]}
+            >
               <Text style={inspectorStyles.infoLabel}>
                 DOCUMENTO DE IDENTIFICACIÓN
               </Text>
+
               <Text style={inspectorStyles.infoValue}>
-                {user?.document_type
-                  ? user.document_type.toUpperCase()
-                  : 'CC'}
-                : {user?.document_number || '-----------'}
+                CC:
+                {" "}
+                {orderData?.funcionario_documento || 'N/A'}
               </Text>
             </View>
           </View>
 
-          {/* COLUMNA 3: ROL Y DECLARACIÓN LEGAL */}
+          {/* COLUMNA 3: DECLARACIÓN */}
           <View
             style={[
               inspectorStyles.inspectorColumn,
               inspectorStyles.inspectorColumnLegal,
             ]}
           >
-            <Text style={inspectorStyles.infoLabel}>ROL OPERATIVO</Text>
+            <Text style={inspectorStyles.infoLabel}>
+              ROL OPERATIVO
+            </Text>
+
             <Text
               style={[
                 inspectorStyles.infoValue,
-                { color: '#2563eb', marginBottom: 6 },
+                {
+                  color: '#2563eb',
+                  marginBottom: 6,
+                },
               ]}
             >
-              RECEPCIONISTA / INSPECTOR TÉCNICO
+              RECEPCIONISTA
             </Text>
+
             <Text style={inspectorStyles.legalText}>
-              El presente funcionario certifica que la información del vehículo y
-              la orden de entrada han sido validadas conforme al sistema de gestión
-              ISO 17020 del CDA.
+              El presente funcionario certifica que la
+              información registrada en la presente orden de
+              entrada fue validada y almacenada conforme a los
+              procedimientos internos del Centro de Diagnóstico
+              Automotor.
             </Text>
           </View>
         </View>
 
         <View style={inspectorStyles.inspectorFooterRow}>
           <Text style={inspectorStyles.inspectorFooterText}>
-            Registro de auditoría interna - Documento digitalizado de uso
-            exclusivo para procesos de control vehicular.
+            Registro de auditoría interna - Documento digitalizado
+            de uso exclusivo para procesos de control vehicular.
           </Text>
         </View>
       </View>
@@ -1119,11 +1395,236 @@ function InspectorSection({ user }: { user: UserContextData | undefined }) {
   );
 }
 
+
+
+
+
+
 // --------------------------------------------------
-// 9. PIE DE PÁGINA
+// 09. DATOS DEL PROPIETARIO DEL VEHÍCULO
+// --------------------------------------------------
+function OwnerSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
+  const formatDocumentType = (type: string) => {
+    if (!type) return 'N/A';
+    return type
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  return (
+    <View style={ownerStyles.container}>
+      <View style={ownerStyles.header}>
+        <Text style={ownerStyles.headerTitle}>
+          08. Datos del Propietario del Vehículo
+        </Text>
+      </View>
+
+      <View style={ownerStyles.content}>
+        <View style={ownerStyles.gridRow}>
+          <View style={ownerStyles.labelCell}>
+            <Text style={ownerStyles.label}>Nombre Completo:</Text>
+          </View>
+          <View style={ownerStyles.valueCell}>
+            <Text style={ownerStyles.value}>
+              {orderData?.propietario_nombre || 'N/A'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={ownerStyles.gridRow}>
+          <View style={ownerStyles.labelCell}>
+            <Text style={ownerStyles.label}>Tipo de Documento:</Text>
+          </View>
+          <View style={ownerStyles.valueCell}>
+            <Text style={ownerStyles.value}>
+              {formatDocumentType(orderData?.propietario_tipo_documento || "")}
+            </Text>
+          </View>
+        </View>
+
+        <View style={ownerStyles.gridRowLast}>
+          <View style={ownerStyles.labelCell}>
+            <Text style={ownerStyles.label}>Número de Documento:</Text>
+          </View>
+          <View style={ownerStyles.valueCell}>
+            <Text style={ownerStyles.value}>
+              {orderData?.propietario_documento || 'N/A'}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+
+// --------------------------------------------------
+// 10. DATOS DEL CLIENTE QUE REALIZA EL TRÁMITE
+// --------------------------------------------------
+function ClientSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
+  const formatDocumentType = (type: string) => {
+    if (!type) return 'N/A';
+    return type
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const isSameAsOwner = () => {
+    return orderData?.propietario_documento === orderData?.cliente_documento &&
+           orderData?.propietario_tipo_documento === orderData?.cliente_tipo_documento;
+  };
+
+  const sameAsOwner = isSameAsOwner();
+
+  return (
+    <View style={clientStyles.container}>
+      <View style={clientStyles.header}>
+        <Text style={clientStyles.headerTitle}>
+          09. Datos del Cliente que Realiza el Trámite
+        </Text>
+      </View>
+
+      <View style={clientStyles.content}>
+        <View style={clientStyles.gridRow}>
+          <View style={clientStyles.labelCell}>
+            <Text style={clientStyles.label}>Nombre Completo:</Text>
+          </View>
+          <View style={clientStyles.valueCell}>
+            <Text style={clientStyles.value}>
+              {orderData?.cliente_nombre || 'N/A'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={clientStyles.gridRow}>
+          <View style={clientStyles.labelCell}>
+            <Text style={clientStyles.label}>Tipo de Documento:</Text>
+          </View>
+          <View style={clientStyles.valueCell}>
+            <Text style={clientStyles.value}>
+              {formatDocumentType(orderData?.cliente_tipo_documento || "")}
+            </Text>
+          </View>
+        </View>
+
+        <View style={clientStyles.gridRowLast}>
+          <View style={clientStyles.labelCell}>
+            <Text style={clientStyles.label}>Número de Documento:</Text>
+          </View>
+          <View style={clientStyles.valueCell}>
+            <Text style={clientStyles.value}>
+              {orderData?.cliente_documento || 'N/A'}
+            </Text>
+          </View>
+        </View>
+
+        {sameAsOwner && (
+          <View style={clientStyles.sameAsOwnerBadge}>
+            <Text style={clientStyles.sameAsOwnerText}>
+              ✓ El cliente es el propietario del vehículo
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------
+// 11 FIRMAS COMPLEMENTARIAS (CLIENTES/OTROS)
+// --------------------------------------------------
+function ComplementarySignaturesSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
+  const signatures = orderData?.firmas_orden || [];
+
+  if (!signatures || signatures.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={complementaryStyles.container}>
+      <View style={complementaryStyles.header}>
+        <Text style={complementaryStyles.headerTitle}>
+          10. Firmas de Aceptación y Declaraciones del Cliente
+        </Text>
+      </View>
+
+      {signatures.map((sig: OrderSignatureDetail, idx: number) => {
+        const isLast = idx === signatures.length - 1;
+        const hasConditions = sig.conditions && sig.conditions.length > 0;
+
+        return (
+          <View
+            key={sig.template_signature_id || idx}
+            style={isLast ? complementaryStyles.signatureItemLast : complementaryStyles.signatureItem}
+          >
+            {/* Encabezado */}
+            <View style={complementaryStyles.signatureHeader}>
+              <Text style={complementaryStyles.signatureLabel}>
+                {sig.representative_type || ''}
+              </Text>
+              <Text style={complementaryStyles.representativeType}>
+                {sig.signature_label || 'Firma'}
+              </Text>
+            </View>
+
+            {/* Imagen de la firma */}
+            <View style={complementaryStyles.imageContainer}>
+              {/* CORREGIDO: Se usa signature_url que viene en la subconsulta firmas_orden */}
+              {sig.signature_url ? (
+                <Image
+                  src={sig.signature_url}
+                  style={complementaryStyles.signatureImage}
+                />
+              ) : (
+                <Text style={complementaryStyles.noSignatureText}>
+                  Sin firma registrada
+                </Text>
+              )}
+            </View>
+
+            {/* Declaraciones */}
+            <View style={complementaryStyles.declarationsContainer}>
+              <Text style={complementaryStyles.declarationsTitle}>
+                Declaraciones:
+              </Text>
+              {hasConditions ? (
+                sig.conditions.map((cond, condIdx: number) => (
+                  <View key={cond.condition_id || condIdx} style={complementaryStyles.declarationRow}>
+                    <Text style={complementaryStyles.bulletPoint}>•</Text>
+                    <Text style={complementaryStyles.declarationText}>
+                      {cond.declaration_text}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={complementaryStyles.emptyDeclarations}>
+                  No hay declaraciones asociadas a esta firma
+                </Text>
+              )}
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+
+
+
+// --------------------------------------------------
+// 12. PIE DE PÁGINA
 // --------------------------------------------------
 function FooterSection({ orderData, fechaDoc }: {
-  orderData: any;
+  orderData: FetchEntryOrderResult | undefined;
   fechaDoc: string;
 }) {
   return (
@@ -1144,11 +1645,17 @@ function FooterSection({ orderData, fechaDoc }: {
   );
 }
 
+
+
+
+
 // ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
-export default function OrderPDF({ logoURL, orderData, user }: OrderPDFProps) {
-  const finalLogo = logoURL || orderData?.plantilla_logo_url;
+export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
+  
+
+  
 
   const fechaDoc = orderData?.plantilla_fecha_documento
     ? new Date(orderData.plantilla_fecha_documento).toLocaleDateString('es-CO')
@@ -1163,12 +1670,19 @@ export default function OrderPDF({ logoURL, orderData, user }: OrderPDFProps) {
     : 'N/A';
 
   return (
-    <Document>
+    <Document
+    title= {orderData? `${orderData.plantilla_nombre} ${orderData.vehiculo_placa} `:templateData?.template_name}
+    author='Centro de Diagnostico Automotor Colombiano'
+    creator='Cda-App'
+    
+    
+    >
       <Page size="A4" style={pageStyles.page}>
         <HeaderSection
-          finalLogo={finalLogo}
+        
           orderData={orderData}
           fechaDoc={fechaDoc}
+          templateData={templateData}
         />
         <GeneralInfoSection orderData={orderData} fechaEntrada={fechaEntrada} />
         <VehicleSection orderData={orderData} />
@@ -1176,7 +1690,10 @@ export default function OrderPDF({ logoURL, orderData, user }: OrderPDFProps) {
         <ConditionsSection orderData={orderData} />
         <ObservationsSection orderData={orderData} />
         <ContractSection orderData={orderData} />
-        <InspectorSection user={user} />
+        <InspectorSection orderData={orderData} />
+        <OwnerSection orderData={orderData} />
+        <ClientSection orderData={orderData} />
+        <ComplementarySignaturesSection orderData={orderData} />
         <FooterSection orderData={orderData} fechaDoc={fechaDoc} />
       </Page>
     </Document>

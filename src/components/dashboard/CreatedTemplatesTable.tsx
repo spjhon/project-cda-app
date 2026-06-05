@@ -21,12 +21,15 @@ import {
   
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import OrderTemplateViewPDF from "./pdfs/OrderTemplateViewPDF";
-import OrderTemplateDownloadPDF from "./pdfs/OrderTemplateDownloadPDF";
+
+
 import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import OrderViewPDF from "./pdfs/OrderViewPDF";
+import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
+
 
 
 const SELECT_ORDENADO_POR = [
@@ -65,8 +68,16 @@ interface CreatedTemplatesTableProps {
 
 export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess, onUpdateStatus, isUpdating }: CreatedTemplatesTableProps) {
   
+
+
+
+
+
 const [orderBy, setOrderBy] = useState<string>("document_date");
 const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
+
+
+
 
 
 
@@ -349,11 +360,14 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
               <TableCell className="md:table-cell py-2 md:py-4 text-right">
                 <div className="flex items-center justify-end gap-2 mt-3 md:mt-0">
                   
-                  {/* Botón Ver (Ojo) */}
-                   <OrderTemplateViewPDF data={template}></OrderTemplateViewPDF>
+                 <OrderViewPDF templateData={template}></OrderViewPDF>
 
-                  {/* Botón Descargar */}
-                  <OrderTemplateDownloadPDF data={template}></OrderTemplateDownloadPDF>
+                    <OrderDownloadPDF templateData={template}></OrderDownloadPDF>
+
+
+                  
+
+                
 
                   {/* Botón Editar */}
                   <Button 

@@ -16,65 +16,201 @@ END $$;
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS public.entry_orders (
+
+    -- ==========================================
+    -- IDENTIFICADORES Y RELACIONES
+    -- ==========================================
+
     -- Identificador único global.
     id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- Indispensable para separar los datos de cada CDA.
     tenant_id                   UUID NOT NULL,
-    
-    -- El número que ve el cliente (ej: 0001, 0002).
-    consecutivo                 SERIAL,
-    
-    -- Fecha y hora exacta de la creación.
+
+    -- Vehículo asociado a la orden.
+    vehiculo_id                 UUID NOT NULL,
+
+    -- Propietario registrado al momento de crear la orden.
+    propietario_id              UUID NOT NULL,
+
+    -- Persona que presenta el vehículo.
+    cliente_id                  UUID NOT NULL,
+
+    -- Funcionario que recibe el vehículo.
+    funcionario_id              UUID NOT NULL,
+
+    -- Plantilla utilizada para generar la orden.
+    plantilla_id                UUID NOT NULL,
+
+
+    -- ==========================================
+    -- DATOS PRINCIPALES DE LA ORDEN
+    -- ==========================================
+
+    -- Fecha y hora exacta de creación.
     fecha                       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    -- tipo de servicio
-    service_type                service_type_enum NOT NULL DEFAULT 'RTM',
-    
-    -- Referencia al vehículo.
-    vehiculo_id                 UUID NOT NULL,
-    
-    -- Referencia al dueño actual.
-    propietario_id              UUID NOT NULL,
-    
-    -- Quien trae el vehículo (puede ser diferente al dueño).
-    cliente_id                  UUID NOT NULL,
-    
-    -- El recepcionista que atiende (Referencia a service_users).
-    funcionario_id              UUID NOT NULL,
-    
-    -- La plantilla de inspección que se usó.
-    plantilla_id                UUID NOT NULL,
-    
-    -- El valor que marca el odómetro.
-    kilometraje                 VARCHAR,
-    
-    -- Indica si viene por rechazo previo.
-    es_reinspeccion             BOOLEAN DEFAULT false,
-    
-    -- Notas generales del estado del vehículo.
-    observaciones               TEXT,
-    
-    -- 'abierta', 'en_prueba', 'finalizada', 'anulada'.
-    estado_orden                order_status_enum NOT NULL DEFAULT 'abierta',
-    
-    -- Fecha del SOAT al momento de entrar.
-    soat_vencimiento_snapshot   DATE,
-    
-    -- Número de certificado de gas al momento de entrar.
-    gas_numero_snapshot         VARCHAR,
-    
-    -- Fecha de certificado de gas al momento de entrar.
-    gas_vencimiento_snapshot    DATE,
+    -- Consecutivo visible para el cliente.
+    consecutivo                 INTEGER NOT NULL,
 
-    -- Registro de creación en sistema.
-    created_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Registro de última edición.
-    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Para anular la orden sin borrarla físicamente.
-    deleted_at                  TIMESTAMPTZ
+    -- Indica si proviene de una reinspección.
+    es_reinspeccion             BOOLEAN DEFAULT FALSE,
+
+    -- Tipo de servicio solicitado.
+    service_type                public.service_type_enum NOT NULL DEFAULT 'RTM'::public.service_type_enum,
+
+    -- Estado actual de la orden.
+    estado_orden                public.order_status_enum NOT NULL DEFAULT 'abierta'::public.order_status_enum,
+
+
+    -- ==========================================
+    -- SNAPSHOT DEL VEHÍCULO
+    -- ==========================================
+
+    -- Placa registrada al momento de crear la orden.
+    vehiculo_placa_snapshot                     VARCHAR NOT NULL,
+
+    -- Marca del vehículo.
+    vehiculo_marca_snapshot                     VARCHAR NOT NULL,
+
+    -- Línea del vehículo.
+    vehiculo_linea_snapshot                     VARCHAR NOT NULL,
+
+    -- Modelo del vehículo.
+    vehiculo_modelo_snapshot                    INTEGER NOT NULL,
+
+    -- Color registrado.
+    vehiculo_color_snapshot                     VARCHAR NOT NULL,
+
+    -- Tipo de vehículo.
+    vehiculo_tipo_snapshot                      public.vehicle_type_enum NOT NULL,
+
+    -- Clase del vehículo.
+    vehiculo_clase_snapshot                     VARCHAR NOT NULL,
+
+    -- Tipo de combustible.
+    vehiculo_combustible_snapshot               VARCHAR NOT NULL,
+
+    -- Cilindraje registrado.
+    vehiculo_cilindrada_snapshot                INTEGER NOT NULL,
+
+    -- Indica si posee blindaje.
+    vehiculo_blindaje_snapshot                  BOOLEAN NOT NULL,
+
+    -- Capacidad máxima de pasajeros.
+    vehiculo_capacidad_pasajeros_snapshot       INTEGER NOT NULL,
+
+    -- Vehículo de enseñanza.
+    vehiculo_es_ensenanza_snapshot              BOOLEAN NOT NULL,
+
+    -- Particular, público, oficial, etc.
+    vehiculo_tipo_servicio_snapshot             public.vehicle_service_type_enum NOT NULL,
+
+    -- Vehículo extranjero.
+    vehiculo_es_extranjero_snapshot             BOOLEAN NOT NULL,
+
+
+    -- ==========================================
+    -- SNAPSHOT DEL PROPIETARIO
+    -- ==========================================
+
+    -- Tipo de documento del propietario.
+    propietario_tipo_documento_snapshot         TEXT NOT NULL,
+
+    -- Número de documento del propietario.
+    propietario_numero_documento_snapshot       VARCHAR NOT NULL,
+
+    -- Nombre completo del propietario.
+    propietario_nombre_snapshot                 TEXT NOT NULL,
+
+    -- Teléfono del propietario.
+    propietario_telefono_snapshot               VARCHAR,
+
+    -- Correo electrónico del propietario.
+    propietario_email_snapshot                  TEXT,
+
+    -- Dirección registrada.
+    propietario_direccion_snapshot              TEXT,
+
+
+    -- ==========================================
+    -- SNAPSHOT DEL CLIENTE
+    -- ==========================================
+
+    -- Tipo de documento de quien presenta el vehículo.
+    cliente_tipo_documento_snapshot             TEXT NOT NULL,
+
+    -- Número de documento.
+    cliente_numero_documento_snapshot           VARCHAR NOT NULL,
+
+    -- Nombre completo.
+    cliente_nombre_snapshot                     TEXT NOT NULL,
+
+    -- Teléfono de contacto.
+    cliente_telefono_snapshot                   VARCHAR,
+
+    -- Correo electrónico.
+    cliente_email_snapshot                      TEXT,
+
+    -- Dirección registrada.
+    cliente_direccion_snapshot                  TEXT,
+
+
+    -- ==========================================
+    -- SNAPSHOT DEL FUNCIONARIO
+    -- ==========================================
+
+    -- Tipo de documento del funcionario.
+    funcionario_tipo_documento_snapshot         TEXT NOT NULL,
+
+    -- Número de documento.
+    funcionario_numero_documento_snapshot       VARCHAR NOT NULL,
+
+    -- Nombre completo.
+    funcionario_nombre_snapshot                 TEXT NOT NULL,
+
+    -- Firma digital utilizada para la recepción.
+    funcionario_firma_base64_snapshot           TEXT NOT NULL,
+
+
+    -- ==========================================
+    -- SNAPSHOTS DOCUMENTALES
+    -- ==========================================
+
+    -- Fecha de vencimiento del SOAT al momento del ingreso.
+    soat_vencimiento_snapshot                   DATE,
+
+    -- Número del certificado de gas.
+    gas_numero_snapshot                         VARCHAR,
+
+    -- Fecha de vencimiento del certificado de gas.
+    gas_vencimiento_snapshot                    DATE,
+
+
+    -- ==========================================
+    -- DATOS OPERATIVOS
+    -- ==========================================
+
+    -- Lectura del odómetro al ingreso.
+    kilometraje                                 VARCHAR,
+
+    -- Observaciones generales registradas por recepción.
+    observaciones                               TEXT,
+
+
+    -- ==========================================
+    -- AUDITORÍA
+    -- ==========================================
+
+    -- Fecha de creación del registro.
+    created_at                                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- Fecha de última modificación.
+    updated_at                                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    -- Soft delete.
+    deleted_at                                  TIMESTAMPTZ
+
 );
 
 -- ==========================================

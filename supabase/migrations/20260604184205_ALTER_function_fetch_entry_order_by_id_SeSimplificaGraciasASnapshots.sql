@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_order_by_id(UUID, UUID);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_order_by_id(
     p_order_id UUID,
     p_tenant_id UUID DEFAULT NULL
@@ -60,7 +62,6 @@ RETURNS TABLE (
     cliente_tipo_documento TEXT,
     funcionario_nombre TEXT,
     funcionario_documento TEXT,
-    funcionario_firma TEXT, -- Nueva columna añadida
 
     -- Colecciones de Datos Detalle
     presiones_llantas JSONB,
@@ -129,7 +130,6 @@ BEGIN
         o.cliente_tipo_documento_snapshot::TEXT AS cliente_tipo_documento,
         o.funcionario_nombre_snapshot AS funcionario_nombre,
         o.funcionario_numero_documento_snapshot::TEXT AS funcionario_documento,
-        o.funcionario_firma_base64_snapshot AS funcionario_firma,
 
         -- Bloque Subconsulta: Mediciones de Presión
         (
@@ -174,7 +174,7 @@ BEGIN
               AND tc.deleted_at IS NULL
         ) AS condiciones_plantilla,
 
-        -- Bloque Subconsulta 3: Firmas Dinámicas Complementarias (EXCLUSIVO CLIENTE / PROPIETARIO / OTROS)
+        -- Bloque Subconsulta 3: Firmas Combinadas (Dinámicas + Snapshot Funcionario)
         (
             SELECT jsonb_agg(
                 jsonb_build_object(
@@ -182,41 +182,31 @@ BEGIN
                     'representative_type', ots.representative_type,
                     'signature_label', ots.signature_label,
                     
-                    -- Aquí NUNCA entra el inspector. Es puramente para las firmas dinámicas de la tabla order_signatures
-                    'signature_url', COALESCE(os.signature_url, ''),
+                    -- Si el rol es el funcionario/inspector, inyectamos directamente su snapshot inmutable.
+                    -- De lo contrario, extraemos la URL de las firmas capturadas en la orden (cliente/propietario).
+                    'signature_url', CASE 
+                        WHEN ots.representative_type = 'inspector' THEN COALESCE(NULLIF(o.funcionario_firma_base64_snapshot, ''), '')
+                        ELSE COALESCE(os.signature_url, '')
+                    END,
                     
-                    'conditions', COALESCE(
-                        (
-                            SELECT jsonb_agg(
-                                jsonb_build_object(
-                                    'condition_id', os_cond.id,
-                                    'declaration_text', os_cond.declaration_text
-                                )
-                                ORDER BY os_cond.created_at ASC
-                            )
-                            FROM public.order_template_signature_conditions os_cond
-                            WHERE os_cond.order_template_signature_id = ots.id
-                              AND os_cond.tenant_id = o.tenant_id
-                              AND os_cond.deleted_at IS NULL
-                        ), 
-                        '[]'::jsonb
-                    )
+                    'declaration_text', os_cond.declaration_text
                 )
                 ORDER BY ots.created_at ASC
             )
             FROM public.order_template_signatures ots
             
-            -- LEFT JOIN puro para traer la firma de la tabla dinámica
             LEFT JOIN public.order_signatures os
                 ON os.template_signature_id = ots.id
                AND os.entry_order_id = o.id
                AND os.tenant_id = o.tenant_id
                
+            LEFT JOIN public.order_template_signature_conditions os_cond
+                ON os_cond.order_template_signature_id = ots.id
+               AND os_cond.tenant_id = o.tenant_id
+               AND os_cond.deleted_at IS NULL
+               
             WHERE ots.order_template_id = o.plantilla_id
               AND ots.tenant_id = o.tenant_id
-              -- ¡CLAVE! Excluimos cualquier intento de mapear al inspector en este bloque dinámico
-              AND LOWER(ots.representative_type) NOT LIKE '%inspector%'
-              AND LOWER(ots.representative_type) NOT LIKE '%funcionario%'
               AND ots.deleted_at IS NULL
         ) AS firmas_orden
 
