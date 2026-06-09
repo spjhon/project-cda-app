@@ -28,8 +28,12 @@ export default function CreatedTemplatesPage() {
       isSuccess={query.isSuccess}
       
       // Acciones y estados de la Mutación
-      onUpdateStatus={(id, is_active) => mutation.mutate({ id, is_active })}
-      isUpdating={mutation.isPending}
+      onUpdateStatus={(id, is_active) => mutation.updateIsActive({ id, is_active })}
+      isUpdating={mutation.isUpdating}
+      deleteTemplate={(id, tenantId) => mutation.deleteTemplate({ id, tenantId })}
+      isDeletingTemplate={mutation.isDeletingTemplate}
+      errorDeletingTemplate={mutation.errorDeletingTemplate}
+      resetDeleteMutation={mutation.resetDeleteMutation}
     />
   );
 }

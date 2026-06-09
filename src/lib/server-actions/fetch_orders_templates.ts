@@ -15,7 +15,7 @@ export interface OrderTemplateCondition {
   id: string;
   label: string;
   is_special: boolean;
-  special_condition_label: string | null;
+  special_condition_label: string | undefined;
   default_value: 'cumple' | 'no_cumple' | 'no_aplica';
 }
 

@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
+import { useRouter } from "next/navigation";
 
 
 
@@ -58,7 +59,10 @@ interface CreatedTemplatesTableProps {
   onUpdateStatus: (id: string, is_active: boolean) => void;
   isUpdating: boolean;
 
-  
+  deleteTemplate: (id: string, tenantId: string) => void
+  isDeletingTemplate: boolean;
+  errorDeletingTemplate: Error | null;
+   resetDeleteMutation: () => void;
 }
 
 
@@ -66,11 +70,27 @@ interface CreatedTemplatesTableProps {
 
 
 
-export default function CreatedTemplatesTable({ data, isError, error, refetch, isFetching, isSuccess, onUpdateStatus, isUpdating }: CreatedTemplatesTableProps) {
+export default function CreatedTemplatesTable({ 
+  //Comandos para el pooling de los templates de la tabla
+  data, 
+  isError, 
+  error, 
+  refetch, 
+  isFetching, 
+  isSuccess, 
+  //Comandos para el is_active
+  onUpdateStatus, 
+  isUpdating,
+  //Comandos para la eliminacion de un template
+  deleteTemplate,
+  isDeletingTemplate, 
+errorDeletingTemplate,
+ resetDeleteMutation
+}: CreatedTemplatesTableProps) {
   
 
 
-
+const router = useRouter();
 
 
 const [orderBy, setOrderBy] = useState<string>("document_date");
@@ -176,6 +196,43 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
       </div>
     );
   }
+
+
+if (errorDeletingTemplate) {
+  return (
+    <Alert variant="destructive" className="my-4 bg-red-50 border-red-200 animate-in fade-in-50 duration-200">
+      <AlertCircle className="h-4 w-4 text-red-600" />
+      <AlertTitle className="font-bold text-red-800">Operación de borrado rechazada</AlertTitle>
+      <AlertDescription className="flex flex-col gap-3 mt-1 text-red-700">
+        <p className="text-sm leading-relaxed">
+          {errorDeletingTemplate?.message || "No se pudo eliminar la plantilla debido a un error inesperado de seguridad."}
+        </p>
+        
+        {/* Botón de acción opcional por si quiere forzar el reintento manualmente con el mismo ID */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={isDeletingTemplate}
+          onClick={() => {
+            // Aquí puedes quemar el reintento si guardas el ID fallido en un estado, 
+            // o simplemente usar este botón para limpiar el estado del error
+            resetDeleteMutation() // Elimina el banner de error de la pantalla de inmediato
+          }}
+          className="w-fit bg-white hover:bg-red-100 border-red-200 text-red-700 font-medium shadow-xs transition-colors"
+        >
+          {isDeletingTemplate ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="mr-2 h-4 w-4" />
+          )}
+          Entendido
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+
 
   return (
     <div className="rounded-md border bg-white shadow-sm overflow-hidden m-5">
@@ -362,7 +419,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
                   
                  <OrderViewPDF templateData={template}></OrderViewPDF>
 
-                    <OrderDownloadPDF templateData={template}></OrderDownloadPDF>
+                  <OrderDownloadPDF templateData={template}></OrderDownloadPDF>
 
 
                   
@@ -375,19 +432,36 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
                     size="icon" 
                     className="h-8 w-8 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
                     title="Editar plantilla"
+                    onClick={() => {
+                      // Redirige a la misma página o layout agregando el query string seguro
+                      router.push(`/dashboard/recepcionista/crear-orden-de-entrada?templateId=${template.id}`);
+                    }}
                   >
                     <Edit3 className="h-4 w-4" />
                   </Button>
                   
+
+
                   {/* Botón Eliminar */}
-                  <Button 
+                 <Button 
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-slate-600 hover:text-red-600 hover:bg-red-50"
                     title="Eliminar"
+                    // 1. Deshabilitamos el botón de inmediato si otra plantilla o esta misma se está borrando
+                    disabled={isDeletingTemplate} 
+                    // 2. Disparamos la acción pasando el ID de la plantilla actual
+                    onClick={() => deleteTemplate(template.id, template.tenant_id)} 
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {/* 3. Renderizado condicional: si está cargando, mostramos un spinner animado */}
+                    {isDeletingTemplate ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </Button>
+
+
                 </div>
               </TableCell>
             </TableRow>

@@ -911,8 +911,11 @@ export type Database = {
           p_fecha_hasta?: string
           p_limit?: number
           p_offset?: number
+          p_order_by_column?: string
+          p_order_by_direction?: string
           p_placa?: string
           p_propietario_documento?: string
+          p_search_term?: string
           p_tenant_id: string
         }
         Returns: {

@@ -46,6 +46,9 @@ function OrderViewPDF({ orderId, tenantId, templateData }: OrderViewPDFProps) {
     );
   }
 
+
+  
+
   // Renderizado final con los spinners ordenados (como lo organizamos antes)
   return (
   <>

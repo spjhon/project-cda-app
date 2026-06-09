@@ -1,9 +1,8 @@
 "use client";
 
 
-
 import React, { useContext, useState } from "react";
-import { CalendarIcon, LayoutDashboard, FileText, Trash2 } from "lucide-react";
+import { CalendarIcon, LayoutDashboard, FileText, Trash2, } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -25,9 +24,59 @@ import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
 
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import ConditionDialog from "@/components/dashboard/ConditionDialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+//import { useFetchTemplateForEdition } from "@/lib/client-actions/fetch_template_data_for_edition";
+import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
+import { OrderTemplateSignature } from "@/lib/server-actions/fetch_orders_templates";
+
+
+
+
+// ==========================================
+// FUNCIÓN DE NORMALIZACIÓN INDEPENDIENTE
+// ==========================================
+/**
+ * Adapta la estructura de firmas de la base de datos al formato
+ * requerido por el esquema de Zod e inputs del formulario.
+ */
+function normalizeSignatures(dbSignatures: OrderTemplateSignature[]) {
+  if (!dbSignatures || !Array.isArray(dbSignatures)) return [];
+
+  return dbSignatures.map((sig) => ({
+    // Mapeo: representative_type ➡️ a_quien_representa
+    a_quien_representa: sig.representative_type || "",
+    
+    // Mapeo: signature_label ➡️ label_firma
+    label_firma: sig.signature_label || "",
+    
+    // Mapeo de declaraciones internas
+    declarations: Array.isArray(sig.declarations)
+      ? sig.declarations.map((dec) => ({
+          // Mapeo: Asegura que caiga en texto_declaracion
+          texto_declaracion: dec.declaration_text || "",
+        }))
+      : [],
+  }));
+}
+
+
+
+
+
+
+
+
+
 
 // Centralización de textos
 const COMPONENT_TEXT = {
@@ -65,64 +114,127 @@ const COMPONENT_TEXT = {
 };
 
 
+
+
+
 export default function NewOrderTemplateForm() {
+ 
+
+const searchParams = useSearchParams()
+
 
  const queryClient = useQueryClient();
 
   const contextRecived = useContext(PermissionsContext);
+  const contextRecivedReceptionist = useContext(ReceptionistContext);
 
-
-  const tenantId = contextRecived?.PermissionsContextValue.tenantObject?.id
-  const logo_url = contextRecived?.PermissionsContextValue.tenantObject?.logo_url
-  
-
+  const tenantId = contextRecived?.PermissionsContextValue.tenantObject?.id;
+  const logo_url = contextRecived?.PermissionsContextValue.tenantObject?.logo_url;
   const user = contextRecived?.PermissionsContextValue.user;
+
+
+ const templateId = searchParams.get('templateId')
+
+
+
+const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.templateTableData.query.data?.find(
+  (template) => template.id === templateId
+);
+
+
+
 
 
 
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM
-  const [formData, setFormData] = useState<OrderTemplateInput>({
-    tenant_id: tenantId || "",
-    template_name: "",
-    version: 1,
-    is_active: false,
-    document_date: new Date(),
-    document_code: "",
-    logo_url: logo_url || "",
-    base_contract_text: "",
-    created_by: user?.id || "",
-    // Agregamos el array de condiciones aquí
-    conditions: [
-     
-    ],
-    signatures: [
-      
-    ],
+  const [formData, setFormData] = useState<OrderTemplateInput>( {
+    
+      tenant_id: tenantId || "",
+      template_name: "",
+      version: 1,
+      is_active: false,
+      document_date: new Date(),
+      document_code: "",
+      logo_url: logo_url || "",
+      base_contract_text: "",
+      created_by: user?.id || "",
+      conditions: [],
+      signatures: [],
+    
   });
-  
+
+ 
+
+
+// =================================================================
+  // GUARDIA DE SINCRONIZACIÓN (Sustituto de useEffect sin romper el flujo)
+  // =================================================================
+  // Guardamos en una variable si el formulario está mostrando datos de edición o está vacío
+  const isFormShowingTemplateId = formData.document_code === currentTemplate?.document_code;
+
+  // Si la URL tiene un templateId pero el estado actual NO coincide con los datos de ese template...
+  if (currentTemplate && !isFormShowingTemplateId) {
+    // Forzamos síncronamente la actualización del estado con la nueva plantilla
+    setFormData({
+      tenant_id: tenantId || "",
+      template_name: currentTemplate.template_name || "",
+      version: currentTemplate.version ?? 1,
+      is_active: false,
+      document_date: currentTemplate.document_date ? new Date(currentTemplate.document_date) : new Date(),
+      document_code: currentTemplate.document_code || "",
+      logo_url: logo_url || "",
+      base_contract_text: currentTemplate.base_contract_text || "",
+      created_by: user?.id || "",
+      conditions: currentTemplate.conditions || [],
+      signatures: normalizeSignatures(currentTemplate.signatures),
+    });
+  } 
+  // Si la URL NO tiene templateId (es nueva) pero el estado actual todavía tiene datos guardados de antes...
+  else if (!templateId && formData.template_name !== "") {
+    // Limpiamos el estado para que vuelva a quedar en blanco
+    setFormData({
+      tenant_id: tenantId || "",
+      template_name: "",
+      version: 1,
+      is_active: false,
+      document_date: new Date(),
+      document_code: "",
+      logo_url: logo_url || "",
+      base_contract_text: "",
+      created_by: user?.id || "",
+      conditions: [],
+      signatures: [],
+    });
+  }
+
+
+
+
+
+
+
+
 
 
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      
-
-  
 
     // Llamamos a la Server Action pasándole nuestro estado
-    const result = await createOrderTemplateAction(formData);
+    const {data: createTemplateData, error} = await createOrderTemplateAction(formData);
 
-    if (result.error) {
-      console.log("❌ Falló la validación:", result.details);
+    if (error || !createTemplateData) {
+      console.log("❌ Falló la validación");
       // TypeScript ahora sabe que result.details es un array de ZodIssue
-      
-      
-      alert("Error, reviza que el codigo con esta version, no se encuentren ya registrados")
+
+      alert(
+        `Error al crear la plantilla, ${error}`,
+      );
     } else {
       queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
-      console.log("✅ ¡Validación exitosa!:", result.message);
-      alert("Todo bien, los datos son válidos.");
+      console.log("✅ ¡Validación exitosa!");
+      alert("Plantilla creada correctamente");
     }
 
     console.log("Datos capturados.");
@@ -131,8 +243,10 @@ export default function NewOrderTemplateForm() {
 
 
 
+
+
+
   //FUNCIONES PARA CREAR, EDITAR O ELIMINAR UNA CONDICION AGREGADA
-  
 
   const removeCondition = (index: number) => {
     setFormData({
@@ -140,10 +254,6 @@ export default function NewOrderTemplateForm() {
       conditions: formData.conditions.filter((_, i) => i !== index),
     });
   };
-
-
-
-
 
   //FUNCIONES PARA CREAR, EDITAR O ELIMINAR UNA DELCARACION PARA LA FIRMA
   const addSignature = () => {
@@ -160,7 +270,6 @@ export default function NewOrderTemplateForm() {
     const newSignatures = [...formData.signatures];
     newSignatures[sigIndex].declarations.push({
       texto_declaracion: "",
-      
     });
     setFormData({ ...formData, signatures: newSignatures });
   };
@@ -175,18 +284,10 @@ export default function NewOrderTemplateForm() {
     setFormData({ ...formData, signatures: newSignatures });
   };
 
-
-
   return (
     <form onSubmit={handleSubmit} className="w-full">
-
-
-
-
       {/* SECCION DE CONFIGURACION DE PLANTILLA */}
       <div className="flex flex-col lg:flex-row gap-6 items-stretch">
-
-
         {/* COLUMNA IZQUIERDA: Configuración */}
         <Card className="flex-1 border-border bg-card text-card-foreground shadow-none rounded-lg">
           <CardHeader className="border-b border-border mb-4">
@@ -232,14 +333,14 @@ export default function NewOrderTemplateForm() {
                   id="version"
                   type="number"
                   min={1}
-                  // Usamos un string vacío como fallback para que el input 
+                  // Usamos un string vacío como fallback para que el input
                   // se vea limpio mientras el usuario borra y escribe
                   value={isNaN(formData.version) ? "" : formData.version}
                   onChange={(e) => {
                     const val = e.target.value;
                     setFormData({
                       ...formData,
-                      // Si el usuario borra todo, guardamos NaN (o 0), 
+                      // Si el usuario borra todo, guardamos NaN (o 0),
                       // pero si hay texto, lo convertimos a número
                       version: val === "" ? NaN : parseInt(val),
                     });
@@ -247,8 +348,6 @@ export default function NewOrderTemplateForm() {
                 />
               </div>
             </div>
-
-            
 
             <div className="grid gap-2">
               <Label>{COMPONENT_TEXT.labels.date}</Label>
@@ -273,15 +372,13 @@ export default function NewOrderTemplateForm() {
                     onSelect={(date) =>
                       date && setFormData({ ...formData, document_date: date })
                     }
-                    initialFocus
+                    
                   />
                 </PopoverContent>
               </Popover>
             </div>
 
-
-
-{/**
+            {/**
  * <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/20">
               <div className="space-y-0.5">
                 <Label htmlFor="is_active">
@@ -300,14 +397,8 @@ export default function NewOrderTemplateForm() {
               />
             </div>
  */}
-
-            
-
-
           </CardContent>
         </Card>
-
-
 
         {/* COLUMNA DERECHA: Contrato */}
         <Card className="flex-[1.5] border-border bg-card text-card-foreground shadow-none rounded-lg flex flex-col">
@@ -335,120 +426,94 @@ export default function NewOrderTemplateForm() {
             </p>
           </CardContent>
         </Card>
-
-
       </div>
 
+      {/* SECCIÓN DE CONDICIONES EN FORMATO TABLA */}
+      <Card className="mt-6 border-border shadow-none rounded-lg overflow-hidden">
+        <CardHeader className="border-b bg-muted/30 flex flex-row items-center justify-between py-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <LayoutDashboard className="size-5 text-primary" />
+            {COMPONENT_TEXT.conditions.headerTittle}
+          </CardTitle>
 
+          {/* El diálogo ahora maneja la creación */}
+          <ConditionDialog setFormData={setFormData} />
+        </CardHeader>
 
+        <CardContent className="p-0">
+          {formData.conditions.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/20">
+                  <TableHead className="w-[50%]">Condición</TableHead>
+                  <TableHead>Valor Inicial</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {formData.conditions.map((item, index) => (
+                  <TableRow key={index} className="group">
+                    <TableCell className="max-w-75 md:max-w-100">
+                      <div className="flex flex-col gap-1 w-full min-w-0">
+                        <span className="font-medium text-sm block whitespace-normal wrap-break-word">
+                          {item.label}
+                        </span>
+                        {item.is_special && (
+                          <span className="text-[10px] text-primary font-bold uppercase tracking-tight block wrap-break-word">
+                            Aplica a: {item.special_condition_label}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="capitalize font-medium"
+                      >
+                        {item.default_value.replace("_", " ")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {item.is_special ? (
+                        <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 text-[10px] uppercase">
+                          Especial
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] uppercase text-slate-500"
+                        >
+                          Estándar
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeCondition(index)}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground bg-background">
+              <LayoutDashboard className="size-10 mx-auto mb-3 opacity-20" />
+              <p className="text-sm italic">
+                No hay condiciones definidas para este template.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-
-
-
-{/* SECCIÓN DE CONDICIONES EN FORMATO TABLA */}
-<Card className="mt-6 border-border shadow-none rounded-lg overflow-hidden">
-
-
-  <CardHeader className="border-b bg-muted/30 flex flex-row items-center justify-between py-4">
-    <CardTitle className="text-lg font-semibold flex items-center gap-2">
-      <LayoutDashboard className="size-5 text-primary" />
-      {COMPONENT_TEXT.conditions.headerTittle}
-    </CardTitle>
-    
-
-
-    {/* El diálogo ahora maneja la creación */}
-    <ConditionDialog 
-       
-      setFormData={setFormData}
-    />
-      
-    
-
-
-  </CardHeader>
-
-
-
-
-  <CardContent className="p-0">
-    {formData.conditions.length > 0 ? (
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/20">
-            <TableHead className="w-[50%]">Condición</TableHead>
-            <TableHead>Valor Inicial</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {formData.conditions.map((item, index) => (
-            <TableRow key={index} className="group">
-             <TableCell className="max-w-75 md:max-w-100"> 
-                <div className="flex flex-col gap-1 w-full min-w-0">
-                  <span className="font-medium text-sm block whitespace-normal wrap-break-word">
-                    {item.label}
-                  </span>
-                  {item.is_special && (
-                    <span className="text-[10px] text-primary font-bold uppercase tracking-tight block wrap-break-word">
-                      Aplica a: {item.special_condition_label}
-                    </span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="capitalize font-medium">
-                  {item.default_value.replace("_", " ")}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {item.is_special ? (
-                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 text-[10px] uppercase">
-                    Especial
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-[10px] uppercase text-slate-500">
-                    Estándar
-                  </Badge>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeCondition(index)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    ) : (
-      <div className="text-center py-12 text-muted-foreground bg-background">
-        <LayoutDashboard className="size-10 mx-auto mb-3 opacity-20" />
-        <p className="text-sm italic">No hay condiciones definidas para este template.</p>
-      </div>
-    )}
-  </CardContent>
-</Card>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {/* SECCION DE CONFIGURACION DE LA FIRMA */}
+      {/* SECCION DE CONFIGURACION DE LA FIRMA */}
       <Card className="mt-6 border-border bg-card text-card-foreground shadow-none rounded-lg">
         <CardHeader className="border-b border-border mb-4 flex flex-row items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -589,14 +654,6 @@ export default function NewOrderTemplateForm() {
         </CardContent>
       </Card>
 
-
-
-
-
-
-
-
-
       {/* BOTON DE ENVIO DE DATOS */}
       <div className="flex justify-end pt-2">
         <Button
@@ -607,9 +664,6 @@ export default function NewOrderTemplateForm() {
           {COMPONENT_TEXT.submit}
         </Button>
       </div>
-
-
-
     </form>
   );
 }

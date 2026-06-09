@@ -18,7 +18,7 @@ export interface TemplateConditionDetail {
   label: string;
   is_special: boolean;
   special_condition_label: string | null;
-  value: string;
+  default_value: string;
 }
 
 export interface SignatureConditionDetail {

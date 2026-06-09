@@ -1,7 +1,7 @@
 "use client";
 
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
-import { FetchEntryOrderResult, OrderSignatureDetail, TirePressureDetail } from '@/lib/client-actions/fetch_entry_order_by_id';
+import { FetchEntryOrderResult, TirePressureDetail } from '@/lib/client-actions/fetch_entry_order_by_id';
 import {  OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
 
 // ============================================================
@@ -782,21 +782,26 @@ interface OrderPDFProps {
 // --------------------------------------------------
 // 1. ENCABEZADO
 // --------------------------------------------------
-function HeaderSection({ orderData, fechaDoc, templateData }: {
+function HeaderSection({ orderData, templateData }: {
  
   orderData?: FetchEntryOrderResult;
   fechaDoc: string;
   templateData: OrderTemplateType | undefined;
 }) {
+
+
+  const logoSrc = orderData?.plantilla_logo_url || templateData?.logo_url;
+
+
   return (
     <View style={headerStyles.headerContainer}>
-      <View style={headerStyles.logoSection}>
-        {orderData?.plantilla_logo_url ? (
-          <Image src={orderData.plantilla_logo_url??""} style={headerStyles.logo}/>
-        ) : (
-          <Text style={headerStyles.logoFallback}>TU LOGO</Text>
-        )}
-      </View>
+          <View style={headerStyles.logoSection}>
+      {logoSrc ? (
+        <Image src={logoSrc} style={headerStyles.logo} />
+      ) : (
+        <Text style={headerStyles.logoFallback}>TU LOGO</Text>
+      )}
+    </View>
 
       <View style={headerStyles.titleSection}>
         <Text style={headerStyles.documentTitle}>
@@ -808,18 +813,18 @@ function HeaderSection({ orderData, fechaDoc, templateData }: {
         <View style={headerStyles.metaRow}>
           <Text style={headerStyles.metaLabel}>Código:</Text>
           <Text style={headerStyles.metaValue}>
-            {orderData?.plantilla_codigo_documento || 'N/A'}
+            {orderData?.plantilla_codigo_documento || templateData?.document_code || 'N/A'}
           </Text>
         </View>
         <View style={headerStyles.metaRow}>
           <Text style={headerStyles.metaLabel}>Versión:</Text>
           <Text style={headerStyles.metaValue}>
-            {orderData?.plantilla_version !== undefined ? orderData.plantilla_version : 'N/A'}
+            {orderData?.plantilla_version || templateData?.version || 'N/A'}
           </Text>
         </View>
         <View style={headerStyles.metaRow}>
           <Text style={headerStyles.metaLabel}>Fecha Doc:</Text>
-          <Text style={headerStyles.metaValue}>{fechaDoc}</Text>
+          <Text style={headerStyles.metaValue}>{orderData?.plantilla_fecha_documento??templateData?.document_date}</Text>
         </View>
         <View style={headerStyles.metaRowLast}>
           <Text style={[headerStyles.metaLabel, { color: '#312e81' }]}>
@@ -1134,10 +1139,22 @@ function PressureSection({ orderData }: { orderData: FetchEntryOrderResult | und
   );
 }
 
+
+
+
 // --------------------------------------------------
 // 5. CONDICIONES DE INSPECCIÓN
 // --------------------------------------------------
-function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
+function ConditionsSection({ orderData, templateData }: {
+ 
+  orderData?: FetchEntryOrderResult;
+  templateData?: OrderTemplateType;
+}) {
+
+const conditions = orderData?.condiciones_plantilla || templateData?.conditions
+
+
+
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -1149,7 +1166,7 @@ function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | u
       <View style={conditionStyles.cond_tableHeader}>
         <View style={conditionStyles.cond_colLabel}>
           <Text style={conditionStyles.cond_tableHeaderText}>
-            Ítem / Condición Evaluada
+            Condición Evaluada
           </Text>
         </View>
         <View style={conditionStyles.cond_colValue}>
@@ -1164,9 +1181,8 @@ function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | u
         </View>
       </View>
 
-      {orderData?.condiciones_plantilla &&
-      orderData.condiciones_plantilla.length > 0 ? (
-        orderData.condiciones_plantilla.map((cond, index: number) => {
+      {conditions && conditions.length > 0 ? (
+        conditions.map((cond, index: number) => {
           const isLast = index === (orderData?.condiciones_plantilla?.length || 0) - 1;
           return (
             <View
@@ -1187,7 +1203,7 @@ function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | u
               </View>
 
               <View style={conditionStyles.cond_colValue}>
-                {cond.value === 'cumple' ? (
+                {cond.default_value === 'cumple' ? (
                   <Text style={conditionStyles.badgeCumple}>Cumple</Text>
                 ) : (
                   <Text style={conditionStyles.badgeNoAplica}>No Aplica</Text>
@@ -1206,6 +1222,12 @@ function ConditionsSection({ orderData }: { orderData: FetchEntryOrderResult | u
     </View>
   );
 }
+
+
+
+
+
+
 
 // --------------------------------------------------
 // 6. OBSERVACIONES
@@ -1240,7 +1262,15 @@ function ObservationsSection({ orderData }: { orderData: FetchEntryOrderResult |
 // --------------------------------------------------
 // 7. TÉRMINOS CONTRACTUALES
 // --------------------------------------------------
-function ContractSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
+function ContractSection({ orderData, templateData }: {
+ 
+  orderData?: FetchEntryOrderResult;
+ 
+  templateData?: OrderTemplateType;
+}) {
+
+const textoContractual = orderData?.plantilla_texto_contractual || templateData?.base_contract_text;
+
   return (
     <View style={sectionStyles.sectionContainer}>
       <View style={sectionStyles.sectionHeader}>
@@ -1249,21 +1279,20 @@ function ContractSection({ orderData }: { orderData: FetchEntryOrderResult | und
         </Text>
       </View>
 
-      {orderData?.plantilla_texto_contractual &&
-      orderData.plantilla_texto_contractual.trim() !== '' ? (
-        <View style={contractStyles.contratoContainer}>
-          <Text style={contractStyles.contratoText}>
-            {orderData.plantilla_texto_contractual}
-          </Text>
-        </View>
-      ) : (
-        <View style={contractStyles.contratoContainer}>
-          <Text style={contractStyles.contratoVacio}>
-            No se constatan cláusulas contractuales específicas anexas a esta orden
-            de entrada.
-          </Text>
-        </View>
-      )}
+      {typeof textoContractual === 'string' && textoContractual.trim() !== '' ? (
+  <View style={contractStyles.contratoContainer}>
+    <Text style={contractStyles.contratoText}>
+      {textoContractual}
+    </Text>
+  </View>
+) : (
+  <View style={contractStyles.contratoContainer}>
+    <Text style={contractStyles.contratoVacio}>
+      No se constatan cláusulas contractuales específicas anexas a esta orden
+      de entrada.
+    </Text>
+  </View>
+)}
     </View>
   );
 }
@@ -1536,15 +1565,41 @@ function ClientSection({ orderData }: { orderData: FetchEntryOrderResult | undef
 
 
 
-
-
 // --------------------------------------------------
-// 11 FIRMAS COMPLEMENTARIAS (CLIENTES/OTROS)
+// 11. FIRMAS COMPLEMENTARIAS (CLIENTES / OTROS)
 // --------------------------------------------------
-function ComplementarySignaturesSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
-  const signatures = orderData?.firmas_orden || [];
+function ComplementarySignaturesSection({
+  orderData,
+  templateData,
+}: {
+  orderData?: FetchEntryOrderResult;
+  templateData?: OrderTemplateType;
+}) {
 
-  if (!signatures || signatures.length === 0) {
+  const signatures =
+    orderData?.firmas_orden?.map((sig) => ({
+      id: sig.template_signature_id,
+      representative_type: sig.representative_type,
+      signature_label: sig.signature_label,
+      signature_url: sig.signature_url,
+      declarations: sig.conditions.map((condition) => ({
+        id: condition.condition_id,
+        declaration_text: condition.declaration_text,
+      })),
+    })) ??
+    templateData?.signatures?.map((sig) => ({
+      id: sig.id,
+      representative_type: sig.representative_type,
+      signature_label: sig.signature_label,
+      signature_url: null,
+      declarations: sig.declarations.map((declaration) => ({
+        id: declaration.id,
+        declaration_text: declaration.declaration_text,
+      })),
+    })) ??
+    [];
+
+  if (signatures.length === 0) {
     return null;
   }
 
@@ -1556,57 +1611,67 @@ function ComplementarySignaturesSection({ orderData }: { orderData: FetchEntryOr
         </Text>
       </View>
 
-      {signatures.map((sig: OrderSignatureDetail, idx: number) => {
+      {signatures.map((signature, idx) => {
         const isLast = idx === signatures.length - 1;
-        const hasConditions = sig.conditions && sig.conditions.length > 0;
 
         return (
           <View
-            key={sig.template_signature_id || idx}
-            style={isLast ? complementaryStyles.signatureItemLast : complementaryStyles.signatureItem}
+            key={signature.id}
+            style={
+              isLast
+                ? complementaryStyles.signatureItemLast
+                : complementaryStyles.signatureItem
+            }
           >
-            {/* Encabezado */}
+            {/* ENCABEZADO */}
             <View style={complementaryStyles.signatureHeader}>
               <Text style={complementaryStyles.signatureLabel}>
-                {sig.representative_type || ''}
+                {signature.representative_type}
               </Text>
+
               <Text style={complementaryStyles.representativeType}>
-                {sig.signature_label || 'Firma'}
+                {signature.signature_label}
               </Text>
             </View>
 
-            {/* Imagen de la firma */}
+            {/* FIRMA */}
             <View style={complementaryStyles.imageContainer}>
-              {/* CORREGIDO: Se usa signature_url que viene en la subconsulta firmas_orden */}
-              {sig.signature_url ? (
+              {signature.signature_url ? (
                 <Image
-                  src={sig.signature_url}
+                  src={signature.signature_url}
                   style={complementaryStyles.signatureImage}
                 />
               ) : (
                 <Text style={complementaryStyles.noSignatureText}>
-                  Sin firma registrada
+                  Firma pendiente de captura
                 </Text>
               )}
             </View>
 
-            {/* Declaraciones */}
+            {/* DECLARACIONES */}
             <View style={complementaryStyles.declarationsContainer}>
               <Text style={complementaryStyles.declarationsTitle}>
                 Declaraciones:
               </Text>
-              {hasConditions ? (
-                sig.conditions.map((cond, condIdx: number) => (
-                  <View key={cond.condition_id || condIdx} style={complementaryStyles.declarationRow}>
-                    <Text style={complementaryStyles.bulletPoint}>•</Text>
+
+              {signature.declarations.length > 0 ? (
+                signature.declarations.map((declaration) => (
+                  <View
+                    key={declaration.id}
+                    style={complementaryStyles.declarationRow}
+                  >
+                    <Text style={complementaryStyles.bulletPoint}>
+                      •
+                    </Text>
+
                     <Text style={complementaryStyles.declarationText}>
-                      {cond.declaration_text}
+                      {declaration.declaration_text}
                     </Text>
                   </View>
                 ))
               ) : (
                 <Text style={complementaryStyles.emptyDeclarations}>
-                  No hay declaraciones asociadas a esta firma
+                  No hay declaraciones asociadas a esta firma.
                 </Text>
               )}
             </View>
@@ -1616,7 +1681,6 @@ function ComplementarySignaturesSection({ orderData }: { orderData: FetchEntryOr
     </View>
   );
 }
-
 
 
 
@@ -1658,7 +1722,7 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
   
 
   const fechaDoc = orderData?.plantilla_fecha_documento
-    ? new Date(orderData.plantilla_fecha_documento).toLocaleDateString('es-CO')
+    ? new Date(orderData.fecha).toLocaleDateString('es-CO')
     : 'N/A';
 
   const fechaEntrada = orderData?.fecha
@@ -1687,13 +1751,13 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
         <GeneralInfoSection orderData={orderData} fechaEntrada={fechaEntrada} />
         <VehicleSection orderData={orderData} />
         <PressureSection orderData={orderData} />
-        <ConditionsSection orderData={orderData} />
+        <ConditionsSection orderData={orderData} templateData={templateData}/>
         <ObservationsSection orderData={orderData} />
-        <ContractSection orderData={orderData} />
+        <ContractSection orderData={orderData} templateData={templateData}/>
         <InspectorSection orderData={orderData} />
         <OwnerSection orderData={orderData} />
         <ClientSection orderData={orderData} />
-        <ComplementarySignaturesSection orderData={orderData} />
+        <ComplementarySignaturesSection orderData={orderData} templateData={templateData}/>
         <FooterSection orderData={orderData} fechaDoc={fechaDoc} />
       </Page>
     </Document>

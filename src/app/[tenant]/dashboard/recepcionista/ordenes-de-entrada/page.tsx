@@ -1,6 +1,6 @@
 
 
-import CreatedOrdersTable from "@/components/dashboard/createdOrdersTable";
+import CreatedOrdersTable from "@/components/dashboard/CreatedOrdersTable";
 
 
 export default function EntryOrdersPage() {

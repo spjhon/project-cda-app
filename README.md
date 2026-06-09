@@ -8,7 +8,8 @@ Local Types Generation: `pnpx supabase gen types typescript --local > supabase/t
 Make full local system backup: `pnpx supabase db dump --local > backup_completo.sql`
 To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzjrqye`
 actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
-ver que falta por actualizar: `pnpm update --interactive --latest`
+ver que falta por actualizar: `pnpm update --interactive --latest`, este permite no solo ver sino tambien instalar
+tambien ver que falta por actualizar: `pnpm outdated`
 Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest typescript@latest`
 otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/supabase-js@latest`
 
@@ -28,4 +29,3 @@ otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/s
                     templateTabelDataPromise
                 ____________________________________________
                 children (page.tsx)
-                

@@ -13,9 +13,9 @@ export async function createOrderTemplateAction(formData: OrderTemplateInput) {
     
 
     return {
-      error: "Datos inválidos",
+      data: null,
       // .issues devuelve el array de objetos planos que viste en tu consola
-    details: validatedFields.error.issues,
+    error: "Error en la validacon de zod",
     };
   }
 
@@ -24,7 +24,7 @@ export async function createOrderTemplateAction(formData: OrderTemplateInput) {
   
  
 
-  const { data, error } = await supabase.rpc('create_full_order_template', { 
+  const { error } = await supabase.rpc('create_full_order_template', { 
   p_data: {
     ...validatedFields.data,
     // Convertimos el objeto Date a un string que Postgres entiende perfectamente
@@ -33,11 +33,11 @@ export async function createOrderTemplateAction(formData: OrderTemplateInput) {
   });
 
   if (error) {
-    return { error: "Error en la base de datos", details: error.message };
+    return { data: null, error: error.message };
   }
 
   
-  return { success: true, message: data };
+  return { data: "Plantilla creada correctamente", error: null };
 
 
 
