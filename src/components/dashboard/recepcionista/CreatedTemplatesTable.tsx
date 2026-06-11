@@ -27,8 +27,8 @@ import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/server-
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import OrderViewPDF from "./pdfs/OrderViewPDF";
-import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
+import OrderViewPDF from "@/components/dashboard/recepcionista/pdfs/OrderViewPDF";
+import OrderDownloadPDF from "@/components/dashboard/recepcionista/pdfs/OrderDownloadPDF";
 import { useRouter } from "next/navigation";
 
 

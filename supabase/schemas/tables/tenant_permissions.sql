@@ -10,7 +10,7 @@ CREATE TABLE public.tenant_permissions (
 
     -- Datos de Membresía
     -- Nota: El default ahora es 'recepcionista' para coincidir con los nuevos roles
-    role              TEXT NOT NULL DEFAULT 'recepcionista',
+    role              public.user_role_enum NOT NULL DEFAULT 'recepcionista'::public.user_role_enum,
 
     -- Auditoría
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -55,6 +55,7 @@ UNIQUE (tenant_id, service_user_id, role);
 
 COMMENT ON TABLE public.tenant_permissions IS 'Mapeo de usuarios a tenants con roles específicos del taller. v1.1';
 COMMENT ON COLUMN public.tenant_permissions.role IS 'Roles: gerente, recepcionista, auxadministrativo, directortecnico';
+COMMENT ON COLUMN public.tenant_permissions.role IS 'Rol del usuario en el CDA administrado mediante el tipo estructurado public.user_role_enum.';
 
 -- ==========================================
 -- Índices estratégicos

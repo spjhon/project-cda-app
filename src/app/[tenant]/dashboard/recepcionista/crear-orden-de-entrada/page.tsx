@@ -23,7 +23,7 @@ import { createOrderTemplateAction } from "@/lib/server-actions/order-template-v
 import { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema";
 
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
-import ConditionDialog from "@/components/dashboard/ConditionDialog";
+import ConditionDialog from "@/components/dashboard/recepcionista/ConditionDialog";
 import {
   Table,
   TableBody,

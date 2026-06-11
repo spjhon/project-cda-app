@@ -6,7 +6,7 @@ import {
 import { ReactNode, Suspense } from "react";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 
-import HeaderSidebar from "@/components/dashboard/HeaderSidebar";
+import HeaderSidebar from "@/components/dashboard/recepcionista/HeaderSidebar";
 import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import Loading from "@/components/ui/loading";
 

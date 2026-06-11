@@ -7,21 +7,21 @@ import {
   Shield,
   ShieldCheck,
 } from "lucide-react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 import {
   ClaseVehiculoType,
   CombustibleType,
   ZodFullFormDataType,
 } from "@/lib/zod-schemas/order-schema";
-import { Checkbox } from "../ui/checkbox";
+import { Checkbox } from "../../ui/checkbox";
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { Dispatch, SetStateAction } from "react";
 

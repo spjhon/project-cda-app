@@ -17,19 +17,19 @@ import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 import { Button } from "@/components/ui/button";
 
-import TirePressureSection from "@/components/dashboard/TirePressureSection";
-import ConditionsSwitchSections from "@/components/dashboard/ConditionsSwitchSections";
-import SignatureSection from "@/components/dashboard/SignatureSection";
-import { PersonSection } from "@/components/dashboard/PersonSection";
+import TirePressureSection from "@/components/dashboard/recepcionista/TirePressureSection";
+import ConditionsSwitchSections from "@/components/dashboard/recepcionista/ConditionsSwitchSections";
+import SignatureSection from "@/components/dashboard/recepcionista/SignatureSection";
+import { PersonSection } from "@/components/dashboard/recepcionista/PersonSection";
 import { Textarea } from "@/components/ui/textarea";
 
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 import { createOrderAction } from "@/lib/server-actions/createOrderAction";
-import { ZodErrorDialog } from "@/components/dashboard/ZodErrorDialog";
+import { ZodErrorDialog } from "@/components/dashboard/recepcionista/ZodErrorDialog";
 import { $ZodIssue } from "zod/v4/core";
-import TemplateSelectionSection from "@/components/dashboard/TemplateSelectionSection";
-import PlacaSelectionSection from "@/components/dashboard/PlacaSelectionSection";
-import VehicleDataSection from "@/components/dashboard/VehicleDataSection";
+import TemplateSelectionSection from "@/components/dashboard/recepcionista/TemplateSelectionSection";
+import PlacaSelectionSection from "@/components/dashboard/recepcionista/PlacaSelectionSection";
+import VehicleDataSection from "@/components/dashboard/recepcionista/VehicleDataSection";
 
 
 

@@ -1,6 +1,6 @@
 
 
-import CreatedOrdersTable from "@/components/dashboard/CreatedOrdersTable";
+import CreatedOrdersTable from "@/components/dashboard/recepcionista/CreatedOrdersTable";
 
 
 export default function EntryOrdersPage() {

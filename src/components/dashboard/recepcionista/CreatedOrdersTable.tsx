@@ -31,16 +31,18 @@ import {
 
 // Importar iconos de Lucide
 import { AlertCircle, CheckCircle2, Loader2, ArrowUpDown, Search, X } from "lucide-react";
-import OrderViewPDF from "./pdfs/OrderViewPDF";
+import OrderViewPDF from "@/components/dashboard/recepcionista/pdfs/OrderViewPDF";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
-import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
-import { Badge } from "../ui/badge";
-import CancelOrder from "./CancelOrder";
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
+import OrderDownloadPDF from "@/components/dashboard/recepcionista/pdfs/OrderDownloadPDF";
+import { Badge } from "@/components/ui/badge";
+import CancelOrder from "@/components/dashboard/recepcionista/CancelOrder";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
+import { Input } from "@/components/ui/input";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { DateRangePicker } from "./DateRangePicker";
-import { Input } from "../ui/input";
-import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
+
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 

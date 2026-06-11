@@ -14,6 +14,7 @@ PENDIENTES
 
 
 - ajustar rls para verificar si es activo o no para protección y en el login
+- ajustar en los respectivos layouts si el rol es o no es, se puede meter en el raw app metadata para que lo lea los claims
 - revisar que las tablas que se les haga partition, el update funcione
 - el gerente puede crear ingeniero, y el ingeniero puede crear auxiliar y recepcionista.
 - reenviar magic link y otp,

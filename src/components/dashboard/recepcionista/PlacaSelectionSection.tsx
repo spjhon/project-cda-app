@@ -27,8 +27,8 @@ import {
   useState,
 } from "react";
 
-import { Label } from "../ui/label";
-import { Checkbox } from "../ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import {
   Dialog,
@@ -37,10 +37,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
 
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
