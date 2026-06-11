@@ -12,6 +12,8 @@ import { createContext, ReactNode, use, useContext, useState } from "react";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
+import { DateRange } from "react-day-picker";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 
 // 1. Tipamos el objeto de la mutación para que sea reusable
 /**
@@ -68,6 +70,26 @@ export interface ReceptionistContextType {
         setOrderByColumn: (column: string) => void;
         orderByDirection: "ASC" | "DESC";
         setOrderByDirection: (direction: "ASC" | "DESC") => void;
+
+        //la habilidad de poder ver los anulados
+        showDeleted: boolean;
+        setShowDeleted: (show: boolean) => void;
+
+        // 🌟 NUEVOS TIPOS PARA EL COMPONENTE DATE-PICKER
+        dateRange: DateRange | undefined;
+        setDateRange: (range: DateRange | undefined) => void;
+
+        // 🌟 NUEVOS ESTADOS PARA LA BÚSQUEDA AVANZADA
+        searchColumn: string
+        setSearchColumn: (col: string) => void
+        searchTerm: string
+        setSearchTerm: (term: string) => void
+
+        //🌟 tipado para la paginacion
+        page: number
+        setPage: (page: number) => void
+        rowsPerPage: number
+        setRowsPerPage: (rows: number) => void
       };
       mutation: {
         cancelOrder: UseMutateFunction<
@@ -104,7 +126,19 @@ export default function ReceptionistLoaderContext({
 // 1. Creamos los dos estados limpios con sus valores por defecto
 const [orderByColumn, setOrderByColumn] = useState<string>("fecha");
 const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">("DESC");
+const [showDeleted, setShowDeleted] = useState<boolean>(false);
+// 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
+  // 🌟 NUEVOS ESTADOS: Inicializados con fallbacks seguros para el CDA
+  const [searchColumn, setSearchColumn] = useState<string>("placa") // Por defecto busca por Placa
+  const [searchTerm, setSearchTerm] = useState<string>("")   
 
+  //paginacion       // Texto vacío al inicio
+  const [page, setPage] = useState<number>(1)
+  const [rowsPerPage, setRowsPerPage] = useState<number>(5) // Por defecto 10 filas
 
 
   const queryClient = useQueryClient();
@@ -271,21 +305,53 @@ const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">("DESC")
     isSuccess: isEntryOrdersSuccess,
   } = useQuery({
    
+    
 
-    queryKey: ["entry-orders", "list", pathname, orderByColumn, orderByDirection],
+    queryKey: ["entry-orders", 
+      "list", 
+      pathname, 
+      orderByColumn, 
+      orderByDirection, 
+      showDeleted,
+      dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
+      dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "null",
+      searchTerm,
+      searchColumn, // 🌟 NUEVO: Si cambian de 'placa' a 'marca', la caché debe cambiar
+      searchTerm,   // (Ya lo tenías, perfecto para el texto del input)
+      page,         // 🌟 NUEVO: Si cambian de página (1, 2, 3...), hay que traer datos nuevos
+      rowsPerPage   // 🌟 NUEVO: Si cambian de ver 10 filas a ver 50 filas, cambia la consulta
+    ],
 
     queryFn: async () => {
       console.log(`Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`);
+
+      //await new Promise((resolve) => setTimeout(resolve, 5000));
+
+
+
+      // 🌟 Control preventivo de seguridad por si limpian el calendario
+      // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
+      const fechaDesde = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : format(startOfMonth(new Date()), "yyyy-MM-dd");
+      const fechaHasta = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
+
 
       const { data, error } = await supabaseBrowser.rpc(
         "fetch_entry_orders_list",
         {
           p_tenant_id: tenantId ?? "",
-          p_limit: 20,
-          p_offset: 0,
+          p_limit: rowsPerPage,
+          // 🌟 MATEMÁTICA LÓGICA: Calculamos el offset en tiempo real para saltar las filas correctas
+    // Ejemplo: Si estás en Pág 2 y ves de a 10 filas: (2 - 1) * 10 = Saltarse las primeras 10 filas (p_offset: 10)
+    p_offset: (page - 1) * rowsPerPage,
           // 🌟 Pasamos los estados DIRECTOS, sin mapeos ni arrays raros
           p_order_by_column: orderByColumn,
           p_order_by_direction: orderByDirection,
+          p_show_deleted: showDeleted, // 🌟 ¡Inyectamos el nuevo parámetro al RPC!
+          // 🌟 PASAMOS LAS FECHAS FORMATEADAS AL RPC DE POSTGRESQL
+        p_fecha_desde: fechaDesde,
+        p_fecha_hasta: fechaHasta,
+        p_search_column: "placa",
+        p_search_term: searchTerm
         }
       );
 
@@ -396,6 +462,26 @@ const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">("DESC")
         setOrderByColumn,
         orderByDirection,
         setOrderByDirection,
+
+        //habilidad de poder ver los anulados
+        showDeleted,
+        setShowDeleted,
+
+        // 🌟 EXPONEMOS EL STATE AL CONTEXTO CONSUMIDOR
+        dateRange,
+        setDateRange,
+
+        // 🌟 Inyectamos las nuevas propiedades en el Provider
+        searchColumn,
+        setSearchColumn,
+        searchTerm,
+        setSearchTerm,
+
+        //Paginacion
+        page,
+        setPage,
+        rowsPerPage,
+        setRowsPerPage
       },
       mutation: {
         cancelOrder: cancelOrder,

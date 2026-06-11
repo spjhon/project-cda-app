@@ -1,3 +1,20 @@
+-- 🗑️ BORRAR LA FUNCIÓN ANTERIOR (Obligatorio porque cambiaron los parámetros de entrada)
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    UUID,     -- p_tenant_id
+    INTEGER,  -- p_limit
+    INTEGER,  -- p_offset
+    TEXT,     -- p_placa
+    public.order_status_enum, -- p_estado
+    DATE,     -- p_fecha_desde
+    DATE,     -- p_fecha_hasta
+    TEXT,     -- p_cliente_documento
+    TEXT,     -- p_propietario_documento
+    TEXT,     -- p_order_by_column
+    TEXT,     -- p_order_by_direction
+    TEXT,     -- p_search_term (El parámetro que tenías antes de este cambio)
+    BOOLEAN   -- p_show_deleted
+);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,

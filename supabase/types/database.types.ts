@@ -915,7 +915,9 @@ export type Database = {
           p_order_by_direction?: string
           p_placa?: string
           p_propietario_documento?: string
+          p_search_column?: string
           p_search_term?: string
+          p_show_deleted?: boolean
           p_tenant_id: string
         }
         Returns: {
