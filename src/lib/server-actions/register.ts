@@ -71,9 +71,9 @@ export async function registerUserAction(tenant: string, formData: FormData) {
   const documentNumberTrimmed = documentNumber.trim();
   const phoneTrimmed = phone.trim();
   const emailLowered = email.toLowerCase();
-  const roleTrimmed = role.trim();
+ 
 
-
+const roleTrimmed = role.trim() as "gerente" | "recepcionista" | "aux_administrativo" | "director_tecnico";
 
   const supabaseAdmin = createSupabaseAdminClient();
 

@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import PermissionsLoaderContext from "@/contexts/PermissionsLoaderContext";
 import { ReactNode, Suspense } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { EntryOrderListItem, fetchEntryOrders } from "@/lib/server-actions/fetch_entry_orders_list";
+import { startOfMonth, format } from "date-fns";
+import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 
 interface DashboardLayout {
   children: ReactNode;
@@ -112,6 +115,51 @@ export default async function DashboardLayout({
 
   
 
+const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
+  (async () => {
+
+    const { tenant } = await params;
+
+    // ==========================================
+    // 1. Resolver tenant slug -> tenant real
+    // ==========================================
+    const tenantResult = await fetchTenantData(tenant);
+
+    if (!tenantResult?.data?.id) {
+      redirect( `/error?type=Error, no existe tenant en entryOrdersTableDataPromise`);
+    }
+
+    if (tenantResult.error !== null) {
+      redirect( `/error?type=Error al extraer tenant: ${tenantResult.error}`);
+    }
+
+    const fechaDesde = format(startOfMonth(new Date()), "yyyy-MM-dd");
+    const fechaHasta = format(new Date(), "yyyy-MM-dd");
+
+    // ==========================================
+    // 3. Traer órdenes iniciales
+    // ==========================================
+    const ordersResult = await fetchEntryOrders({
+      tenantId: tenantResult.data.id,
+
+      limit: 5,
+      fechaDesde: fechaDesde,
+      fechaHasta: fechaHasta,
+      offset: 0,
+
+   
+    });
+
+    if (ordersResult.error !== null) {
+      redirect( `/error?type=Error al extraer órdenes: ${ordersResult.error}`);
+    }
+
+    return ordersResult.data;
+  })();
+
+
+
+
 
 
   return (
@@ -123,12 +171,10 @@ export default async function DashboardLayout({
          * de este layout es client tambien, entonces tiene acceso tambien al context.
          * Como children esta dentro de PermissionsLoaderContext, estos children no van a cargar sino hasta que lo que este dentro de PermissionsLoaderContext termine de cargar
          */}
-        <PermissionsLoaderContext
-          tenantPromise={tenantPromise}
-          userPromise={userPromise}
-          RolesDataPromise={RolesDataPromise}
-        >
+        <PermissionsLoaderContext tenantPromise={tenantPromise} userPromise={userPromise} RolesDataPromise={RolesDataPromise}>
+          <EntryOrdersLoaderContext entryOrdersTableDataPromise={entryOrdersTableDataPromise}>
           {children}
+          </EntryOrdersLoaderContext>
         </PermissionsLoaderContext>
       </Suspense>
     </>

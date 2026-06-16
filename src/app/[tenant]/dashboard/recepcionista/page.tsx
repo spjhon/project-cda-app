@@ -30,12 +30,16 @@ import { $ZodIssue } from "zod/v4/core";
 import TemplateSelectionSection from "@/components/dashboard/recepcionista/TemplateSelectionSection";
 import PlacaSelectionSection from "@/components/dashboard/recepcionista/PlacaSelectionSection";
 import VehicleDataSection from "@/components/dashboard/recepcionista/VehicleDataSection";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 
 
 
 export default function NewEntryOrder() {
+
+  const queryClient = useQueryClient();
+
 
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
@@ -244,6 +248,9 @@ if (tieneCondicionesNoCumplidas) {
   setShowErrorDialog(true);
   setIsSubmitting(false);
   return
+
+
+  
 }
 
     
@@ -274,7 +281,7 @@ if (tieneCondicionesNoCumplidas) {
         setFormData((prev) => ({
           ...prev,
 
-          id: null,
+          
           // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
 
           // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
@@ -351,7 +358,7 @@ if (tieneCondicionesNoCumplidas) {
         
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);
-        handleTemplateSelect(formData.plantilla_id, true);
+        queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
       }
     } catch (error: unknown) {
       alert("Ocurrio un error inesperado en la validacion: " + error);

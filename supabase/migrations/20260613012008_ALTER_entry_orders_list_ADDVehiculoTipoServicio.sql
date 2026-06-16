@@ -1,3 +1,20 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    UUID, 
+    INTEGER, 
+    INTEGER, 
+    TEXT, 
+    public.order_status_enum, 
+    DATE, 
+    DATE, 
+    TEXT, 
+    TEXT, 
+    TEXT, 
+    TEXT, 
+    BOOLEAN, 
+    TEXT, 
+    TEXT
+);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -34,16 +51,6 @@ RETURNS TABLE (
     vehiculo_tipo_snapshot public.vehicle_type_enum, -- 🌟 NUEVO (Liviano, pesado, moto)
     vehiculo_tipo_servicio_snapshot public.vehicle_service_type_enum,
     estado_orden public.order_status_enum,
-    
-    -- 🌟 NUEVOS CAMPOS DE OFICINA
-    oficina_pin CHARACTER VARYING,
-    oficina_pago NUMERIC(12,2),
-    oficina_consecutivo_factura CHARACTER VARYING,
-    oficina_tipo_pago public.office_payment_type_enum,
-    oficina_fupas CHARACTER VARYING,
-    oficina_certificados_runt CHARACTER VARYING,
-    se_compro_soat BOOLEAN,
-    resultado_revision TEXT,
     total_count BIGINT
 )
 LANGUAGE plpgsql
@@ -72,15 +79,6 @@ BEGIN
             o.vehiculo_tipo_snapshot,                                                    -- 🌟 NUEVO
             o.vehiculo_tipo_servicio_snapshot,
             o.estado_orden,
-            -- 🌟 MAPEO DE NUEVOS CAMPOS DESDE LA TABLA
-            o.oficina_pin,
-            o.oficina_pago,
-            o.oficina_consecutivo_factura,
-            o.oficina_tipo_pago,
-            o.oficina_fupas,
-            o.oficina_certificados_runt,
-            o.se_compro_soat,
-            o.resultado_revision,
             COUNT(*) OVER() AS total_count
         FROM public.entry_orders o
         WHERE

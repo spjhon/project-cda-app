@@ -57,19 +57,25 @@ export default function CancelOrder({ orden, tenantId, mutation }: CancelOrderPr
       {/* 3. Cuadro de Diálogo para la Anulación (AlertDialog) */}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger render={
-            <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-slate-600 hover:text-red-600 hover:bg-red-50"
-                title="Anular orden"
-                disabled={isCancelingOrder}
-            >
-                {isCancelingOrder ? (
-                <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                ) : (
-                <Ban className="h-4 w-4 text-red-600" />
-                )}
-            </Button>
+           <Button
+  variant="destructive"
+  size="lg"
+  className="w-full sm:w-auto px-6 font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white gap-2 transition-colors shadow-sm"
+  title="Anular orden"
+  disabled={isCancelingOrder}
+>
+  {isCancelingOrder ? (
+    <>
+      <Loader2 className="h-4 w-4 animate-spin text-white" />
+      <span>Anulando Orden...</span>
+    </>
+  ) : (
+    <>
+      <Ban className="h-4 w-4 text-white" />
+      <span>Anular Orden</span>
+    </>
+  )}
+</Button>
         }>
           
         </AlertDialogTrigger>

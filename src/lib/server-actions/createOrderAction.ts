@@ -73,7 +73,7 @@ if (!validatedFields.success){
 
 console.log("Datos enviados correctamente:")
 
-console.log(validatedFields.data)
+
 
 return {data: orderCreatedData, error: null}
 

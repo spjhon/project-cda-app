@@ -1,3 +1,23 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    UUID, 
+    INTEGER, 
+    INTEGER, 
+    TEXT, 
+    public.order_status_enum, 
+    DATE, 
+    DATE, 
+    TEXT, 
+    TEXT, 
+    TEXT, 
+    TEXT, 
+    BOOLEAN, 
+    TEXT, 
+    TEXT
+);
+
+
+
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -40,8 +60,7 @@ RETURNS TABLE (
     oficina_pago NUMERIC(12,2),
     oficina_consecutivo_factura CHARACTER VARYING,
     oficina_tipo_pago public.office_payment_type_enum,
-    oficina_fupas CHARACTER VARYING,
-    oficina_certificados_runt CHARACTER VARYING,
+    
     se_compro_soat BOOLEAN,
     resultado_revision TEXT,
     total_count BIGINT
@@ -77,8 +96,7 @@ BEGIN
             o.oficina_pago,
             o.oficina_consecutivo_factura,
             o.oficina_tipo_pago,
-            o.oficina_fupas,
-            o.oficina_certificados_runt,
+           
             o.se_compro_soat,
             o.resultado_revision,
             COUNT(*) OVER() AS total_count

@@ -197,6 +197,16 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     -- Observaciones generales registradas por recepción.
     observaciones                               TEXT,
 
+    -- ==========================================
+    -- INFORMACION DE OFICINA (QUE VIENE DESDE OFICINA)
+    -- ==========================================
+
+    oficina_pin character varying,
+    oficina_pago numeric(12,2),
+    oficina_consecutivo_factura character varying,
+    oficina_tipo_pago public.office_payment_type_enum,
+    se_compro_soat boolean,
+    resultado_revision text,
 
     -- ==========================================
     -- AUDITORÍA
@@ -284,6 +294,11 @@ CREATE INDEX IF NOT EXISTS entry_orders_plantilla_id_idx
 -- Útil para reportes (ej: "¿Cuántas RTM se hicieron este mes?")
 CREATE INDEX IF NOT EXISTS entry_orders_service_type_idx 
 ON public.entry_orders USING btree (service_type);
+
+-- Índice para búsquedas por factura (Cuadres de caja, reportes de ingresos)
+CREATE INDEX IF NOT EXISTS entry_orders_oficina_factura_tenant_idx 
+ON public.entry_orders USING btree (tenant_id, oficina_consecutivo_factura) 
+TABLESPACE pg_default;
 
 -- ==========================================
 -- 7. GRANTS

@@ -13,6 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { registerUserAction } from "@/lib/server-actions/register";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
+
+const SELECT_ROLES_SISTEMA = [
+  { label: "Recepcionista", value: "recepcionista" },
+  { label: "Auxiliar Administrativo", value: "aux_administrativo" },
+  { label: "Gerente", value: "gerente" },
+  { label: "Director Técnico", value: "director_tecnico" },
+];
+
 
 interface SignUpFormProps extends React.ComponentPropsWithoutRef<"div"> {
   tenant: string;
@@ -46,6 +56,11 @@ export function AdminSignUpForm({
 
     if (password.length < 6) { // Recomendado subir de 3 a 6 por seguridad
       setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (!userRole || userRole === undefined){
+      setError("Debe seleccionar un rol");
       return;
     }
 
@@ -184,22 +199,35 @@ export function AdminSignUpForm({
 
               {/* ROL DEL USUARIO (Solo para Administrador) */}
               <div className="grid gap-2">
-                <Label htmlFor="role">Rol en el Sistema</Label>
-                <select
+              <Label htmlFor="role" className="text-slate-700 font-medium">Rol en el Sistema</Label>
+              <Select
+                items={SELECT_ROLES_SISTEMA}
+                value={userRole}
+                // 🌟 Controlamos el null de Base UI: si es null o vacío, lo dejamos como ""
+                onValueChange={(value) => setUserRole(value?value:"")}
+              >
+                {/* 🌟 Base UI utiliza el prop 'render' para inyectar nuestro Button de Shadcn sin duplicar nodos HTML */}
+                <SelectTrigger 
                   id="role"
-                  name="role"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                  value={userRole}
-                  onChange={(e) => setUserRole(e.target.value)}
+                  render={
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-between bg-white font-normal h-10 border-input text-sm px-3 py-2" 
+                    />
+                  }
                 >
-                  <option value="" disabled>Selecciona un rol</option>
-                  <option value="recepcionista">Recepcionista</option>
-                  <option value="aux_administrativo">Auxiliar Administrativo</option>
-                  <option value="gerente">Gerente</option>
-                  <option value="director_tecnico">Director Técnico</option>
-                </select>
-              </div>
+                  <SelectValue placeholder="Selecciona un rol" />
+                </SelectTrigger>
+                
+                <SelectContent>
+                  {SELECT_ROLES_SISTEMA.map((rol) => (
+                    <SelectItem key={rol.value} value={rol.value}>
+                      {rol.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
               {error && <p className="text-sm font-medium text-red-500">{error}</p>}
 

@@ -7,27 +7,53 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // ======================================================
 // Tipos de una fila devuelta por fetch_entry_orders_list
 // ======================================================
+export type OfficePaymentType = 
+  | 'efectivo' 
+  | 'tarjeta_debito' 
+  | 'tarjeta_credito' 
+  | 'sistecredito' 
+  | 'addi' 
+  | 'transferencia' 
+  | 'qr';
 
 export interface EntryOrderListItem {
   id: string;
-
-  fecha: string;
   placa: string;
-
+  fecha: string;
   marca: string;
   linea: string;
-
-  estado_orden: "abierta" | "anulada" | "en_prueba" | "finalizada";
-
-  cliente_nombre: string;
-  cliente_documento: string;
-
+  
+  // Datos del Propietario (Snapshots)
   propietario_nombre: string;
   propietario_documento: string;
+  propietario_tipo_documento: string;
+  
+  // Datos del Cliente (Snapshots)
+  cliente_nombre: string;
+  cliente_documento: string;
+  cliente_tipo_documento: string;
+  
+  // Datos Operativos del Vehículo
+  es_reinspeccion: boolean;
+  kilometraje: string | null;
+  soat_vencimiento_snapshot: string | null;
+  service_type: "RTM" | string; // Ajusta si manejas más tipos de servicio en el enum
+  vehiculo_tipo_snapshot: string;
+  vehiculo_tipo_servicio_snapshot: string;
+  estado_orden: string;
 
+  // 🌟 NUEVOS CAMPOS: INFORMACIÓN DE OFICINA
+  oficina_pin: string | null;
+  oficina_pago: number | null; // Mapea el numeric(12,2) de Postgres
+  oficina_consecutivo_factura: string | null;
+  oficina_tipo_pago: OfficePaymentType | null;
+  
+  se_compro_soat: boolean;
+  resultado_revision: string | null;
+  
+  // Metadata de paginación
   total_count: number;
 }
-
 // ======================================================
 // Parámetros de búsqueda
 // ======================================================

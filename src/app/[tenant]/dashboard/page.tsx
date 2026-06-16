@@ -12,6 +12,35 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, UserCircle, ShieldCheck, ArrowRight } from "lucide-react";
 import Loading from "@/components/ui/loading";
 
+
+
+
+// 🌟 DICCIONARIO DE ROLES: Centraliza textos, descripciones y rutas de redirección
+const ROLE_CONFIG: Record<string, { label: string; description: string; path: string }> = {
+  gerente: {
+    label: "Administrador",
+    description: "Gestión global, reportes financieros y control total del CDA.",
+    path: "/dashboard/gerente", // 👈 Controlado desde el objeto
+  },
+  recepcionista: {
+    label: "Recepcionista",
+    description: "Creación de órdenes de entrada, manejo de caja y flujo inicial.",
+    path: "/dashboard/recepcionista",
+  },
+  aux_administrativo: {
+    label: "Auxiliar Administrativo",
+    description: "Gestión de documentos, control de archivos y soporte general.",
+    path: "/dashboard/oficina",
+  },
+  director_tecnico: {
+    label: "Director Técnico",
+    description: "Control de calidad del SGC, aprobación e inspección bajo ISO 17020.",
+    path: "/dashboard/director_tecnico",
+  },
+};
+
+
+
 export default function DashboardPage() {
   const router = useRouter();
   const permissionsContext = useContext(PermissionsContext);
@@ -23,9 +52,12 @@ export default function DashboardPage() {
   const userName = contextValue?.user?.name || "Usuario";
 
   // Lógica de Redirección Automática
+ // 🌟 Lógica de Redirección Automática adaptada al Objeto
   useEffect(() => {
     if (roles.length === 1) {
-      router.replace(`/dashboard/${roles[0]}`);
+      const targetRole = roles[0];
+      const targetPath = ROLE_CONFIG[targetRole]?.path || `/dashboard/${targetRole}`;
+      router.replace(targetPath);
     }
   }, [roles, router]);
 
@@ -35,6 +67,8 @@ export default function DashboardPage() {
       <Loading/>
     );
   }
+
+
 
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center p-6">
@@ -65,30 +99,37 @@ export default function DashboardPage() {
         </div>
 
         {/* Rejilla de Perfiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {roles.length > 0 ? (
-            roles.map((role) => (
-              <Card 
-                key={role} 
-                className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50 cursor-pointer"
-                onClick={() => router.push(`/dashboard/${role}`)}
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-primary/10 transition-colors">
-                      <UserCircle className="h-6 w-6 text-slate-600 group-hover:text-primary" />
+            roles.map((role) => {
+              // Extraemos la configuración o generamos un fallback seguro si no existe la key
+              const config = ROLE_CONFIG[role] || { 
+                label: role, 
+                description: `Acceso a las funciones de ${role}.`,
+                path: `/dashboard/${role}` 
+              };
+
+              return (
+                <Card 
+                  key={role} 
+                  className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50 cursor-pointer"
+                  onClick={() => router.push(config.path)} // 🌟 Redirección controlada 100% por el Objeto
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-primary/10 transition-colors">
+                        <UserCircle className="h-6 w-6 text-slate-600 group-hover:text-primary" />
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardTitle className="capitalize text-xl mb-1">{role}</CardTitle>
-                  <CardDescription>
-                    Acceso total a las funciones de {role} en este centro.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle className="text-xl mb-1">{config.label}</CardTitle>
+                    <CardDescription>{config.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })
           ) : (
             <div className="col-span-full py-12 text-center border-2 border-dashed rounded-xl">
               <ShieldCheck className="h-12 w-12 text-slate-300 mx-auto mb-4" />

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { LucideIcon, PlusCircle, FileStack, FilePenLine, ClipboardList, UserCog,  } from "lucide-react";
+import { ClipboardList, FilePenLine, FileStack, LucideIcon, PlusCircle, UserCog} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -24,6 +24,19 @@ import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { Separator } from "./separator";
 
 
+interface NavItem {
+  title: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+interface AppSidebarProps {
+  rol: string; // 👈 Aquí declaramos que NAV_DATA es el array
+}
+
+
+
 
 interface NavItem {
   title: string;
@@ -32,7 +45,7 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-const NAV_DATA: NavItem[] = [
+const NavRecepcionista: NavItem[] = [
   {
     title: "Nueva Orden de Entrada",
     description: "Crear una nueva orden de entrada",
@@ -65,8 +78,43 @@ const NAV_DATA: NavItem[] = [
   },
 ];
 
-export function AppSidebar() {
 
+
+const NavOficina: NavItem[] = [
+  
+  {
+    title: "Órdenes de Entrada",
+    description: "Listado de órdenes de entrada",
+    href: "/dashboard/oficina",
+    icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
+  },
+  
+  {
+    title: "Mi Perfil", // 🔥 NUEVO MÓDULO
+    description: "Gestionar tu cuenta, firma y credenciales",
+    href: "/dashboard/oficina/perfil",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
+];
+
+
+
+
+
+export function AppSidebar({ rol }: AppSidebarProps) {
+
+
+let NAV_DATA = NavOficina; // Valor por defecto
+  
+  switch (rol) {
+    case "recepcionista":
+      NAV_DATA = NavRecepcionista;
+      break;
+    case "oficina":
+      NAV_DATA = NavOficina;
+      break;
+    
+  }
 
 const contextRecived = useContext(PermissionsContext);
 

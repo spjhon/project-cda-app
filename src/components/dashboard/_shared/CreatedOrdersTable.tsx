@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
-import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 
 import {
@@ -20,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Importar componentes de Select de tu UI
 import {
   Select,
   SelectContent,
@@ -29,22 +27,78 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Importar iconos de Lucide
-import { AlertCircle, CheckCircle2, Loader2, ArrowUpDown, Search, X } from "lucide-react";
-import OrderViewPDF from "@/components/dashboard/recepcionista/pdfs/OrderViewPDF";
+// 🌟 Importación de nuevos íconos para los tipos de vehículos
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  Loader2, 
+  ArrowUpDown, 
+  Search, 
+  X,
+  Car,
+  Truck,
+  Bike
+} from "lucide-react";
+
+
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
-import OrderDownloadPDF from "@/components/dashboard/recepcionista/pdfs/OrderDownloadPDF";
+
 import { Badge } from "@/components/ui/badge";
-import CancelOrder from "@/components/dashboard/recepcionista/CancelOrder";
+
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 import { Input } from "@/components/ui/input";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
-import { DateRangePicker } from "./DateRangePicker";
-
+import { DateRangePicker } from "../recepcionista/DateRangePicker";
+import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
+import { OficinaContext } from "@/contexts/OficinaLoaderContext";
+import AccionesOrderDialog from "./AccionesOrderDialog";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
+
+// ==========================================
+// DICCIONARIOS DE MAPEO Y TRADUCCIÓN
+// ==========================================
+
+// 🌟 Mapeo para Tipo de Vehículo con íconos y etiquetas formateadas
+const VEHICLE_TYPE_MAP: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  liviano: { label: "Automóvil (Liviano)", icon: Car },
+  pesado: { label: "Camión / Bus (Pesado)", icon: Truck },
+  motocicleta_4t: { label: "Motocicleta 4T", icon: Bike },
+  motocicleta_2t: { label: "Motocicleta 2T", icon: Bike },
+  motocarro_4t: { label: "Motocarro 4T", icon: Bike },
+  motocarro_2t: { label: "Motocarro 2T", icon: Bike },
+};
+
+// 🌟 Mapeo para Tipo de Servicio
+const SERVICE_TYPE_MAP: Record<string, string> = {
+  RTM: "RTM",
+  preventiva: "Preventiva",
+  peritaje: "Peritaje",
+  otro: "Otro",
+};
+
+// 🌟 Mapeo para Estados de la Orden con estilos de Badge dedicados
+const STATUS_MAP: Record<string, { label: string; className: string }> = {
+  abierta: { 
+    label: "Abierta", 
+    className: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium tracking-wide" 
+  },
+  en_prueba: { 
+    label: "En Prueba", 
+    className: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-medium tracking-wide" 
+  },
+  finalizada: { 
+    label: "Finalizada", 
+    className: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium tracking-wide" 
+  },
+  anulada: { 
+    label: "Anulada", 
+    className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-medium tracking-wide line-through opacity-80" 
+  },
+};
 
 const SELECT_COLUMNAS = [
   { label: "Fecha y Hora", value: "fecha" },
@@ -60,89 +114,76 @@ const SELECT_DIRECCION = [
 ];
 
 export default function CreatedOrdersTable() {
-  const ReceptionistcontextReceived = useContext(ReceptionistContext);
+  
   const PermissioncontextRecived = useContext(PermissionsContext);
+  const EntryOrdersContextRecived = useContext(EntryOrdersContext);
+  const contextRecivedReceptionist = useContext(ReceptionistContext);
+  const OficinaContextRecived = useContext(OficinaContext);
 
-  const tenantId =
-    PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const templates =
-    ReceptionistcontextReceived?.ReceptionistContextValue.entryOrdersTableData
-      .query.entryOrdersData || [];
+  //extraccion del rol desde el contexto
+  const rol = contextRecivedReceptionist?.ReceptionistContextValue.rol || OficinaContextRecived?.OficinaContextValue.rol
 
-  const { query, mutation } =
-    ReceptionistcontextReceived?.ReceptionistContextValue
-      .entryOrdersTableData || {};
+  console.log("El rol actual es: ", rol)
 
-  // 🌟 EXTRAEMOS LOS NUEVOS ESTADOS DIRECTAMENTE DEL CONTEXTO
+  const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+  
+
+  const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
+
+
+
   const {
     orderByColumn = "fecha",
     setOrderByColumn = () => {},
     orderByDirection = "DESC",
     setOrderByDirection = () => {},
-    showDeleted = false, // 🌟 Extraemos el estado
-    setShowDeleted = () => {}, // 🌟 Extraemos el mutador con fallback seguro
+    showDeleted = false, 
+    setShowDeleted = () => {}, 
     dateRange = undefined,
     setDateRange = () => {},
-    // 🌟 Extraemos los nuevos estados de la búsqueda por columna con sus fallbacks
-    searchColumn = "placa", // Por defecto el selector mirará a 'placa'
-    setSearchColumn = () => {}, // Función vacía por si el contexto llega undefined
-    searchTerm = "", // Por defecto el texto de búsqueda es un string vacío
-    setSearchTerm = () => {}, // Función vacía de respaldo seguro
-    // 🌟 NUEVO: Extraemos los estados de la paginación con sus fallbacks seguros
-    page = 1,                         // Por defecto inicia en la página 1
-    setPage = () => {},               // Función vacía de respaldo
-    rowsPerPage = 5,                 // Por defecto muestra 10 filas por página
-    setRowsPerPage = () => {},        // Función vacía de respal
+    searchColumn = "placa", 
+    setSearchColumn = () => {}, 
+    searchTerm = "", 
+    setSearchTerm = () => {}, 
+    page = 1,                         
+    setPage = () => {},               
+    rowsPerPage = 5,                 
+    setRowsPerPage = () => {},        
   } = query || {};
 
-  // 🌟 NUEVO: Estado local únicamente para el valor visual del Input
   const [inputValue, setInputValue] = useState(searchTerm);
 
-
-
-
-  // 🌟 NUEVO: Creamos una función "debounced" que sube el valor al contexto
-  // Usamos useMemo para que no se re-cree en cada renderizado y dañe el temporizador
   const debouncedSetSearchTerm = useMemo(() => {
     let timeoutId: NodeJS.Timeout;
     return (val: string) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setSearchTerm(val);
-      }, 400); // 400ms de espera
+      }, 400); 
     };
   }, [setSearchTerm]);
 
-
-console.log(searchTerm)
-
-
-  // 🌟 NUEVO: Cuando el usuario escribe, actualiza el input e inicia el debounce
-  // Modifica las funciones existentes en tu tabla:
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
     debouncedSetSearchTerm(value);
-    setPage(1); // 🔥 Resetea a la primera página al escribir
+    setPage(1); 
   };
 
   const handleColumnChange = (newColumn: string) => {
     setSearchColumn(newColumn);
     setInputValue("");
     setSearchTerm("");
-    setPage(1); // 🔥 Resetea a la primera página al cambiar de columna
+    setPage(1); 
   };
 
   const total = query?.entryOrdersData?.[0]?.total_count ?? 0;
 
-  // Renderizado del Badge de Estado de Sincronización
   const renderStatusBadge = () => {
     if (query?.isEntryOrdersError) {
       return (
-        <Badge
-          variant="destructive"
-          className="gap-1.5 px-3 py-1 animate-pulse"
-        >
+        <Badge variant="destructive" className="gap-1.5 px-3 py-1 animate-pulse">
           <AlertCircle className="h-3.5 w-3.5" />
           Error de Sincronización
         </Badge>
@@ -150,10 +191,7 @@ console.log(searchTerm)
     }
     if (query?.isFetchingEntryOrders) {
       return (
-        <Badge
-          variant="default"
-          className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700"
-        >
+        <Badge variant="default" className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Actualizando datos...
         </Badge>
@@ -161,10 +199,7 @@ console.log(searchTerm)
     }
     if (query?.isEntryOrdersSuccess) {
       return (
-        <Badge
-          variant="outline"
-          className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50"
-        >
+        <Badge variant="outline" className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50">
           <CheckCircle2 className="h-3.5 w-3.5" />
           Datos Actualizados
         </Badge>
@@ -174,24 +209,67 @@ console.log(searchTerm)
   };
 
   // ==========================================
-  // COLUMNAS
+  // CONFIGURACIÓN DE COLUMNAS RE-DISEÑADAS
   // ==========================================
   const columns = useMemo(
     () => [
       columnHelper.accessor("placa", {
-        header: "Placa",
-        cell: (info) => info.getValue(),
-      }),
+  header: "Placa",
+  cell: ({ row }) => {
+    const placaText = row.original.placa?.toString().toUpperCase() || "---";
+    const servicioRaw = row.original.vehiculo_tipo_servicio_snapshot?.toString().toLowerCase() || "particular";
+
+    // Mapeo dinámico de estilos según la regulación colombiana
+    const STYLES_MAP: Record<string, { bg: string; text: string; border: string; line: string }> = {
+      particular: {
+        bg: "bg-amber-400",
+        text: "text-slate-900",
+        border: "border-slate-950",
+        line: "border-slate-950/20",
+      },
+      publico: {
+        bg: "bg-white",
+        text: "text-slate-900",
+        border: "border-slate-400",
+        line: "border-slate-300",
+      },
+      oficial: {
+        bg: "bg-blue-700",
+        text: "text-white",
+        border: "border-blue-900",
+        line: "border-white/20",
+      },
+    };
+
+    // Obtenemos los estilos correspondientes (o fallback a particular si no coincide)
+    const estilo = STYLES_MAP[servicioRaw] || STYLES_MAP.particular;
+    const labelServicio = servicioRaw.toUpperCase();
+
+    return (
+      <div className={`inline-flex flex-col items-center justify-center ${estilo.bg} ${estilo.text} ${estilo.border} border-2 rounded-md  px-3 py-1 shadow-xs min-w-26.25 tracking-wider text-center text-sm select-none transition-colors`}>
+        <span className="leading-none text-base font-black">{placaText}</span>
+        <div className={`w-full border-t ${estilo.line} my-0.5`} />
+        <span className="text-[7.5px] font-black tracking-widest leading-none opacity-90">
+          {labelServicio}
+        </span>
+      </div>
+    );
+  },
+}),
 
       columnHelper.accessor("fecha", {
         header: "Fecha y Hora",
         cell: (info) => {
           const date = new Date(info.getValue());
-          return date.toLocaleString("es-CO", {
-            dateStyle: "short",
-            timeStyle: "short",
-            hour12: true,
-          });
+          return (
+            <span className="font-bold text-slate-800 tracking-tight">
+              {date.toLocaleString("es-CO", {
+                dateStyle: "short",
+                timeStyle: "short",
+                hour12: true,
+              })}
+            </span>
+          );
         },
       }),
 
@@ -205,20 +283,58 @@ console.log(searchTerm)
         cell: (info) => info.getValue(),
       }),
 
-      columnHelper.accessor("propietario_nombre", {
-        header: "Propietario",
-        cell: (info) => info.getValue(),
+      // 🌟 REEMPLAZADO: Tipo de Vehículo con íconos dinámicos y texto enriquecido
+      columnHelper.accessor("vehiculo_tipo_snapshot", {
+        header: "Tipo de Vehículo",
+        cell: (info) => {
+          const value = info.getValue() as string;
+          const config = VEHICLE_TYPE_MAP[value] || { label: value || "No especificado", icon: Car };
+          const IconComponent = config.icon;
+
+          return (
+            <div className="flex items-center gap-2 font-bold text-slate-800">
+              <div className="p-1 rounded-md bg-slate-100 text-slate-600">
+                <IconComponent className="h-4 w-4 shrink-0" />
+              </div>
+              <span className="text-sm truncate">{config.label}</span>
+            </div>
+          );
+        },
       }),
 
-      columnHelper.accessor("cliente_nombre", {
-        header: "Cliente",
-        cell: (info) => info.getValue(),
+      // 🌟 REEMPLAZADO: Tipo de Servicio (Texto limpio en negrita)
+      columnHelper.accessor("service_type", {
+        header: "Tipo de Servicio",
+        cell: (info) => {
+          const value = info.getValue() as string;
+          const translatedLabel = SERVICE_TYPE_MAP[value] || value || "---";
+          return (
+            <span className="font-bold text-slate-900 text-sm tracking-tight">
+              {translatedLabel}
+            </span>
+          );
+        },
       }),
 
+      // 🌟 REFORMADO: Estado de la Orden utilizando Badges de color condicionales
       columnHelper.accessor("estado_orden", {
         header: "Estado",
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          const rawStatus = info.getValue() as string;
+          const statusConfig = STATUS_MAP[rawStatus] || { label: rawStatus, className: "bg-slate-100 text-slate-700" };
+
+          return (
+            <Badge variant="outline" className={statusConfig.className}>
+              {statusConfig.label}
+            </Badge>
+          );
+        },
       }),
+
+
+
+
+
 
       columnHelper.display({
         id: "acciones",
@@ -228,27 +344,27 @@ console.log(searchTerm)
           if (!mutation) return null;
 
           return (
-            <div className="flex gap-2">
-              <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-              <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
-              <CancelOrder
-                orden={orden}
-                tenantId={tenantId}
-                mutation={mutation}
-              />
-            </div>
+            <AccionesOrderDialog 
+              orden={orden} 
+              tenantId={tenantId} 
+              mutation={mutation} 
+              rol={rol} 
+            />
           );
         },
       }),
+
+
+
+
+
+
     ],
-    [tenantId, mutation],
+    [tenantId, mutation, rol],
   );
 
-  // ==========================================
-  // INSTANCIA DE LA TABLA
-  // ==========================================
   const table = useReactTable({
-    data: templates,
+    data: EntryOrders,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -257,7 +373,6 @@ console.log(searchTerm)
     <div className="space-y-4">
       {/* SECCIÓN SUPERIOR: Info, Selects de Ordenamiento y Estado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-        {/* Total Registros */}
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-medium text-slate-500">
             Total Encontrado:
@@ -267,16 +382,13 @@ console.log(searchTerm)
           </span>
         </div>
 
-        {/* CONTROLES DE ORDENAMIENTO Y FILTROS */}
         <div className="flex flex-wrap items-center gap-6">
-          {/* CONTROLES DE ORDENAMIENTO (SELECTS CON SINTAXIS BASE UI) */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-slate-600 text-sm font-medium">
               <ArrowUpDown className="h-4 w-4 text-slate-400" />
               <span>Ordenar por:</span>
             </div>
 
-            {/* Select de Columnas al estilo Base UI */}
             <Select
               items={SELECT_COLUMNAS}
               value={orderByColumn}
@@ -294,7 +406,6 @@ console.log(searchTerm)
               </SelectContent>
             </Select>
 
-            {/* Select de Dirección al estilo Base UI */}
             <Select
               items={SELECT_DIRECCION}
               value={orderByDirection}
@@ -305,7 +416,7 @@ console.log(searchTerm)
                   setOrderByDirection("DESC");
                 }
               }}
-             >
+            >
               <SelectTrigger className="w-45 bg-white h-9 text-sm">
                 <SelectValue placeholder="Dirección" />
               </SelectTrigger>
@@ -318,30 +429,26 @@ console.log(searchTerm)
               </SelectContent>
             </Select>
 
-            {/* Input de texto libre */}
-                <div className="relative flex-1 h-full">
-                  <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    placeholder={`Buscar por ${searchColumn === 'placa' ? 'placa' : searchColumn === 'marca' ? 'marca' : searchColumn === 'linea' ? 'línea' : 'documento'}...`}
-                    value={inputValue} // 🌟 Conectado al estado síncrono local
-                    onChange={handleInputChange} // 🌟 Despacha el cambio y el debounce juntos
-                    className="w-full h-full pl-9 pr-8 border-none bg-transparent rounded-l-none text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  {/* Botón X para limpiar rápido */}
-                  {inputValue && (
-                    <button
-                      onClick={() => {
-                        setInputValue("");
-                        setSearchTerm(""); // Limpia el contexto inmediatamente sin esperar debounce
-                      }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-
-
+            <div className="relative flex-1 h-full">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Input
+                placeholder={`Buscar por ${searchColumn === 'placa' ? 'placa' : searchColumn === 'marca' ? 'marca' : searchColumn === 'linea' ? 'línea' : 'documento'}...`}
+                value={inputValue} 
+                onChange={handleInputChange} 
+                className="w-full h-full pl-9 pr-8 border-none bg-transparent rounded-l-none text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              {inputValue && (
+                <button
+                  onClick={() => {
+                    setInputValue("");
+                    setSearchTerm(""); 
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
           <DateRangePicker
@@ -349,7 +456,6 @@ console.log(searchTerm)
             setDate={setDateRange}
           ></DateRangePicker>
 
-          {/* 🌟 NUEVO FILTRO: MOSTRAR ANULADOS (SWITCH) */}
           <div className="flex items-center space-x-2 bg-white px-3 h-9 rounded-md border border-slate-200 shadow-sm">
             <Switch
               id="show-deleted"
@@ -365,7 +471,6 @@ console.log(searchTerm)
           </div>
         </div>
 
-        {/* Estado de Sincronización */}
         <div className="flex items-center">{renderStatusBadge()}</div>
       </div>
 
@@ -417,11 +522,8 @@ console.log(searchTerm)
         </Table>
       </div>
 
-
-      {/* 🌟 NUEVO: PIE DE PÁGINA CON COMPONENTES DE PAGINACIÓN SHADCN */}
+      {/* PIE DE PÁGINA CON COMPONENTES DE PAGINACIÓN */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-1">
-        
-        {/* Selector de Filas por Página (Izquierda) */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-500 whitespace-nowrap">
             Filas por página:
@@ -430,7 +532,7 @@ console.log(searchTerm)
             value={String(rowsPerPage)}
             onValueChange={(val) => {
               setRowsPerPage(Number(val));
-              setPage(1); // Al cambiar la densidad de filas, volvemos a la pág 1
+              setPage(1); 
             }}
           >
             <SelectTrigger className="w-16 h-8 text-xs bg-white">
@@ -443,36 +545,29 @@ console.log(searchTerm)
             </SelectContent>
           </Select>
           
-          {/* Indicador de posición actual */}
           <span className="text-xs text-slate-400 ml-2 hidden md:inline">
             Mostrando {Math.min((page - 1) * rowsPerPage + 1, total)} - {Math.min(page * rowsPerPage, total)} de {total}
           </span>
         </div>
 
-        {/* Control de Navegación de Páginas (Derecha) */}
         <Pagination className="mx-0 w-auto">
           <PaginationContent className="gap-1">
-            
-            {/* Botón Anterior */}
             <PaginationItem>
               <button
                 onClick={() => setPage(Math.max(page - 1, 1))}
                 disabled={page === 1}
                 className="flex h-8 items-center justify-center gap-1 pl-2.5 pr-3.5 text-xs font-medium rounded-md border border-slate-200 bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
               >
-                {/* Nota: Reutilizamos la estructura visual interna de Shadcn */}
                 <span className="hidden sm:inline">Anterior</span>
               </button>
             </PaginationItem>
 
-            {/* Número de Página Actual Estático o Compacto */}
             <PaginationItem>
               <div className="flex h-8 min-w-8 items-center justify-center rounded-md border border-blue-100 bg-blue-50 text-xs font-semibold text-blue-600 px-2 shadow-sm select-none">
                 Pág. {page} de {Math.max(Math.ceil(total / rowsPerPage), 1)}
               </div>
             </PaginationItem>
 
-            {/* Botón Siguiente */}
             <PaginationItem>
               <button
                 onClick={() => setPage(Math.min(page + 1, Math.ceil(total / rowsPerPage)))}
@@ -482,7 +577,6 @@ console.log(searchTerm)
                 <span className="hidden sm:inline">Siguiente</span>
               </button>
             </PaginationItem>
-
           </PaginationContent>
         </Pagination>
       </div>

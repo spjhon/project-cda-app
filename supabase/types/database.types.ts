@@ -113,6 +113,12 @@ export type Database = {
           id: string
           kilometraje: string | null
           observaciones: string | null
+          oficina_consecutivo_factura: string | null
+          oficina_pago: number | null
+          oficina_pin: string | null
+          oficina_tipo_pago:
+            | Database["public"]["Enums"]["office_payment_type_enum"]
+            | null
           plantilla_id: string
           propietario_direccion_snapshot: string | null
           propietario_email_snapshot: string | null
@@ -121,6 +127,8 @@ export type Database = {
           propietario_numero_documento_snapshot: string
           propietario_telefono_snapshot: string | null
           propietario_tipo_documento_snapshot: string
+          resultado_revision: string | null
+          se_compro_soat: boolean
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string | null
           tenant_id: string
@@ -165,6 +173,12 @@ export type Database = {
           id?: string
           kilometraje?: string | null
           observaciones?: string | null
+          oficina_consecutivo_factura?: string | null
+          oficina_pago?: number | null
+          oficina_pin?: string | null
+          oficina_tipo_pago?:
+            | Database["public"]["Enums"]["office_payment_type_enum"]
+            | null
           plantilla_id: string
           propietario_direccion_snapshot?: string | null
           propietario_email_snapshot?: string | null
@@ -173,6 +187,8 @@ export type Database = {
           propietario_numero_documento_snapshot: string
           propietario_telefono_snapshot?: string | null
           propietario_tipo_documento_snapshot: string
+          resultado_revision?: string | null
+          se_compro_soat?: boolean
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id: string
@@ -217,6 +233,12 @@ export type Database = {
           id?: string
           kilometraje?: string | null
           observaciones?: string | null
+          oficina_consecutivo_factura?: string | null
+          oficina_pago?: number | null
+          oficina_pin?: string | null
+          oficina_tipo_pago?:
+            | Database["public"]["Enums"]["office_payment_type_enum"]
+            | null
           plantilla_id?: string
           propietario_direccion_snapshot?: string | null
           propietario_email_snapshot?: string | null
@@ -225,6 +247,8 @@ export type Database = {
           propietario_numero_documento_snapshot?: string
           propietario_telefono_snapshot?: string | null
           propietario_tipo_documento_snapshot?: string
+          resultado_revision?: string | null
+          se_compro_soat?: boolean
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id?: string
@@ -684,7 +708,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          role: string
+          role: Database["public"]["Enums"]["user_role_enum"]
           service_user_id: string
           tenant_id: string
           updated_at: string
@@ -692,7 +716,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          role?: string
+          role?: Database["public"]["Enums"]["user_role_enum"]
           service_user_id: string
           tenant_id: string
           updated_at?: string
@@ -700,7 +724,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          role?: string
+          role?: Database["public"]["Enums"]["user_role_enum"]
           service_user_id?: string
           tenant_id?: string
           updated_at?: string
@@ -923,15 +947,29 @@ export type Database = {
         Returns: {
           cliente_documento: string
           cliente_nombre: string
+          cliente_tipo_documento: string
+          es_reinspeccion: boolean
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
           id: string
+          kilometraje: string
           linea: string
           marca: string
+          oficina_consecutivo_factura: string
+          oficina_pago: number
+          oficina_pin: string
+          oficina_tipo_pago: Database["public"]["Enums"]["office_payment_type_enum"]
           placa: string
           propietario_documento: string
           propietario_nombre: string
+          propietario_tipo_documento: string
+          resultado_revision: string
+          se_compro_soat: boolean
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          soat_vencimiento_snapshot: string
           total_count: number
+          vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
         }[]
       }
       fetch_orders_templates: {
@@ -966,6 +1004,17 @@ export type Database = {
       get_tenant_roles: { Args: { p_tenant_id: string }; Returns: string[] }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      update_office_order_data: {
+        Args: {
+          p_consecutivo_factura: string
+          p_order_id: string
+          p_pago: number
+          p_pin: string
+          p_se_compro_soat: boolean
+          p_tipo_pago: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       condition_response_enum: "cumple" | "no_cumple" | "no_aplica"
@@ -979,8 +1028,21 @@ export type Database = {
         | "registro_civil"
         | "carnet_diplomatico"
         | "ti2"
+      office_payment_type_enum:
+        | "efectivo"
+        | "tarjeta_debito"
+        | "tarjeta_credito"
+        | "sistecredito"
+        | "addi"
+        | "transferencia"
+        | "qr"
       order_status_enum: "abierta" | "en_prueba" | "finalizada" | "anulada"
       service_type_enum: "RTM" | "preventiva" | "peritaje" | "otro"
+      user_role_enum:
+        | "gerente"
+        | "recepcionista"
+        | "aux_administrativo"
+        | "director_tecnico"
       vehicle_service_type_enum:
         | "particular"
         | "enseñanza"
@@ -1137,8 +1199,23 @@ export const Constants = {
         "carnet_diplomatico",
         "ti2",
       ],
+      office_payment_type_enum: [
+        "efectivo",
+        "tarjeta_debito",
+        "tarjeta_credito",
+        "sistecredito",
+        "addi",
+        "transferencia",
+        "qr",
+      ],
       order_status_enum: ["abierta", "en_prueba", "finalizada", "anulada"],
       service_type_enum: ["RTM", "preventiva", "peritaje", "otro"],
+      user_role_enum: [
+        "gerente",
+        "recepcionista",
+        "aux_administrativo",
+        "director_tecnico",
+      ],
       vehicle_service_type_enum: [
         "particular",
         "enseñanza",

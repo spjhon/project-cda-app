@@ -4,8 +4,9 @@ Multi-tenant Colombian CDAs (automotive diagnostic center) admin tool.
 
 ## CLI Commands I Use Frequently
 
-Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts`
-Make full local system backup: `pnpx supabase db dump --local > backup_completo.sql`
+Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts` o `pnpx supabase gen types typescript --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > supabase/types/database.types.ts`
+Make full local system backup: `pnpx supabase db dump --local > backup_completo.sql` o `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > backup_completo.sql`
+backup solo de la data: ``
 To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzjrqye`
 actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
 ver que falta por actualizar: `pnpm update --interactive --latest`, este permite no solo ver sino tambien instalar
