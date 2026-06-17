@@ -1,32 +1,32 @@
-import {
-  SidebarInset,
-  SidebarProvider,
-  
-} from "@/components/ui/sidebar";
-import { ReactNode, Suspense } from "react";
-import { AppSidebar } from "@/components/ui/app-sidebar";
-
 import HeaderSidebar from "@/components/dashboard/recepcionista/HeaderSidebar";
+import { AppSidebar } from "@/components/ui/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import DirectorTecnicoLoaderContext from "@/contexts/DirectorTecnicoLoaderContext";
 
-import Loading from "@/components/ui/loading";
 
-
-import ReceptionistLoaderContext from "@/contexts/ReceptionistLoaderContex";
 import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
-import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { redirect } from "next/navigation";
+import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 
+import { ReactNode } from "react";
 
-interface ReceptionistDashboardLayoutProps {
+interface DirectorTecnicoDashboardLayoutProps {
   children: ReactNode;
-  params: Promise<{ tenant: string }>
+  params: Promise<{ tenant: string }>;
 }
 
 
 
 
-export default function ReceptionistDashboardLayout({children, params}: ReceptionistDashboardLayoutProps) {
-  //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
+
+
+
+export default function DirectorTecnicoDashboardLayout({
+  children,
+  params
+}: DirectorTecnicoDashboardLayoutProps) {
+
+
 
 
 
@@ -62,13 +62,19 @@ export default function ReceptionistDashboardLayout({children, params}: Receptio
 
 
 
+
+
+
+
+
+
+
   return (
-    <Suspense fallback={<Loading />}>
-      <ReceptionistLoaderContext   rol={"recepcionista"} templateTabelDataPromise={templateTabelDataPromise}>
-        <SidebarProvider>
+    <DirectorTecnicoLoaderContext rol={"director-tecnico"} templateTabelDataPromise={templateTabelDataPromise} >
+    <SidebarProvider>
           
 
-          <AppSidebar rol={"recepcionista"} />
+          <AppSidebar rol={"director-tecnico"}/>
 
           <SidebarInset>
             <HeaderSidebar></HeaderSidebar>
@@ -83,8 +89,6 @@ export default function ReceptionistDashboardLayout({children, params}: Receptio
 
 
         </SidebarProvider>
-      </ReceptionistLoaderContext>
-    </Suspense>
+        </DirectorTecnicoLoaderContext>
   );
-};
-
+}

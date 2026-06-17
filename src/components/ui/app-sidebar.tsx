@@ -58,18 +58,7 @@ const NavRecepcionista: NavItem[] = [
     href: "/dashboard/recepcionista/ordenes-de-entrada",
     icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
   },
-  {
-    title: "Nueva Plantilla Orden de Entrada", // Ojo: podrías renombrarlo a "Editor de Órdenes" para diferenciarlo de la primera
-    description: "Creación y edición de órdenes de entrada",
-    href: "/dashboard/recepcionista/crear-orden-de-entrada",
-    icon: FilePenLine, // ✨ El lápiz sobre el documento grita "creación / edición"
-  },
-  {
-    title: "Plantillas Creadas",
-    description: "Listado de plantillas creadas",
-    href: "/dashboard/recepcionista/plantillas-creadas",
-    icon: ClipboardList, // ✨ Representa fielmente los formatos de inspección ISO
-  },
+  
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
     description: "Gestionar tu cuenta, firma y credenciales",
@@ -98,7 +87,34 @@ const NavOficina: NavItem[] = [
 ];
 
 
-
+const NavDirectorTecnico: NavItem[] = [
+  
+  {
+    title: "Órdenes de Entrada",
+    description: "Listado de órdenes de entrada",
+    href: "/dashboard/director-tecnico",
+    icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
+  },
+  {
+    title: "Nueva Plantilla Orden de Entrada", // Ojo: podrías renombrarlo a "Editor de Órdenes" para diferenciarlo de la primera
+    description: "Creación y edición de órdenes de entrada",
+    href: "/dashboard/director-tecnico/crear-orden-de-entrada",
+    icon: FilePenLine, // ✨ El lápiz sobre el documento grita "creación / edición"
+  },
+  {
+    title: "Plantillas Creadas",
+    description: "Listado de plantillas creadas",
+    href: "/dashboard/director-tecnico/plantillas-creadas",
+    icon: ClipboardList, // ✨ Representa fielmente los formatos de inspección ISO
+  },
+  
+  {
+    title: "Mi Perfil", // 🔥 NUEVO MÓDULO
+    description: "Gestionar tu cuenta, firma y credenciales",
+    href: "/dashboard/director-tecnico/perfil",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
+];
 
 
 export function AppSidebar({ rol }: AppSidebarProps) {
@@ -113,7 +129,9 @@ let NAV_DATA = NavOficina; // Valor por defecto
     case "oficina":
       NAV_DATA = NavOficina;
       break;
-    
+    case "director-tecnico":
+      NAV_DATA = NavDirectorTecnico;
+      break;
   }
 
 const contextRecived = useContext(PermissionsContext);

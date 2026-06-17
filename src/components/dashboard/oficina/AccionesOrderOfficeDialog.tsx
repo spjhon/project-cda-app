@@ -33,8 +33,8 @@ export default function AccionesOrderOfficeDialog({
     return null;
   }
 
-  // Filtrado de renderizado: Este componente está optimizado para perfiles de Oficina o Gerencia administrativa
-  if (rol !== "oficina" && rol !== "gerente") {
+  // Filtrado de renderizado: Este componente está optimizado para perfiles de Oficina
+  if (rol !== "oficina") {
     return null;
   }
 

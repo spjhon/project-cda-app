@@ -434,7 +434,7 @@ if (errorDeletingTemplate) {
                     title="Editar plantilla"
                     onClick={() => {
                       // Redirige a la misma página o layout agregando el query string seguro
-                      router.push(`/dashboard/recepcionista/crear-orden-de-entrada?templateId=${template.id}`);
+                      router.push(`/dashboard/director-tecnico/crear-orden-de-entrada?templateId=${template.id}`);
                     }}
                   >
                     <Edit3 className="h-4 w-4" />

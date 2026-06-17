@@ -51,6 +51,10 @@ export interface EntryOrderListItem {
   se_compro_soat: boolean;
   resultado_revision: string | null;
   
+// 🌟 INYECTAR AQUÍ: Consecutivos de cierre técnico (ISO 17020)
+  consecutivo_fur: string | null;
+  consecutivo_rtm: string | null;
+
   // Metadata de paginación
   total_count: number;
 }

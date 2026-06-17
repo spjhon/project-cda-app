@@ -55,6 +55,7 @@ import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
+import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -119,11 +120,12 @@ export default function CreatedOrdersTable() {
   const EntryOrdersContextRecived = useContext(EntryOrdersContext);
   const contextRecivedReceptionist = useContext(ReceptionistContext);
   const OficinaContextRecived = useContext(OficinaContext);
+  const DirectorTecnicoContextRecived = useContext(DirectorTecnicoContext)
 
   //extraccion del rol desde el contexto
-  const rol = contextRecivedReceptionist?.ReceptionistContextValue.rol || OficinaContextRecived?.OficinaContextValue.rol
+  const rol = contextRecivedReceptionist?.ReceptionistContextValue.rol || OficinaContextRecived?.OficinaContextValue.rol || DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol
 
-  console.log("El rol actual es: ", rol)
+
 
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
   const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];

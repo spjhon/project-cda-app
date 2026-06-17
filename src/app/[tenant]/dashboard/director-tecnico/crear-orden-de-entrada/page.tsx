@@ -1,7 +1,7 @@
 "use client";
 
 
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { CalendarIcon, LayoutDashboard, FileText, Trash2, } from "lucide-react";
 import { format } from "date-fns";
 
@@ -35,9 +35,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-//import { useFetchTemplateForEdition } from "@/lib/client-actions/fetch_template_data_for_edition";
-import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
+
 import { OrderTemplateSignature } from "@/lib/server-actions/fetch_orders_templates";
+import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
 
 
 
@@ -126,7 +126,7 @@ const searchParams = useSearchParams()
  const queryClient = useQueryClient();
 
   const contextRecived = useContext(PermissionsContext);
-  const contextRecivedReceptionist = useContext(ReceptionistContext);
+  const contextRecivedDirectorTecnico = useContext(DirectorTecnicoContext);
 
   const tenantId = contextRecived?.PermissionsContextValue.tenantObject?.id;
   const logo_url = contextRecived?.PermissionsContextValue.tenantObject?.logo_url;
@@ -137,7 +137,7 @@ const searchParams = useSearchParams()
 
 
 
-const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.templateTableData.query.data?.find(
+const  currentTemplate = contextRecivedDirectorTecnico?.DirectorTecnicoContextValue.templateTableData.query.data?.find(
   (template) => template.id === templateId
 );
 
@@ -148,7 +148,7 @@ const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.te
 
   //ESTE ES EL STATE QUE MANEJA TODA LA INFORMACIN DEL FORM
   const [formData, setFormData] = useState<OrderTemplateInput>( {
-    
+      id: "",
       tenant_id: tenantId || "",
       template_name: "",
       version: 1,
@@ -170,12 +170,13 @@ const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.te
   // GUARDIA DE SINCRONIZACIÓN (Sustituto de useEffect sin romper el flujo)
   // =================================================================
   // Guardamos en una variable si el formulario está mostrando datos de edición o está vacío
-  const isFormShowingTemplateId = formData.document_code === currentTemplate?.document_code;
+  const isFormShowingTemplateId = formData.id === currentTemplate?.id;
 
   // Si la URL tiene un templateId pero el estado actual NO coincide con los datos de ese template...
   if (currentTemplate && !isFormShowingTemplateId) {
     // Forzamos síncronamente la actualización del estado con la nueva plantilla
     setFormData({
+      id: currentTemplate.id,
       tenant_id: tenantId || "",
       template_name: currentTemplate.template_name || "",
       version: currentTemplate.version ?? 1,
@@ -190,9 +191,10 @@ const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.te
     });
   } 
   // Si la URL NO tiene templateId (es nueva) pero el estado actual todavía tiene datos guardados de antes...
-  else if (!templateId && formData.template_name !== "") {
+  else if (!templateId && formData.id !== "") {
     // Limpiamos el estado para que vuelva a quedar en blanco
     setFormData({
+      id: "",
       tenant_id: tenantId || "",
       template_name: "",
       version: 1,
@@ -239,7 +241,6 @@ const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.te
 
     console.log("Datos capturados.");
   };
-
 
 
 
@@ -377,26 +378,6 @@ const  currentTemplate = contextRecivedReceptionist?.ReceptionistContextValue.te
                 </PopoverContent>
               </Popover>
             </div>
-
-            {/**
- * <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/20">
-              <div className="space-y-0.5">
-                <Label htmlFor="is_active">
-                  {COMPONENT_TEXT.labels.active}
-                </Label>
-                <p className="text-[12px] text-muted-foreground">
-                  {COMPONENT_TEXT.hints.active}
-                </p>
-              </div>
-              <Switch
-                id="is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_active: checked })
-                }
-              />
-            </div>
- */}
           </CardContent>
         </Card>
 

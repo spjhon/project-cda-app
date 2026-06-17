@@ -98,6 +98,8 @@ export type Database = {
           cliente_telefono_snapshot: string | null
           cliente_tipo_documento_snapshot: string
           consecutivo: number
+          consecutivo_fur: string | null
+          consecutivo_rtm: string | null
           created_at: string
           deleted_at: string | null
           es_reinspeccion: boolean | null
@@ -158,6 +160,8 @@ export type Database = {
           cliente_telefono_snapshot?: string | null
           cliente_tipo_documento_snapshot: string
           consecutivo: number
+          consecutivo_fur?: string | null
+          consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
           es_reinspeccion?: boolean | null
@@ -218,6 +222,8 @@ export type Database = {
           cliente_telefono_snapshot?: string | null
           cliente_tipo_documento_snapshot?: string
           consecutivo?: number
+          consecutivo_fur?: string | null
+          consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
           es_reinspeccion?: boolean | null
@@ -948,6 +954,8 @@ export type Database = {
           cliente_documento: string
           cliente_nombre: string
           cliente_tipo_documento: string
+          consecutivo_fur: string
+          consecutivo_rtm: string
           es_reinspeccion: boolean
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
@@ -1004,6 +1012,15 @@ export type Database = {
       get_tenant_roles: { Args: { p_tenant_id: string }; Returns: string[] }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      update_director_tecnico_order: {
+        Args: {
+          p_consecutivo_fur: string
+          p_consecutivo_rtm: string
+          p_order_id: string
+          p_resultado_revision: string
+        }
+        Returns: string
+      }
       update_office_order_data: {
         Args: {
           p_consecutivo_factura: string
@@ -1013,7 +1030,7 @@ export type Database = {
           p_se_compro_soat: boolean
           p_tipo_pago: string
         }
-        Returns: undefined
+        Returns: string
       }
     }
     Enums: {

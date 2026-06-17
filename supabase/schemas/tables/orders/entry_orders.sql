@@ -208,6 +208,10 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     se_compro_soat boolean,
     resultado_revision text,
 
+    -- 🌟 INYECTAR AQUÍ: Campos de control para el Director Técnico (ISO 17020)
+    consecutivo_fur character varying,
+    consecutivo_rtm character varying,
+
     -- ==========================================
     -- AUDITORÍA
     -- ==========================================
@@ -254,6 +258,10 @@ ALTER TABLE public.entry_orders
 
 COMMENT ON COLUMN public.entry_orders.service_type IS 'Tipo de servicio legal o comercial asociado a esta orden de entrada';
 
+-- 🌟 INYECTAR AQUÍ: Documentación técnica de los nuevos consecutivos
+COMMENT ON COLUMN public.entry_orders.consecutivo_fur IS 'Número del Formato Uniforme de Resultados generado en la inspección';
+COMMENT ON COLUMN public.entry_orders.consecutivo_rtm IS 'Número del certificado de Revisión Tecnicomecánica emitido (Satisface RUNT)';
+
 -- ==========================================
 -- 5. CONSTRAINTS (Unicidad)
 -- ==========================================
@@ -299,6 +307,13 @@ ON public.entry_orders USING btree (service_type);
 CREATE INDEX IF NOT EXISTS entry_orders_oficina_factura_tenant_idx 
 ON public.entry_orders USING btree (tenant_id, oficina_consecutivo_factura) 
 TABLESPACE pg_default;
+
+-- 🌟 INYECTAR AQUÍ: Índices optimizados para auditorías rápidas por FUR y RTM por CDA
+CREATE INDEX IF NOT EXISTS entry_orders_consecutivo_fur_idx 
+ON public.entry_orders USING btree (tenant_id, consecutivo_fur);
+
+CREATE INDEX IF NOT EXISTS entry_orders_consecutivo_rtm_idx 
+ON public.entry_orders USING btree (tenant_id, consecutivo_rtm);
 
 -- ==========================================
 -- 7. GRANTS

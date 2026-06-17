@@ -1,17 +1,18 @@
 "use client";
 
-import CreatedTemplatesTable from "@/components/dashboard/recepcionista/CreatedTemplatesTable";
-import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
+import CreatedTemplatesTable from "@/components/dashboard/director-tecnico/CreatedTemplatesTable";
+import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
+
 
 import { useContext } from "react";
 
 export default function CreatedTemplatesPage() {
 
 
-  const contextReceived = useContext(ReceptionistContext);
+  const contextReceived = useContext(DirectorTecnicoContext);
   
   // Extraemos la query y la mutación del contexto
-  const templateContext = contextReceived?.ReceptionistContextValue.templateTableData;
+  const templateContext = contextReceived?.DirectorTecnicoContextValue.templateTableData;
 
   if (!templateContext) return "No hay datos que mostrar desde el contexto templateContext"; // O un skeleton/loader
 

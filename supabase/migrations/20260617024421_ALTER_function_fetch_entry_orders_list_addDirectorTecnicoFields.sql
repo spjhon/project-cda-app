@@ -1,3 +1,21 @@
+-- DROP de la función existente para permitir el cambio en la estructura de la tabla de retorno (RETURNS TABLE)
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    p_tenant_id UUID,
+    p_limit INTEGER,
+    p_offset INTEGER,
+    p_placa TEXT,
+    p_estado public.order_status_enum,
+    p_fecha_desde DATE,
+    p_fecha_hasta DATE,
+    p_cliente_documento TEXT,
+    p_propietario_documento TEXT, 
+    p_order_by_column TEXT,
+    p_order_by_direction TEXT,
+    p_show_deleted BOOLEAN,
+    p_search_column TEXT,
+    p_search_term TEXT
+);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -40,7 +58,8 @@ RETURNS TABLE (
     oficina_pago NUMERIC(12,2),
     oficina_consecutivo_factura CHARACTER VARYING,
     oficina_tipo_pago public.office_payment_type_enum,
-   
+    oficina_fupas CHARACTER VARYING,
+    oficina_certificados_runt CHARACTER VARYING,
     se_compro_soat BOOLEAN,
     resultado_revision TEXT,
     consecutivo_fur CHARACTER VARYING,
@@ -78,7 +97,8 @@ BEGIN
             o.oficina_pago,
             o.oficina_consecutivo_factura,
             o.oficina_tipo_pago,
-            
+            o.oficina_fupas,
+            o.oficina_certificados_runt,
             o.se_compro_soat,
             o.resultado_revision,
             o.consecutivo_fur,

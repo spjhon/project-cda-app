@@ -1,3 +1,21 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    p_tenant_id UUID,
+    p_limit INTEGER,
+    p_offset INTEGER,
+    p_placa TEXT,
+    p_estado public.order_status_enum,
+    p_fecha_desde DATE,
+    p_fecha_hasta DATE,
+    p_cliente_documento TEXT,
+    p_propietario_documento TEXT, 
+    p_order_by_column TEXT,
+    p_order_by_direction TEXT,
+    p_show_deleted BOOLEAN,
+    p_search_column TEXT,
+    p_search_term TEXT
+);
+
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,

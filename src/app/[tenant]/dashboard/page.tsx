@@ -35,7 +35,7 @@ const ROLE_CONFIG: Record<string, { label: string; description: string; path: st
   director_tecnico: {
     label: "Director Técnico",
     description: "Control de calidad del SGC, aprobación e inspección bajo ISO 17020.",
-    path: "/dashboard/director_tecnico",
+    path: "/dashboard/director-tecnico",
   },
 };
 

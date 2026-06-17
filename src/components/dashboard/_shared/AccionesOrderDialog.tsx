@@ -14,6 +14,7 @@ import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
 import CancelOrder from "./CancelOrder";
 import { UseMutateFunction } from "@tanstack/react-query";
 import AccionesOrderOfficeDialog from "../oficina/AccionesOrderOfficeDialog";
+import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrderDirectorTecnicoDialog";
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
@@ -130,10 +131,21 @@ export default function AccionesOrderDialog({
   // 🌟 Espacio reservado para los siguientes roles (oficina, gerente, etc.)
   // Por ahora, si no es recepcionista no muestra nada hasta que los programemos.
 
-  // 🌟 Tratamiento para OFICINA y GERENTE
-  if (rol === "oficina" || rol === "gerente") {
+  // 🌟 Tratamiento para OFICINA
+  if (rol === "oficina") {
     return (
       <AccionesOrderOfficeDialog 
+        orden={orden} 
+        tenantId={tenantId} 
+        rol={rol} 
+      />
+    );
+  }
+
+
+  if (rol === "director-tecnico") {
+    return (
+      <AccionesOrderDirectorTecnicoDialog 
         orden={orden} 
         tenantId={tenantId} 
         rol={rol} 

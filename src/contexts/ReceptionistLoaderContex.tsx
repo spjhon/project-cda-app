@@ -1,42 +1,24 @@
 "use client";
 
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import {
-  UseMutateFunction,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext } from "react";
-import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-// 1. Tipamos el objeto de la mutación para que sea reusable
-/**
- * "Esta es una función que recibe un string (TVariables), retorna un string si todo sale bien (TData), puede lanzar un objeto de tipo Error si falla (TError), y no maneja contexto intermedio (TContext)."
- * UseMutateFunction<TData, TError, TVariables, TContext>
- */
-interface TemplateMutation {
-  updateIsActive: UseMutateFunction<
-    { id: string; is_active: boolean },
-    Error,
-    { id: string; is_active: boolean },
-    unknown
-  >;
-  isUpdating: boolean;
-  deleteTemplate: UseMutateFunction<
-    string,
-    Error,
-    { id: string; tenantId: string },
-    unknown
-  >;
-  isDeletingTemplate: boolean;
-  errorDeletingTemplate: Error | null;
-  resetDeleteMutation: () => void;
+
+// 3. Definimos el valor total del contexto
+export interface ReceptionistContextType {
+  ReceptionistContextValue: {
+    rol: string;
+   templateTableData: {
+      query: TemplateQuery;
+      
+    };
+  };
 }
 
-// 2. Tipamos el objeto de la query
 interface TemplateQuery {
   data: OrderTemplate[] | null;
   isFetching: boolean;
@@ -46,16 +28,8 @@ interface TemplateQuery {
   isSuccess: boolean;
 }
 
-// 3. Definimos el valor total del contexto
-export interface ReceptionistContextType {
-  ReceptionistContextValue: {
-    rol: string;
-    templateTableData: {
-      query: TemplateQuery;
-      mutation: TemplateMutation; // Corregido el typo de muetation
-    };
-  };
-}
+
+
 
 // Tipamos el Contexto
 export const ReceptionistContext = createContext<ReceptionistContextType | null>(null);
@@ -63,6 +37,7 @@ export const ReceptionistContext = createContext<ReceptionistContextType | null>
 interface ReceptionistLoaderContext {
   children: ReactNode;
   templateTabelDataPromise: Promise<OrderTemplate[] | null>;
+  
   rol: string;
 }
 
@@ -71,7 +46,8 @@ export default function ReceptionistLoaderContext({
   templateTabelDataPromise,
   children,
 }: ReceptionistLoaderContext) {
-  const queryClient = useQueryClient();
+ 
+
 
   const permissionscontextRecived = useContext(PermissionsContext);
   const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
@@ -108,102 +84,10 @@ export default function ReceptionistLoaderContext({
     refetchOnWindowFocus: false,
   });
 
-  //useMutation utilizado para cambiar el state de is_active que esta en un switch en el componente hijo
-  const { mutate: updateIsActive, isPending: isUpdating } = useMutation({
-    mutationFn: async ({
-      id,
-      is_active,
-    }: {
-      id: string;
-      is_active: boolean;
-    }) => {
-      const { error } = await supabaseBrowser
-        .from("order_template") // Asegúrate de que este sea el nombre de tu tabla
-        .update({ is_active })
-        .eq("id", id);
 
-      if (error) throw new Error(error.message);
-      return { id, is_active };
-    },
 
-    // Al tener éxito, invalidamos la cache para que useQuery vuelva a pedir los datos
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
-    },
 
-    onError: (err) => {
-      console.error("Error al actualizar:", err);
-      // Aquí podrías disparar un toast de error
-    },
-  });
 
-  //Mutacion para la eliminacion de unn temmplate, primero reviza si ya existe uno y si si, no deja eliminar el template
-  const {
-    mutate: deleteTemplate,
-    isPending: isDeletingTemplate,
-    error: errorDeletingTemplate,
-    reset: resetDeleteMutation,
-  } = useMutation({
-    mutationFn: async ({ id, tenantId }: { id: string; tenantId: string }) => {
-      // 1. VERIFICACIÓN: Consultamos si el id de la plantilla ya está en entry_orders
-      const { data: existingOrders, error: searchError } = await supabaseBrowser
-        .from("entry_orders")
-        .select("id") // Solo pedimos el ID para que sea ultra ligero
-        .eq("plantilla_id", id)
-        .eq("tenant_id", tenantId) // Seguridad Multi-tenant obligatoria
-        .is("deleted_at", null) // Ignoramos órdenes eliminadas si tienes soft-delete
-        .limit(1); // Con encontrar una sola, ya sabemos que no se puede borrar
-
-      if (searchError) {
-        throw new Error(
-          `Error al verificar trazabilidad: ${searchError.message}`,
-        );
-      }
-
-      // 2. CONDICIONAL: Si encuentra al menos un registro, arrojamos el error para TanStack Query
-      if (existingOrders && existingOrders.length > 0) {
-        throw new Error(
-          "No se puede eliminar la plantilla. Ya se encuentra asociada a órdenes de entrada en el sistema y debe conservarse por auditoría.",
-        );
-      }
-
-      // 3. ACCIÓN: Si pasó la verificación, procedemos con el Soft Delete de la plantilla
-      const { data: deletedRows, error: deleteError } = await supabaseBrowser
-        .from("order_template")
-        .delete() // 🔥 Quita el .update(...) e inyecta el .delete() directamente
-        .eq("id", id)
-        .eq("tenant_id", tenantId) // Seguridad Multi-tenant para que solo borre lo suyo
-        .select("id"); // 💥 LE PEDIMOS QUE RETORNE EL ID BORRADO
-
-      if (deleteError) {
-        throw new Error(
-          `Error al eliminar la plantilla: ${deleteError.message}`,
-        );
-      }
-
-      // 🚨 SI RLS FALLÓ: deletedRows vendrá vacío (length === 0)
-      if (!deletedRows || deletedRows.length === 0) {
-        throw new Error(
-          "Violación de seguridad RLS: No tienes permisos para eliminar esta plantilla o no pertenece a tu organización.",
-        );
-      }
-
-      return id;
-    },
-
-    // Al tener éxito, invalidamos la caché para actualizar tu tabla en la interfaz
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates", "list"] });
-      // Aquí puedes disparar tu toast de éxito: toast.success("Plantilla eliminada")
-    },
-
-    // Aquí es donde TanStack Query captura CUALQUIERA de los "throw new Error" de arriba
-    onError: (err: Error) => {
-      console.log("Operación rechazada:", err.message);
-      // 💥 Aquí disparas tu toast de error pasándole el mensaje exacto que arrojamos
-      // toast.error(err.message)
-    },
-  });
 
   const ReceptionistContextValue = {
     rol: rol,
@@ -216,16 +100,7 @@ export default function ReceptionistLoaderContext({
         refetch: refetch,
         isSuccess: isSuccess,
       },
-      mutation: {
-        //Mutacion para el cambio de plantilla activa a una inactiva
-        updateIsActive: updateIsActive,
-        isUpdating: isUpdating,
-        //Mutacion para la eliminacion de un template
-        deleteTemplate: deleteTemplate,
-        isDeletingTemplate: isDeletingTemplate,
-        errorDeletingTemplate: errorDeletingTemplate,
-        resetDeleteMutation: resetDeleteMutation,
-      },
+      
     },
   };
 

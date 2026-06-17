@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const orderTemplateSchema = z.object({
+  id:z.string(),
   tenant_id:z.string(),
   template_name: z.string().min(3, "El nombre es muy corto"),
   version: z.number().int().positive(),

@@ -5,7 +5,7 @@ import OficinaLoaderContext from "@/contexts/OficinaLoaderContext";
 
 import { ReactNode } from "react";
 
-interface ReceptionistDashboardLayoutProps {
+interface OficinaDashboardLayout {
   children: ReactNode;
   params: Promise<{ tenant: string }>;
 }
@@ -18,7 +18,7 @@ interface ReceptionistDashboardLayoutProps {
 
 export default function OficinaDashboardLayout({
   children,
-}: ReceptionistDashboardLayoutProps) {
+}: OficinaDashboardLayout) {
   return (
     <OficinaLoaderContext rol={"oficina"}>
     <SidebarProvider>
