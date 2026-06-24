@@ -67,10 +67,10 @@ export async function insertDirectorTecnicoData({ orderId, formData }: UpdateDir
     p_resultado_revision: resultado_revision,
     p_consecutivo_fur: consecutivo_fur,
     p_consecutivo_rtm: rtmFinal ?? "",
-    p_director_tecnico_tipo_documento_snapshot: formData.director_tecnico_tipo_documento_snapshot,
-  p_director_tecnico_numero_documento_snapshot: formData.director_tecnico_numero_documento_snapshot,
-  p_director_tecnico_nombre_snapshot: formData.director_tecnico_nombre_snapshot,
-  p_director_tecnico_firma_base64_snapshot: formData.director_tecnico_firma_base64_snapshot
+    p_director_tecnico_tipo_documento_snapshot: formData.director_tecnico_tipo_documento_snapshot ?? "",
+  p_director_tecnico_numero_documento_snapshot: formData.director_tecnico_numero_documento_snapshot ?? "",
+  p_director_tecnico_nombre_snapshot: formData.director_tecnico_nombre_snapshot ?? "",
+  p_director_tecnico_firma_base64_snapshot: formData.director_tecnico_firma_base64_snapshot ?? ""
   });
 
   // 6. Gestión de errores provenientes del motor de base de datos
