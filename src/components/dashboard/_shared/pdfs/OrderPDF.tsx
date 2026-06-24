@@ -762,7 +762,33 @@ const footerStyles = StyleSheet.create({
 });
 
 
-
+// --------------------------------------------------
+// 13. seccion anulado
+// --------------------------------------------------
+const voidedStyles = StyleSheet.create({
+  voidedBanner: {
+    backgroundColor: '#dc2626',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voidedBannerText: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: '#ffffff',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+  },
+  voidedBannerSubtext: {
+    fontSize: 8,
+    color: '#fecaca',
+    marginTop: 2,
+    fontFamily: 'Helvetica-Oblique',
+  },
+});
 
 
 // ============================================================
@@ -1709,8 +1735,23 @@ function FooterSection({ orderData, fechaDoc }: {
   );
 }
 
+// --------------------------------------------------
+// 13. PIE DE PÁGINA
+// --------------------------------------------------
+function VoidedBannerSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
+  if (orderData?.estado_orden !== 'anulada') {
+    return null;
+  }
 
-
+  return (
+    <View style={voidedStyles.voidedBanner} fixed>
+      <Text style={voidedStyles.voidedBannerText}>ORDEN ANULADA</Text>
+      <Text style={voidedStyles.voidedBannerSubtext}>
+        Esta orden de entrada ha sido anulada y no tiene validez legal
+      </Text>
+    </View>
+  );
+}
 
 
 // ============================================================
@@ -1742,12 +1783,15 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
     
     >
       <Page size="A4" style={pageStyles.page}>
+        
         <HeaderSection
         
           orderData={orderData}
           fechaDoc={fechaDoc}
           templateData={templateData}
         />
+         <VoidedBannerSection orderData={orderData} />
+        
         <GeneralInfoSection orderData={orderData} fechaEntrada={fechaEntrada} />
         <VehicleSection orderData={orderData} />
         <PressureSection orderData={orderData} />
@@ -1759,6 +1803,7 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
         <ClientSection orderData={orderData} />
         <ComplementarySignaturesSection orderData={orderData} templateData={templateData}/>
         <FooterSection orderData={orderData} fechaDoc={fechaDoc} />
+        
       </Page>
     </Document>
   );

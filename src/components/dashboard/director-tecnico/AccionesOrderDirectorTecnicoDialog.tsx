@@ -10,20 +10,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, FileText, Receipt, ShieldCheck, ShieldAlert } from "lucide-react";
+import { MoreHorizontal, FileText, Receipt, ShieldCheck, ShieldAlert, CreditCard } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import DirectorTecnicoOrderForm from "./DirectorTecnicoOrderForm";
+import { UseMutateFunction } from "@tanstack/react-query";
 
 interface AccionesOrderDirectorTecnicoDialogProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
   rol: string | undefined;
+   mutation: {
+    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string; }, unknown>;
+    isCancelingOrder: boolean;
+    errorCancelingOrder: Error | null;
+    resetCancelError: () => void;
+  };
 }
 
 export default function AccionesOrderDirectorTecnicoDialog({
   orden,
   tenantId,
   rol,
+  mutation
 }: AccionesOrderDirectorTecnicoDialogProps) {
   
   // Control de seguridad perimetral
@@ -46,6 +54,9 @@ export default function AccionesOrderDirectorTecnicoDialog({
       minimumFractionDigits: 0,
     }).format(value);
   };
+
+  // Evaluar si el método de pago requirió tarjeta para mostrar el voucher
+  const esPagoTarjeta = orden.oficina_tipo_pago === "tarjeta_debito" || orden.oficina_tipo_pago === "tarjeta_credito";
 
   return (
     <Dialog>
@@ -75,7 +86,6 @@ export default function AccionesOrderDirectorTecnicoDialog({
         </DialogHeader>
 
         {/* 🌟 CONTENEDOR PRINCIPAL: Rejilla inteligente de doble columna */}
-        {/* En móvil (por defecto) es 1 sola columna. En pantallas grandes (lg) se divide en 2 columnas equilibradas con espacio de 6 unidades */}
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           
           {/* ================================================================= */}
@@ -193,6 +203,19 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   </span>
                 </div>
 
+                {/* 🌟 NUEVO FIELD: N° DE APROBACIÓN VOUCHER (Renderizado condicional) */}
+                {esPagoTarjeta && (
+                  <div className="col-span-2 bg-white/60 p-2.5 rounded-lg border border-emerald-200/50 flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-medium leading-none mb-1">N° Aprobación Datáfono</span>
+                      <span className="text-slate-900 font-mono font-bold tracking-wider text-xs">
+                        {orden.oficina_num_aprobacion || "PENDIENTE"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="col-span-2">
                   <span className="text-slate-400 block font-medium mb-0.5">¿Se compró SOAT también?</span>
                   {orden.se_compro_soat ? (
@@ -212,11 +235,9 @@ export default function AccionesOrderDirectorTecnicoDialog({
 
           </div>
 
-          {/* ================================================================= */}
-          {/* COLUMNA DERECHA: FORMULARIO ACTIVO DEL DIRECTOR TÉCNICO           */}
-          {/* ================================================================= */}
+          
           <div className="lg:border-l lg:border-slate-100 lg:pl-6">
-            <DirectorTecnicoOrderForm orden={orden} tenantId={tenantId} />
+            <DirectorTecnicoOrderForm orden={orden} tenantId={tenantId} mutation={mutation}/>
           </div>
 
         </div>

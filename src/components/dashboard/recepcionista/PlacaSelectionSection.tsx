@@ -45,6 +45,8 @@ import { Input } from "@/components/ui/input";
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
 import { fetchDataWithPlaca } from "@/lib/server-actions/fetch_data_with_placa";
+import { getInitialOrderFormData } from "@/app/[tenant]/dashboard/recepcionista/page";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface ServiceOption {
   id: ServiceType;
@@ -78,20 +80,26 @@ export interface PlacaSelectionSectionProps {
   selectedTemplate: OrderTemplate | undefined;
   formData: ZodFullFormDataType;
   setFormData: Dispatch<SetStateAction<ZodFullFormDataType>>;
+   setSignatureKey: Dispatch<SetStateAction<number>>;
 }
 
-type SearchStatus =
-  | "idle"
-  | "loading"
-  | "found"
-  | "not_found"
-  | "error";
+type SearchStatus = | "idle" | "loading" | "found" | "not_found" | "error";
 
-export default function PlacaSelectionSection({selectedTemplate, setFormData, formData,}: PlacaSelectionSectionProps) {
+
+
+
+
+
+
+
+
+
+export default function PlacaSelectionSection({selectedTemplate, setFormData, formData, setSignatureKey}: PlacaSelectionSectionProps) {
 
   
   // DIALOG STATES
   const [dialogOpen, setDialogOpen] = useState(false);
+  
   const [tempPlaca, setTempPlaca] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [message, setMessage] = useState("");
@@ -101,10 +109,23 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
 
   // SERVICE TYPE
   const handleServiceTypeChange = (type: ServiceType) => {
+
+const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+
+
     setFormData((prev) => ({
       ...prev,
+     ...initialData,
       service_type: type,
+      es_reinspeccion: type === "peritaje" ? false : prev.es_reinspeccion,
+      condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
     }));
+
+// ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+
+
   };
 
 
@@ -112,10 +133,21 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
 
   // REINSPECCIÓN
   const handleReinspeccionChange = (checked: boolean) => {
+
+  const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+
+
+
     setFormData((prev) => ({
       ...prev,
+       ...initialData,
       es_reinspeccion: checked,
+      condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
     }));
+
+    // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
   };
 
 
@@ -137,8 +169,15 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
 
 
 
+
+
   // BUSCAR PLACA
+  
   const handleBuscarPlaca = async () => {
+
+
+
+
     const placaLimpia = tempPlaca.trim().toUpperCase();
 
     if (!placaLimpia) return;
@@ -146,6 +185,283 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
     const tenantId = formData.tenant_id;
     setSearchStatus("loading");
     setMessage("");
+
+
+
+
+    if (!formData.es_reinspeccion && formData.service_type === "RTM"){
+
+      try{
+        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+        // Inicializamos el cliente de Supabase del lado del navegador
+        const supabaseBrowser = createSupabaseBrowserClient();
+
+        // Llamamos directamente al RPC usando el SDK de frontend
+        const { data: RTMcheckInfo, error: ErrorRTMcheckInfo } = await supabaseBrowser.rpc(
+          "check_rtm_primera_vez_eligibility",
+          {
+            p_placa: placaLimpia,
+            p_tenant_id: tenantId,
+          }
+        );
+
+         // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
+        if (ErrorRTMcheckInfo) {
+          console.error("Error en RPC de Supabase:", ErrorRTMcheckInfo);
+          setSearchStatus("error");
+          setMessage(`Error de comunicación: ${ErrorRTMcheckInfo.message}`);
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          
+          condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+          return;
+        }
+
+
+
+
+
+        // Si la lógica de Postgres determinó que NO aplica a reinspección
+        if (!RTMcheckInfo) {
+          setSearchStatus("error");
+          setMessage("No hay datos que mostrar"); // Imprime el motivo exacto que programamos en SQL
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+         
+           condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+          return; // 🛑 Frenamos el flujo aquí mismo
+        }
+
+
+        if (!RTMcheckInfo[0].puede_primera_vez){
+          setSearchStatus("error");
+           setMessage(RTMcheckInfo[0].motivo);
+           setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+            
+             condition_results: prev.condition_results,
+     signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+           return;
+        }
+
+      }catch{
+
+      }finally{
+
+      }
+
+    
+
+
+    }
+
+
+
+    if (formData.es_reinspeccion && formData.service_type === "preventiva"){
+
+      try {
+        // Inicializamos el cliente de Supabase del lado del navegador
+        const supabaseBrowser = createSupabaseBrowserClient();
+
+        // Llamamos directamente al RPC usando el SDK de frontend
+        const { data: rpcData, error: rpcError } = await supabaseBrowser.rpc(
+          "check_preventiva_reinspection_eligibility",
+          {
+            p_placa: placaLimpia,
+            p_tenant_id: tenantId,
+          }
+        );
+
+       
+        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+
+        // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
+        if (rpcError) {
+          console.error("Error en RPC de Supabase:", rpcError);
+          setSearchStatus("error");
+          setMessage(`Error de comunicación: ${rpcError.message}`);
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          es_reinspeccion: true,
+          service_type: "preventiva",
+          condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+          return;
+        }
+
+        // Si la lógica de Postgres determinó que NO aplica a reinspección
+        if (!rpcData) {
+          setSearchStatus("error");
+          setMessage("No hay datos que mostrar"); // Imprime el motivo exacto que programamos en SQL
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          es_reinspeccion: true,
+           service_type: "preventiva",
+           condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+          return; // 🛑 Frenamos el flujo aquí mismo
+        }
+
+      
+
+        if (!rpcData[0].merece_reinspeccion){
+          setSearchStatus("error");
+           setMessage(rpcData[0].motivo);
+           setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+            es_reinspeccion: true,
+             service_type: "preventiva",
+             condition_results: prev.condition_results,
+     signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+           return;
+        }
+
+        // Si Postgres dio luz verde, inyectamos el 'id_reprobado' en el estado
+        setFormData((prev) => ({
+          ...prev,
+          id_reprobado: rpcData[0].id_reprobado,
+        }));
+        
+
+      } catch (err) {
+        console.error("Error inesperado en el cliente:", err);
+        setSearchStatus("error");
+        setMessage("Ocurrió un error inesperado al validar la reinspección.");
+        return;
+      }
+
+    }
+
+
+
+
+
+if (formData.es_reinspeccion && formData.service_type === "RTM"){
+
+  
+
+      try {
+        // Inicializamos el cliente de Supabase del lado del navegador
+        const supabaseBrowser = createSupabaseBrowserClient();
+
+        // Llamamos directamente al RPC usando el SDK de frontend
+        const { data: rpcData, error: rpcError } = await supabaseBrowser.rpc(
+          "check_rtm_reinspection_eligibility",
+          {
+            p_placa: placaLimpia,
+            p_tenant_id: tenantId,
+          }
+        );
+
+        
+       
+       
+        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+
+        // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
+        if (rpcError) {
+          console.error("Error en RPC de Supabase:", rpcError);
+          setSearchStatus("error");
+          setMessage(`Error de comunicación: ${rpcError.message}`);
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          es_reinspeccion: true,
+          service_type: "RTM",
+          condition_results: prev.condition_results,
+          signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+          setSignatureKey((prev) => prev + 1);
+          return;
+        }
+
+        // Si la lógica de Postgres determinó que NO aplica a reinspección
+        if (!rpcData) {
+          setSearchStatus("error");
+          setMessage("No hay datos que mostrar"); // Imprime el motivo exacto que programamos en SQL
+          setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          es_reinspeccion: true,
+           service_type: "RTM",
+           condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+          return; // 🛑 Frenamos el flujo aquí mismo
+        }
+
+      
+
+        if (!rpcData[0].merece_reinspeccion){
+          setSearchStatus("error");
+           setMessage(rpcData[0].motivo);
+           setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+            es_reinspeccion: true,
+             service_type: "RTM",
+             condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+          }));
+          // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+           return;
+        }
+
+        // Si Postgres dio luz verde, inyectamos el 'id_reprobado' en el estado
+        setFormData((prev) => ({
+          ...prev,
+          id_reprobado: rpcData[0].id_reprobado,
+          
+        }));
+        
+       
+
+      } catch (err) {
+        console.error("Error inesperado en el cliente:", err);
+        setSearchStatus("error");
+        setMessage("Ocurrió un error inesperado al validar la reinspección de RTM.");
+        return;
+      }
+
+
+
+
+}
+
+
+
+
 
     try {
       const { data, error, found } = await fetchDataWithPlaca(placaLimpia, tenantId);
@@ -156,18 +472,28 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
         return;
       }
 
+      
+
       // ACTUALIZA LA PLACA SIEMPRE
       setFormData((prev) => ({
         ...prev,
+       
         vehicle: {
           ...prev.vehicle,
           placa: placaLimpia,
         },
+        condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
       }));
+
+      // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+        setSignatureKey((prev) => prev + 1);
+
+
 
 
       if (found) {
-        console.log(data);
+        
         setIsNewVehicle(false);
         setSearchStatus("found");
         setMessage("Vehículo encontrado correctamente en la base de datos.");
@@ -226,8 +552,10 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
               correo: data?.customer_data?.correo ?? prev.customer_data?.correo ?? "",
               direccion: data?.customer_data?.direccion ?? prev.customer_data?.direccion ?? "",
             },
+            
           };
         });
+        
 
 
 
@@ -249,6 +577,9 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
 
 
   };
+
+
+
 
 
 
@@ -440,6 +771,7 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
                     </div>
 
                     <Checkbox
+                      disabled={formData.service_type === "peritaje" && tipo.id === "reinspeccion"}
                       checked={
                         tipo.id === "reinspeccion"
                           ? formData.es_reinspeccion
@@ -447,8 +779,7 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
                       }
                       onCheckedChange={() =>
                         handleReinspeccionChange(
-                          tipo.id ===
-                            "reinspeccion"
+                          tipo.id ===  "reinspeccion"
                         )
                       }
                       className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 ml-4"
@@ -474,10 +805,11 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
               {/* BUSCAR */}
               <div className="md:col-span-8">
+                
                 <Dialog
                   open={dialogOpen}
                   onOpenChange={handleOpenChange}
-                >
+                 >
                   <DialogTrigger
                     render={
                       <Button
@@ -486,7 +818,8 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
                       >
                         <Search className="h-6 w-6" />
 
-                        BUSCAR PLACA
+                        
+                        {formData.es_reinspeccion?"BUSCAR PLACA PARA REINSPECCION":"BUSCAR PLACA"}
                       </Button>
                     }
                   />
@@ -496,7 +829,9 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
                       <DialogTitle className="flex items-center gap-2">
                         <Search className="h-5 w-5 text-slate-500" />
 
-                        Buscar Vehículo
+                       
+
+                        {formData.es_reinspeccion?"Buscar Reinspeccion":"Buscar Vehículo"}
                       </DialogTitle>
 
                       <DialogDescription>
@@ -632,6 +967,10 @@ export default function PlacaSelectionSection({selectedTemplate, setFormData, fo
                     </div>
                   </DialogContent>
                 </Dialog>
+               
+
+
+
               </div>
 
               {/* RUNT */}

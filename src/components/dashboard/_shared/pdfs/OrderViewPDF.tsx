@@ -47,6 +47,7 @@ function OrderViewPDF({ orderId, tenantId, templateData }: OrderViewPDFProps) {
   }
 
 
+
   
 
   // Renderizado final con los spinners ordenados (como lo organizamos antes)
@@ -61,7 +62,7 @@ function OrderViewPDF({ orderId, tenantId, templateData }: OrderViewPDFProps) {
 
     {error && (
       <span className="text-[10px] text-red-500 font-medium px-2">
-        Error al cargar datos
+        Error al cargar datos.
       </span>
     )}
 
@@ -74,7 +75,7 @@ function OrderViewPDF({ orderId, tenantId, templateData }: OrderViewPDFProps) {
             templateData={templateData}
           />
         }
-      >
+       >
         {({ url, loading, error: pdfError }) => {
           if (pdfError) {
             return <span className="text-[10px] text-red-500 font-medium px-2">Error PDF</span>;
@@ -108,6 +109,8 @@ function OrderViewPDF({ orderId, tenantId, templateData }: OrderViewPDFProps) {
         }}
       </BlobProvider>
     )}
+
+     
   </>
 );
 }

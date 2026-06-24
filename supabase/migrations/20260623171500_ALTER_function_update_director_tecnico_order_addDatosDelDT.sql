@@ -1,3 +1,16 @@
+ALTER TABLE public.entry_orders 
+ALTER COLUMN fecha_limite_reinspeccion TYPE TIMESTAMPTZ;
+
+
+-- Elimina la función antigua de 4 parámetros
+DROP FUNCTION IF EXISTS public.update_director_tecnico_order(
+    uuid, 
+    text, 
+    character varying, 
+    character varying
+);
+
+
 CREATE OR REPLACE FUNCTION public.update_director_tecnico_order(
     p_order_id uuid,
     p_resultado_revision text,
@@ -34,7 +47,7 @@ BEGIN
         
         -- 🌟 CÁLCULO DE FECHA LÍMITE CON HORA EXACTA (Si es reprobada)
         fecha_limite_reinspeccion = CASE 
-            WHEN LOWER(TRIM(p_resultado_revision)) = 'rechazado' THEN NOW() + INTERVAL '15 days'
+            WHEN LOWER(TRIM(p_resultado_revision)) = 'reprobado' THEN NOW() + INTERVAL '15 days'
             ELSE fecha_limite_reinspeccion -- Mantiene lo que tenga si no es reprobada
         END,
 

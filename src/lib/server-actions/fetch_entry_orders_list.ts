@@ -47,6 +47,7 @@ export interface EntryOrderListItem {
   oficina_pago: number | null; // Mapea el numeric(12,2) de Postgres
   oficina_consecutivo_factura: string | null;
   oficina_tipo_pago: OfficePaymentType | null;
+  oficina_num_aprobacion: string | null,
   
   se_compro_soat: boolean;
   resultado_revision: string | null;

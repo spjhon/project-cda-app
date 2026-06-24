@@ -23,6 +23,44 @@ PENDIENTES
 - validar usuario en el DAL con redireccionamiento a auth/login y que tales.
 - ojo, todos lo que se haga fetch en layouts, los hijos que pueden ser estáticos, NO LO VAN A HACER, se recomienda hacer el fetch de lado del cliente, con las funciones en el DAL y las promesas siendo llenadas en los use().
 - una feature importante para agregar despues de la presentacion: sistema de inventarios no solo para las fupas y los certificados del runt sino tambien para todo el cda
+- ojo que las rutas de los perfiles no estan protegidas, NO ESTAN PROTEGIDAS.
+- las funciones de fetch e insercion no estan protegidas, ni las rpc, no las de tankstack ni las server actions ni las esparcias del js
+- cuadrar que cuando se cree una nueva orden, no deje si ya existe una que esta abierta o en prueba y que se agrege la fecha de vencimiento desde que se seleccione el reprobado
+- que cuando se anule una orden, esto no afecte otros lados como por ejemplo cuando se anula una reinspeccion y el id de la reinspeccion ya este ahi
+- terminar las diferentes anulaciones de la orden de entrada
+- verificacion de que si todavida tiene tiempo para hacer el tecno, que avise al recepcionista, y tambien que si el modelo esta con los tiempo validos de 2 años para motos y 5 años para carros, entonces de un aviso de que si est seguro de la vuelta
+- agregar las fimas que faltan al pdf, las del dt
+- si la orden esta anulada que se vea en la orden de entrada y que se dejen ver los anulados al quitar los null de la funcion rpc
+- en cuanto al dinero recaudado hay que tener en cuenta que pueden haber varios tipos de pagos para la misma rtm
+- si se compro soat hoy que eso se vea en el sistema la nueva fecha y reemplace la vieja
+
+FEATURES QUE FALTAN
+
+- administracion de reprobados
+- manejo y registro de usuarios en diferentes escalas, que el gerente cree director tecnico y el director tecnico cree los demas
+- avisos por email por ahora
+- seccion del gerente
+- api runt
+
+
+FEATURES PARA TRABAJAR DURANTE EL TESTEO:
+
+- manejo de fupas
+- envio y comunicacion por wassap
+- de pronto inventario
+- mejor manejo de los anulados 
+- de pronto notificaciones
+- seccion de reservas
+- seccion de quejas y sugerencias
+
+MODULOS A FUTURO
+
+- EQUIPOS
+- PERSONAL
+- SGC
+- GERENCIAL
+- QUEJAS Y APELACIONES MAS COMPLETO
+- PROVEEDORES O COMPRAS
 
 
 ROOT LAYOUTS:

@@ -47,6 +47,18 @@ if (formData.oficina_tipo_pago === null) {
       };
     }
 
+
+// 🌟 VALIDADOR COMPLEMENTARIO: EXIGIR NÚMERO DE APROBACIÓN PARA TARJETAS
+  const requiereTarjeta = formData.oficina_tipo_pago === "tarjeta_debito" || formData.oficina_tipo_pago === "tarjeta_credito";
+
+
+  if (requiereTarjeta && (!formData.oficina_num_aprobacion || formData.oficina_num_aprobacion.trim() === "")) {
+    return {
+      data: null,
+      error: "Error: Las transacciones con tarjeta requieren el número de aprobación / voucher."
+    };
+  }
+
 //await new Promise((resolve) => setTimeout(resolve, 5000));
 
 
@@ -74,7 +86,8 @@ if (formData.oficina_tipo_pago === null) {
     p_pago: validatedFields.data.oficina_pago,
     p_consecutivo_factura: validatedFields.data.oficina_consecutivo_factura,
     p_tipo_pago: validatedFields.data.oficina_tipo_pago,
-    p_se_compro_soat: validatedFields.data.se_compro_soat
+    p_se_compro_soat: validatedFields.data.se_compro_soat,
+    p_num_aprobacion: validatedFields.data.oficina_num_aprobacion // 🌟 PASADO AL RPC
   });
 
   // 5. Gestión de errores provenientes del motor de base de datos

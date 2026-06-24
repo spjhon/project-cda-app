@@ -110,16 +110,19 @@ export function useFetchEntryOrder({ orderId, tenantId, readyToProcess }: UseFet
       
       if (error) {
         console.error('Error en RPC:', error);
-        throw error;
+        
       }
       
       console.log('📦 Datos de la orden obtenidos:', data);
       
-      if (!data || data.length === 0) return null;
+      if (!data || data.length === 0) throw new Error;
       
       return data[0] as unknown as FetchEntryOrderResult;
     },
     enabled: !!orderId && readyToProcess, 
     retry: 1,
+    
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
   });
 }

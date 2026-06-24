@@ -97,12 +97,6 @@ BEGIN
     END IF;
 
 
-    -- =========================================================================
-    -- PASO 0.4: VALIDACIÓN DE INTEGRIDAD EN REINSPECCIONES
-    -- =========================================================================
-    IF COALESCE((p_data->>'es_reinspeccion')::boolean, false) = true AND (p_data->>'id_reprobado') IS NULL THEN
-        RAISE EXCEPTION 'Operación cancelada: La orden está marcada como Reinspección pero no se proporcionó el ID de la orden reprobada original.';
-    END IF;
 
     -- =========================================================================
     -- PASO 1: PROCESO E IDENTIFICACIÓN DEL CLIENTE (customer_data)
@@ -261,7 +255,6 @@ BEGIN
         plantilla_id,
         consecutivo,
         es_reinspeccion,
-        id_reprobado,
         service_type,
         estado_orden,
         kilometraje,
@@ -322,12 +315,6 @@ BEGIN
         (p_data->>'plantilla_id')::uuid,
         v_consecutivo,
         COALESCE((p_data->>'es_reinspeccion')::boolean, false),
-        -- 🌟 LOGICA CONDICIONAL: Solo guarda si es_reinspeccion es TRUE
-        CASE 
-            WHEN COALESCE((p_data->>'es_reinspeccion')::boolean, false) = true 
-            THEN (p_data->>'id_reprobado')::uuid 
-            ELSE NULL 
-        END,
         COALESCE((p_data->>'service_type')::public.service_type_enum, 'RTM'::public.service_type_enum),
         COALESCE((p_data->>'estado_orden')::public.order_status_enum, 'abierta'::public.order_status_enum),
         (p_data->>'kilometraje'),
@@ -386,7 +373,6 @@ BEGIN
         funcionario_id = EXCLUDED.funcionario_id,
         plantilla_id = EXCLUDED.plantilla_id,
         es_reinspeccion = EXCLUDED.es_reinspeccion,
-        id_reprobado = EXCLUDED.id_reprobado,
         service_type = EXCLUDED.service_type,
         estado_orden = EXCLUDED.estado_orden,
         kilometraje = EXCLUDED.kilometraje,

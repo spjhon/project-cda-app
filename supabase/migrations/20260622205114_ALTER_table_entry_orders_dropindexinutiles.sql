@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS public.entry_orders_oficina_factura_tenant_idx;
+DROP INDEX IF EXISTS public.entry_orders_consecutivo_fur_idx;
+DROP INDEX IF EXISTS public.entry_orders_consecutivo_rtm_idx

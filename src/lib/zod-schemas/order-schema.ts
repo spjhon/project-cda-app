@@ -281,6 +281,8 @@ export const ZodFullFormDataSchema = z.object({
 
   plantilla_id: z.uuid(),
 
+  id_reprobado: z.uuid().nullable(),
+
   /* ---------------------------
      ORDEN
   ---------------------------- */
@@ -368,3 +370,5 @@ export type TipoDocumentoType = (typeof TipoDocumentoEnum)[number];
 export type TipoServicioVehiculoEnumType = (typeof TipoServicioVehiculoEnum)[number];
 
 export type TipoVehiculoEnumType = (typeof TipoVehiculoEnum)[number];
+
+export type EstadoOrdenEnumType = (typeof EstadoOrdenEnum)[number]

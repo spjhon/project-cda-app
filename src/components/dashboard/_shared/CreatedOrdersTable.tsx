@@ -101,6 +101,18 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
   },
 };
 
+// 🌟 Mapeo para discriminar si es Inspección Original o Reinspección
+const INSPECTION_TYPE_MAP: Record<string, { label: string; className: string }> = {
+  original: {
+    label: "Primera Vez",
+    className: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 font-medium tracking-wide"
+  },
+  reinspeccion: {
+    label: "Reinspección",
+    className: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-medium tracking-wide"
+  }
+};
+
 const SELECT_COLUMNAS = [
   { label: "Fecha y Hora", value: "fecha" },
   { label: "Placa", value: "vehiculo_placa_snapshot" },
@@ -113,6 +125,20 @@ const SELECT_DIRECCION = [
   { label: "Más recientes / Z-A", value: "DESC" },
   { label: "Más antiguos / A-Z", value: "ASC" },
 ];
+
+// 🌟 Mapeo para el Dictamen o Resultado de la Revisión Técnico-Mecánica
+const REVISION_RESULT_MAP: Record<string, { label: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
+  aprobado: { 
+    label: "Aprobado", 
+    className: "bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold", 
+    icon: CheckCircle2 
+  },
+  rechazado: { 
+    label: "Rechazado", 
+    className: "bg-rose-50 text-rose-700 border-rose-200/40 font-bold", 
+    icon: AlertCircle 
+  },
+};
 
 export default function CreatedOrdersTable() {
   
@@ -318,6 +344,23 @@ export default function CreatedOrdersTable() {
         },
       }),
 
+      // 🌟 NUEVA COLUMNA: Identifica si es Primera Vez (Original) o Reinspección
+      columnHelper.accessor("es_reinspeccion", {
+        header: "Tipo Inspección",
+        cell: ({ row }) => {
+          const esReinspeccion = row.original.es_reinspeccion;
+          const config = esReinspeccion 
+            ? INSPECTION_TYPE_MAP.reinspeccion 
+            : INSPECTION_TYPE_MAP.original;
+
+          return (
+            <Badge variant="outline" className={config.className}>
+              {config.label}
+            </Badge>
+          );
+        },
+      }),
+
       // 🌟 REFORMADO: Estado de la Orden utilizando Badges de color condicionales
       columnHelper.accessor("estado_orden", {
         header: "Estado",
@@ -328,6 +371,40 @@ export default function CreatedOrdersTable() {
           return (
             <Badge variant="outline" className={statusConfig.className}>
               {statusConfig.label}
+            </Badge>
+          );
+        },
+      }),
+
+
+
+
+columnHelper.accessor("resultado_revision", {
+        header: "Dictamen Técnico",
+        cell: (info) => {
+          const rawResult = info.getValue() as string;
+          
+          // Si no hay resultado asignado aún en la base de datos
+          if (!rawResult) {
+            return (
+              <span className="text-xs text-slate-400 italic pl-1">
+                Pendiente de firma
+              </span>
+            );
+          }
+
+          const config = REVISION_RESULT_MAP[rawResult] || { 
+            label: rawResult.toUpperCase(), 
+            className: "bg-slate-50 text-slate-600 border-slate-200", 
+            icon: AlertCircle 
+          };
+          
+          const IconComponent = config.icon;
+
+          return (
+            <Badge variant="outline" className={`gap-1 px-2.5 py-0.5 text-xs shadow-xs ${config.className}`}>
+              <IconComponent className="h-3.5 w-3.5 shrink-0" />
+              {config.label}
             </Badge>
           );
         },

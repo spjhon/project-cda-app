@@ -102,9 +102,14 @@ export type Database = {
           consecutivo_rtm: string | null
           created_at: string
           deleted_at: string | null
+          director_tecnico_firma_base64_snapshot: string | null
+          director_tecnico_nombre_snapshot: string | null
+          director_tecnico_numero_documento_snapshot: string | null
+          director_tecnico_tipo_documento_snapshot: string | null
           es_reinspeccion: boolean | null
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
+          fecha_limite_reinspeccion: string | null
           funcionario_firma_base64_snapshot: string
           funcionario_id: string
           funcionario_nombre_snapshot: string
@@ -113,9 +118,12 @@ export type Database = {
           gas_numero_snapshot: string | null
           gas_vencimiento_snapshot: string | null
           id: string
+          id_orden_reinspeccion: string | null
+          id_reprobado: string | null
           kilometraje: string | null
           observaciones: string | null
           oficina_consecutivo_factura: string | null
+          oficina_num_aprobacion: string | null
           oficina_pago: number | null
           oficina_pin: string | null
           oficina_tipo_pago:
@@ -164,9 +172,14 @@ export type Database = {
           consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
+          director_tecnico_firma_base64_snapshot?: string | null
+          director_tecnico_nombre_snapshot?: string | null
+          director_tecnico_numero_documento_snapshot?: string | null
+          director_tecnico_tipo_documento_snapshot?: string | null
           es_reinspeccion?: boolean | null
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
+          fecha_limite_reinspeccion?: string | null
           funcionario_firma_base64_snapshot: string
           funcionario_id: string
           funcionario_nombre_snapshot: string
@@ -175,9 +188,12 @@ export type Database = {
           gas_numero_snapshot?: string | null
           gas_vencimiento_snapshot?: string | null
           id?: string
+          id_orden_reinspeccion?: string | null
+          id_reprobado?: string | null
           kilometraje?: string | null
           observaciones?: string | null
           oficina_consecutivo_factura?: string | null
+          oficina_num_aprobacion?: string | null
           oficina_pago?: number | null
           oficina_pin?: string | null
           oficina_tipo_pago?:
@@ -226,9 +242,14 @@ export type Database = {
           consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
+          director_tecnico_firma_base64_snapshot?: string | null
+          director_tecnico_nombre_snapshot?: string | null
+          director_tecnico_numero_documento_snapshot?: string | null
+          director_tecnico_tipo_documento_snapshot?: string | null
           es_reinspeccion?: boolean | null
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
+          fecha_limite_reinspeccion?: string | null
           funcionario_firma_base64_snapshot?: string
           funcionario_id?: string
           funcionario_nombre_snapshot?: string
@@ -237,9 +258,12 @@ export type Database = {
           gas_numero_snapshot?: string | null
           gas_vencimiento_snapshot?: string | null
           id?: string
+          id_orden_reinspeccion?: string | null
+          id_reprobado?: string | null
           kilometraje?: string | null
           observaciones?: string | null
           oficina_consecutivo_factura?: string | null
+          oficina_num_aprobacion?: string | null
           oficina_pago?: number | null
           oficina_pin?: string | null
           oficina_tipo_pago?:
@@ -288,6 +312,13 @@ export type Database = {
             columns: ["funcionario_id"]
             isOneToOne: false
             referencedRelation: "service_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_orders_id_reprobado_fkey"
+            columns: ["id_reprobado"]
+            isOneToOne: false
+            referencedRelation: "entry_orders"
             referencedColumns: ["id"]
           },
           {
@@ -871,6 +902,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_preventiva_reinspection_eligibility: {
+        Args: { p_placa: string; p_tenant_id: string }
+        Returns: {
+          id_reprobado: string
+          merece_reinspeccion: boolean
+          motivo: string
+        }[]
+      }
+      check_rtm_primera_vez_eligibility: {
+        Args: { p_placa: string; p_tenant_id: string }
+        Returns: {
+          motivo: string
+          puede_primera_vez: boolean
+        }[]
+      }
+      check_rtm_reinspection_eligibility: {
+        Args: { p_placa: string; p_tenant_id: string }
+        Returns: {
+          id_reprobado: string
+          merece_reinspeccion: boolean
+          motivo: string
+        }[]
+      }
       create_full_order: { Args: { p_data: Json }; Returns: string }
       create_full_order_template: { Args: { p_data: Json }; Returns: string }
       fetch_data_with_placa: {
@@ -964,6 +1018,7 @@ export type Database = {
           linea: string
           marca: string
           oficina_consecutivo_factura: string
+          oficina_num_aprobacion: string
           oficina_pago: number
           oficina_pin: string
           oficina_tipo_pago: Database["public"]["Enums"]["office_payment_type_enum"]
@@ -1016,22 +1071,39 @@ export type Database = {
         Args: {
           p_consecutivo_fur: string
           p_consecutivo_rtm: string
+          p_director_tecnico_firma_base64_snapshot: string
+          p_director_tecnico_nombre_snapshot: string
+          p_director_tecnico_numero_documento_snapshot: string
+          p_director_tecnico_tipo_documento_snapshot: string
           p_order_id: string
           p_resultado_revision: string
         }
         Returns: string
       }
-      update_office_order_data: {
-        Args: {
-          p_consecutivo_factura: string
-          p_order_id: string
-          p_pago: number
-          p_pin: string
-          p_se_compro_soat: boolean
-          p_tipo_pago: string
-        }
-        Returns: string
-      }
+      update_office_order_data:
+        | {
+            Args: {
+              p_consecutivo_factura: string
+              p_order_id: string
+              p_pago: number
+              p_pin: string
+              p_se_compro_soat: boolean
+              p_tipo_pago: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_consecutivo_factura: string
+              p_num_aprobacion?: string
+              p_order_id: string
+              p_pago: number
+              p_pin: string
+              p_se_compro_soat: boolean
+              p_tipo_pago: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       condition_response_enum: "cumple" | "no_cumple" | "no_aplica"

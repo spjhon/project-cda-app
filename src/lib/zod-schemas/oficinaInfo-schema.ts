@@ -26,6 +26,13 @@ export const officeOrderSchema = z.object({
   // Valida contra los valores exactos de tu Enum de la base de datos
   oficina_tipo_pago: z.enum(TipoPagoEnum, { message: "Seleccione un método de pago válido"}),
 
+  // 🌟 CAMPO ADICIONAL: Opcional por defecto, pero se limpia con trim
+  oficina_num_aprobacion: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal("")),
+
   // Booleano simple para el Switch del SOAT
   se_compro_soat: z.boolean({
     message: "Debe especificar si se gestionó el SOAT",

@@ -92,6 +92,33 @@ CREATE TYPE "public"."document_type_enum" AS ENUM (
 ALTER TYPE "public"."document_type_enum" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."office_payment_type_enum" AS ENUM (
+    'efectivo',
+    'tarjeta_debito',
+    'tarjeta_credito',
+    'sistecredito',
+    'addi',
+    'transferencia',
+    'qr'
+);
+
+
+ALTER TYPE "public"."office_payment_type_enum" OWNER TO "postgres";
+
+
+COMMENT ON TYPE "public"."office_payment_type_enum" IS 'Métodos de pago autorizados para la facturación de servicios en la caja de la oficina del CDA.
+Valores permitidos:
+  - efectivo: Pago con moneda corriente física.
+  - tarjeta_debito: Tarjeta de débito bancaria (Mister, Visa, etc.).
+  - tarjeta_credito: Tarjeta de crédito (Franquicias tradicionales).
+  - sistecredito: Línea de crédito y financiamiento por plataforma Sistecrédito.
+  - addi: Compra a cuotas mediante la pasarela fintech Addi.
+  - transferencia: Transferencias directas verificadas (Bancolombia, Nequi, Daviplata, etc.).
+  - qr: Pagos mediante códigos QR de interoperabilidad bancaria.
+Este tipo es crítico para los cierres, arqueos de caja diarios y auditorías contables.';
+
+
+
 CREATE TYPE "public"."order_status_enum" AS ENUM (
     'abierta',
     'en_prueba',
@@ -155,6 +182,302 @@ CREATE TYPE "public"."vehicle_type_enum" AS ENUM (
 ALTER TYPE "public"."vehicle_type_enum" OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."check_preventiva_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") RETURNS TABLE("merece_reinspeccion" boolean, "motivo" "text", "id_reprobado" "uuid")
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+    v_orden_id UUID;
+    v_fecha_limite DATE;
+    v_conteo_originales INT;
+    v_ya_reinspeccionada BOOLEAN;
+BEGIN
+
+
+
+    -- 1. Contar cuántas órdenes originales vigentes existen
+    SELECT COUNT(*)
+    INTO v_conteo_originales
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'preventiva'
+      AND estado_orden = 'finalizada'
+      AND resultado_revision = 'rechazado'
+      AND CURRENT_DATE <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL;
+
+    IF v_conteo_originales > 1 THEN
+        merece_reinspeccion := false;
+        motivo := 'Error crítico: Existe más de una orden original rechazada vigente en el sistema para esta placa.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+    -- 2. Seleccionar la orden original vigente
+    SELECT id, fecha_limite_reinspeccion
+    INTO v_orden_id, v_fecha_limite
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'preventiva'
+      AND estado_orden = 'finalizada'
+      AND resultado_revision = 'rechazado'
+      AND CURRENT_DATE <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL
+    ORDER BY fecha DESC
+    LIMIT 1;
+
+    -- Si no hay ninguna orden que cumpla las condiciones o ya expiró
+    IF v_orden_id IS NULL THEN
+        merece_reinspeccion := false;
+        motivo := 'No se encontró ninguna revisión preventiva rechazada que esté vigente. El plazo legal ya expiró o no existe el registro.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+
+
+    -- 3. Comprobar que no se haya usado ya este derecho en otra orden de reinspección
+    SELECT EXISTS (
+        SELECT 1 
+        FROM public.entry_orders 
+        WHERE public.entry_orders.id_reprobado = v_orden_id
+          AND es_reinspeccion = true
+          AND deleted_at IS NULL
+    ) INTO v_ya_reinspeccionada;
+
+    IF v_ya_reinspeccionada THEN
+        merece_reinspeccion := false;
+        motivo := 'El derecho a reinspección para esta orden ya fue utilizado.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+
+    -- 4. Todo correcto: Retornamos los datos asignando valores a las columnas de la tabla de salida
+    merece_reinspeccion := true;
+    motivo := 'Vehículo apto. Aplica para reinspección (Plazo límite: ' || to_char(v_fecha_limite, 'DD/MM/YYYY') || ')';
+    id_reprobado := v_orden_id;
+    
+    RETURN NEXT; -- Empuja la fila armada al resultado
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_preventiva_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_rtm_primera_vez_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") RETURNS TABLE("puede_primera_vez" boolean, "motivo" "text")
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+    v_orden_id UUID;
+    v_fecha_limite TIMESTAMPTZ;
+    v_estado_reinspeccion public.order_status_enum;
+    v_conteo_originales INT;
+BEGIN
+    -- ==========================================
+    -- 1. CONTROL DE INTEGRIDAD / MULTIPLICIDAD
+    -- ==========================================
+    SELECT COUNT(*)
+    INTO v_conteo_originales
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'RTM'
+      AND estado_orden = 'finalizada'
+      AND LOWER(TRIM(resultado_revision)) = 'rechazado'
+      AND NOW() <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL;
+
+    IF v_conteo_originales > 1 THEN
+        puede_primera_vez := false; -- 🛑 Bloqueamos por consistencia de datos
+        motivo := 'Error crítico: Existe más de una orden original reprobada vigente en el sistema para esta placa. Contacte al administrador para revisar el historial.';
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+    -- ==========================================
+    -- 2. SELECCIÓN DE LA ORDEN REPROBADA VIGENTE
+    -- ==========================================
+    SELECT id, fecha_limite_reinspeccion
+    INTO v_orden_id, v_fecha_limite
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'RTM'
+      AND estado_orden = 'finalizada'
+      AND LOWER(TRIM(resultado_revision)) = 'rechazado'
+      AND NOW() <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL
+    ORDER BY fecha DESC
+    LIMIT 1;
+
+    -- SI NO TIENE RECHAZOS VIGENTES: Puede pasar tranquilamente como Primera Vez
+    IF v_orden_id IS NULL THEN
+        puede_primera_vez := true;
+        motivo := 'Vehículo apto para ingresar como Primera Vez.';
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+    -- ==========================================
+    -- 3. ESTADO DE LA REINSPECCIÓN
+    -- ==========================================
+    SELECT estado_orden
+    INTO v_estado_reinspeccion
+    FROM public.entry_orders 
+    WHERE public.entry_orders.id_reprobado = v_orden_id
+      AND es_reinspeccion = true
+      AND estado_orden IN ('abierta', 'en_prueba', 'finalizada')
+      AND deleted_at IS NULL
+    ORDER BY fecha DESC
+    LIMIT 1;
+
+    -- ESCENARIO A: No ha usado su reinspección
+    IF v_estado_reinspeccion IS NULL THEN
+        puede_primera_vez := false; -- 🛑 Bloqueamos
+        motivo := 'No se permite Primera Vez. El vehículo se encuentra en periodo de gracia para Reinspección gratuita/descuento (Vence: ' || to_char(v_fecha_limite, 'DD/MM/YYYY HH:MI AM') || ').';
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+    -- ESCENARIO B: La reinspección se está ejecutando ahora mismo
+    IF v_estado_reinspeccion IN ('abierta', 'en_prueba') THEN
+        puede_primera_vez := false; -- 🛑 Bloqueamos
+        motivo := 'El vehículo tiene una orden de reinspección en curso en este momento. No se puede generar una nueva orden de Primera Vez simultáneamente.';
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+    -- ESCENARIO C: La reinspección está FINALIZADA
+    puede_primera_vez := true; -- ✅ Permitimos
+    motivo := 'El vehículo ya agotó su derecho a reinspección para el último rechazo. Puede ingresar pagando una nueva Primera Vez.';
+    
+    RETURN NEXT;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_rtm_primera_vez_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_rtm_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") RETURNS TABLE("merece_reinspeccion" boolean, "motivo" "text", "id_reprobado" "uuid")
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+    v_orden_id UUID;
+    v_fecha_limite DATE;
+    v_conteo_originales INT;
+    v_ya_reinspeccionada BOOLEAN;
+BEGIN
+
+
+
+    -- 1. Contar cuántas órdenes originales vigentes existen
+    SELECT COUNT(*)
+    INTO v_conteo_originales
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'RTM'
+      AND estado_orden = 'finalizada'
+      AND resultado_revision = 'rechazado'
+      AND CURRENT_DATE <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL;
+
+    IF v_conteo_originales > 1 THEN
+        merece_reinspeccion := false;
+        motivo := 'Error crítico: Existe más de una orden original rechazada vigente en el sistema para esta placa.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+    -- 2. Seleccionar la orden original vigente
+    SELECT id, fecha_limite_reinspeccion
+    INTO v_orden_id, v_fecha_limite
+    FROM public.entry_orders
+    WHERE vehiculo_placa_snapshot = p_placa
+      AND tenant_id = p_tenant_id
+      AND es_reinspeccion = false
+      AND service_type = 'RTM'
+      AND estado_orden = 'finalizada'
+      AND resultado_revision = 'rechazado'
+      AND CURRENT_DATE <= fecha_limite_reinspeccion
+      AND deleted_at IS NULL
+    ORDER BY fecha DESC
+    LIMIT 1;
+
+    -- Si no hay ninguna orden que cumpla las condiciones o ya expiró
+    IF v_orden_id IS NULL THEN
+        merece_reinspeccion := false;
+        motivo := 'No se encontró ninguna revisión técnico-mecánica rechazada que esté vigente. El plazo legal ya expiró o no existe el registro.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+
+
+    -- 3. Comprobar que no se haya usado ya este derecho en otra orden de reinspección
+    SELECT EXISTS (
+        SELECT 1 
+        FROM public.entry_orders 
+        WHERE public.entry_orders.id_reprobado = v_orden_id
+          AND es_reinspeccion = true
+          AND deleted_at IS NULL
+    ) INTO v_ya_reinspeccionada;
+
+    IF v_ya_reinspeccionada THEN
+        merece_reinspeccion := false;
+        motivo := 'El derecho a reinspección para esta orden ya fue utilizado.';
+        id_reprobado := NULL;
+        RETURN NEXT;
+        RETURN;
+    END IF;
+
+
+
+
+
+    -- 4. Todo correcto: Retornamos los datos asignando valores a las columnas de la tabla de salida
+    merece_reinspeccion := true;
+    motivo := 'Vehículo apto. Aplica para reinspección (Plazo límite: ' || to_char(v_fecha_limite, 'DD/MM/YYYY') || ')';
+    id_reprobado := v_orden_id;
+    
+    RETURN NEXT; -- Empuja la fila armada al resultado
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_rtm_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."create_full_order"("p_data" "jsonb") RETURNS "uuid"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
@@ -182,6 +505,12 @@ DECLARE
     v_owner_json jsonb;
     v_conditions_json jsonb;
     v_signatures_json jsonb;
+
+    -- Variable de seguridad para verificar permisos en el tenant
+    v_has_permission boolean;
+    
+    -- Variable para verificar si el vehículo ya tiene una orden activa
+    v_has_active_order boolean;
 BEGIN
     -- =========================================================================
     -- PASO 0: INICIALIZACIÓN DE VARIABLES Y ATAJOS
@@ -193,9 +522,44 @@ BEGIN
     v_owner_json := p_data->'owner_data';
     v_conditions_json := p_data->'condition_results';
     v_signatures_json := p_data->'signatures';
+    
+
+
+    -- PASO 0.1: VALIDACIÓN DE SEGURIDAD Y PERMISOS EN EL TENANT
+    -- =========================================================================
+    SELECT EXISTS (
+        SELECT 1 
+        FROM public.tenant_permissions
+        WHERE tenant_id = v_tenant_id 
+          AND service_user_id = (p_data->>'funcionario_id')::uuid
+    ) INTO v_has_permission;
+
+    IF NOT v_has_permission THEN
+        RAISE EXCEPTION 'Acceso Denegado: El funcionario no cuenta con un rol o permisos asignados para el Tenant %', v_tenant_id;
+    END IF;
+
+
+
+    -- PASO 0.2: VALIDACIÓN DE ÓRDENES ACTIVAS O EN PROCESO (Inspección / Reinspección)
+    -- =========================================================================
+    SELECT EXISTS (
+        SELECT 1 
+        FROM public.entry_orders
+        WHERE tenant_id = v_tenant_id
+          AND vehiculo_placa_snapshot = UPPER(v_vehicle_json->>'placa')
+          AND estado_orden IN ('abierta'::public.order_status_enum, 'en_prueba'::public.order_status_enum)
+          AND deleted_at IS NULL
+          -- Si estamos EDITANDO la orden, ignoramos la orden misma que se está editando
+          AND (v_input_id IS NULL OR id != v_input_id)
+    ) INTO v_has_active_order;
+
+    IF v_has_active_order THEN
+        RAISE EXCEPTION 'Operación cancelada: El vehículo con placa % ya cuenta con una orden de entrada activa (Abierta o En Prueba) en este centro.', UPPER(v_vehicle_json->>'placa');
+    END IF;
+
 
     -- =========================================================================
-    -- PASO 0.1: CÁLCULO DEL CONSECUTIVO POR TENANT (Solo en Creación)
+    -- PASO 0.3: CÁLCULO DEL CONSECUTIVO POR TENANT (Solo en Creación)
     -- =========================================================================
     IF v_input_id IS NOT NULL AND EXISTS (SELECT 1 FROM public.entry_orders WHERE id = v_input_id) THEN
         SELECT consecutivo INTO v_consecutivo FROM public.entry_orders WHERE id = v_input_id;
@@ -204,6 +568,14 @@ BEGIN
         INTO v_consecutivo 
         FROM public.entry_orders 
         WHERE tenant_id = v_tenant_id;
+    END IF;
+
+
+    -- =========================================================================
+    -- PASO 0.4: VALIDACIÓN DE INTEGRIDAD EN REINSPECCIONES
+    -- =========================================================================
+    IF COALESCE((p_data->>'es_reinspeccion')::boolean, false) = true AND (p_data->>'id_reprobado') IS NULL THEN
+        RAISE EXCEPTION 'Operación cancelada: La orden está marcada como Reinspección pero no se proporcionó el ID de la orden reprobada original.';
     END IF;
 
     -- =========================================================================
@@ -362,6 +734,7 @@ BEGIN
         plantilla_id,
         consecutivo,
         es_reinspeccion,
+        id_reprobado,
         service_type,
         estado_orden,
         kilometraje,
@@ -422,6 +795,12 @@ BEGIN
         (p_data->>'plantilla_id')::uuid,
         v_consecutivo,
         COALESCE((p_data->>'es_reinspeccion')::boolean, false),
+        -- 🌟 LOGICA CONDICIONAL: Solo guarda si es_reinspeccion es TRUE
+        CASE 
+            WHEN COALESCE((p_data->>'es_reinspeccion')::boolean, false) = true 
+            THEN (p_data->>'id_reprobado')::uuid 
+            ELSE NULL 
+        END,
         COALESCE((p_data->>'service_type')::public.service_type_enum, 'RTM'::public.service_type_enum),
         COALESCE((p_data->>'estado_orden')::public.order_status_enum, 'abierta'::public.order_status_enum),
         (p_data->>'kilometraje'),
@@ -480,6 +859,7 @@ BEGIN
         funcionario_id = EXCLUDED.funcionario_id,
         plantilla_id = EXCLUDED.plantilla_id,
         es_reinspeccion = EXCLUDED.es_reinspeccion,
+        id_reprobado = EXCLUDED.id_reprobado,
         service_type = EXCLUDED.service_type,
         estado_orden = EXCLUDED.estado_orden,
         kilometraje = EXCLUDED.kilometraje,
@@ -746,8 +1126,9 @@ DECLARE
     v_vehicle_row RECORD;
     v_owner_json JSONB;
     v_customer_json JSONB;
-    v_last_customer_id UUID; -- ⚡ Volvemos a extraer solo el UUID del cliente
+    v_last_customer_id UUID; 
     v_is_owner_same_as_customer BOOLEAN := FALSE;
+    v_has_active_order BOOLEAN := FALSE; -- 🌟 Variable añadida para el control de duplicados
     v_result JSONB;
 BEGIN
     -- 1. Buscar el vehículo mediante aislamiento por tenant
@@ -763,7 +1144,24 @@ BEGIN
         RETURN NULL;
     END IF;
 
-    -- 3. Si existe, buscamos los datos del propietario actual en la tabla personas
+    -- =========================================================================
+    -- 🌟 CONTROL ADAPTADO: VALIDACIÓN DE ÓRDENES ACTIVAS O EN PROCESO
+    -- =========================================================================
+    SELECT EXISTS (
+        SELECT 1 
+        FROM public.entry_orders
+        WHERE tenant_id = p_tenant_id
+          AND vehiculo_placa_snapshot = UPPER(TRIM(p_placa))
+          AND estado_orden IN ('abierta'::public.order_status_enum, 'en_prueba'::public.order_status_enum)
+          AND deleted_at IS NULL
+    ) INTO v_has_active_order;
+
+    IF v_has_active_order THEN
+        RAISE EXCEPTION 'Operación cancelada: El vehículo con placa % ya cuenta con una orden de entrada activa (Abierta o En Prueba) en este centro.', UPPER(TRIM(p_placa));
+    END IF;
+    -- =========================================================================
+
+    -- 3. Si existe y está libre, buscamos los datos del propietario actual en la tabla personas
     IF v_vehicle_row.propietario_actual_id IS NOT NULL THEN
         SELECT jsonb_build_object(
             'id', p.id,
@@ -780,7 +1178,7 @@ BEGIN
         v_owner_json := NULL;
     END IF;
 
-    -- 4. ✅ Buscar ÚNICAMENTE el cliente_id de la última orden de entrada para este vehículo
+    -- 4. Buscar ÚNICAMENTE el cliente_id de la última orden de entrada para este vehículo
     SELECT o.cliente_id INTO v_last_customer_id
     FROM public.entry_orders o
     WHERE o.vehiculo_id = v_vehicle_row.id
@@ -811,7 +1209,7 @@ BEGIN
         v_customer_json := NULL;
     END IF;
 
-    -- 7. ✅ Construimos el objeto unificado de salida SIN los snapshots de vencimiento
+    -- 7. Construimos el objeto unificado de salida
     v_result := jsonb_build_object(
         'vehicle', jsonb_build_object(
             'id', v_vehicle_row.id,
@@ -1013,8 +1411,8 @@ $$;
 ALTER FUNCTION "public"."fetch_entry_order_by_id"("p_order_id" "uuid", "p_tenant_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."fetch_entry_orders_list"("p_tenant_id" "uuid", "p_limit" integer DEFAULT 20, "p_offset" integer DEFAULT 0, "p_placa" "text" DEFAULT NULL::"text", "p_estado" "public"."order_status_enum" DEFAULT NULL::"public"."order_status_enum", "p_fecha_desde" "date" DEFAULT CURRENT_DATE, "p_fecha_hasta" "date" DEFAULT CURRENT_DATE, "p_cliente_documento" "text" DEFAULT NULL::"text", "p_propietario_documento" "text" DEFAULT NULL::"text", "p_order_by_column" "text" DEFAULT 'fecha'::"text", "p_order_by_direction" "text" DEFAULT 'DESC'::"text", "p_show_deleted" boolean DEFAULT false, "p_search_column" "text" DEFAULT NULL::"text", "p_search_term" "text" DEFAULT NULL::"text") RETURNS TABLE("id" "uuid", "placa" "text", "fecha" timestamp with time zone, "marca" "text", "linea" "text", "propietario_nombre" "text", "propietario_documento" "text", "cliente_nombre" "text", "cliente_documento" "text", "estado_orden" "public"."order_status_enum", "total_count" bigint)
-    LANGUAGE "plpgsql" SECURITY DEFINER
+CREATE OR REPLACE FUNCTION "public"."fetch_entry_orders_list"("p_tenant_id" "uuid", "p_limit" integer DEFAULT 20, "p_offset" integer DEFAULT 0, "p_placa" "text" DEFAULT NULL::"text", "p_estado" "public"."order_status_enum" DEFAULT NULL::"public"."order_status_enum", "p_fecha_desde" "date" DEFAULT CURRENT_DATE, "p_fecha_hasta" "date" DEFAULT CURRENT_DATE, "p_cliente_documento" "text" DEFAULT NULL::"text", "p_propietario_documento" "text" DEFAULT NULL::"text", "p_order_by_column" "text" DEFAULT 'fecha'::"text", "p_order_by_direction" "text" DEFAULT 'DESC'::"text", "p_show_deleted" boolean DEFAULT false, "p_search_column" "text" DEFAULT NULL::"text", "p_search_term" "text" DEFAULT NULL::"text") RETURNS TABLE("id" "uuid", "placa" "text", "fecha" timestamp with time zone, "marca" "text", "linea" "text", "propietario_nombre" "text", "propietario_documento" "text", "propietario_tipo_documento" "text", "cliente_nombre" "text", "cliente_documento" "text", "cliente_tipo_documento" "text", "es_reinspeccion" boolean, "kilometraje" character varying, "soat_vencimiento_snapshot" "date", "service_type" "public"."service_type_enum", "vehiculo_tipo_snapshot" "public"."vehicle_type_enum", "vehiculo_tipo_servicio_snapshot" "public"."vehicle_service_type_enum", "estado_orden" "public"."order_status_enum", "oficina_pin" character varying, "oficina_pago" numeric, "oficina_consecutivo_factura" character varying, "oficina_tipo_pago" "public"."office_payment_type_enum", "oficina_num_aprobacion" character varying, "se_compro_soat" boolean, "resultado_revision" "text", "consecutivo_fur" character varying, "consecutivo_rtm" character varying, "total_count" bigint)
+    LANGUAGE "plpgsql"
     SET "search_path" TO 'public'
     AS $_$
 BEGIN
@@ -1022,15 +1420,34 @@ BEGIN
     RETURN QUERY EXECUTE format('
         SELECT
             o.id,
-            o.vehiculo_placa_snapshot::TEXT,
+            o.vehiculo_placa_snapshot::TEXT AS placa,
             o.fecha,
-            o.vehiculo_marca_snapshot::TEXT,
-            o.vehiculo_linea_snapshot::TEXT,
-            o.propietario_nombre_snapshot,
-            o.propietario_numero_documento_snapshot::TEXT,
-            o.cliente_nombre_snapshot,
-            o.cliente_numero_documento_snapshot::TEXT,
+            o.vehiculo_marca_snapshot::TEXT AS marca,
+            o.vehiculo_linea_snapshot::TEXT AS linea,
+            o.propietario_nombre_snapshot AS propietario_nombre,
+            o.propietario_numero_documento_snapshot::TEXT AS propietario_documento,
+            o.propietario_tipo_documento_snapshot::TEXT AS propietario_tipo_documento,   -- 🌟 NUEVO
+            o.cliente_nombre_snapshot AS cliente_nombre,
+            o.cliente_numero_documento_snapshot::TEXT AS cliente_documento,
+            o.cliente_tipo_documento_snapshot::TEXT AS cliente_tipo_documento,           -- 🌟 NUEVO
+            o.es_reinspeccion,                                                           -- 🌟 NUEVO
+            o.kilometraje,                                                               -- 🌟 NUEVO
+            o.soat_vencimiento_snapshot,                                                 -- 🌟 NUEVO
+            o.service_type,                                                              -- 🌟 NUEVO
+            o.vehiculo_tipo_snapshot,                                                    -- 🌟 NUEVO
+            o.vehiculo_tipo_servicio_snapshot,
             o.estado_orden,
+            -- 🌟 MAPEO DE NUEVOS CAMPOS DESDE LA TABLA
+            o.oficina_pin,
+            o.oficina_pago,
+            o.oficina_consecutivo_factura,
+            o.oficina_tipo_pago,
+            o.oficina_num_aprobacion,
+            
+            o.se_compro_soat,
+            o.resultado_revision,
+            o.consecutivo_fur,
+            o.consecutivo_rtm,
             COUNT(*) OVER() AS total_count
         FROM public.entry_orders o
         WHERE
@@ -1038,7 +1455,7 @@ BEGIN
             o.tenant_id = $1
             
             -- 🌟 NUEVO: Si porcentaje con el 10 es TRUE muestra todo, si es FALSE exige que deleted_at sea NULL
-            AND ($10 = TRUE OR o.deleted_at IS NULL)
+            AND ($10 = TRUE OR o.estado_orden != ''anulada''::public.order_status_enum)
 
             -- FILTRO POR PLACA (Sobre el Snapshot)
             AND ($2 IS NULL OR o.vehiculo_placa_snapshot ILIKE ''%%'' || TRIM($2) || ''%%'')
@@ -1303,6 +1720,125 @@ $$;
 
 ALTER FUNCTION "public"."sync_user_active_status"() OWNER TO "postgres";
 
+
+CREATE OR REPLACE FUNCTION "public"."update_director_tecnico_order"("p_order_id" "uuid", "p_resultado_revision" "text", "p_consecutivo_fur" character varying, "p_consecutivo_rtm" character varying, "p_director_tecnico_tipo_documento_snapshot" "text", "p_director_tecnico_numero_documento_snapshot" character varying, "p_director_tecnico_nombre_snapshot" "text", "p_director_tecnico_firma_base64_snapshot" "text") RETURNS "text"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+    -- 1. Verificación defensiva de la existencia de la orden
+    IF NOT EXISTS (SELECT 1 FROM public.entry_orders WHERE id = p_order_id) THEN
+        RAISE EXCEPTION 'La orden de entrada con ID % no existe.', p_order_id;
+    END IF;
+
+    -- 2. Ejecución de la actualización del Cierre Técnico (ISO 17020)
+    UPDATE public.entry_orders
+    SET
+        resultado_revision = NULLIF(TRIM(p_resultado_revision), ''),
+        consecutivo_fur = NULLIF(TRIM(p_consecutivo_fur), ''),
+        consecutivo_rtm = NULLIF(TRIM(p_consecutivo_rtm), ''),
+        
+        -- Guardado de los snapshots del DT
+        director_tecnico_tipo_documento_snapshot = NULLIF(TRIM(p_director_tecnico_tipo_documento_snapshot), ''),
+        director_tecnico_numero_documento_snapshot = NULLIF(TRIM(p_director_tecnico_numero_documento_snapshot), ''),
+        director_tecnico_nombre_snapshot = NULLIF(TRIM(p_director_tecnico_nombre_snapshot), ''),
+        director_tecnico_firma_base64_snapshot = NULLIF(TRIM(p_director_tecnico_firma_base64_snapshot), ''),
+        
+        -- 🌟 CÁLCULO DE FECHA LÍMITE CON HORA EXACTA (Si es reprobada)
+        fecha_limite_reinspeccion = CASE 
+            WHEN LOWER(TRIM(p_resultado_revision)) = 'rechazado' THEN NOW() + INTERVAL '15 days'
+            ELSE fecha_limite_reinspeccion -- Mantiene lo que tenga si no es reprobada
+        END,
+
+        -- Transición de estado
+        estado_orden = 'finalizada'::public.order_status_enum
+        
+    WHERE id = p_order_id;
+
+    -- 3. Retorno de confirmación
+    RETURN 'Cierre técnico registrado con éxito';
+
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_director_tecnico_order"("p_order_id" "uuid", "p_resultado_revision" "text", "p_consecutivo_fur" character varying, "p_consecutivo_rtm" character varying, "p_director_tecnico_tipo_documento_snapshot" "text", "p_director_tecnico_numero_documento_snapshot" character varying, "p_director_tecnico_nombre_snapshot" "text", "p_director_tecnico_firma_base64_snapshot" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean) RETURNS "text"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+    -- 1. Verificación defensiva de la existencia de la orden
+    IF NOT EXISTS (SELECT 1 FROM public.entry_orders WHERE id = p_order_id) THEN
+        RAISE EXCEPTION 'La orden de entrada con ID % no existe.', p_order_id;
+    END IF;
+
+    -- 2. Ejecución de la actualización
+    UPDATE public.entry_orders
+    SET
+        oficina_pin = NULLIF(TRIM(p_pin), ''),
+        oficina_pago = COALESCE(p_pago, 0.00),
+        oficina_consecutivo_factura = NULLIF(TRIM(p_consecutivo_factura), ''),
+        oficina_tipo_pago = p_tipo_pago::public.office_payment_type_enum,
+        se_compro_soat = COALESCE(p_se_compro_soat, false),
+        estado_orden = 'en_prueba'::public.order_status_enum, -- 🌟 Cambia el estado para habilitarla en pista
+        updated_at = NOW()
+    WHERE id = p_order_id;
+
+    -- 3. Retornamos el string exacto que necesitas
+    RETURN 'Datos guardados con exito';
+
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean, "p_num_aprobacion" character varying DEFAULT NULL::character varying) RETURNS "text"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public'
+    AS $$
+BEGIN
+    -- 1. Verificación defensiva de la existencia de la orden
+    IF NOT EXISTS (SELECT 1 FROM public.entry_orders WHERE id = p_order_id) THEN
+        RAISE EXCEPTION 'La orden de entrada con ID % no existe.', p_order_id;
+    END IF;
+
+    -- 🌟 2. VALIDACIÓN DEFENSIVA EN BASE DE DATOS PARA TARJETAS
+    IF (p_tipo_pago = 'tarjeta_debito' OR p_tipo_pago = 'tarjeta_credito') 
+        AND (p_num_aprobacion IS NULL OR TRIM(p_num_aprobacion) = '') THEN
+        RAISE EXCEPTION 'Operación cancelada: Las transacciones con tarjeta requieren un número de aprobación válido.';
+    END IF;
+
+    -- 3. Ejecución de la actualización
+    UPDATE public.entry_orders
+    SET
+        oficina_pin = NULLIF(TRIM(p_pin), ''),
+        oficina_pago = COALESCE(p_pago, 0.00),
+        oficina_consecutivo_factura = NULLIF(TRIM(p_consecutivo_factura), ''),
+        oficina_tipo_pago = p_tipo_pago::public.office_payment_type_enum,
+        -- 🌟 Guardamos el número de aprobación (si no es tarjeta, se guardará NULL de forma limpia)
+        oficina_num_aprobacion = CASE 
+            WHEN p_tipo_pago IN ('tarjeta_debito', 'tarjeta_credito') THEN NULLIF(TRIM(p_num_aprobacion), '')
+            ELSE NULL 
+        END,
+        se_compro_soat = COALESCE(p_se_compro_soat, false),
+        estado_orden = 'en_prueba'::public.order_status_enum, -- Pasa a pista
+        updated_at = NOW()
+    WHERE id = p_order_id;
+
+    -- 4. Retornamos el mensaje de éxito
+    RETURN 'Datos guardados con exito';
+
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean, "p_num_aprobacion" character varying) OWNER TO "postgres";
+
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -1380,7 +1916,23 @@ CREATE TABLE IF NOT EXISTS "public"."entry_orders" (
     "funcionario_tipo_documento_snapshot" "text" NOT NULL,
     "funcionario_numero_documento_snapshot" character varying NOT NULL,
     "funcionario_nombre_snapshot" "text" NOT NULL,
-    "funcionario_firma_base64_snapshot" "text" NOT NULL
+    "funcionario_firma_base64_snapshot" "text" NOT NULL,
+    "oficina_pin" character varying,
+    "oficina_pago" numeric(12,2) DEFAULT 0.00,
+    "oficina_consecutivo_factura" character varying,
+    "oficina_tipo_pago" "public"."office_payment_type_enum",
+    "se_compro_soat" boolean DEFAULT false NOT NULL,
+    "resultado_revision" "text",
+    "consecutivo_fur" character varying,
+    "consecutivo_rtm" character varying,
+    "id_reprobado" "uuid",
+    "id_orden_reinspeccion" "uuid",
+    "fecha_limite_reinspeccion" timestamp with time zone,
+    "oficina_num_aprobacion" character varying,
+    "director_tecnico_tipo_documento_snapshot" "text",
+    "director_tecnico_numero_documento_snapshot" character varying,
+    "director_tecnico_nombre_snapshot" "text",
+    "director_tecnico_firma_base64_snapshot" "text"
 );
 
 
@@ -1388,6 +1940,62 @@ ALTER TABLE "public"."entry_orders" OWNER TO "postgres";
 
 
 COMMENT ON COLUMN "public"."entry_orders"."service_type" IS 'Tipo de servicio legal o comercial asociado a esta orden de entrada';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."funcionario_tipo_documento_snapshot" IS 'Snapshot del tipo de documento del funcionario que firma.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."funcionario_numero_documento_snapshot" IS 'Snapshot del número de documento del funcionario que firma.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."funcionario_nombre_snapshot" IS 'Snapshot del nombre completo del funcionario que firma.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."funcionario_firma_base64_snapshot" IS 'Snapshot en Base64 de la firma digitalizada del funcionario.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."oficina_tipo_pago" IS 'Registra la modalidad de pago con la que el cliente canceló la Revisión Técnico-Mecánica (RTM) u otros servicios. Vinculado al enum office_payment_type_enum.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."consecutivo_fur" IS 'Número del Formato Uniforme de Resultados generado en la inspección';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."consecutivo_rtm" IS 'Número del certificado de Revisión Tecnicomecánica emitido (Satisface RUNT)';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."id_reprobado" IS 'Se llena en la REINSPECCIÓN. Guarda el UUID de la orden original que fue rechazada.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."id_orden_reinspeccion" IS 'Se llena en la ORDEN ORIGINAL (Opcional/Históricos). Guarda el UUID de la orden que actuó como su reinspección.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."fecha_limite_reinspeccion" IS 'Fecha máxima (Fecha de la orden original + 15 días calendario) en la que el vehículo puede aplicar a una reinspección.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."director_tecnico_tipo_documento_snapshot" IS 'Snapshot del tipo de documento del Director Técnico que aprueba la orden.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."director_tecnico_numero_documento_snapshot" IS 'Snapshot del número de documento del Director Técnico que aprueba la orden.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."director_tecnico_nombre_snapshot" IS 'Snapshot del nombre completo del Director Técnico que firma el cierre.';
+
+
+
+COMMENT ON COLUMN "public"."entry_orders"."director_tecnico_firma_base64_snapshot" IS 'Snapshot en formato Base64 de la firma digitalizada del Director Técnico (Auditoría ISO 17020).';
 
 
 
@@ -1692,6 +2300,21 @@ ALTER TABLE ONLY "public"."entry_orders"
 
 
 
+ALTER TABLE ONLY "public"."entry_orders"
+    ADD CONSTRAINT "entry_orders_tenant_factura_key" UNIQUE ("tenant_id", "oficina_consecutivo_factura");
+
+
+
+ALTER TABLE ONLY "public"."entry_orders"
+    ADD CONSTRAINT "entry_orders_tenant_fur_key" UNIQUE ("tenant_id", "consecutivo_fur");
+
+
+
+ALTER TABLE ONLY "public"."entry_orders"
+    ADD CONSTRAINT "entry_orders_tenant_rtm_key" UNIQUE ("tenant_id", "consecutivo_rtm");
+
+
+
 ALTER TABLE "public"."tenants"
     ADD CONSTRAINT "logo_url_not_null_check" CHECK (("logo_url" IS NOT NULL)) NOT VALID;
 
@@ -1805,7 +2428,19 @@ CREATE INDEX "entry_orders_fecha_idx" ON "public"."entry_orders" USING "btree" (
 
 
 
+CREATE INDEX "entry_orders_fecha_limite_reinspeccion_idx" ON "public"."entry_orders" USING "btree" ("fecha_limite_reinspeccion") WHERE ("fecha_limite_reinspeccion" IS NOT NULL);
+
+
+
 CREATE INDEX "entry_orders_funcionario_id_idx" ON "public"."entry_orders" USING "btree" ("funcionario_id");
+
+
+
+CREATE INDEX "entry_orders_id_orden_reinspeccion_idx" ON "public"."entry_orders" USING "btree" ("id_orden_reinspeccion") WHERE ("id_orden_reinspeccion" IS NOT NULL);
+
+
+
+CREATE INDEX "entry_orders_id_reprobado_idx" ON "public"."entry_orders" USING "btree" ("id_reprobado") WHERE ("id_reprobado" IS NOT NULL);
 
 
 
@@ -2004,6 +2639,11 @@ ALTER TABLE ONLY "public"."entry_orders"
 
 ALTER TABLE ONLY "public"."entry_orders"
     ADD CONSTRAINT "entry_orders_funcionario_id_fkey" FOREIGN KEY ("funcionario_id") REFERENCES "public"."service_users"("id");
+
+
+
+ALTER TABLE ONLY "public"."entry_orders"
+    ADD CONSTRAINT "entry_orders_id_reprobado_fkey" FOREIGN KEY ("id_reprobado") REFERENCES "public"."entry_orders"("id") ON DELETE SET NULL;
 
 
 
@@ -2632,6 +3272,24 @@ GRANT ALL ON FUNCTION "public"."gtrgm_out"("public"."gtrgm") TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."check_preventiva_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."check_preventiva_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_preventiva_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."check_rtm_primera_vez_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."check_rtm_primera_vez_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_rtm_primera_vez_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."check_rtm_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."check_rtm_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_rtm_reinspection_eligibility"("p_placa" character varying, "p_tenant_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."create_full_order"("p_data" "jsonb") TO "anon";
 GRANT ALL ON FUNCTION "public"."create_full_order"("p_data" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_full_order"("p_data" "jsonb") TO "service_role";
@@ -2869,6 +3527,24 @@ GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "s
 GRANT ALL ON FUNCTION "public"."sync_user_active_status"() TO "anon";
 GRANT ALL ON FUNCTION "public"."sync_user_active_status"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."sync_user_active_status"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_director_tecnico_order"("p_order_id" "uuid", "p_resultado_revision" "text", "p_consecutivo_fur" character varying, "p_consecutivo_rtm" character varying, "p_director_tecnico_tipo_documento_snapshot" "text", "p_director_tecnico_numero_documento_snapshot" character varying, "p_director_tecnico_nombre_snapshot" "text", "p_director_tecnico_firma_base64_snapshot" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."update_director_tecnico_order"("p_order_id" "uuid", "p_resultado_revision" "text", "p_consecutivo_fur" character varying, "p_consecutivo_rtm" character varying, "p_director_tecnico_tipo_documento_snapshot" "text", "p_director_tecnico_numero_documento_snapshot" character varying, "p_director_tecnico_nombre_snapshot" "text", "p_director_tecnico_firma_base64_snapshot" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_director_tecnico_order"("p_order_id" "uuid", "p_resultado_revision" "text", "p_consecutivo_fur" character varying, "p_consecutivo_rtm" character varying, "p_director_tecnico_tipo_documento_snapshot" "text", "p_director_tecnico_numero_documento_snapshot" character varying, "p_director_tecnico_nombre_snapshot" "text", "p_director_tecnico_firma_base64_snapshot" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean) TO "anon";
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean, "p_num_aprobacion" character varying) TO "anon";
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean, "p_num_aprobacion" character varying) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_office_order_data"("p_order_id" "uuid", "p_pin" character varying, "p_pago" numeric, "p_consecutivo_factura" character varying, "p_tipo_pago" "text", "p_se_compro_soat" boolean, "p_num_aprobacion" character varying) TO "service_role";
 
 
 

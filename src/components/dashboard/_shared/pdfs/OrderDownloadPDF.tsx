@@ -40,6 +40,9 @@ function OrderDownloadPDF({ orderId, tenantId, templateData }: OrderDownloadPDFP
     );
   }
 
+  
+
+
   // Fallback dinámico para construir el nombre del archivo de forma limpia y segura sin romper si es una plantilla
   const getFileName = () => {
     const nombrePlantilla = orderData?.plantilla_nombre || templateData?.template_name || "Orden_de_Ingreso";
@@ -116,6 +119,8 @@ function OrderDownloadPDF({ orderId, tenantId, templateData }: OrderDownloadPDFP
           }}
         </PDFDownloadLink>
       )}
+
+      
     </>
   );
 }

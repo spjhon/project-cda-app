@@ -23,7 +23,7 @@ import SignatureSection from "@/components/dashboard/recepcionista/SignatureSect
 import { PersonSection } from "@/components/dashboard/recepcionista/PersonSection";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { ServiceType, ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 import { createOrderAction } from "@/lib/server-actions/createOrderAction";
 import { ZodErrorDialog } from "@/components/dashboard/recepcionista/ZodErrorDialog";
 import { $ZodIssue } from "zod/v4/core";
@@ -36,10 +36,105 @@ import { useQueryClient } from "@tanstack/react-query";
 
 
 
+
+
+
+
+// 🌟 ESTADO INICIAL REUTILIZABLE (Con Return Explícito)
+export function getInitialOrderFormData(
+  tenantId = "", 
+  funcionarioId = "", 
+  currentPlantillaId = "",
+   serviceType: ServiceType = "RTM"
+): ZodFullFormDataType {
+
+
+  return {
+    id: null,
+    
+    // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
+    tenant_id: tenantId,
+    funcionario_id: funcionarioId,
+    plantilla_id: currentPlantillaId,
+    id_reprobado: null,
+
+    // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
+    kilometraje: "",
+    es_reinspeccion: false,
+    service_type: serviceType, 
+    estado_orden: "abierta",
+    observaciones: "",
+    soat_vencimiento_snapshot: "",
+    gas_numero_snapshot: "",
+    gas_vencimiento_snapshot: "",
+    
+    // --- ENTIDAD VEHÍCULO ---
+    vehicle: {
+      id: null, 
+      placa: "",
+      marca: "",
+      linea: "",
+      modelo: "", 
+      color: "",
+      tipo_vehiculo: "",
+      clase: "",
+      combustible: "",
+      cilindrada: "", 
+      blindaje: false,
+      capacidad_pasajeros: "", 
+      es_ensenanza: false,
+      tipo_servicio_vehiculo: "", 
+      propietario_actual_id: null, 
+      es_extranjero: false,
+    },
+
+    // --- REGISTRO DE PRESIONES DE LLANTAS ---
+    tire_pressures: [
+      { eje: 1, posicion: "centro", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+      { eje: 2, posicion: "centro", presion_encontrada: "", presion_ajustada: "", _requiere_ajuste: false },
+    ],
+
+    // --- RESULTADOS DE CONDICIONES Y FIRMAS ---
+    condition_results: [],
+    signatures: [], 
+
+    // --- DATOS DE CLIENTE Y PROPIETARIO ---
+    customer_data: {
+      id: null,
+      tipo_documento: "cedula_ciudadania",
+      numero_documento: "",
+      nombre_completo: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+    },
+    owner_data: {
+      id: null,
+      tipo_documento: "cedula_ciudadania",
+      numero_documento: "",
+      nombre_completo: "",
+      telefono: "",
+      correo: "",
+      direccion: "",
+    },
+    is_owner_same_as_customer: false, 
+  };
+}
+
+
+
+
+
+
+
+
+
+
 export default function NewEntryOrder() {
 
   const queryClient = useQueryClient();
 
+  
 
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
@@ -69,6 +164,9 @@ export default function NewEntryOrder() {
     tenant_id: PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "",
     funcionario_id: PermissionsContextReceived?.PermissionsContextValue.user?.id || "",
     plantilla_id: "",
+
+    //Control por si es reinpseccion
+    id_reprobado: null,
 
     // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
     // Estos datos cambian en cada inspección y deben quedar congelados en entry_orders
@@ -150,7 +248,7 @@ export default function NewEntryOrder() {
   });
 
 
-
+console.log(formData)
 
 
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
@@ -209,6 +307,10 @@ if (!PermissionsContextReceived?.PermissionsContextValue.user?.signature_base64)
         signatures: initialSignatures,
       };
     });
+
+
+ setSignatureKey((prev) => prev + 1);
+
   };
 
 
@@ -285,7 +387,7 @@ if (tieneCondicionesNoCumplidas) {
           // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
 
           // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
-          kilometraje: "",
+          kilometraje: "111",
           es_reinspeccion: false,
           service_type: "RTM", 
           estado_orden: "abierta",
@@ -332,9 +434,8 @@ if (tieneCondicionesNoCumplidas) {
             },
           ],
 
-          // --- RESULTADOS DE CONDICIONES (Detalle de la Orden) ---
-          condition_results: [],
-          signatures: [], 
+          condition_results: prev.condition_results,
+          signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })), // Reseteamos la URL a vacío,
           customer_data: {
             id: null,
             tipo_documento: "cedula_ciudadania",
@@ -355,11 +456,16 @@ if (tieneCondicionesNoCumplidas) {
           },
           is_owner_same_as_customer: false, 
         }));
+
+
+
         
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);
         queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
       }
+
+      
     } catch (error: unknown) {
       alert("Ocurrio un error inesperado en la validacion: " + error);
     } finally {
@@ -445,6 +551,7 @@ if (tieneCondicionesNoCumplidas) {
           selectedTemplate={selectedTemplate}
           setFormData={setFormData}
           formData={formData}
+          setSignatureKey={setSignatureKey}
         ></PlacaSelectionSection>
 
 

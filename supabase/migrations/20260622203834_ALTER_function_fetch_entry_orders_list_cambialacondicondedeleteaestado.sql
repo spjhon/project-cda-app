@@ -40,7 +40,6 @@ RETURNS TABLE (
     oficina_pago NUMERIC(12,2),
     oficina_consecutivo_factura CHARACTER VARYING,
     oficina_tipo_pago public.office_payment_type_enum,
-    oficina_num_aprobacion CHARACTER VARYING,
    
     se_compro_soat BOOLEAN,
     resultado_revision TEXT,
@@ -49,7 +48,7 @@ RETURNS TABLE (
     total_count BIGINT
 )
 LANGUAGE plpgsql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
@@ -79,7 +78,6 @@ BEGIN
             o.oficina_pago,
             o.oficina_consecutivo_factura,
             o.oficina_tipo_pago,
-            o.oficina_num_aprobacion,
             
             o.se_compro_soat,
             o.resultado_revision,

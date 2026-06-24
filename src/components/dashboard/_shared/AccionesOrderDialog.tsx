@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, FileText, Ban, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, FileText, Ban, } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
@@ -95,32 +95,33 @@ export default function AccionesOrderDialog({
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Control de Estado
             </span>
-            <div className="flex items-center justify-center p-4 bg-red-50/50 rounded-xl border border-red-100/50 w-full">
-                {/* CASO 1: LA ORDEN YA ESTÁ ANULADA */}
-              {orden.estado_orden === "anulada" && (
-                <div className="flex items-center gap-2 text-sm font-semibold text-red-600 bg-red-100/60 px-5 py-2.5 rounded-lg border border-red-200 shadow-xs animate-fade-in select-none">
-                  <Ban className="h-4 w-4 shrink-0" />
-                  <span>Esta orden ya fue anulada</span>
-                </div>
-              )}
+           {/* CONTENEDOR DINÁMICO: Ajusta su fondo/borde según si está bloqueado o permitido */}
+              <div className={`flex items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
+                orden.estado_orden === "abierta" 
+                  ? "bg-stone-50/50 border-stone-100/50" // Fondo neutro si está abierta
+                  : "bg-red-50/50 border-red-100/50"    // Fondo de advertencia si no se puede anular
+              }`}>
 
-              {/* CASO 2: LA ORDEN YA PASÓ A PISTA (EN PRUEBA) */}
-              {orden.estado_orden === "en_prueba" && (
-                <div className="flex items-center gap-2 text-sm font-semibold text-amber-700 bg-amber-50 px-5 py-2.5 rounded-lg border border-amber-200 shadow-xs animate-fade-in select-none">
-                  <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
-                  <span>No se puede anular la orden porque ya se encuentra en prueba en pista</span>
-                </div>
-              )}
+                {orden.estado_orden !== "abierta" ? (
+                  /* CASO DE BLOQUEO: Cualquier estado diferente a 'abierta' (en_prueba, finalizada, anulada) */
+                  <div className="flex items-center gap-2 text-sm font-semibold text-red-600 bg-red-100/60 px-5 py-2.5 rounded-lg border border-red-200 shadow-xs animate-fade-in select-none">
+                    <Ban className="h-4 w-4 shrink-0" />
+                    <span>
+                      {orden.estado_orden === "anulada" 
+                        ? "Esta orden ya fue anulada" 
+                        : `No se puede anular la orden porque se encuentra en estado '${orden.estado_orden.replace('_', ' ')}'`}
+                    </span>
+                  </div>
+                ) : (
+                  /* CASO PERMITIDO: La orden está estrictamente 'abierta' */
+                  <CancelOrder
+                    orden={orden}
+                    tenantId={tenantId}
+                    mutation={mutation}
+                  />
+                )}
 
-              {/* CASO 3: LA ORDEN ESTÁ ABIERTA (PERMITIDO ANULAR) */}
-              {orden.estado_orden !== "anulada" && orden.estado_orden !== "en_prueba" && (
-                <CancelOrder
-                  orden={orden}
-                  tenantId={tenantId}
-                  mutation={mutation}
-                />
-              )}
-            </div>
+              </div>
             </div>
             
           </div>
@@ -138,6 +139,7 @@ export default function AccionesOrderDialog({
         orden={orden} 
         tenantId={tenantId} 
         rol={rol} 
+        mutation={mutation}
       />
     );
   }
@@ -149,6 +151,7 @@ export default function AccionesOrderDialog({
         orden={orden} 
         tenantId={tenantId} 
         rol={rol} 
+        mutation={mutation}
       />
     );
   }
