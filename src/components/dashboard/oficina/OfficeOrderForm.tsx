@@ -179,7 +179,7 @@ export default function OfficeOrderForm({
               value={formData.oficina_pin}
               onChange={handleChange}
               className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"}
+              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" || orden.es_reinspeccion}
             />
           </div>
 
@@ -195,7 +195,7 @@ export default function OfficeOrderForm({
               value={formData.oficina_consecutivo_factura}
               onChange={handleChange}
               className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"}
+              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
             />
           </div>
 
@@ -213,7 +213,7 @@ export default function OfficeOrderForm({
               value={formData.oficina_pago === 0 ? "" : formData.oficina_pago}
               onChange={handleChange}
               className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"}
+              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
             />
           </div>
 
@@ -226,7 +226,7 @@ export default function OfficeOrderForm({
               items={SELECT_METODO_PAGO}
               value={formData.oficina_tipo_pago}
               onValueChange={(value) => handleSelectChange(value || "efectivo")}
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"}
+              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
             >
               <SelectTrigger id="oficina_tipo_pago" className="bg-white h-10 text-xs">
                 <SelectValue placeholder="Seleccione método" />
@@ -261,7 +261,7 @@ export default function OfficeOrderForm({
               onChange={handleChange}
               required={mostrarNumAprobacion}
              
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" || !mostrarNumAprobacion}
+              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" || !mostrarNumAprobacion  || orden.es_reinspeccion}
               className="bg-white h-10 text-xs"
             />
           </div>
@@ -281,7 +281,7 @@ export default function OfficeOrderForm({
             id="se_compro_soat"
             checked={formData.se_compro_soat}
             onCheckedChange={handleSwitchChange}
-            disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"}
+            disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
           />
         </div>
       </div>
@@ -326,7 +326,7 @@ export default function OfficeOrderForm({
             <div className="w-full sm:w-auto order-1 sm:order-2">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (orden.estado_orden === "en_prueba" && orden.es_reinspeccion )}
                 className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70 disabled:cursor-not-allowed text-white font-bold h-10 text-xs transition-all rounded-lg shadow-sm gap-2 px-5"
               >
                 {isSubmitting ? (

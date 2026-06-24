@@ -39,8 +39,8 @@ RETURNS TABLE (
     oficina_consecutivo_factura CHARACTER VARYING,
     oficina_tipo_pago public.office_payment_type_enum,
     oficina_num_aprobacion CHARACTER VARYING,
-    
     se_compro_soat BOOLEAN,
+    
     resultado_revision TEXT,
     consecutivo_fur CHARACTER VARYING,
     consecutivo_rtm CHARACTER VARYING,

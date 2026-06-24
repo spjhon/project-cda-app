@@ -295,8 +295,13 @@ ALTER TABLE public.entry_orders
     UNIQUE (tenant_id, consecutivo_rtm),
 
   -- 3. Factura única por Tenant
-  ADD CONSTRAINT entry_orders_tenant_factura_key 
-    UNIQUE (tenant_id, oficina_consecutivo_factura);
+CREATE UNIQUE INDEX entry_orders_tenant_factura_no_reinspeccion_idx 
+ON public.entry_orders (tenant_id, oficina_consecutivo_factura)
+WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL);
+
+CREATE UNIQUE INDEX entry_orders_tenant_oficina_pin_no_reinspeccion_idx 
+ON public.entry_orders (tenant_id, oficina_pin)
+WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL);
 -- ==========================================
 -- 4. COMENTARIOS
 -- ==========================================

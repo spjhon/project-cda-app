@@ -941,6 +941,10 @@ export type Database = {
           condiciones_plantilla: Json
           consecutivo: number
           created_at: string
+          director_tecnico_documento: string
+          director_tecnico_firma: string
+          director_tecnico_nombre: string
+          director_tecnico_tipo_documento: string
           es_reinspeccion: boolean
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string

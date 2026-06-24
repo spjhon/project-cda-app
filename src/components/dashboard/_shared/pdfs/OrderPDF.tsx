@@ -791,6 +791,127 @@ const voidedStyles = StyleSheet.create({
 });
 
 
+// --------------------------------------------------
+// 14. Firma del dt
+// --------------------------------------------------
+
+const directorStyles = StyleSheet.create({
+  directorSectionContainer: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 4,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  directorSectionHeader: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  directorSectionTitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  directorTableCard: {
+    width: '100%',
+    backgroundColor: '#ffffff',
+  },
+  directorTableHeader: {
+    backgroundColor: '#f8fafc',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  directorHeaderText: {
+    fontSize: 7.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#64748b',
+    letterSpacing: 0.5,
+  },
+  directorTableBody: {
+    flexDirection: 'row',
+    width: '100%',
+  },
+  directorColumn: {
+    padding: 10,
+    flexDirection: 'column',
+  },
+  directorColumnSignature: {
+    width: '35%',
+    borderRightWidth: 1,
+    borderRightColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  directorColumnInfo: {
+    width: '35%',
+    borderRightWidth: 1,
+    borderRightColor: '#e2e8f0',
+    justifyContent: 'center',
+  },
+  directorColumnLegal: {
+    width: '30%',
+    justifyContent: 'center',
+  },
+  signatureWrapper: {
+    width: '100%',
+    height: 55,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  signatureImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+  },
+  emptyText: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Oblique',
+    color: '#94a3b8',
+  },
+  infoBlock: {
+    width: '100%',
+  },
+  infoLabel: {
+    fontSize: 6.5,
+    fontFamily: 'Helvetica',
+    color: '#94a3b8',
+    marginBottom: 3,
+  },
+  infoValue: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#0f172a',
+    textTransform: 'uppercase',
+  },
+  legalText: {
+    fontSize: 6,
+    fontFamily: 'Helvetica',
+    color: '#64748b',
+    lineHeight: 1.2,
+  },
+  directorFooterRow: {
+    backgroundColor: '#f8fafc',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  directorFooterText: {
+    fontSize: 5.5,
+    fontFamily: 'Helvetica-Oblique',
+    color: '#94a3b8',
+    textAlign: 'center',
+  },
+});
+
+
 // ============================================================
 // INTERFACES
 // ============================================================
@@ -1754,6 +1875,101 @@ function VoidedBannerSection({ orderData }: { orderData: FetchEntryOrderResult |
 }
 
 
+// --------------------------------------------------
+// 14. firma del dt
+// --------------------------------------------------
+
+function DirectorSection({ orderData }: { orderData: FetchEntryOrderResult | undefined }) {
+  const formatDocType = (type: string | null) => {
+    if (!type) return 'CC';
+    return type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  return (
+    <View style={directorStyles.directorSectionContainer}>
+      <View style={directorStyles.directorSectionHeader}>
+        <Text style={directorStyles.directorSectionTitle}>
+          11. Director Técnico Responsable
+        </Text>
+      </View>
+
+      <View style={directorStyles.directorTableCard}>
+        <View style={directorStyles.directorTableHeader}>
+          <Text style={directorStyles.directorHeaderText}>
+            FIRMA Y RESPONSABILIDAD DEL DIRECTOR TÉCNICO
+          </Text>
+        </View>
+
+        <View style={directorStyles.directorTableBody}>
+          {/* COLUMNA 1: FIRMA */}
+          <View style={[directorStyles.directorColumn, directorStyles.directorColumnSignature]}>
+            <Text style={directorStyles.infoLabel}>FIRMA DIGITALIZADA</Text>
+            <View style={directorStyles.signatureWrapper}>
+              {orderData?.director_tecnico_firma ? (
+                <Image
+                  src={orderData.director_tecnico_firma}
+                  style={directorStyles.signatureImage}
+                />
+              ) : (
+                <Text style={directorStyles.emptyText}>
+                  Firma No Registrada
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* COLUMNA 2: DATOS */}
+          <View style={[directorStyles.directorColumn, directorStyles.directorColumnInfo]}>
+            <View style={directorStyles.infoBlock}>
+              <Text style={directorStyles.infoLabel}>
+                NOMBRE COMPLETO DEL DIRECTOR TÉCNICO
+              </Text>
+              <Text style={directorStyles.infoValue}>
+                {orderData?.director_tecnico_nombre || 'N/A'}
+              </Text>
+            </View>
+
+            <View style={[directorStyles.infoBlock, { marginTop: 8 }]}>
+              <Text style={directorStyles.infoLabel}>
+                DOCUMENTO DE IDENTIFICACIÓN
+              </Text>
+              <Text style={directorStyles.infoValue}>
+                {formatDocType(orderData?.director_tecnico_tipo_documento ?? null)}:: {orderData?.director_tecnico_documento || 'N/A'}
+              </Text>
+            </View>
+          </View>
+
+          {/* COLUMNA 3: ROL Y DECLARACIÓN */}
+          <View style={[directorStyles.directorColumn, directorStyles.directorColumnLegal]}>
+            <Text style={directorStyles.infoLabel}>ROL OPERATIVO</Text>
+            <Text style={[directorStyles.infoValue, { color: '#2563eb', marginBottom: 6 }]}>
+              DIRECTOR TÉCNICO
+            </Text>
+            <Text style={directorStyles.legalText}>
+              El Director Técnico certifica que los procesos de inspección
+              realizados en esta orden cumplen con los estándares técnicos
+              y normativos establecidos por el Ministerio de Transporte
+              y la normativa vigente de centros de diagnóstico automotor.
+            </Text>
+          </View>
+        </View>
+
+        <View style={directorStyles.directorFooterRow}>
+          <Text style={directorStyles.directorFooterText}>
+            Certificación técnica conforme a Resolución 1740 de 2020 y normativa
+            vigente del Ministerio de Transporte de Colombia.
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+
+
+
+
+
 // ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
@@ -1802,6 +2018,7 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
         <OwnerSection orderData={orderData} />
         <ClientSection orderData={orderData} />
         <ComplementarySignaturesSection orderData={orderData} templateData={templateData}/>
+        <DirectorSection orderData={orderData} />  {/* ← ANTES del footer */}
         <FooterSection orderData={orderData} fechaDoc={fechaDoc} />
         
       </Page>

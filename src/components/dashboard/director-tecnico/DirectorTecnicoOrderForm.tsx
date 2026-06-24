@@ -22,6 +22,7 @@ import { UseMutateFunction, useQueryClient } from "@tanstack/react-query";
 import { insertDirectorTecnicoData } from "@/lib/server-actions/insert_director_tecnico_data";
 import CancelOrder from "../_shared/CancelOrder";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import { ServiceType } from "@/lib/zod-schemas/order-schema";
 
 export type ResultadoRevision = "aprobado" | "rechazado" | null;
 
@@ -129,13 +130,17 @@ export default function DirectorTecnicoOrderForm({
     // Aseguramos mandar data limpia al server action en caso de que no aplique RTM
     const payloadData = {
       ...formData,
-      consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm
+      consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
+     
     };
+
+    
 
     try {
       const { data, error } = await insertDirectorTecnicoData({
         orderId: orden.id,
         formData: payloadData,
+        serviceType: orden.service_type as ServiceType,
       });
 
       if (error || !data) {
@@ -231,7 +236,7 @@ export default function DirectorTecnicoOrderForm({
                   ? "No aplica por rechazo del vehículo" 
                   : "Ej: RTM-2026X"
               }
-              disabled={noAplicaRTM || formData.resultado_revision === "rechazado" || orden.estado_orden !== "en_prueba"}
+              disabled={noAplicaRTM || formData.resultado_revision === "rechazado" || orden.estado_orden !== "en_prueba" || !formData.resultado_revision}
               value={noAplicaRTM || formData.resultado_revision === "rechazado" ? "" : formData.consecutivo_rtm}
               onChange={handleChange}
               className="bg-white border-slate-200 font-mono text-xs h-9 disabled:bg-slate-100/80 disabled:text-slate-400 disabled:cursor-not-allowed"

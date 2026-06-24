@@ -144,6 +144,7 @@ export default function CreatedOrdersTable() {
   
   const PermissioncontextRecived = useContext(PermissionsContext);
   const EntryOrdersContextRecived = useContext(EntryOrdersContext);
+
   const contextRecivedReceptionist = useContext(ReceptionistContext);
   const OficinaContextRecived = useContext(OficinaContext);
   const DirectorTecnicoContextRecived = useContext(DirectorTecnicoContext)
@@ -182,6 +183,8 @@ export default function CreatedOrdersTable() {
 
   const [inputValue, setInputValue] = useState(searchTerm);
 
+
+
   const debouncedSetSearchTerm = useMemo(() => {
     let timeoutId: NodeJS.Timeout;
     return (val: string) => {
@@ -192,6 +195,8 @@ export default function CreatedOrdersTable() {
     };
   }, [setSearchTerm]);
 
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
@@ -199,12 +204,16 @@ export default function CreatedOrdersTable() {
     setPage(1); 
   };
 
+
+
   const handleColumnChange = (newColumn: string) => {
     setSearchColumn(newColumn);
     setInputValue("");
     setSearchTerm("");
     setPage(1); 
   };
+
+
 
   const total = query?.entryOrdersData?.[0]?.total_count ?? 0;
 
@@ -236,16 +245,19 @@ export default function CreatedOrdersTable() {
     return null;
   };
 
+
+
+
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS RE-DISEÑADAS
   // ==========================================
   const columns = useMemo(
     () => [
       columnHelper.accessor("placa", {
-  header: "Placa",
-  cell: ({ row }) => {
-    const placaText = row.original.placa?.toString().toUpperCase() || "---";
-    const servicioRaw = row.original.vehiculo_tipo_servicio_snapshot?.toString().toLowerCase() || "particular";
+     header: "Placa",
+      cell: ({ row }) => {
+     const placaText = row.original.placa?.toString().toUpperCase() || "---";
+     const servicioRaw = row.original.vehiculo_tipo_servicio_snapshot?.toString().toLowerCase() || "particular";
 
     // Mapeo dinámico de estilos según la regulación colombiana
     const STYLES_MAP: Record<string, { bg: string; text: string; border: string; line: string }> = {

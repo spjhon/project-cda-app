@@ -83,6 +83,10 @@ export interface FetchEntryOrderResult {
   funcionario_nombre: string;
   funcionario_documento: string;
   funcionario_firma: string | null;
+  director_tecnico_nombre: string | null;
+  director_tecnico_documento: string | null;
+  director_tecnico_tipo_documento: string | null;
+  director_tecnico_firma: string | null;
   presiones_llantas: TirePressureDetail[] | null;
   condiciones_plantilla: TemplateConditionDetail[] | null;
   firmas_orden: OrderSignatureDetail[] | null;

@@ -3,13 +3,15 @@
 import { DirectorTecnicoFormState } from "@/components/dashboard/director-tecnico/DirectorTecnicoOrderForm";
 import { createSupabaseServerClient } from "../supabase/server";
 import { directorTecnicoOrderSchema } from "@/lib/zod-schemas/directorTecnico-schema";
+import { ServiceType } from "../zod-schemas/order-schema";
 
 interface UpdateDirectorTecnicoOrderArgs {
   orderId: string;
   formData: DirectorTecnicoFormState;
+  serviceType: ServiceType;
 }
 
-export async function insertDirectorTecnicoData({ orderId, formData }: UpdateDirectorTecnicoOrderArgs) {
+export async function insertDirectorTecnicoData({ orderId, formData, serviceType }: UpdateDirectorTecnicoOrderArgs) {
 
   // 1. Validaciones básicas previas
   if (!orderId || orderId === "") {
@@ -34,15 +36,20 @@ export async function insertDirectorTecnicoData({ orderId, formData }: UpdateDir
   }
 
   // Regla de negocio explícita previa a Zod
-  if (formData.resultado_revision === "aprobado" && (!formData.consecutivo_rtm || formData.consecutivo_rtm.trim() === "")) {
+  if (formData.resultado_revision === "aprobado" && (!formData.consecutivo_rtm || formData.consecutivo_rtm.trim() === "") && serviceType !== "preventiva" && serviceType !== "peritaje") {
     return { 
       data: null, 
       error: "Error: Si la revisión es APROBADA, debe ingresar el consecutivo RTM" 
     };
   }
 
+  const dataToValidate = {
+    ...formData,
+    serviceType: serviceType
+  }
+
   // 2. Validación estricta con el Zod Schema (Maneja el superRefine condicional)
-  const validatedFields = directorTecnicoOrderSchema.safeParse(formData);
+  const validatedFields = directorTecnicoOrderSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
     return { 
