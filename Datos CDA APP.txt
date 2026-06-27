@@ -33,6 +33,8 @@ PENDIENTES
 - si la orden esta anulada que se vea en la orden de entrada y que se dejen ver los anulados al quitar los null de la funcion rpc
 - en cuanto al dinero recaudado hay que tener en cuenta que pueden haber varios tipos de pagos para la misma rtm
 - si se compro soat hoy que eso se vea en el sistema la nueva fecha y reemplace la vieja
+- reizar que si se compra el soat, este se actualice en los datos de la orden de entrada para referencia
+- recordar el extrude text para los estilos
 
 FEATURES QUE FALTAN
 

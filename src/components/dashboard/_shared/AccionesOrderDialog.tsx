@@ -15,6 +15,7 @@ import CancelOrder from "./CancelOrder";
 import { UseMutateFunction } from "@tanstack/react-query";
 import AccionesOrderOfficeDialog from "../oficina/AccionesOrderOfficeDialog";
 import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrderDirectorTecnicoDialog";
+import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
@@ -155,6 +156,22 @@ export default function AccionesOrderDialog({
       />
     );
   }
+
+  if (rol === "admin") {
+    return (
+      
+      <VerDetalleOrdenAdminDialog 
+        orden={orden} 
+        tenantId={tenantId} 
+    
+    
+      />
+      
+    );
+  }
+
+
+
   return null;
 }
 

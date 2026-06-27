@@ -149,7 +149,7 @@ const handleSubmitFirma = async () => {
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">{user?.name || "Usuario del Sistema"}</h1>
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/10 font-medium capitalize">
-                  Recepcionista
+                  Director Tecnico
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground max-w-md">

@@ -28,18 +28,17 @@ import {
 } from "@/components/ui/select";
 
 // 🌟 Importación de nuevos íconos para los tipos de vehículos
-import { 
-  AlertCircle, 
-  CheckCircle2, 
-  Loader2, 
-  ArrowUpDown, 
-  Search, 
+import {
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  ArrowUpDown,
+  Search,
   X,
   Car,
   Truck,
-  Bike
+  Bike,
 } from "lucide-react";
-
 
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
@@ -49,13 +48,18 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 import { Input } from "@/components/ui/input";
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import { DateRangePicker } from "../recepcionista/DateRangePicker";
 import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
 import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
+import { AdminContext } from "@/contexts/AdminLoaderContext";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -64,7 +68,10 @@ const columnHelper = createColumnHelper<EntryOrderListItem>();
 // ==========================================
 
 // 🌟 Mapeo para Tipo de Vehículo con íconos y etiquetas formateadas
-const VEHICLE_TYPE_MAP: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+const VEHICLE_TYPE_MAP: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   liviano: { label: "Automóvil (Liviano)", icon: Car },
   pesado: { label: "Camión / Bus (Pesado)", icon: Truck },
   motocicleta_4t: { label: "Motocicleta 4T", icon: Bike },
@@ -83,34 +90,43 @@ const SERVICE_TYPE_MAP: Record<string, string> = {
 
 // 🌟 Mapeo para Estados de la Orden con estilos de Badge dedicados
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
-  abierta: { 
-    label: "Abierta", 
-    className: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium tracking-wide" 
+  abierta: {
+    label: "Abierta",
+    className:
+      "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 font-medium tracking-wide",
   },
-  en_prueba: { 
-    label: "En Prueba", 
-    className: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-medium tracking-wide" 
+  en_prueba: {
+    label: "En Prueba",
+    className:
+      "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-medium tracking-wide",
   },
-  finalizada: { 
-    label: "Finalizada", 
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium tracking-wide" 
+  finalizada: {
+    label: "Finalizada",
+    className:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium tracking-wide",
   },
-  anulada: { 
-    label: "Anulada", 
-    className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-medium tracking-wide line-through opacity-80" 
+  anulada: {
+    label: "Anulada",
+    className:
+      "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-medium tracking-wide line-through opacity-80",
   },
 };
 
 // 🌟 Mapeo para discriminar si es Inspección Original o Reinspección
-const INSPECTION_TYPE_MAP: Record<string, { label: string; className: string }> = {
+const INSPECTION_TYPE_MAP: Record<
+  string,
+  { label: string; className: string }
+> = {
   original: {
     label: "Primera Vez",
-    className: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 font-medium tracking-wide"
+    className:
+      "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 font-medium tracking-wide",
   },
   reinspeccion: {
     label: "Reinspección",
-    className: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-medium tracking-wide"
-  }
+    className:
+      "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-medium tracking-wide",
+  },
 };
 
 const SELECT_COLUMNAS = [
@@ -127,63 +143,70 @@ const SELECT_DIRECCION = [
 ];
 
 // 🌟 Mapeo para el Dictamen o Resultado de la Revisión Técnico-Mecánica
-const REVISION_RESULT_MAP: Record<string, { label: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
-  aprobado: { 
-    label: "Aprobado", 
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold", 
-    icon: CheckCircle2 
+const REVISION_RESULT_MAP: Record<
+  string,
+  {
+    label: string;
+    className: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
+> = {
+  aprobado: {
+    label: "Aprobado",
+    className: "bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold",
+    icon: CheckCircle2,
   },
-  rechazado: { 
-    label: "Rechazado", 
-    className: "bg-rose-50 text-rose-700 border-rose-200/40 font-bold", 
-    icon: AlertCircle 
+  rechazado: {
+    label: "Rechazado",
+    className: "bg-rose-50 text-rose-700 border-rose-200/40 font-bold",
+    icon: AlertCircle,
   },
 };
 
 export default function CreatedOrdersTable() {
-  
   const PermissioncontextRecived = useContext(PermissionsContext);
   const EntryOrdersContextRecived = useContext(EntryOrdersContext);
 
   const contextRecivedReceptionist = useContext(ReceptionistContext);
   const OficinaContextRecived = useContext(OficinaContext);
-  const DirectorTecnicoContextRecived = useContext(DirectorTecnicoContext)
+  const DirectorTecnicoContextRecived = useContext(DirectorTecnicoContext);
+  const AdminContextRecived = useContext(AdminContext);
 
   //extraccion del rol desde el contexto
-  const rol = contextRecivedReceptionist?.ReceptionistContextValue.rol || OficinaContextRecived?.OficinaContextValue.rol || DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol
+  const rol =
+    contextRecivedReceptionist?.ReceptionistContextValue.rol ||
+    OficinaContextRecived?.OficinaContextValue.rol ||
+    DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol ||
+    AdminContextRecived?.AdminContextValue.rol;
 
+  const tenantId =
+    PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const EntryOrders =
+    EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
 
-
-  const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
-  
-
-  const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
-
-
+  const { query, mutation } =
+    EntryOrdersContextRecived?.entryOrdersTableData || {};
 
   const {
     orderByColumn = "fecha",
     setOrderByColumn = () => {},
     orderByDirection = "DESC",
     setOrderByDirection = () => {},
-    showDeleted = false, 
-    setShowDeleted = () => {}, 
+    showDeleted = false,
+    setShowDeleted = () => {},
     dateRange = undefined,
     setDateRange = () => {},
-    searchColumn = "placa", 
-    setSearchColumn = () => {}, 
-    searchTerm = "", 
-    setSearchTerm = () => {}, 
-    page = 1,                         
-    setPage = () => {},               
-    rowsPerPage = 5,                 
-    setRowsPerPage = () => {},        
+    searchColumn = "placa",
+    setSearchColumn = () => {},
+    searchTerm = "",
+    setSearchTerm = () => {},
+    page = 1,
+    setPage = () => {},
+    rowsPerPage = 5,
+    setRowsPerPage = () => {},
   } = query || {};
 
   const [inputValue, setInputValue] = useState(searchTerm);
-
-
 
   const debouncedSetSearchTerm = useMemo(() => {
     let timeoutId: NodeJS.Timeout;
@@ -191,36 +214,33 @@ export default function CreatedOrdersTable() {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setSearchTerm(val);
-      }, 400); 
+      }, 400);
     };
   }, [setSearchTerm]);
-
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
     debouncedSetSearchTerm(value);
-    setPage(1); 
+    setPage(1);
   };
-
-
 
   const handleColumnChange = (newColumn: string) => {
     setSearchColumn(newColumn);
     setInputValue("");
     setSearchTerm("");
-    setPage(1); 
+    setPage(1);
   };
-
-
 
   const total = query?.entryOrdersData?.[0]?.total_count ?? 0;
 
   const renderStatusBadge = () => {
     if (query?.isEntryOrdersError) {
       return (
-        <Badge variant="destructive" className="gap-1.5 px-3 py-1 animate-pulse">
+        <Badge
+          variant="destructive"
+          className="gap-1.5 px-3 py-1 animate-pulse"
+        >
           <AlertCircle className="h-3.5 w-3.5" />
           Error de Sincronización
         </Badge>
@@ -228,7 +248,10 @@ export default function CreatedOrdersTable() {
     }
     if (query?.isFetchingEntryOrders) {
       return (
-        <Badge variant="default" className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700">
+        <Badge
+          variant="default"
+          className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700"
+        >
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Actualizando datos...
         </Badge>
@@ -236,7 +259,10 @@ export default function CreatedOrdersTable() {
     }
     if (query?.isEntryOrdersSuccess) {
       return (
-        <Badge variant="outline" className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50">
+        <Badge
+          variant="outline"
+          className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50"
+        >
           <CheckCircle2 className="h-3.5 w-3.5" />
           Datos Actualizados
         </Badge>
@@ -245,57 +271,71 @@ export default function CreatedOrdersTable() {
     return null;
   };
 
-
-
-
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS RE-DISEÑADAS
   // ==========================================
   const columns = useMemo(
     () => [
+
+
+
       columnHelper.accessor("placa", {
-     header: "Placa",
-      cell: ({ row }) => {
-     const placaText = row.original.placa?.toString().toUpperCase() || "---";
-     const servicioRaw = row.original.vehiculo_tipo_servicio_snapshot?.toString().toLowerCase() || "particular";
+        header: "Placa",
+        cell: ({ row }) => {
+          const placaText =
+            row.original.placa?.toString().toUpperCase() || "---";
+          const servicioRaw =
+            row.original.vehiculo_tipo_servicio_snapshot
+              ?.toString()
+              .toLowerCase() || "particular";
 
-    // Mapeo dinámico de estilos según la regulación colombiana
-    const STYLES_MAP: Record<string, { bg: string; text: string; border: string; line: string }> = {
-      particular: {
-        bg: "bg-amber-400",
-        text: "text-slate-900",
-        border: "border-slate-950",
-        line: "border-slate-950/20",
-      },
-      publico: {
-        bg: "bg-white",
-        text: "text-slate-900",
-        border: "border-slate-400",
-        line: "border-slate-300",
-      },
-      oficial: {
-        bg: "bg-blue-700",
-        text: "text-white",
-        border: "border-blue-900",
-        line: "border-white/20",
-      },
-    };
+          // Mapeo dinámico de estilos según la regulación colombiana
+          const STYLES_MAP: Record<
+            string,
+            { bg: string; text: string; border: string; line: string }
+          > = {
+            particular: {
+              bg: "bg-amber-400",
+              text: "text-slate-900",
+              border: "border-slate-950",
+              line: "border-slate-950/20",
+            },
+            publico: {
+              bg: "bg-white",
+              text: "text-slate-900",
+              border: "border-slate-400",
+              line: "border-slate-300",
+            },
+            oficial: {
+              bg: "bg-blue-700",
+              text: "text-white",
+              border: "border-blue-900",
+              line: "border-white/20",
+            },
+          };
 
-    // Obtenemos los estilos correspondientes (o fallback a particular si no coincide)
-    const estilo = STYLES_MAP[servicioRaw] || STYLES_MAP.particular;
-    const labelServicio = servicioRaw.toUpperCase();
+          // Obtenemos los estilos correspondientes (o fallback a particular si no coincide)
+          const estilo = STYLES_MAP[servicioRaw] || STYLES_MAP.particular;
+          const labelServicio = servicioRaw.toUpperCase();
 
-    return (
-      <div className={`inline-flex flex-col items-center justify-center ${estilo.bg} ${estilo.text} ${estilo.border} border-2 rounded-md  px-3 py-1 shadow-xs min-w-26.25 tracking-wider text-center text-sm select-none transition-colors`}>
-        <span className="leading-none text-base font-black">{placaText}</span>
-        <div className={`w-full border-t ${estilo.line} my-0.5`} />
-        <span className="text-[7.5px] font-black tracking-widest leading-none opacity-90">
-          {labelServicio}
-        </span>
-      </div>
-    );
-  },
-}),
+          return (
+            <div
+              className={`inline-flex flex-col items-center justify-center ${estilo.bg} ${estilo.text} ${estilo.border} border-2 rounded-md  px-3 py-1 min-w-26.25 tracking-wider text-center text-sm select-none transition-colors shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]`}
+            >
+              <span className="leading-none text-base font-black">
+                {placaText}
+              </span>
+              <div className={`w-full border-t ${estilo.line} my-0.5`} />
+              <span className="text-[7.5px] font-black tracking-widest leading-none opacity-90">
+                {labelServicio}
+              </span>
+            </div>
+          );
+        },
+      }),
+
+
+
 
       columnHelper.accessor("fecha", {
         header: "Fecha y Hora",
@@ -328,7 +368,10 @@ export default function CreatedOrdersTable() {
         header: "Tipo de Vehículo",
         cell: (info) => {
           const value = info.getValue() as string;
-          const config = VEHICLE_TYPE_MAP[value] || { label: value || "No especificado", icon: Car };
+          const config = VEHICLE_TYPE_MAP[value] || {
+            label: value || "No especificado",
+            icon: Car,
+          };
           const IconComponent = config.icon;
 
           return (
@@ -361,8 +404,8 @@ export default function CreatedOrdersTable() {
         header: "Tipo Inspección",
         cell: ({ row }) => {
           const esReinspeccion = row.original.es_reinspeccion;
-          const config = esReinspeccion 
-            ? INSPECTION_TYPE_MAP.reinspeccion 
+          const config = esReinspeccion
+            ? INSPECTION_TYPE_MAP.reinspeccion
             : INSPECTION_TYPE_MAP.original;
 
           return (
@@ -378,7 +421,10 @@ export default function CreatedOrdersTable() {
         header: "Estado",
         cell: (info) => {
           const rawStatus = info.getValue() as string;
-          const statusConfig = STATUS_MAP[rawStatus] || { label: rawStatus, className: "bg-slate-100 text-slate-700" };
+          const statusConfig = STATUS_MAP[rawStatus] || {
+            label: rawStatus,
+            className: "bg-slate-100 text-slate-700",
+          };
 
           return (
             <Badge variant="outline" className={statusConfig.className}>
@@ -388,14 +434,11 @@ export default function CreatedOrdersTable() {
         },
       }),
 
-
-
-
-columnHelper.accessor("resultado_revision", {
+      columnHelper.accessor("resultado_revision", {
         header: "Dictamen Técnico",
         cell: (info) => {
           const rawResult = info.getValue() as string;
-          
+
           // Si no hay resultado asignado aún en la base de datos
           if (!rawResult) {
             return (
@@ -405,27 +448,25 @@ columnHelper.accessor("resultado_revision", {
             );
           }
 
-          const config = REVISION_RESULT_MAP[rawResult] || { 
-            label: rawResult.toUpperCase(), 
-            className: "bg-slate-50 text-slate-600 border-slate-200", 
-            icon: AlertCircle 
+          const config = REVISION_RESULT_MAP[rawResult] || {
+            label: rawResult.toUpperCase(),
+            className: "bg-slate-50 text-slate-600 border-slate-200",
+            icon: AlertCircle,
           };
-          
+
           const IconComponent = config.icon;
 
           return (
-            <Badge variant="outline" className={`gap-1 px-2.5 py-0.5 text-xs shadow-xs ${config.className}`}>
+            <Badge
+              variant="outline"
+              className={`gap-1 px-2.5 py-0.5 text-xs shadow-xs ${config.className}`}
+            >
               <IconComponent className="h-3.5 w-3.5 shrink-0" />
               {config.label}
             </Badge>
           );
         },
       }),
-
-
-
-
-
 
       columnHelper.display({
         id: "acciones",
@@ -435,21 +476,15 @@ columnHelper.accessor("resultado_revision", {
           if (!mutation) return null;
 
           return (
-            <AccionesOrderDialog 
-              orden={orden} 
-              tenantId={tenantId} 
-              mutation={mutation} 
-              rol={rol} 
+            <AccionesOrderDialog
+              orden={orden}
+              tenantId={tenantId}
+              mutation={mutation}
+              rol={rol}
             />
           );
         },
       }),
-
-
-
-
-
-
     ],
     [tenantId, mutation, rol],
   );
@@ -523,16 +558,16 @@ columnHelper.accessor("resultado_revision", {
             <div className="relative flex-1 h-full">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <Input
-                placeholder={`Buscar por ${searchColumn === 'placa' ? 'placa' : searchColumn === 'marca' ? 'marca' : searchColumn === 'linea' ? 'línea' : 'documento'}...`}
-                value={inputValue} 
-                onChange={handleInputChange} 
+                placeholder={`Buscar por ${searchColumn === "placa" ? "placa" : searchColumn === "marca" ? "marca" : searchColumn === "linea" ? "línea" : "documento"}...`}
+                value={inputValue}
+                onChange={handleInputChange}
                 className="w-full h-full pl-9 pr-8 border-none bg-transparent rounded-l-none text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               {inputValue && (
                 <button
                   onClick={() => {
                     setInputValue("");
-                    setSearchTerm(""); 
+                    setSearchTerm("");
                   }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
@@ -623,21 +658,28 @@ columnHelper.accessor("resultado_revision", {
             value={String(rowsPerPage)}
             onValueChange={(val) => {
               setRowsPerPage(Number(val));
-              setPage(1); 
+              setPage(1);
             }}
           >
             <SelectTrigger className="w-16 h-8 text-xs bg-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start">
-              <SelectItem value="5" className="text-xs">5</SelectItem>
-              <SelectItem value="20" className="text-xs">20</SelectItem>
-              <SelectItem value="50" className="text-xs">50</SelectItem>
+              <SelectItem value="5" className="text-xs">
+                5
+              </SelectItem>
+              <SelectItem value="20" className="text-xs">
+                20
+              </SelectItem>
+              <SelectItem value="50" className="text-xs">
+                50
+              </SelectItem>
             </SelectContent>
           </Select>
-          
+
           <span className="text-xs text-slate-400 ml-2 hidden md:inline">
-            Mostrando {Math.min((page - 1) * rowsPerPage + 1, total)} - {Math.min(page * rowsPerPage, total)} de {total}
+            Mostrando {Math.min((page - 1) * rowsPerPage + 1, total)} -{" "}
+            {Math.min(page * rowsPerPage, total)} de {total}
           </span>
         </div>
 
@@ -661,7 +703,9 @@ columnHelper.accessor("resultado_revision", {
 
             <PaginationItem>
               <button
-                onClick={() => setPage(Math.min(page + 1, Math.ceil(total / rowsPerPage)))}
+                onClick={() =>
+                  setPage(Math.min(page + 1, Math.ceil(total / rowsPerPage)))
+                }
                 disabled={page >= Math.ceil(total / rowsPerPage)}
                 className="flex h-8 items-center justify-center gap-1 pl-3.5 pr-2.5 text-xs font-medium rounded-md border border-slate-200 bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
               >

@@ -87,6 +87,33 @@ const NavOficina: NavItem[] = [
 ];
 
 
+const NavAdmin: NavItem[] = [
+  
+  {
+    title: "Órdenes de Entrada",
+    description: "Listado de órdenes de entrada",
+    href: "/dashboard/admin",
+    icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
+  },
+
+  {
+    title: "Analítica", // 🔥 NUEVO MÓDULO
+    description: "Estadísticas sobre las ordenes de entrada",
+    href: "/dashboard/admin/analitica",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
+  
+  {
+    title: "Mi Perfil", // 🔥 NUEVO MÓDULO
+    description: "Gestionar tu cuenta, firma y credenciales",
+    href: "/dashboard/admin/perfil",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
+
+  
+];
+
+
 const NavDirectorTecnico: NavItem[] = [
   
   {
@@ -131,6 +158,9 @@ let NAV_DATA = NavOficina; // Valor por defecto
       break;
     case "director-tecnico":
       NAV_DATA = NavDirectorTecnico;
+      break;
+      case "admin":
+      NAV_DATA = NavAdmin;
       break;
   }
 
@@ -227,45 +257,54 @@ const contextRecived = useContext(PermissionsContext);
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      // 🔥 Fusiona el botón directamente con el Link
-                      isActive={active}
-                      className={`group relative h-20 w-full justify-start gap-4 rounded-xl px-4 py-3 transition-all duration-300 ease-out
-                        ${
-                          active
-                            ? "bg-primary/4 font-medium text-primary shadow-xs before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1.5 before:rounded-r-full before:bg-primary"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        }`}
-                    >
-                      <Link prefetch={true} href={item.href} className="flex w-full items-center gap-4">
-                        {/* Contenedor del Icono - Estilizado pero espacioso */}
-                        <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ease-out
-                            ${
-                              active
-                                ? "border-primary/20 bg-primary/10 text-primary scale-102"
-                                : "border-transparent bg-muted/40 text-muted-foreground group-hover:bg-sidebar-accent-foreground/5 group-hover:text-sidebar-accent-foreground group-hover:scale-105"
-                            }`}
-                        >
-                          <Icon className="size-5 transition-transform duration-300 ease-out group-hover:rotate-1" />
-                        </div>
 
-                        {/* Bloque de Textos con el espaciado original */}
-                        <div className="flex flex-col text-left space-y-0.5">
-                          <span className="text-sm font-semibold tracking-tight leading-none">
-                            {item.title}
-                          </span>
-                          {item.description && (
-                            <span 
-                              className={`text-[11px] font-normal tracking-wide leading-relaxed transition-colors duration-300
-                                ${active ? "text-primary/70" : "text-muted-foreground/80 group-hover:text-sidebar-accent-foreground/70"}`}
-                            >
-                              {item.description}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                    </SidebarMenuButton>
+
+
+
+                   
+  
+ <SidebarMenuButton
+    isActive={active}
+    className={`h-15 w-50 justify-start rounded-xl px-4 py-3 my-3 border border-slate-900 bg-white transition-all duration-75 cursor-pointer font-bold
+      /* Sombra dura inicial (Fija en el fondo) */
+      shadow-[0.25rem_0.25rem_0px_0px_rgba(15,23,42,1)]
+      
+      /* Hover: El cuadro flota hacia ARRIBA y a la IZQUIERDA (la sombra se queda quieta) */
+      
+      
+
+      
+      /* Estado Switch Hundido: Si está activo, se baja a la derecha y se apaga la sombra */
+      ${active 
+        ? "translate-x-0.5 translate-y-0.5 shadow-none bg-slate-100 text-slate-900" 
+        : "text-slate-700 hover:text-slate-900 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(15,23,42,1)]"
+      }
+    `}
+  >
+    <Link prefetch={true} href={item.href} className="flex w-full items-center gap-4">
+      
+      {/* Icono plano */}
+      <Icon className="h-6 w-6 shrink-0 text-slate-900" />
+
+      {/* Bloque de Textos con negrilla persistente */}
+      <div className="flex flex-col text-left space-y-1 font-bold">
+        <span className="text-sm tracking-tight leading-none text-slate-900">
+          {item.title}
+        </span>
+        {item.description && (
+          <span className="text-xs font-normal text-slate-500 tracking-wide leading-none">
+            {item.description}
+          </span>
+        )}
+      </div>
+    </Link>
+  </SidebarMenuButton>
+
+
+
+
+
+                    
                   </SidebarMenuItem>
                 );
               })}

@@ -20,7 +20,7 @@ const ROLE_CONFIG: Record<string, { label: string; description: string; path: st
   gerente: {
     label: "Administrador",
     description: "Gestión global, reportes financieros y control total del CDA.",
-    path: "/dashboard/gerente", // 👈 Controlado desde el objeto
+    path: "/dashboard/admin", // 👈 Controlado desde el objeto
   },
   recepcionista: {
     label: "Recepcionista",
