@@ -514,7 +514,7 @@ export default function CreatedOrdersTable() {
         
 
 
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-6">
           
           <div className="flex items-center gap-1.5 text-slate-600 text-sm font-medium">
             <ArrowUpDown className="h-4 w-4 text-slate-400" />
@@ -526,7 +526,7 @@ export default function CreatedOrdersTable() {
             value={orderByColumn}
             onValueChange={(v) => setOrderByColumn(v ? v : "fecha")}
           >
-            <SelectTrigger className="w-40 bg-white h-9 text-sm">
+            <SelectTrigger className="w-50 bg-white h-9 text-sm">
               <SelectValue placeholder="Columna" />
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>
@@ -550,7 +550,7 @@ export default function CreatedOrdersTable() {
               }
             }}
           >
-            <SelectTrigger className=" bg-white text-sm">
+            <SelectTrigger className="w-50 h-9 bg-white text-sm">
               <SelectValue placeholder="Dirección" />
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>
@@ -562,8 +562,8 @@ export default function CreatedOrdersTable() {
             </SelectContent>
           </Select>
 
-          <div className="relative flex-1 h-full">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <div className="relative min-w-40 h-8">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 " />
             <Input
               placeholder={`Buscar por ${searchColumn === "placa" ? "placa" : searchColumn === "marca" ? "marca" : searchColumn === "linea" ? "línea" : "documento"}...`}
               value={inputValue}
@@ -576,7 +576,7 @@ export default function CreatedOrdersTable() {
                   setInputValue("");
                   setSearchTerm("");
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2  hover:text-slate-600 transition-colors"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2   transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -637,7 +637,7 @@ export default function CreatedOrdersTable() {
             </SelectContent>
           </Select>
 
-          <span className="text-xs text-slate-400 ml-2 hidden md:inline">
+          <span className="text-xs text-slate-400 ml-2">
             Mostrando {Math.min((page - 1) * rowsPerPage + 1, total)} -{" "}
             {Math.min(page * rowsPerPage, total)} de {total}
           </span>
@@ -654,7 +654,7 @@ export default function CreatedOrdersTable() {
                 disabled={page === 1}
                 className="flex h-8 items-center justify-center gap-1 pl-2.5 pr-3.5 text-xs font-medium rounded-md border border-slate-200 bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
               >
-                <span className="hidden sm:inline">Anterior</span>
+                <span className="">Anterior</span>
               </button>
             </PaginationItem>
 
@@ -672,7 +672,7 @@ export default function CreatedOrdersTable() {
                 disabled={page >= Math.ceil(total / rowsPerPage)}
                 className="flex h-8 items-center justify-center gap-1 pl-3.5 pr-2.5 text-xs font-medium rounded-md border border-slate-200 bg-white shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
               >
-                <span className="hidden sm:inline">Siguiente</span>
+                <span className="">Siguiente</span>
               </button>
             </PaginationItem>
           </PaginationContent>
