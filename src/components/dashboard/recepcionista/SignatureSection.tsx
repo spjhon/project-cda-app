@@ -129,7 +129,7 @@ export default function SignatureSection({
         <div className="space-y-6">
           {/* --- BLOQUE DE CONTRATO FIJO --- */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-center gap-10 transition-all hover:bg-slate-100/50">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               <Checkbox
                 id="fixed-contract"
                 // Usamos una llave fija "contrato-general" dentro de tu estado actual
@@ -224,13 +224,17 @@ export default function SignatureSection({
                   </DialogContent>
                 </Dialog>
               </div>
+
+              <div
+                className={`transition-opacity duration-300 ${acceptedDeclarations["contrato-general"] ? "opacity-100" : "opacity-20"}`}
+              >
+                <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+              </div>
+
+
             </div>
 
-            <div
-              className={`transition-opacity duration-300 ${acceptedDeclarations["contrato-general"] ? "opacity-100" : "opacity-20"}`}
-            >
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-            </div>
+            
           </div>
 
           {signatures?.map((signature) => {
