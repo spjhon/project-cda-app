@@ -309,7 +309,7 @@ const contextRecived = useContext(PermissionsContext);
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t">
+      <SidebarFooter className="p-4 border-t m-auto">
         <LogoutButton />
         <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
           SaaS CDA - v1.0
