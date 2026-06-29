@@ -35,6 +35,7 @@ PENDIENTES
 - si se compro soat hoy que eso se vea en el sistema la nueva fecha y reemplace la vieja
 - reizar que si se compra el soat, este se actualice en los datos de la orden de entrada para referencia
 - recordar el extrude text para los estilos
+- agregar moto electrica ya que moto 4t y 2t no son electrica ninguna de las dos
 
 FEATURES QUE FALTAN
 

@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" >
       <body
-        className={` antialiased max-w-[2592px] mx-auto bg-[#FAFAFA] `}
+        className={` antialiased max-w-[2592px] mx-auto bg-[#FAFAFA] shadow-2xl`}
       >
         <TooltipProvider>
         {children}

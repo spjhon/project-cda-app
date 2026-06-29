@@ -119,7 +119,7 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
         {/* BOTÓN / CHECKBOX GRANDE CLICKABLE EN CUALQUIER LADO */}
         <div
           onClick={toggleSameOwner}
-          className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 select-none w-100 my-10 ${
+          className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 select-none my-10 ${
             formData.is_owner_same_as_customer
               ? "bg-blue-600 border-blue-700 text-white shadow-lg shadow-blue-200"
               : "bg-white border-slate-200 text-slate-600 hover:border-blue-300"
@@ -291,8 +291,11 @@ export const PersonSection = ({formData, setFormData, selectedTemplate, hayPlaca
             </div>
           </div>
 
+
+
+
           {/* --- BLOQUE PROPIETARIO (TARJETA) --- */}
-          <div className="space-y-6">
+          <div className="space-y-6 ">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <UserCheck className="h-5 w-5 text-emerald-600" />
