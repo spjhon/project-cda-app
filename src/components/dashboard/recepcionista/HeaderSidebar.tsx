@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
+  
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { LogoutButton } from "./LogoutButton";
+import Link from "next/link";
 
 export default function HeaderSidebar() {
   const pathname = usePathname();
@@ -53,7 +54,7 @@ export default function HeaderSidebar() {
                     {isLast ? (
                       <BreadcrumbPage>{item.title}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={item.href}>{item.title}</BreadcrumbLink>
+                      <Link href={item.href} prefetch={true}>{item.title}</Link>
                     )}
                   </BreadcrumbItem>
                   {/* Si hay dos elementos y es el primero, metemos el separador */}
