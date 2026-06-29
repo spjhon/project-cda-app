@@ -17,13 +17,25 @@ import { LogoutButton } from "./LogoutButton";
 export default function HeaderSidebar() {
   const pathname = usePathname();
 
-  // Dividimos la ruta y quitamos los espacios vacíos
-  // Ejemplo: "/dashboard/recepcionista" -> ["dashboard", "recepcionista"]
-  const segments = pathname.split("/").filter((item) => item !== "");
+  // 1. Dividimos la ruta completa
+  const allSegments = pathname.split("/").filter((item) => item !== "");
+
+  // 2. Pre-calculamos toda la información para no romper los enlaces originales (href)
+  const breadcrumbItems = allSegments.map((segment, index) => {
+    const href = `/${allSegments.slice(0, index + 1).join("/")}`;
+    const title = segment
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+
+    return { href, title };
+  });
+
+  // 3. 🌟 FILTRO CLAVE: Nos quedamos estrictamente con los últimos dos elementos
+  const visibleItems = breadcrumbItems.slice(-2);
 
   return (
     <div className="flex flex-row justify-between items-center border bg-white">
-      <header className="flex h-16 shrink-0 items-center gap-2 px-4">
+      <header className="flex flex-wrap h-16 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
@@ -31,24 +43,20 @@ export default function HeaderSidebar() {
         />
         <Breadcrumb>
           <BreadcrumbList>
-            {segments.map((segment, index) => {
-              const href = `/${segments.slice(0, index + 1).join("/")}`;
-              const isLast = index === segments.length - 1;
-
-              // Formateamos el texto: quitamos guiones y ponemos mayúscula inicial
-              const title = segment
-                .replace(/-/g, " ")
-                .replace(/\b\w/g, (l) => l.toUpperCase());
+            {visibleItems.map((item, index) => {
+              // Comprobamos si es el último basándonos en la lista visible
+              const isLast = index === visibleItems.length - 1;
 
               return (
-                <Fragment key={href}>
+                <Fragment key={item.href}>
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage>{title}</BreadcrumbPage>
+                      <BreadcrumbPage>{item.title}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={href}>{title}</BreadcrumbLink>
+                      <BreadcrumbLink href={item.href}>{item.title}</BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
+                  {/* Si hay dos elementos y es el primero, metemos el separador */}
                   {!isLast && <BreadcrumbSeparator />}
                 </Fragment>
               );
@@ -57,7 +65,7 @@ export default function HeaderSidebar() {
         </Breadcrumb>
       </header>
 
-      <LogoutButton></LogoutButton>
+      <LogoutButton />
     </div>
   );
 }
