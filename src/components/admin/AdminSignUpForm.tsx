@@ -219,7 +219,7 @@ export function AdminSignUpForm({
                   <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
                 
-                <SelectContent>
+                <SelectContent alignItemWithTrigger={false}>
                   {SELECT_ROLES_SISTEMA.map((rol) => (
                     <SelectItem key={rol.value} value={rol.value}>
                       {rol.label}

@@ -231,7 +231,7 @@ export default function OfficeOrderForm({
               <SelectTrigger id="oficina_tipo_pago" className="bg-white h-10 text-xs">
                 <SelectValue placeholder="Seleccione método" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 {SELECT_METODO_PAGO.map((metodo) => (
                   <SelectItem key={metodo.value} value={metodo.value} className="text-xs">
                     {metodo.label}

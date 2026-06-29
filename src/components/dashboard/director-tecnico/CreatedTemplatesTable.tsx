@@ -251,7 +251,7 @@ if (errorDeletingTemplate) {
               <SelectTrigger className="w-45 h-9">
                 <SelectValue placeholder="Columna" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 <SelectItem value="document_code">Código</SelectItem>
                 <SelectItem value="document_name">Nombre</SelectItem>
                 <SelectItem value="service_type">Tipo de Servicio</SelectItem>
@@ -268,7 +268,7 @@ if (errorDeletingTemplate) {
               <SelectTrigger className="w-37.5 h-9">
                 <SelectValue placeholder="Dirección" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 <SelectItem value="asc">Ascendente</SelectItem>
                 <SelectItem value="desc">Descendente</SelectItem>
               </SelectContent>

@@ -61,9 +61,9 @@ export default function TemplateSelectionSection({activeTemplates, plantilla_id,
             {activeTemplates.map((template, index) => (
               <Label
                 key={template.id}
-                className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all hover:border-slate-300 hover:bg-slate-50/50 ${
+                className={`group border-2 rounded-xl shadow-2xl relative flex flex-col gap-3  p-4 cursor-pointer transition-all hover:border-slate-300 hover:bg-[#ECF3FF] ${
                   plantilla_id === template.id
-                    ? "border-blue-600 bg-blue-50/30 ring-1 ring-blue-600"
+                    ? "border-slate-600 bg-[#ECF3FF]"
                     : "border-slate-200"
                 }`}
               >
@@ -71,7 +71,7 @@ export default function TemplateSelectionSection({activeTemplates, plantilla_id,
                   <div className="p-2 bg-white border rounded-lg shadow-sm group-hover:border-blue-200">
                     {getTemplateIcon(index)}
                   </div>
-                  {/*#a11 ACTION */}
+               
                   <Checkbox
                     checked={plantilla_id === template.id}
                     onCheckedChange={(checked) =>

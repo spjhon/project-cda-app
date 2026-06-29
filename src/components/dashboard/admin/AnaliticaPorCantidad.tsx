@@ -19,8 +19,8 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
   return (
   <div 
       className={`
-        flex flex-col items-center justify-center aspect-square rounded-2xl 
-        border-3 shadow-2xl border-slate-900 bg-white transition-all duration-300
+        flex flex-col items-center justify-center aspect-square
+        border border-slate-300 bg-white transition-all duration-300
         /* Sombra sólida (Shade) */
         
         

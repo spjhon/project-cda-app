@@ -271,7 +271,7 @@ const requiereGas =
                     <SelectValue placeholder="Selecciona combustible" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     {/* Mapeo dinámico */}
                     {FUEL_OPTIONS.map((opcion) => (
                       <SelectItem key={opcion.value} value={opcion.value}>
@@ -305,7 +305,7 @@ const requiereGas =
                     <SelectValue placeholder="Selecciona una clase" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     {CLASE_OPTIONS.map((opcion) => (
                       <SelectItem key={opcion.value} value={opcion.value}>
                         {opcion.label}
@@ -345,7 +345,7 @@ const requiereGas =
                     <SelectValue placeholder="Selecciona un tipo" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectItem value="liviano">Liviano</SelectItem>
                     <SelectItem value="pesado">Pesado</SelectItem>
                     <SelectItem value="motocicleta_4t">Moto 4T</SelectItem>
@@ -386,7 +386,7 @@ const requiereGas =
                     <SelectValue placeholder="Selecciona tipo de servicio" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     <SelectItem value="particular">Particular</SelectItem>
                     <SelectItem value="ensenanza">Enseñanza</SelectItem>
                     <SelectItem value="oficial">Oficial</SelectItem>

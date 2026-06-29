@@ -513,7 +513,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                               <SelectTrigger className="h-9 text-xs border-slate-200 w-full">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent alignItemWithTrigger={false}>
                                 {POSITIONS.map((p) => (
                                   <SelectItem key={p.value} value={p.value} className="text-xs">
                                     {p.label}

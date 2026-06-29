@@ -139,7 +139,7 @@ export default function EntryOrdersLoaderContext({
         `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
       );
 
-      //await new Promise((resolve) => setTimeout(resolve, 5000));
+      //await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // 🌟 Control preventivo de seguridad por si limpian el calendario
       // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
@@ -149,6 +149,9 @@ export default function EntryOrdersLoaderContext({
       const fechaHasta = dateRange?.to
         ? format(dateRange.to, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
+
+
+   
 
       const { data, error } = await supabaseBrowser.rpc(
         "fetch_entry_orders_list",
@@ -171,7 +174,11 @@ export default function EntryOrdersLoaderContext({
       );
 
       if (error) throw new Error(error.message);
+
+      
+      
       return (data as EntryOrderListItem[]) || [];
+
     },
     initialData: entryOrdersTableData,
     staleTime: 0,

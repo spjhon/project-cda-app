@@ -109,7 +109,7 @@ export const fetchEntryOrders = cache(
     limit = 20,
     offset = 0,
     placa = undefined,
-    estado = "abierta",
+    estado = undefined,
     fechaDesde = undefined,
     fechaHasta = undefined,
     clienteDocumento = undefined,
@@ -142,8 +142,6 @@ export const fetchEntryOrders = cache(
           p_propietario_documento: propietarioDocumento,
         }
       );
-
-     
 
       if (error) {
         console.error(`❌ RPC Error (fetch_entry_orders_list):`, error.message);

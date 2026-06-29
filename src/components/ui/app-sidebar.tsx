@@ -179,8 +179,8 @@ const contextRecived = useContext(PermissionsContext);
   const isActive = (path: string) => pathname === path;
 
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader className="flex flex-col gap-2.5 px-4 py-3 border-b border-sidebar-border/50">
+    <Sidebar variant="inset" className="" >
+      <SidebarHeader className="flex flex-col gap-2.5 px-4 py-3 border-b border-sidebar-border/50border ">
         {/* Funciones helper internas para las iniciales */}
         {(() => {
           const getTenantInitials = (name?: string) => {
@@ -245,7 +245,7 @@ const contextRecived = useContext(PermissionsContext);
         })()}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="">
         <SidebarGroup>
           <SidebarGroupLabel>Recepcionista</SidebarGroupLabel>
 
@@ -262,44 +262,40 @@ const contextRecived = useContext(PermissionsContext);
 
 
                    
-  
- <SidebarMenuButton
-    isActive={active}
-    className={`h-15 w-50 justify-start rounded-xl px-4 py-3 my-3 border border-slate-900 bg-white transition-all duration-75 cursor-pointer font-bold
-      /* Sombra dura inicial (Fija en el fondo) */
-      shadow-[0.25rem_0.25rem_0px_0px_rgba(15,23,42,1)]
-      
-      /* Hover: El cuadro flota hacia ARRIBA y a la IZQUIERDA (la sombra se queda quieta) */
-      
-      
+                  <Link prefetch={true} href={item.href}>
+                <SidebarMenuButton
+                    isActive={active}
+                    className={`h-15 w-full justify-start rounded-none my-3 border border-slate-300 bg-[#ECF3FF] transition-all duration-75 cursor-pointer font-bold
+                      /* Sombra dura inicial (Fija en el fondo) */
+                      shadow-2xl
 
-      
-      /* Estado Switch Hundido: Si está activo, se baja a la derecha y se apaga la sombra */
-      ${active 
-        ? "translate-x-0.5 translate-y-0.5 shadow-none bg-slate-100 text-slate-900" 
-        : "text-slate-700 hover:text-slate-900 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(15,23,42,1)]"
-      }
-    `}
-  >
-    <Link prefetch={true} href={item.href} className="flex w-full items-center gap-4">
-      
-      {/* Icono plano */}
-      <Icon className="h-6 w-6 shrink-0 text-slate-900" />
+                      active:bg-[#ECF3FF]
+                    
+                      ${active 
+                        ? "translate-x-0.5 translate-y-0.5 shadow-none bg-slate-100 text-slate-900" 
+                        : "text-slate-700 hover:text-slate-900 hover:bg-[#ECF3FF]"
+                      }
+                    `}
+                  >
+                    
+                      
+                      {/* Icono plano */}
+                      <Icon className="w-20 shrink-0 text-slate-900" />
 
-      {/* Bloque de Textos con negrilla persistente */}
-      <div className="flex flex-col text-left space-y-1 font-bold">
-        <span className="text-sm tracking-tight leading-none text-slate-900">
-          {item.title}
-        </span>
-        {item.description && (
-          <span className="text-xs font-normal text-slate-500 tracking-wide leading-none">
-            {item.description}
-          </span>
-        )}
-      </div>
-    </Link>
-  </SidebarMenuButton>
-
+                      {/* Bloque de Textos con negrilla persistente */}
+                      <div className="flex flex-col text-left space-y-1 font-bold">
+                        <span className="text-sm tracking-tight leading-none text-slate-900">
+                          {item.title}
+                        </span>
+                        {item.description && (
+                          <span className="text-xs font-normal text-slate-500 tracking-wide leading-none">
+                            {item.description}
+                          </span>
+                        )}
+                      </div>
+                    
+                  </SidebarMenuButton>
+                </Link>
 
 
 

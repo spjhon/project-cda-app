@@ -11,7 +11,7 @@ export default function TenantLayout({
     <TanstackContext>
       {" "}
       {/* <-- El motor de datos nace aquí */}
-      <main className="bg-[#F5F5F5]">
+      <main className="">
         {/* El AuthListener es clave aquí para vigilar la sesión del tenant específico */}
         <Suspense fallback={<Loading />}>
           <AuthListener>{children}</AuthListener>

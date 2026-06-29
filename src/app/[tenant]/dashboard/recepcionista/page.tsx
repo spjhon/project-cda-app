@@ -485,7 +485,7 @@ if (tieneCondicionesNoCumplidas) {
 
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8">
+    <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8 bg-[#FAFAFA]">
 
 
       

@@ -6,7 +6,7 @@ import React from "react";
 export default function AnaliticaPage() {
   return (
     // section proporciona la raíz semántica. px-4 o px-6 da el margen sutil para que nada toque los bordes.
-    <section className="w-full px-6 py-4 flex flex-col gap-6">
+    <section className="w-full px-6 py-4 flex flex-col gap-6 bg-[#FAFAFA]">
       
       {/* header agrupa el bloque de presentación de la página */}
       <header className="w-full border-b border-slate-100 pb-4">

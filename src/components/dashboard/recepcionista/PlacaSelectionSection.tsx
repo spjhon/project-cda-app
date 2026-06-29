@@ -622,7 +622,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           2. Datos del Servicio
         </legend>
 
-        <div className="bg-slate-50/80 border rounded-xl p-6 space-y-8">
+        <div className="p-6 space-y-8">
           {/* HEADER */}
           <div className="flex items-center gap-4">
             <div
@@ -668,22 +668,16 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
               {SERVICE_TYPES.map((tipo) => (
                 <Label
                   key={tipo.id}
-                  className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-white hover:border-blue-300 ${
+                  className={`group relative flex flex-col gap-3 rounded-xl  border-2 p-4 cursor-pointer transition-all bg-white hover:bg-[#ECF3FF] ${
                     formData.service_type === tipo.id
-                      ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
+                      ? "border-slate-600 bg-[#ECF3FF]"
                       : "border-slate-200"
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <div
-                      className={`p-2 border rounded-lg ${
-                        formData.service_type === tipo.id
-                          ? "bg-white border-blue-100"
-                          : "bg-slate-50 border-slate-100"
-                      }`}
-                    >
+                    
                       {tipo.icon}
-                    </div>
+                    
 
                     <Checkbox
                       checked={
@@ -746,29 +740,19 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
               ].map((tipo) => (
                 <Label
                   key={tipo.id}
-                  className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-white hover:border-blue-300 ${
+                  className={`group relative rounded-xl flex flex-col gap-3 border-2 p-4 cursor-pointer transition-all bg-white hover:bg-[#ECF3FF] ${
                     (tipo.id === "reinspeccion" &&
                       formData.es_reinspeccion) ||
                     (tipo.id === "nueva" &&
                       !formData.es_reinspeccion)
-                      ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
+                      ? "border-slate-600 bg-[#ECF3FF]"
                       : "border-slate-200"
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <div
-                      className={`p-2 border rounded-lg ${
-                        (tipo.id ===
-                          "reinspeccion" &&
-                          formData.es_reinspeccion) ||
-                        (tipo.id === "nueva" &&
-                          !formData.es_reinspeccion)
-                          ? "bg-white border-blue-100"
-                          : "bg-slate-50 border-slate-100"
-                      }`}
-                    >
+                    
                       {tipo.icon}
-                    </div>
+                    
 
                     <Checkbox
                       disabled={formData.service_type === "peritaje" && tipo.id === "reinspeccion"}
@@ -814,7 +798,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     render={
                       <Button
                         type="button"
-                        className="w-full h-16 gap-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-slate-200 text-lg"
+                        className="w-full h-16 gap-3 bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all active:scale-95 cursor-pointer text-lg"
                       >
                         <Search className="h-6 w-6" />
 
@@ -986,7 +970,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     ${
                       formData.vehicle.placa
                         ? "bg-[#f57c00] hover:bg-[#e65100] text-white shadow-lg shadow-orange-100 cursor-pointer"
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
                     }
                   `}
                 >

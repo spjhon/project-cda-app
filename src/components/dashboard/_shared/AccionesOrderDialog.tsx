@@ -52,7 +52,7 @@ export default function AccionesOrderDialog({
               {...props}
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-slate-500 hover:text-slate-900"
+              className="h-8 w-8 text-slate-500 hover:text-slate-900 shadow-2xl border border-slate-300 rounded-none"
             >
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Abrir acciones</span>

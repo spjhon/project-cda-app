@@ -254,7 +254,7 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
                 <SelectValue placeholder="Seleccione tipo" />
               </SelectTrigger>
 
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 {ID_DOCUMENT_OPTIONS.map((option) => (
                   <SelectItem
                     key={option.value}

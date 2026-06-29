@@ -7,6 +7,8 @@ export default function EntryOrdersPage() {
 
  
   return (
+    <div className="">
     <CreatedOrdersTable></CreatedOrdersTable>
+    </div>
   )
 }

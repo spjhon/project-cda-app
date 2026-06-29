@@ -190,7 +190,7 @@ export default function DirectorTecnicoOrderForm({
               <SelectTrigger id="resultado_revision" className="bg-white border-slate-200 font-medium text-xs h-9">
                 <SelectValue placeholder="Seleccione el dictamen final" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 {SELECT_RESULTADO.map((item) => (
                   <SelectItem key={item.value} value={item.value} className="text-xs">
                     {item.label}

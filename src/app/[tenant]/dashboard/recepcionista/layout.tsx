@@ -70,7 +70,7 @@ export default function ReceptionistDashboardLayout({children, params}: Receptio
 
           <AppSidebar rol={"recepcionista"} />
 
-          <SidebarInset>
+          <SidebarInset className="bg-[#FAFAFA]">
             <HeaderSidebar></HeaderSidebar>
             <main>
               

@@ -14,9 +14,9 @@ export default function RootLayout({
 }: Readonly<{children: React.ReactNode}>) {
 
   return (
-    <html lang="en">
+    <html lang="en" >
       <body
-        className={` antialiased max-w-[2592px] border border-gray-400 mx-auto`}
+        className={` antialiased max-w-[2592px] border border-gray-400 mx-auto bg-[#FAFAFA] `}
       >
         <TooltipProvider>
         {children}

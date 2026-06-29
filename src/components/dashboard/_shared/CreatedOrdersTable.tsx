@@ -61,6 +61,7 @@ import AccionesOrderDialog from "./AccionesOrderDialog";
 import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 
+
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
 // ==========================================
@@ -239,9 +240,9 @@ export default function CreatedOrdersTable() {
       return (
         <Badge
           variant="destructive"
-          className="gap-1.5 px-3 py-1 animate-pulse"
+          className="gap-1.5 px-3 py-1 animate-pulse w-35"
         >
-          <AlertCircle className="h-3.5 w-3.5" />
+          <AlertCircle className="h-3.5 w-" />
           Error de Sincronización
         </Badge>
       );
@@ -250,9 +251,9 @@ export default function CreatedOrdersTable() {
       return (
         <Badge
           variant="default"
-          className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700"
+          className="gap-1.5 w-35 px-3 py-1 bg-blue-600 hover:bg-blue-700"
         >
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <Loader2 className="h-3.5 w-6 animate-spin" />
           Actualizando datos...
         </Badge>
       );
@@ -261,9 +262,9 @@ export default function CreatedOrdersTable() {
       return (
         <Badge
           variant="outline"
-          className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50"
+          className="gap-1.5 px-3 w-35 py-1 border-green-500 text-green-700 bg-green-50"
         >
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <CheckCircle2 className="h-3.5" />
           Datos Actualizados
         </Badge>
       );
@@ -496,9 +497,12 @@ export default function CreatedOrdersTable() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-5 bg-[#FAFAFA]">
       {/* SECCIÓN SUPERIOR: Info, Selects de Ordenamiento y Estado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+
+
+
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-medium text-slate-500">
             Total Encontrado:
@@ -507,75 +511,78 @@ export default function CreatedOrdersTable() {
             {total}
           </span>
         </div>
+        
+
 
         <div className="flex flex-wrap items-center gap-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-slate-600 text-sm font-medium">
-              <ArrowUpDown className="h-4 w-4 text-slate-400" />
-              <span>Ordenar por:</span>
-            </div>
-
-            <Select
-              items={SELECT_COLUMNAS}
-              value={orderByColumn}
-              onValueChange={(v) => setOrderByColumn(v ? v : "fecha")}
-            >
-              <SelectTrigger className="w-40 bg-white h-9 text-sm">
-                <SelectValue placeholder="Columna" />
-              </SelectTrigger>
-              <SelectContent>
-                {SELECT_COLUMNAS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              items={SELECT_DIRECCION}
-              value={orderByDirection}
-              onValueChange={(v) => {
-                if (v === "ASC" || v === "DESC") {
-                  setOrderByDirection(v);
-                } else {
-                  setOrderByDirection("DESC");
-                }
-              }}
-            >
-              <SelectTrigger className="w-45 bg-white h-9 text-sm">
-                <SelectValue placeholder="Dirección" />
-              </SelectTrigger>
-              <SelectContent>
-                {SELECT_DIRECCION.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="relative flex-1 h-full">
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-              <Input
-                placeholder={`Buscar por ${searchColumn === "placa" ? "placa" : searchColumn === "marca" ? "marca" : searchColumn === "linea" ? "línea" : "documento"}...`}
-                value={inputValue}
-                onChange={handleInputChange}
-                className="w-full h-full pl-9 pr-8 border-none bg-transparent rounded-l-none text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              {inputValue && (
-                <button
-                  onClick={() => {
-                    setInputValue("");
-                    setSearchTerm("");
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
+          
+          <div className="flex items-center gap-1.5 text-slate-600 text-sm font-medium">
+            <ArrowUpDown className="h-4 w-4 text-slate-400" />
+            <span>Ordenar por:</span>
           </div>
+
+          <Select
+            items={SELECT_COLUMNAS}
+            value={orderByColumn}
+            onValueChange={(v) => setOrderByColumn(v ? v : "fecha")}
+          >
+            <SelectTrigger className="w-40 bg-white h-9 text-sm">
+              <SelectValue placeholder="Columna" />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false}>
+              {SELECT_COLUMNAS.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            modal
+            items={SELECT_DIRECCION}
+            value={orderByDirection}
+            onValueChange={(v) => {
+              if (v === "ASC" || v === "DESC") {
+                setOrderByDirection(v);
+              } else {
+                setOrderByDirection("DESC");
+              }
+            }}
+          >
+            <SelectTrigger className=" bg-white text-sm">
+              <SelectValue placeholder="Dirección" />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false}>
+              {SELECT_DIRECCION.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="relative flex-1 h-full">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder={`Buscar por ${searchColumn === "placa" ? "placa" : searchColumn === "marca" ? "marca" : searchColumn === "linea" ? "línea" : "documento"}...`}
+              value={inputValue}
+              onChange={handleInputChange}
+              className="w-full h-full pl-9 pr-8 border bg-white text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+            {inputValue && (
+              <button
+                onClick={() => {
+                  setInputValue("");
+                  setSearchTerm("");
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2  hover:text-slate-600 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+          
 
           <DateRangePicker
             date={dateRange}
@@ -597,56 +604,9 @@ export default function CreatedOrdersTable() {
           </div>
         </div>
 
-        <div className="flex items-center">{renderStatusBadge()}</div>
+        
       </div>
 
-      {/* CONTENEDOR DE LA TABLA */}
-      <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-8"
-                >
-                  No hay órdenes
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
 
       {/* PIE DE PÁGINA CON COMPONENTES DE PAGINACIÓN */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-1">
@@ -664,7 +624,7 @@ export default function CreatedOrdersTable() {
             <SelectTrigger className="w-16 h-8 text-xs bg-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent align="start">
+            <SelectContent align="start" alignItemWithTrigger={false}>
               <SelectItem value="5" className="text-xs">
                 5
               </SelectItem>
@@ -682,6 +642,9 @@ export default function CreatedOrdersTable() {
             {Math.min(page * rowsPerPage, total)} de {total}
           </span>
         </div>
+
+
+            <div className="flex items-center">{renderStatusBadge()}</div>
 
         <Pagination className="mx-0 w-auto">
           <PaginationContent className="gap-1">
@@ -715,6 +678,58 @@ export default function CreatedOrdersTable() {
           </PaginationContent>
         </Pagination>
       </div>
+
+      
+
+      {/* CONTENEDOR DE LA TABLA */}
+      <div className=" ">
+        <Table className="">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody className="">
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} className="">
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8"
+                >
+                  No hay órdenes
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      
     </div>
   );
 }

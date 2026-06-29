@@ -20,13 +20,13 @@ export default function AdminDashboardLayout({ children }: AdminDashboardLayout)
 
           <AppSidebar rol={"admin"}/>
 
-          <SidebarInset>
+          <SidebarInset className="">
             <HeaderSidebar></HeaderSidebar>
-            <main>
+            
               
               {children}
             
-            </main>
+            
           </SidebarInset>
 
           
