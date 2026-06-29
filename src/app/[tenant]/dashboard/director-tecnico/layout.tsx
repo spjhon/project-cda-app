@@ -8,7 +8,8 @@ import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_ord
 import { redirect } from "next/navigation";
 import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import Loading from "@/components/ui/loading";
 
 interface DirectorTecnicoDashboardLayoutProps {
   children: ReactNode;
@@ -70,6 +71,7 @@ export default function DirectorTecnicoDashboardLayout({
 
 
   return (
+    <Suspense fallback={<Loading />}>
     <DirectorTecnicoLoaderContext rol={"director-tecnico"} templateTabelDataPromise={templateTabelDataPromise} >
     <SidebarProvider>
           
@@ -90,5 +92,6 @@ export default function DirectorTecnicoDashboardLayout({
 
         </SidebarProvider>
         </DirectorTecnicoLoaderContext>
+        </Suspense>
   );
 }
