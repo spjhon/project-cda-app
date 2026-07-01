@@ -248,7 +248,7 @@ export default function NewEntryOrder() {
   });
 
 
-console.log(formData)
+
 
 
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido

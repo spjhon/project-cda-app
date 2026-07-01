@@ -180,10 +180,11 @@ export default function CreatedOrdersTable() {
     DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol ||
     AdminContextRecived?.AdminContextValue.rol;
 
-  const tenantId =
-    PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const EntryOrders =
-    EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+  const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+
+  console.log("estas son las entry orders,", EntryOrders)
+
 
   const { query, mutation } =
     EntryOrdersContextRecived?.entryOrdersTableData || {};
