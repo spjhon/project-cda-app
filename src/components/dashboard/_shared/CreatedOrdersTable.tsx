@@ -183,7 +183,7 @@ export default function CreatedOrdersTable() {
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
   const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
 
-  console.log("estas son las entry orders,", EntryOrders)
+  
 
 
   const { query, mutation } =

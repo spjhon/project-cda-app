@@ -139,7 +139,7 @@ export default function EntryOrdersLoaderContext({
         `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      //await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // 🌟 Control preventivo de seguridad por si limpian el calendario
       // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
