@@ -36,25 +36,31 @@ PENDIENTES
 - reizar que si se compra el soat, este se actualice en los datos de la orden de entrada para referencia
 - recordar el extrude text para los estilos
 - agregar moto electrica ya que moto 4t y 2t no son electrica ninguna de las dos
+- recordar que se puede utilizar el streaming pre rendering o algo asi para granularizar todavia mas el suspence y lograr cargar el shell o al menos hacer el prefetch
+- recordar que a la tabla de las placas agregarles los filtros para datos de un solo numero de consulta, para la analitica es:
+	- las tablas de las tortas para las categorias de: combustible, tipo de vehiculo, torta especial entre motos 2 y 4 tiempos
+	- en las tablas de barra va, en uno solo total rtm, total preventiva, total peritaje, en otro los reprobados (solo de rtm por ahora) y el soat
 
 FEATURES QUE FALTAN
 
 - administracion de reprobados
 - manejo y registro de usuarios en diferentes escalas, que el gerente cree director tecnico y el director tecnico cree los demas
-- avisos por email por ahora
+- avisos por email por ahora (recordatorios de los 15 dias y los anuales)
 - seccion del gerente
 - api runt
+- estadisticas de dinero recogido (se puede separa entre todo, solo rtm, solo preventiva, solo peritaje)
 
 
 FEATURES PARA TRABAJAR DURANTE EL TESTEO:
 
-- manejo de fupas
+- manejo de fupas y cantidad de certificados
 - envio y comunicacion por wassap
 - de pronto inventario
 - mejor manejo de los anulados 
 - de pronto notificaciones
 - seccion de reservas
 - seccion de quejas y sugerencias
+- sistema kanban
 
 MODULOS A FUTURO
 

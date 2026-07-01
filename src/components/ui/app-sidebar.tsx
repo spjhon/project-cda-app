@@ -179,7 +179,7 @@ const contextRecived = useContext(PermissionsContext);
   const isActive = (path: string) => pathname === path;
 
   return (
-    <Sidebar variant="inset" className="" >
+    <Sidebar variant="inset" className="p-0" >
       <SidebarHeader className="flex flex-col gap-2.5 px-4 py-3 border-b border-sidebar-border/50border ">
         {/* Funciones helper internas para las iniciales */}
         {(() => {
@@ -265,7 +265,7 @@ const contextRecived = useContext(PermissionsContext);
                   <Link prefetch={true} href={item.href}>
                 <SidebarMenuButton
                     isActive={active}
-                    className={`h-15 w-full justify-start rounded-none my-3 border border-slate-300 bg-[#ECF3FF] transition-all duration-75 cursor-pointer font-bold
+                    className={`h-15 w-full justify-start rounded-md my-3 border border-slate-300 bg-[#ECF3FF] transition-all duration-75 cursor-pointer font-bold
                       /* Sombra dura inicial (Fija en el fondo) */
                       shadow-2xl
 

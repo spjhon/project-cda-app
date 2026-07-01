@@ -78,7 +78,7 @@ export default function DirectorTecnicoDashboardLayout({
 
           <AppSidebar rol={"director-tecnico"}/>
 
-          <SidebarInset>
+          <SidebarInset className="md:m-0! bg-[#FAFAFA]">
             <HeaderSidebar></HeaderSidebar>
             <main>
               

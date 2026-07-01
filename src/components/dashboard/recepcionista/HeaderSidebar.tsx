@@ -35,12 +35,12 @@ export default function HeaderSidebar() {
   const visibleItems = breadcrumbItems.slice(-2);
 
   return (
-    <div className="flex flex-row justify-between items-center border bg-white">
+    <div className="flex flex-row justify-between items-center border bg-white mx-3">
       <header className="flex flex-wrap h-16 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-5 my-auto"
+          className="mx-2 data-[orientation=vertical]:h-5 my-auto"
         />
         <Breadcrumb>
           <BreadcrumbList>

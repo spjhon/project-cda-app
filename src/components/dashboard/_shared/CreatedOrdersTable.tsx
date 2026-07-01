@@ -53,7 +53,7 @@ import {
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-import { DateRangePicker } from "../recepcionista/DateRangePicker";
+import { DateRangePicker } from "./DateRangePicker";
 import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";

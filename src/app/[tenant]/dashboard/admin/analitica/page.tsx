@@ -1,7 +1,7 @@
 "use client";
 
 import AnaliticaPorCantidad from "@/components/dashboard/admin/AnaliticaPorCantidad";
-import React from "react";
+
 
 export default function AnaliticaPage() {
   return (
@@ -26,10 +26,29 @@ export default function AnaliticaPage() {
       <div className="flex flex-col gap-6 w-full">
         <AnaliticaPorCantidad 
           titulo="Inspecciones Realizadas" 
-          descripcion="Volumen total de vehículos que han ingresado a la línea de revisión (Primeras entradas y reinspecciones)."
+          descripcion="Volumen total de vehículos que han ingresado a la línea de revisión (Primeras entradas)."
           datos={{ hoy: 24, ayer: 31, mes: 450, anio: 5420 }} 
         />
       </div>
+
+      <div className="flex flex-col gap-6 w-full">
+        <AnaliticaPorCantidad 
+          titulo="Tasa de Rechazo" 
+          descripcion="Datos sobre la tasa de rechazo en diferentes rangos de tiempo."
+          datos={{ hoy: 6, ayer: 3, mes: 125, anio: 1255 }} 
+        />
+      </div>
+
+
+      <div className="flex flex-col gap-6 w-full">
+        <AnaliticaPorCantidad 
+          titulo="Soats Vendidos" 
+          descripcion="Cantidad de ordenes de entrada marcadas con que se vendieron soats tambien."
+          datos={{ hoy: 8, ayer: 9, mes: 90, anio: 150 }} 
+        />
+      </div>
+
+
 
     </section>
   );
