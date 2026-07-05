@@ -1,12 +1,4 @@
--- ==========================================
--- 1. TIPOS ENUM (Definición de respuestas)
--- ==========================================
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'condition_response_enum') THEN
-        CREATE TYPE condition_response_enum AS ENUM ('cumple', 'no_cumple', 'no_aplica');
-    END IF;
-END $$;
+
 
 -- ==========================================
 -- 2. TABLA: order_template_conditions

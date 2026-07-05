@@ -899,7 +899,28 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mv_reportes_diarios: {
+        Row: {
+          cantidad: number | null
+          fecha: string | null
+          resultado_revision: string | null
+          se_compro_soat: boolean | null
+          service_type: Database["public"]["Enums"]["service_type_enum"] | null
+          tenant_id: string | null
+          vehiculo_tipo_snapshot:
+            | Database["public"]["Enums"]["vehicle_type_enum"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_preventiva_reinspection_eligibility: {
@@ -927,6 +948,22 @@ export type Database = {
       }
       create_full_order: { Args: { p_data: Json }; Returns: string }
       create_full_order_template: { Args: { p_data: Json }; Returns: string }
+      fetch_admin_analitics: {
+        Args: never
+        Returns: {
+          chart_anio_actual: Json
+          chart_mes_actual: Json
+          total_rtm_anio_actual: number
+          total_rtm_ayer: number
+          total_rtm_mes_actual: number
+        }[]
+      }
+      fetch_admin_analitics_diary: {
+        Args: never
+        Returns: {
+          total_rtm_hoy: number
+        }[]
+      }
       fetch_data_with_placa: {
         Args: { p_placa: string; p_tenant_id: string }
         Returns: Json
@@ -1150,6 +1187,8 @@ export type Database = {
         | "motocicleta_2t"
         | "motocarro_4t"
         | "motocarro_2t"
+        | "motocicleta_electrica"
+        | "motocarro_diesel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1324,6 +1363,8 @@ export const Constants = {
         "motocicleta_2t",
         "motocarro_4t",
         "motocarro_2t",
+        "motocicleta_electrica",
+        "motocarro_diesel",
       ],
     },
   },

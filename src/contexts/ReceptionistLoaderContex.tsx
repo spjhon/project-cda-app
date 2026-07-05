@@ -1,7 +1,7 @@
 "use client";
 
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery} from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext } from "react";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";

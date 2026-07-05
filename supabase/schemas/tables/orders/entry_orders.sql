@@ -1,15 +1,4 @@
--- ==========================================
--- 1. TIPOS ENUM (Estados y Servicios)
--- ==========================================
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN
-        CREATE TYPE order_status_enum AS ENUM ('abierta', 'en_prueba', 'finalizada', 'anulada');
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'service_type_enum') THEN
-        CREATE TYPE service_type_enum AS ENUM ('RTM', 'preventiva', 'peritaje', 'otro');
-    END IF;
-END $$;
+
 
 -- ==========================================
 -- 2. TABLA: entry_orders

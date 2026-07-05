@@ -73,6 +73,22 @@ export const CLASE_OPTIONS: ClaseOption[] = [
   { value: "cuadriciclo", label: "Cuadriciclo" },
 ];
 
+
+
+const VEHICLE_TYPE_ITEMS = [
+  { label: "Liviano", value: "liviano" },
+  { label: "Pesado", value: "pesado" },
+  { label: "Moto 4T", value: "motocicleta_4t" },
+  { label: "Moto 2T", value: "motocicleta_2t" },
+  { label: "Moto Electrica", value: "motocicleta_electrica" },
+  { label: "Motocarro 4T", value: "motocarro_4t" },
+  { label: "Motocarro 2T", value: "motocarro_2t" },
+  { label: "Motocarro Diesel", value: "motocarro_diesel" },
+];
+
+
+
+
 export interface VehicleDataSectionProps {
   /** * La plantilla técnica seleccionada actualmente.
    * Útil si necesitas condicionar campos visuales del vehículo según el tipo de plantilla.
@@ -123,7 +139,7 @@ const requiereGas =
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Marca</Label>
-                {/*#a11 ACTION */}
+                
                 <Input
                   required
                   placeholder="Ej: Chevrolet"
@@ -141,7 +157,7 @@ const requiereGas =
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Línea</Label>
-                {/*#a11 ACTION */}
+            
                 <Input
                   required
                   placeholder="Ej: Spark GT"
@@ -159,7 +175,7 @@ const requiereGas =
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Modelo (Año)</Label>
-                {/*#a11 ACTION */}
+            
                 <Input
                   required
                   type="number"
@@ -179,7 +195,7 @@ const requiereGas =
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Color</Label>
-                {/*#a11 ACTION */}
+              
                 <Input
                   required
                   placeholder="Ej: Blanco Galaxia"
@@ -209,7 +225,7 @@ const requiereGas =
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Cilindrada (cc)</Label>
-                {/*#a11 ACTION */}
+             
                 <Input
                   required
                   type="number"
@@ -231,7 +247,7 @@ const requiereGas =
                 <Label className="text-xs font-semibold">
                   Capacidad Pasajeros
                 </Label>
-                {/*#a11 ACTION */}
+              
                 <Input
                   required
                   type="number"
@@ -319,7 +335,7 @@ const requiereGas =
                 <Label className="text-xs font-semibold">
                   Tipo de Vehículo
                 </Label>
-                {/*#a11 ACTION */}
+            
                 <Select
                   required
                   value={formData.vehicle.tipo_vehiculo}
@@ -332,26 +348,18 @@ const requiereGas =
                       },
                     }))
                   }
-                  items={[
-                    { label: "Liviano", value: "liviano" },
-                    { label: "Pesado", value: "pesado" },
-                    { label: "Moto 4T", value: "motocicleta_4t" },
-                    { label: "Moto 2T", value: "motocicleta_2t" },
-                    { label: "Motocarro 4T", value: "motocarro_4t" },
-                    { label: "Motocarro 2T", value: "motocarro_2t" },
-                  ]}
+                  items={VEHICLE_TYPE_ITEMS}
                 >
                   <SelectTrigger className="h-10 bg-background w-full">
                     <SelectValue placeholder="Selecciona un tipo" />
                   </SelectTrigger>
 
                   <SelectContent alignItemWithTrigger={false}>
-                    <SelectItem value="liviano">Liviano</SelectItem>
-                    <SelectItem value="pesado">Pesado</SelectItem>
-                    <SelectItem value="motocicleta_4t">Moto 4T</SelectItem>
-                    <SelectItem value="motocicleta_2t">Moto 2T</SelectItem>
-                    <SelectItem value="motocarro_4t">Motocarro 4T</SelectItem>
-                    <SelectItem value="motocarro_2t">Motocarro 2T</SelectItem>
+                    {VEHICLE_TYPE_ITEMS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -414,7 +422,7 @@ const requiereGas =
                   <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
                     <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
                   </Label>
-                  {/*#a11 ACTION */}
+                
                   <Input
                     required
                     type="date"
@@ -481,7 +489,7 @@ const requiereGas =
                 <Label className="text-xs font-bold text-slate-700">
                   Kilometraje Actual -Km-
                 </Label>
-                {/*#a11 ACTION */}
+               
                 <Input
                   min={0}
                   type="number"
@@ -554,7 +562,7 @@ const requiereGas =
                     >
                       {item.icon}
                     </div>
-                    {/*#a11 ACTION */}
+                
                     <Checkbox
                       checked={item.checked}
                       onCheckedChange={(checked) =>

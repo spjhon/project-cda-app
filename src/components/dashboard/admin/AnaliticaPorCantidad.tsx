@@ -32,6 +32,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { AdminAnalyticsData, AdminAnalyticsDiaryData } from "@/app/[tenant]/dashboard/admin/layout";
 //import { useSidebar } from "@/components/ui/sidebar";
 
 
@@ -96,7 +97,7 @@ export function ChartBarMonthInteractive() {
 
 
   return (
-    <Card className="py-2 rounded-none min-w-350">
+    <Card className="py-2 rounded-none min-w-170">
 
 
 
@@ -232,7 +233,7 @@ export function ChartBarYearInteractive() {
 
 
   return (
-    <Card className="py-2 rounded-none min-w-350">
+    <Card className="py-2 rounded-none min-w-210">
 
 
 
@@ -376,15 +377,13 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
 // ============================================================================
 // 2. COMPONENTE PRINCIPAL
 // ============================================================================
+
+interface CompleteAnalyticsData extends AdminAnalyticsData, AdminAnalyticsDiaryData {}
+
 interface AnaliticaPorCantidadProps {
   titulo: string;
   descripcion: string;
-  datos: {
-    hoy: number;
-    ayer: number;
-    mes: number;
-    anio: number;
-  };
+  datos: CompleteAnalyticsData | undefined
 }
 
 export default function AnaliticaPorCantidad({
@@ -400,7 +399,7 @@ export default function AnaliticaPorCantidad({
   const valorRangoEspecial = date?.from && date?.to ? 0 : "Seleccione rango";
 
   return (
-    <div className="flex flex-col gap-6 w-full pl-2 md:pl-4">
+    <div className="flex flex-col gap-6 pl-2 md:pl-4">
       
       {/* Encabezado con Iconos */}
       <div className="flex flex-col gap-1.5">
@@ -416,10 +415,10 @@ export default function AnaliticaPorCantidad({
 
       {/* Contenedor Flex Responsivo invocando el subcomponente */}
       <div className="flex flex-wrap gap-5 w-full items-start">
-        <CuadroMetrica label="Hoy" valor={datos.hoy} esPrimario={true} />
-        <CuadroMetrica label="Ayer" valor={datos.ayer} />
-        <CuadroMetrica label="Este Mes" valor={datos.mes} />
-        <CuadroMetrica label="Este Año" valor={datos.anio} />
+        <CuadroMetrica label="Hoy" valor={datos?.total_rtm_hoy} esPrimario={true} />
+        <CuadroMetrica label="Ayer" valor={datos?.total_rtm_ayer} />
+        <CuadroMetrica label="Este Mes" valor={datos?.total_rtm_mes_actual} />
+        <CuadroMetrica label="Este Año" valor={datos?.total_rtm_anio_actual} />
 
         {/* Nuevo bloque: Cuadro especial acoplado al seleccionador */}
         <div className="flex items-center  gap-4">
@@ -481,9 +480,15 @@ export default function AnaliticaPorCantidad({
       </div>
 
       {/* ESPACIO PARA LAS GRÁFICAS */}
-      <div className=" border border-slate-300  overflow-scroll mt-6 flex flex-col gap-6">
-        <ChartBarMonthInteractive></ChartBarMonthInteractive>
+      <div className="  mt-6 flex flex-row flex-wrap gap-6">
+
+        <div className="overflow-scroll ">
+<ChartBarMonthInteractive></ChartBarMonthInteractive>
+        </div>
+        
+        <div className="overflow-scroll ">
         <ChartBarYearInteractive></ChartBarYearInteractive>
+        </div>
       </div>
 
     </div>

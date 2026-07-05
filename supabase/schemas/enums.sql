@@ -1,3 +1,39 @@
+-- ==========================================
+-- 1. TIPOS ENUM (Estados y Servicios)
+-- ==========================================
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN
+        CREATE TYPE order_status_enum AS ENUM ('abierta', 'en_prueba', 'finalizada', 'anulada');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'service_type_enum') THEN
+        CREATE TYPE service_type_enum AS ENUM ('RTM', 'preventiva', 'peritaje', 'otro');
+    END IF;
+END $$;
+
+
+
+
+-- ==========================================
+-- 1. TIPOS ENUM (Definición de respuestas)
+-- ==========================================
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'condition_response_enum') THEN
+        CREATE TYPE condition_response_enum AS ENUM ('cumple', 'no_cumple', 'no_aplica');
+    END IF;
+END $$;
+
+-- ==========================================
+-- 1. TIPOS ENUM (Definiciones previas)
+-- ==========================================
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type_enum') THEN
+        CREATE TYPE vehicle_type_enum AS ENUM ('liviano', 'pesado', 'motocicleta_4t', 'motocicleta_2t', 'motocicleta_electrica', 'motocarro_4t', 'motocarro_2t', 'motocarro_diesel');
+    END IF;
+END $$;
+
 
 
 -- Enums de los roles del sistema

@@ -1,12 +1,4 @@
--- ==========================================
--- 1. TIPOS ENUM (Definiciones previas)
--- ==========================================
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type_enum') THEN
-        CREATE TYPE vehicle_type_enum AS ENUM ('liviano', 'pesado', 'motocicleta_4t', 'motocicleta_2t', 'motocarro_4t', 'motocarro_2t');
-    END IF;
-END $$;
+
 
 -- ==========================================
 -- 2. TABLA: order_template (Plantilla Orden de Entrada)

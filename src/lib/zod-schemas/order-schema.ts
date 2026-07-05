@@ -15,8 +15,10 @@ const TipoVehiculoEnum = [
   "pesado",
   "motocicleta_4t",
   "motocicleta_2t",
+  "motocicleta_electrica",
   "motocarro_4t",
   "motocarro_2t",
+  "motocarro_diesel"
 ] as const;
 
 
