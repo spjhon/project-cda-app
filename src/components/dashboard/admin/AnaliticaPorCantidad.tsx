@@ -374,6 +374,17 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
   );
 }
 
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // 2. COMPONENTE PRINCIPAL
 // ============================================================================
@@ -415,10 +426,10 @@ export default function AnaliticaPorCantidad({
 
       {/* Contenedor Flex Responsivo invocando el subcomponente */}
       <div className="flex flex-wrap gap-5 w-full items-start">
-        <CuadroMetrica label="Hoy" valor={datos?.total_rtm_hoy} esPrimario={true} />
-        <CuadroMetrica label="Ayer" valor={datos?.total_rtm_ayer} />
-        <CuadroMetrica label="Este Mes" valor={datos?.total_rtm_mes_actual} />
-        <CuadroMetrica label="Este Año" valor={datos?.total_rtm_anio_actual} />
+        <CuadroMetrica label="Hoy" valor={Number(datos?.total_rtm_hoy ?? 0)} esPrimario={true} />
+<CuadroMetrica label="Ayer" valor={Number(datos?.total_rtm_ayer ?? 0)} />
+<CuadroMetrica label="Este Mes" valor={Number(datos?.total_rtm_mes_actual ?? 0)} />
+<CuadroMetrica label="Este Año" valor={Number(datos?.total_rtm_anio_actual ?? 0)} />
 
         {/* Nuevo bloque: Cuadro especial acoplado al seleccionador */}
         <div className="flex items-center  gap-4">
