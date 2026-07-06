@@ -953,6 +953,11 @@ export type Database = {
         Returns: {
           chart_anio_actual: Json
           chart_mes_actual: Json
+          chart_rechazado_anio: Json
+          chart_rechazado_mes: Json
+          total_rechazado_anio: number
+          total_rechazado_ayer: number
+          total_rechazado_mes: number
           total_rtm_anio_actual: number
           total_rtm_ayer: number
           total_rtm_mes_actual: number
@@ -962,6 +967,7 @@ export type Database = {
         Args: never
         Returns: {
           total_rtm_hoy: number
+          total_rtm_rechazados_hoy: number
         }[]
       }
       fetch_data_with_placa: {

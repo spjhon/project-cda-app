@@ -1,5 +1,3 @@
-
-
 CREATE OR REPLACE FUNCTION public.fetch_admin_analitics()
 RETURNS TABLE (
     -- Datos Originales RTM
@@ -229,5 +227,3 @@ BEGIN
 
 END;
 $$;
-
-GRANT EXECUTE ON FUNCTION public.fetch_admin_analitics() TO authenticated;

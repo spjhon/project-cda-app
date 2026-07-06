@@ -4,7 +4,7 @@ import { Activity, Info, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
-import { Bar, BarChart, CartesianGrid, Label, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 
 
 import {
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/card"
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -32,8 +34,29 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
-import { AdminAnalyticsData, AdminAnalyticsDiaryData } from "@/app/[tenant]/dashboard/admin/layout";
+import {DayChartItem, MonthChartItem } from "@/app/[tenant]/dashboard/admin/layout";
+import { CompleteDataRTMType } from "@/app/[tenant]/dashboard/admin/analitica/page";
 //import { useSidebar } from "@/components/ui/sidebar";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42,56 +65,25 @@ import { AdminAnalyticsData, AdminAnalyticsDiaryData } from "@/app/[tenant]/dash
 // ============================================================================
 // 1. SUBCOMPONENTE REUTILIZABLE PARA LOS GRAFICOS DE BARRAS MENSUALES
 // ============================================================================
-export interface AnaliticaMonthData {
-  day: string;
-  quantity: number;
-}
 
-// 2. Constante con los 31 días posibles y datos dummy
-export const chartMonthData: AnaliticaMonthData[] = [
-  { day: "01", quantity: 222 },
-  { day: "02", quantity: 97 },
-  { day: "03", quantity: 167 },
-  { day: "04", quantity: 242 },
-  { day: "05", quantity: 373 },
-  { day: "06", quantity: 301 },
-  { day: "07", quantity: 245 },
-  { day: "08", quantity: 409 },
-  { day: "09", quantity: 59 },
-  { day: "10", quantity: 261 },
-  { day: "11", quantity: 327 },
-  { day: "12", quantity: 292 },
-  { day: "13", quantity: 342 },
-  { day: "14", quantity: 137 },
-  { day: "15", quantity: 120 },
-  { day: "16", quantity: 138 },
-  { day: "17", quantity: 446 },
-  { day: "18", quantity: 364 },
-  { day: "19", quantity: 243 },
-  { day: "20", quantity: 89 },
-  { day: "21", quantity: 137 },
-  { day: "22", quantity: 224 },
-  { day: "23", quantity: 138 },
-  { day: "24", quantity: 387 },
-  { day: "25", quantity: 215 },
-  { day: "26", quantity: 75 },
-  { day: "27", quantity: 383 },
-  { day: "28", quantity: 122 },
-  { day: "29", quantity: 315 },
-  { day: "30", quantity: 454 },
-  { day: "31", quantity: 198 } // Agregado el día 31 faltante
-];
+
+// 2. Definimos la interfaz de las Props que va a recibir tu componente
+interface ChartBarMonthInteractiveProps {
+  chartMonthData: DayChartItem[] | undefined; // ◄ Aquí es donde le dices que es un Array
+  isPorcentaje: boolean;
+}
 
 
 const chartMonthConfig = {
-  views: {
-    label: "Page Views",
+  total: {
+    label: "Inspecciones RTM", // ◄ Este texto saldrá automáticamente en el Tooltip y la Leyenda
   },
+  
 } satisfies ChartConfig
 
 
 
-export function ChartBarMonthInteractive() {
+export function ChartBarMonthInteractive({chartMonthData, isPorcentaje}: ChartBarMonthInteractiveProps) {
 //const { state } = useSidebar()
    
 
@@ -126,6 +118,8 @@ export function ChartBarMonthInteractive() {
             margin={{
               left: 12,
               right: 12,
+              top: 30,
+              bottom: 12
             }}
            >
             
@@ -133,18 +127,13 @@ export function ChartBarMonthInteractive() {
             <CartesianGrid vertical={false} />
 
             <XAxis
-              dataKey="day" 
+              dataKey="dia" 
               tickLine={true}
               axisLine={false}
               tickMargin={8}
-              height={60}
+              height={30}
             >
-              <Label
-                value="Dias del Mes"
-                position="insideBottom"
-                offset={0}
-                className="font-bold fill-slate-500 text-xs tracking-wide uppercase"
-              />
+             
             </XAxis>
 
             <YAxis width={"auto"} >
@@ -157,20 +146,34 @@ export function ChartBarMonthInteractive() {
               content={
                 <ChartTooltipContent
                   className="w-37.5"
-                  nameKey="views"
+                  nameKey="total"
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  }}
+        // 1. Obtenemos el nombre del mes actual en Colombia (ej: "julio")
+        const mesActualRaw = new Date().toLocaleString("es-CO", { 
+          timeZone: "America/Bogota", 
+          month: "long" 
+        });
+        
+        // 2. Capitalizamos el mes (ej: "Julio")
+        const mesFormateado = mesActualRaw.charAt(0).toUpperCase() + mesActualRaw.slice(1);
+        
+        // 3. Retornamos el mes junto al número del día que trae la barra (value)
+        return `${mesFormateado} ${value}`;
+      }}
                 />
               }
             />
 
-             
-            <Bar dataKey={"quantity"} fill={`#62748E`} />
+             <ChartLegend content={<ChartLegendContent />} />
+            <Bar dataKey={"total"} fill={`#62748E`}>
+              <LabelList
+                formatter={(label) => isPorcentaje? `${label}%` : label}
+                dataKey="total"
+                position="top"       // ◄ Lo ubica justo encima de la barra
+                offset={8}           // ◄ Separación en píxeles para que no toque la barra
+                className="fill-slate-500 text-[10px] font-medium" // ◄ Estilo sutil con Tailwind
+              />
+            </Bar>
 
 
 
@@ -192,42 +195,40 @@ export function ChartBarMonthInteractive() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // 1. SUBCOMPONENTE REUTILIZABLE PARA LOS GRAFICOS DE BARRAS MENSUALES
 // ============================================================================
 
 
 // 1. Definición de la interfaz para el tipado anual
-export interface AnaliticaYearData {
-  month: string;
-  quantity: number;
+interface ChartBarYearInteractiveProps {
+  chartYearData: MonthChartItem[] | undefined; // ◄ Aquí es donde le dices que es un Array
+   isPorcentaje: boolean;
 }
 
-// 2. Constante con los 12 meses del año y datos dummy
-export const chartYearData: AnaliticaYearData[] = [
-  { month: "Enero", quantity: 222 },
-  { month: "Febrero", quantity: 167 },
-  { month: "Marzo", quantity: 242 },
-  { month: "Abril", quantity: 373 },
-  { month: "Mayo", quantity: 301 },
-  { month: "Junio", quantity: 245 },
-  { month: "Julio", quantity: 409 },
-  { month: "Agosto", quantity: 261 },
-  { month: "Septiembre", quantity: 327 },
-  { month: "Octubre", quantity: 342 },
-  { month: "Noviembre", quantity: 137 },
-  { month: "Diciembre", quantity: 446 }
-];
 
 const chartYearConfig = {
-  views: {
-    label: "Page Views",
+  total: {
+    label: "Inspecciones RTM", // ◄ Este texto saldrá automáticamente en el Tooltip y la Leyenda
   },
 } satisfies ChartConfig
 
 
 
-export function ChartBarYearInteractive() {
+export function ChartBarYearInteractive({chartYearData, isPorcentaje}: ChartBarYearInteractiveProps) {
 //const { state } = useSidebar()
    
 
@@ -262,6 +263,8 @@ export function ChartBarYearInteractive() {
             margin={{
               left: 12,
               right: 12,
+              top: 30,
+              bottom: 12
             }}
            >
             
@@ -269,18 +272,13 @@ export function ChartBarYearInteractive() {
             <CartesianGrid vertical={false} />
 
             <XAxis
-              dataKey="month" 
+              dataKey="mes" 
               tickLine={true}
               axisLine={false}
               tickMargin={8}
-              height={60}
+              height={30}
             >
-              <Label
-                value="Dias del Mes"
-                position="insideBottom"
-                offset={0}
-                className="font-bold fill-slate-500 text-xs tracking-wide uppercase"
-              />
+              
             </XAxis>
 
             <YAxis width={"auto"} >
@@ -292,21 +290,24 @@ export function ChartBarYearInteractive() {
             <ChartTooltip
               content={
                 <ChartTooltipContent
+                formatter={(label) => isPorcentaje? `Tasa de rechazo: ${label}%` : `Total de RTMs: ${label}`}
                   className="w-37.5"
-                  nameKey="views"
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  }}
+                  nameKey="total"
+                  
                 />
               }
             />
 
-             
-            <Bar dataKey={"quantity"} fill={`#62748E`} />
+             <ChartLegend content={<ChartLegendContent />} />
+            <Bar dataKey={"total"} fill={`#62748E`}>
+              <LabelList
+              formatter={(label) => isPorcentaje? `${label}%` : label}
+                dataKey="total"
+                position="top"       // ◄ Lo ubica justo encima de la barra
+                offset={8}           // ◄ Separación en píxeles para que no toque la barra
+                className="fill-slate-500 text-[10px] font-medium" // ◄ Estilo sutil con Tailwind
+              />
+            </Bar>
 
 
 
@@ -331,6 +332,12 @@ export function ChartBarYearInteractive() {
 
 
 
+
+
+
+
+
+
 // ============================================================================
 // 1. SUBCOMPONENTE REUTILIZABLE PARA LOS CUADROS 3D
 // ============================================================================
@@ -338,9 +345,9 @@ interface CuadroMetricaProps {
   label: string;
   valor: string | number; // Cambiado a string | number para soportar el texto por defecto
   esPrimario?: boolean;
+  isPorcentaje:boolean;
 }
-
-function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps) {
+function CuadroMetrica({ label, valor, esPrimario = false, isPorcentaje = false }: CuadroMetricaProps) {
   return (
     <div 
       className={`
@@ -359,7 +366,7 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
           typeof valor === "number" 
             ? esPrimario ? "text-blue-600 text-5xl" : "text-slate-900 text-5xl"
             : "text-sm text-slate-400 font-medium normal-case tracking-normal"
-        }`}
+        } ${isPorcentaje && typeof valor === "number" ? "text-4xl" : ""}`} // ◄ Ajuste: un poco más pequeño si es % para que quepa el símbolo
         style={{
           textShadow: typeof valor === "number"
             ? esPrimario 
@@ -368,7 +375,11 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
             : 'none'
         }}
       >
+        {/* Renderizado condicional del símbolo */}
         {valor}
+        {isPorcentaje && typeof valor === "number" && (
+          <span className="text-2xl ml-0.5">%</span>
+        )}
       </span>
     </div>
   );
@@ -385,16 +396,25 @@ function CuadroMetrica({ label, valor, esPrimario = false }: CuadroMetricaProps)
 
 
 
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // 2. COMPONENTE PRINCIPAL
 // ============================================================================
 
-interface CompleteAnalyticsData extends AdminAnalyticsData, AdminAnalyticsDiaryData {}
+
 
 interface AnaliticaPorCantidadProps {
   titulo: string;
   descripcion: string;
-  datos: CompleteAnalyticsData | undefined
+  datos: CompleteDataRTMType | undefined
 }
 
 export default function AnaliticaPorCantidad({
@@ -408,6 +428,43 @@ export default function AnaliticaPorCantidad({
   // Si hay un rango completo, puedes simular o computar el valor (ej. 0 o fetch). 
   // Mientras falte un extremo, muestra el string por defecto.
   const valorRangoEspecial = date?.from && date?.to ? 0 : "Seleccione rango";
+
+  const isPorcentaje = titulo === "Tasa de Rechazo";
+  
+
+  const datosSeparados = {
+    total_hoy: 0,
+    total_ayer: 0,
+    total_mes: 0,
+    total_anio: 0,
+    chartMonthData: [] as DayChartItem[],
+    chartYearData: [] as MonthChartItem[]
+  }
+
+  if (titulo === "Inspecciones Realizadas"){
+    datosSeparados.total_hoy = datos?.total_rtm_hoy ?? 0;
+    datosSeparados.total_ayer = datos?.total_rtm_ayer ?? 0;
+    datosSeparados.total_mes = datos?.total_rtm_mes_actual ?? 0;
+    datosSeparados.total_anio = datos?.total_rtm_anio_actual ?? 0;
+    datosSeparados.chartMonthData = datos?.chart_mes_actual ?? [];
+    datosSeparados.chartYearData = datos?.chart_anio_actual ?? [];
+  }else if (titulo === "Cantidad RTM Reprobadas") { // ◄ Nueva condición para los rechazos
+    datosSeparados.total_hoy = datos?.total_rtm_rechazados_hoy ?? 0;
+    datosSeparados.total_ayer = datos?.total_rechazado_ayer ?? 0;
+    datosSeparados.total_mes = datos?.total_rechazado_mes ?? 0;
+    datosSeparados.total_anio = datos?.total_rechazado_anio ?? 0;
+    datosSeparados.chartMonthData = datos?.chart_rechazado_mes ?? [];
+    datosSeparados.chartYearData = datos?.chart_rechazado_anio ?? [];
+  }else if (titulo === "Tasa de Rechazo") {
+
+  datosSeparados.total_hoy = datos?.tasa_rechazo_hoy ?? 0;
+  datosSeparados.total_ayer = datos?.tasa_rechazo_ayer ?? 0;
+  datosSeparados.total_mes = datos?.tasa_rechazo_mes ?? 0;
+  datosSeparados.total_anio = datos?.tasa_rechazo_anio ?? 0;
+  datosSeparados.chartMonthData = datos?.chart_tasa_rechazo_mes ?? [];
+  datosSeparados.chartYearData = datos?.chart_tasa_rechazo_anio ?? [];
+
+}
 
   return (
     <div className="flex flex-col gap-6 pl-2 md:pl-4">
@@ -426,14 +483,15 @@ export default function AnaliticaPorCantidad({
 
       {/* Contenedor Flex Responsivo invocando el subcomponente */}
       <div className="flex flex-wrap gap-5 w-full items-start">
-        <CuadroMetrica label="Hoy" valor={Number(datos?.total_rtm_hoy ?? 0)} esPrimario={true} />
-<CuadroMetrica label="Ayer" valor={Number(datos?.total_rtm_ayer ?? 0)} />
-<CuadroMetrica label="Este Mes" valor={Number(datos?.total_rtm_mes_actual ?? 0)} />
-<CuadroMetrica label="Este Año" valor={Number(datos?.total_rtm_anio_actual ?? 0)} />
+        <CuadroMetrica label="Hoy" valor={Number(datosSeparados.total_hoy)} esPrimario={true} isPorcentaje={isPorcentaje}/>
+        <CuadroMetrica label="Ayer" valor={Number(datosSeparados.total_ayer)} isPorcentaje={isPorcentaje} />
+        <CuadroMetrica label="Este Mes" valor={Number(datosSeparados.total_mes)} isPorcentaje={isPorcentaje}/>
+        <CuadroMetrica label="Este Año" valor={Number(datosSeparados.total_anio)} isPorcentaje={isPorcentaje}/>
 
         {/* Nuevo bloque: Cuadro especial acoplado al seleccionador */}
         <div className="flex items-center  gap-4">
           <CuadroMetrica 
+          isPorcentaje={isPorcentaje}
             label="Por Rango" 
             valor={valorRangoEspecial} 
             esPrimario={typeof valorRangoEspecial === "number"} 
@@ -494,11 +552,11 @@ export default function AnaliticaPorCantidad({
       <div className="  mt-6 flex flex-row flex-wrap gap-6">
 
         <div className="overflow-scroll ">
-<ChartBarMonthInteractive></ChartBarMonthInteractive>
+        <ChartBarMonthInteractive chartMonthData={datosSeparados.chartMonthData} isPorcentaje={isPorcentaje}></ChartBarMonthInteractive>
         </div>
         
         <div className="overflow-scroll ">
-        <ChartBarYearInteractive></ChartBarYearInteractive>
+        <ChartBarYearInteractive chartYearData={datosSeparados.chartYearData} isPorcentaje={isPorcentaje}></ChartBarYearInteractive>
         </div>
       </div>
 

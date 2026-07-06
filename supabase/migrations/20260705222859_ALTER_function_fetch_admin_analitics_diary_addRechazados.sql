@@ -1,3 +1,8 @@
+-- =========================================================================
+-- DROPS
+-- =========================================================================
+-- Borrar la versión anterior para permitir el cambio en las columnas del RETURNS TABLE
+DROP FUNCTION IF EXISTS public.fetch_admin_analitics_diary();
 
 -- =========================================================================
 -- CREACIÓN DE LA FUNCIÓN

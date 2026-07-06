@@ -3,6 +3,58 @@
 import AnaliticaPorCantidad from "@/components/dashboard/admin/AnaliticaPorCantidad";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { useContext } from "react";
+import { DayChartItem, MonthChartItem } from "../layout";
+
+
+
+
+
+export type CompleteDataRTMType = {
+  // ========================================================================
+  // TOTALES DIARIOS
+  // ========================================================================
+  total_rtm_hoy: number;
+  total_rtm_rechazados_hoy: number;
+  tasa_rechazo_hoy: number;
+
+  // ========================================================================
+  // HISTÓRICOS
+  // ========================================================================
+  total_rtm_ayer: number;
+  total_rechazado_ayer: number;
+  tasa_rechazo_ayer: number;
+
+  // ========================================================================
+  // ACUMULADOS
+  // ========================================================================
+  total_rtm_mes_actual: number;
+  total_rtm_anio_actual: number;
+
+  total_rechazado_mes: number;
+  total_rechazado_anio: number;
+
+  tasa_rechazo_mes: number;
+  tasa_rechazo_anio: number;
+
+  // ========================================================================
+  // GRÁFICOS BASE
+  // ========================================================================
+  chart_mes_actual: DayChartItem[];
+  chart_anio_actual: MonthChartItem[];
+
+  chart_rechazado_mes: DayChartItem[];
+  chart_rechazado_anio: MonthChartItem[];
+
+  // ========================================================================
+  // GRÁFICOS DE TASAS
+  // ========================================================================
+  chart_tasa_rechazo_mes: DayChartItem[];
+
+  chart_tasa_rechazo_anio: MonthChartItem[];
+} | undefined;
+
+
+
 
 
 export default function AnaliticaPage() {
@@ -37,43 +89,110 @@ const mesFormateado = mesActualRaw.charAt(0).toUpperCase() + mesActualRaw.slice(
 
 // Guardamos el valor en una constante segura (si es undefined, vale 0)
 const totalHoy = analyticsDataDiary?.total_rtm_hoy ?? 0;
+const totalRechazadosHoy = analyticsDataDiary?.total_rtm_rechazados_hoy ?? 0;
 
 
 
 
 
-
-const completeDataRTM = analyticsData 
+const completeDataRTM: CompleteDataRTMType | undefined = analyticsData 
   ? {
-      ...analyticsData, // Copia todas las propiedades originales (totales y gráficos)
+      ...analyticsData, 
       
-      // Inyectamos la nueva propiedad con el dato fresco del polling
+      // =======================================================================
+      // 1. TOTALES DIARIOS Y TASAS
+      // =======================================================================
       total_rtm_hoy: totalHoy,
+      total_rtm_rechazados_hoy: totalRechazadosHoy, 
       
-      // Mantenemos el total de ayer intacto (viene directo del RPC histórico)
+      // Tasa Hoy: (Rechazos Hoy / Total Hoy) * 100
+      tasa_rechazo_hoy: totalHoy > 0 
+        ? Number(((totalRechazadosHoy / totalHoy) * 100).toFixed(2)) 
+        : 0,
+
+      // =======================================================================
+      // 2. HISTÓRICOS Y TASAS (Ayer)
+      // =======================================================================
       total_rtm_ayer: analyticsData.total_rtm_ayer,
+      total_rechazado_ayer: analyticsData.total_rechazado_ayer,
       
-      // Le sumamos lo de hoy al acumulado del mes y del año en tiempo real
+      // Tasa Ayer: (Rechazos Ayer / Total Ayer) * 100
+      tasa_rechazo_ayer: analyticsData.total_rtm_ayer > 0 
+        ? Number(((analyticsData.total_rechazado_ayer / analyticsData.total_rtm_ayer) * 100).toFixed(2)) 
+        : 0,
+
+      // =======================================================================
+      // 3. ACUMULADOS Y TASAS (Mes y Año)
+      // =======================================================================
       total_rtm_mes_actual: analyticsData.total_rtm_mes_actual + totalHoy,
       total_rtm_anio_actual: analyticsData.total_rtm_anio_actual + totalHoy,
 
+      total_rechazado_mes: analyticsData.total_rechazado_mes + totalRechazadosHoy,
+      total_rechazado_anio: analyticsData.total_rechazado_anio + totalRechazadosHoy,
 
-// 1. ACTUALIZAR GRÁFICO DEL MES (Eje X: Días '01', '02'...)
+      // Tasa Mes: (Acumulado Rechazos Mes / Acumulado Total Mes) * 100
+      tasa_rechazo_mes: (analyticsData.total_rtm_mes_actual + totalHoy) > 0 
+        ? Number((((analyticsData.total_rechazado_mes + totalRechazadosHoy) / (analyticsData.total_rtm_mes_actual + totalHoy)) * 100).toFixed(2)) 
+        : 0,
+
+      // Tasa Año: (Acumulado Rechazos Año / Acumulado Total Año) * 100
+      tasa_rechazo_anio: (analyticsData.total_rtm_anio_actual + totalHoy) > 0 
+        ? Number((((analyticsData.total_rechazado_anio + totalRechazadosHoy) / (analyticsData.total_rtm_anio_actual + totalHoy)) * 100).toFixed(2)) 
+        : 0,
+
+      // =======================================================================
+      // 4. ACTUALIZACIÓN DE GRÁFICOS (Cantidades)
+      // =======================================================================
       chart_mes_actual: analyticsData.chart_mes_actual?.map((item) => {
-        if (item.dia === diaActualStr) {
-          return { ...item, total: item.total + totalHoy }; // Suma en tiempo real al día de hoy
-        }
-        return item; // Los demás días se quedan intactos
+        if (item.dia === diaActualStr) return { ...item, total: (item.total?item.total:0) + totalHoy }; 
+        return item; 
       }) ?? [],
 
-      // 2. ACTUALIZAR GRÁFICO DEL AÑO (Eje X: Meses 'Enero', 'Febrero'...)
       chart_anio_actual: analyticsData.chart_anio_actual?.map((item) => {
-        if (item.mes === mesFormateado) {
-          return { ...item, total: item.total + totalHoy }; // Suma en tiempo real al mes actual
-        }
-        return item; // Los demás meses se quedan intactos
+        if (item.mes === mesFormateado) return { ...item, total: (item.total?item.total:0) + totalHoy }; 
+        return item; 
       }) ?? [],
 
+      chart_rechazado_mes: analyticsData.chart_rechazado_mes?.map((item) => {
+        if (item.dia === diaActualStr) return { ...item, total_rechazado: (item.total?item.total:0) + totalRechazadosHoy }; 
+        return item; 
+      }) ?? [],
+
+      chart_rechazado_anio: analyticsData.chart_rechazado_anio?.map((item) => {
+        if (item.mes === mesFormateado) return { ...item, total_rechazado: (item.total?item.total:0) + totalRechazadosHoy }; 
+        return item; 
+      }) ?? [],
+
+      // =======================================================================
+      // 5. NUEVOS GRÁFICOS DE TASAS DE RECHAZO (Calculados al vuelo)
+      // =======================================================================
+      // Combinamos el array base del mes con el array de rechazos del mes usando el índice (index)
+      chart_tasa_rechazo_mes: analyticsData.chart_mes_actual?.map((item, index) => {
+        const rechazoItem = analyticsData.chart_rechazado_mes?.[index];
+        
+        // Verificamos si es el día de hoy para inyectarle el polling en tiempo real a ambos valores
+        const isToday = item.dia === diaActualStr;
+        const currentTotal = isToday ? (item.total || 0) + totalHoy : (item.total || 0);
+        const currentRechazo = isToday ? (rechazoItem?.total || 0) + totalRechazadosHoy : (rechazoItem?.total || 0);
+
+        return {
+          dia: item.dia,
+          total: currentTotal > 0 ? Number(((currentRechazo / currentTotal) * 100).toFixed(2)) : 0
+        };
+      }) ?? [],
+
+      chart_tasa_rechazo_anio: analyticsData.chart_anio_actual?.map((item, index) => {
+        const rechazoItem = analyticsData.chart_rechazado_anio?.[index];
+        
+        const isThisMonth = item.mes === mesFormateado;
+        const currentTotal = isThisMonth ? (item.total || 0) + totalHoy : (item.total || 0);
+        const currentRechazo = isThisMonth ? (rechazoItem?.total || 0) + totalRechazadosHoy : (rechazoItem?.total || 0);
+
+        return {
+          mes: item.mes,
+          total: currentTotal > 0 ? Number(((currentRechazo / currentTotal) * 100).toFixed(2)) : 0
+        };
+      }) ?? [],
 
     }
   : undefined;
@@ -81,9 +200,6 @@ const completeDataRTM = analyticsData
 
 
 
-
-
-  console.log(completeDataRTM)
 
 
   return (
@@ -113,6 +229,16 @@ const completeDataRTM = analyticsData
         <AnaliticaPorCantidad 
           titulo="Inspecciones Realizadas" 
           descripcion="Volumen total de vehículos que han ingresado a la línea de revisión (Primeras entradas)."
+          datos={completeDataRTM} 
+        />
+        <AnaliticaPorCantidad 
+          titulo="Cantidad RTM Reprobadas" 
+          descripcion="RTMs reprobadas."
+          datos={completeDataRTM} 
+        />
+        <AnaliticaPorCantidad 
+          titulo="Tasa de Rechazo" 
+          descripcion="Porcentaje de reprobadas con respecto a todas la placas por primera vez (no se cuentan reinspecciones reprobadas)"
           datos={completeDataRTM} 
         />
       </div>

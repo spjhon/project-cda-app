@@ -1,4 +1,4 @@
-
+DROP FUNCTION IF EXISTS public.fetch_admin_analitics();
 
 CREATE OR REPLACE FUNCTION public.fetch_admin_analitics()
 RETURNS TABLE (
@@ -17,7 +17,7 @@ RETURNS TABLE (
     chart_rechazado_anio JSON 
 )
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
@@ -142,7 +142,7 @@ BEGIN
         )
         SELECT 
             TO_CHAR(cal.fecha_calendario, 'DD') as dia,
-            COALESCE(SUM(mv.cantidad), 0)::INTEGER as total
+            COALESCE(SUM(mv.cantidad), 0)::INTEGER as total_rechazado
         FROM todos_los_dias cal
         LEFT JOIN public.mv_reportes_diarios mv ON mv.fecha = cal.fecha_calendario 
             AND mv.tenant_id = v_tenant_id 
@@ -198,7 +198,7 @@ BEGIN
                 WHEN 7 THEN 'Julio' WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre'
                 WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre'
             END as mes,
-            COALESCE(SUM(mv.cantidad), 0)::INTEGER as total
+            COALESCE(SUM(mv.cantidad), 0)::INTEGER as total_rechazado
         FROM todos_los_meses cal
         LEFT JOIN public.mv_reportes_diarios mv ON EXTRACT(MONTH FROM mv.fecha) = cal.numero_mes
             AND EXTRACT(YEAR FROM mv.fecha) = EXTRACT(YEAR FROM v_hoy)
