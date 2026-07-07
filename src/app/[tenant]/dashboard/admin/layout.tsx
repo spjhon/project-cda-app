@@ -19,13 +19,13 @@ interface AdminDashboardLayout {
 export interface DayChartItem {
   dia: string;             // '01', '02', '03'...
   total?: number;          // Para el gráfico de RTM aprobadas
-  total_rechazado?: number; // Para el gráfico de Rechazos
+  
 }
 
 export interface MonthChartItem {
   mes: string;             // 'Enero', 'Febrero'...
   total?: number;          // Para el gráfico de RTM aprobadas
-  total_rechazado?: number; // Para el gráfico de Rechazos
+  
 }
 
 // ============================================================================

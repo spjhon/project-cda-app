@@ -65,7 +65,7 @@ export default function ReceptionistLoaderContext({
   const { data, isFetching, isError, error, refetch, isSuccess } = useQuery({
     queryKey: ["templates", "list", pathname], //TODO, HAY QUE CUADRAR ESTE PATH NAME PARA QUE SOLO SE ACTUALIZE CUANDO SE ENTRE EN EL PAGE.TSX CORRECTO
     queryFn: async () => {
-      console.log("se llamo la funcion de query");
+      console.log("se llamo la funcion de query del recepcionista");
       // LLAMADA DIRECTA A SUPABASE
       const { data, error } = await supabaseBrowser.rpc(
         "fetch_orders_templates",

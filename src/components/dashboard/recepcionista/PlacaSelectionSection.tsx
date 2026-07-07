@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   ClipboardCheck,
   FileCheck,
-  Globe,
   Hash,
   Loader2,
   RefreshCcw,
@@ -47,6 +46,7 @@ import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { fetchDataWithPlaca } from "@/lib/server-actions/fetch_data_with_placa";
 import { getInitialOrderFormData } from "@/app/[tenant]/dashboard/recepcionista/page";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import RuntScraperModal from "./RuntScraperModal";
 
 interface ServiceOption {
   id: ServiceType;
@@ -561,9 +561,23 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
 
       } else {
+        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
         setIsNewVehicle(true);
         setSearchStatus("not_found");
         setMessage("No se encontraron registros previos. Puedes continuar con el registro manual.");
+        setFormData((prev) => ({
+            ...prev,
+            ...initialData,
+          es_reinspeccion: prev.es_reinspeccion,
+           
+           condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })), // Reseteamos la URL a vacío,
+      vehicle: {
+        ...initialData.vehicle,
+        placa: prev.vehicle.placa
+      }
+          }));
+        
       }
 
 
@@ -596,16 +610,6 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
 
 
-
-  // RUNT
-  const handleRuntQuery = () => {
-
-    console.log(
-      "Consultando RUNT para:",
-      formData.vehicle.placa
-    );
-
-  };
 
 
 
@@ -957,34 +961,21 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
               </div>
 
+
+
+
+
               {/* RUNT */}
               <div className="md:col-span-4">
-                <Button
-                  type="button"
-                  onClick={handleRuntQuery}
-                  disabled={
-                    !formData.vehicle.placa
-                  }
-                  className={`
-                    w-full h-16 gap-2 font-bold rounded-xl transition-all active:scale-95 text-lg
-                    ${
-                      formData.vehicle.placa
-                        ? "bg-[#f57c00] hover:bg-[#e65100] text-white shadow-lg shadow-orange-100 cursor-pointer"
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                    }
-                  `}
-                >
-                  <Globe className="h-5 w-5" />
-
-                  <span className="hidden md:inline">
-                    ACTUALIZAR DATOS
-                  </span>
-
-                  <span className="md:hidden">
-                    RUNT
-                  </span>
-                </Button>
+                <RuntScraperModal 
+                  formData={formData} 
+                  setFormData={setFormData} 
+                />
               </div>
+
+
+
+              
             </div>
 
             {/* ESTADO PLACA */}
