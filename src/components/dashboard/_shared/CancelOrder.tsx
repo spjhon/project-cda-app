@@ -109,6 +109,7 @@ export default function CancelOrder({ orden, tenantId, mutation }: CancelOrderPr
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault(); // Evita que Shadcn cierre el modal antes de que termine el proceso asíncrono
+                e.stopPropagation();
                 handleConfirmCancel();
               }}
               disabled={isCancelingOrder}

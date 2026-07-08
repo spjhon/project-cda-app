@@ -222,6 +222,7 @@ const  currentTemplate = contextRecivedDirectorTecnico?.DirectorTecnicoContextVa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     // Llamamos a la Server Action pasándole nuestro estado
     const {data: createTemplateData, error} = await createOrderTemplateAction(formData);

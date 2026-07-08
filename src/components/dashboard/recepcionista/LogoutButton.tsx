@@ -15,6 +15,7 @@ export function LogoutButton({ className, children }: LogoutButtonProps) {
   
   const handleLogout = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    event.stopPropagation();
 
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();

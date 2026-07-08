@@ -104,6 +104,7 @@ export default function DirectorTecnicoOrderForm({
   // Validación local y envío de datos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     setIsSubmitting(true);
     setServerError(null);

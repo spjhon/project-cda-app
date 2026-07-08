@@ -321,6 +321,7 @@ if (!PermissionsContextReceived?.PermissionsContextValue.user?.signature_base64)
  // manejador del boton submit del final
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
 
 

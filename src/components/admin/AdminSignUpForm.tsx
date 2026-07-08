@@ -47,6 +47,7 @@ export function AdminSignUpForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    event.stopPropagation();
     setError(null);
 
     if (password !== repeatPassword) {

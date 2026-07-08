@@ -32,6 +32,7 @@ export function UpdatePasswordForm({
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const supabase = createSupabaseBrowserClient();
     setIsLoading(true);
     setError(null);

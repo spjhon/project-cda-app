@@ -80,7 +80,7 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
     isLoading: isLoadingCaptcha,
     isFetching: isFetchingCaptcha,
     isError: isErrorCaptcha,
-    refetch: recargarCaptcha,
+    
   } = useQuery({
     queryKey: ["runtCaptcha", placa],
     queryFn: async () => {
@@ -151,17 +151,16 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
 
 
 
-        setIsOpen(false); // Cerramos el modal
-        setCaptchaValue(""); // Limpiamos el input
-        setCaptchaImage(null);
-      } else {
-        alert(`Error del RUNT: ${data.message}`);
         
+        setCaptchaValue(""); // Limpiamos el input
+       
+      }else{
+        console.log("✅ Error desde el runt:", data.message);
       }
     },
     onError: (error: unknown) => {
       console.error("Error en la mutación:", error);
-      alert("Hubo un error de conexión con tu PC local.");
+      
     },
   });
 
@@ -187,6 +186,7 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
     if(!open)
       setCaptchaValue(""); // Limpiamos el input
       setCaptchaImage(null);
+      solveRuntMutation.reset();
   };
 
 
@@ -197,6 +197,7 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
   
   const handleSubmitRunt = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!captchaValue || !numeroDocumento || !captchaData?.sessionId) return;
 
     // Disparamos la mutación con los datos recolectados
@@ -340,6 +341,36 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
               disabled={solveRuntMutation.isPending}
             />
           </div>
+
+          {/* 🔍 ESTADO DE BÚSQUEDA Y MENSAJES EN TIEMPO REAL */}
+{(solveRuntMutation.isPending || solveRuntMutation.isError || solveRuntMutation.data) && (
+  <div className={`p-3 rounded-lg border text-sm text-center transition-all ${
+    solveRuntMutation.isPending 
+      ? "bg-orange-50 border-orange-200 text-orange-800" 
+      : solveRuntMutation.isError 
+      ? "bg-destructive/10 border-destructive/20 text-destructive" 
+      : "bg-emerald-50 border-emerald-200 text-emerald-800"
+  }`}>
+    {solveRuntMutation.isPending && (
+      <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
+        <Loader2 className="h-4 w-4 animate-spin text-[#f57c00]" />
+        <span>Buscando datos en el RUNT... Por favor espera.</span>
+      </div>
+    )}
+    
+    {solveRuntMutation.isError && (
+      <p className="font-semibold">
+        ❌ {(solveRuntMutation.error as any)?.message || "Hubo un error de conexión con tu PC local."}
+      </p>
+    )}
+
+    {!solveRuntMutation.isPending && solveRuntMutation.data && (
+      <p className="font-medium">
+        ℹ️ {solveRuntMutation.data.message}
+      </p>
+    )}
+  </div>
+)}
 
           {/* ACCIONES DEL FORMULARIO */}
           <div className="flex gap-3 pt-2">

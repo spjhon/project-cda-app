@@ -50,6 +50,7 @@ export const AdminLoginForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsLoading(true);
 
 

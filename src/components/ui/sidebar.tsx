@@ -101,6 +101,7 @@ function SidebarProvider({
         (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
+        event.stopPropagation();
         toggleSidebar()
       }
     }
