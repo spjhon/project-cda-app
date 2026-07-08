@@ -136,7 +136,7 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
       if (data.success) {
         console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
         
-        // Actualizamos el estado global del formulario de Next.js
+        /** 
         setFormData((prev: ZodFullFormDataType) => ({
           ...prev,
           vehicle: {
@@ -147,12 +147,16 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
             // ... los demás datos que extraigas del RUNT
           },
         }));
-        
+        */
+
+
+
         setIsOpen(false); // Cerramos el modal
         setCaptchaValue(""); // Limpiamos el input
+        setCaptchaImage(null);
       } else {
         alert(`Error del RUNT: ${data.message}`);
-        recargarCaptcha(); // Si falló el captcha, forzamos uno nuevo automáticamente
+        
       }
     },
     onError: (error: unknown) => {
@@ -283,8 +287,8 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
               type="text"
               placeholder="Ej: AB12"
               value={captchaValue}
-              onChange={(e) => setCaptchaValue(e.target.value.toUpperCase())}
-              className="uppercase font-mono text-center tracking-widest text-lg h-11"
+              onChange={(e) => setCaptchaValue(e.target.value)}
+              className="font-mono text-center tracking-widest text-lg h-11"
               maxLength={6}
               required
               disabled={isLoadingCaptcha || solveRuntMutation.isPending || !captchaData?.captcha}
@@ -351,7 +355,7 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
             <Button
               type="submit"
               className="w-2/3 h-11 bg-[#f57c00] hover:bg-[#e65100] font-bold text-white gap-2"
-              disabled={isLoadingCaptcha || solveRuntMutation.isPending || !captchaValue || !captchaData?.captchaBase64}
+              disabled={isLoadingCaptcha || solveRuntMutation.isPending || !captchaValue || !captchaData?.captcha}
             >
               {solveRuntMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {solveRuntMutation.isPending ? "Extrayendo..." : "Consultar e Importar"}
