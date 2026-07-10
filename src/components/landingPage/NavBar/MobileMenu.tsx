@@ -1,11 +1,11 @@
 
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
+ 
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -15,6 +15,11 @@ import { NavigationMenu, NavigationMenuList } from "@/components/ui/navigation-m
 
 import {RouteProps} from "./Navbar"
 import Link from "next/link"
+import Image from "next/image"; // 🔑 Importamos el componente de Next.js
+
+import LogoDark from "../../../../public/logo_dark_transparente_resize_cropped.png"
+import LogoLight from "../../../../public/logo_light_transparente_resize_cropped.png"
+import { ModeToggle } from "./mode-toggle"
 
 
 interface MobileMenuProps {
@@ -32,8 +37,8 @@ export function MobileMenu({routes}: MobileMenuProps) {
 
 
 
-      <DrawerTrigger asChild className="xl:hidden">
-        <Button variant="outline" >Menu</Button>
+      <DrawerTrigger asChild className=" p-4">
+        <Button variant="outline" className={"border-black"}>Menu</Button>
       </DrawerTrigger>
 
 
@@ -41,40 +46,64 @@ export function MobileMenu({routes}: MobileMenuProps) {
         <div className="mx-auto w-full max-w-sm">
 
           <DrawerHeader>
-            <DrawerTitle>Colombian Real State</DrawerTitle>
-            <DrawerDescription>Vende Tu casa con confianza</DrawerDescription>
+            <DrawerTitle></DrawerTitle>
+            <Link
+            prefetch={true}
+              rel="noreferrer noopener"
+              href="/"
+              className="flex items-center justify-center"
+            >
+              {/* ☀️ LOGO PARA MODO CLARO: Se muestra por defecto, se oculta en modo oscuro */}
+              <Image
+                src={LogoLight}
+                alt="cdApp Logo"
+                priority // 🏎️ Le da prioridad de carga por estar en el Navbar (LCP optimization)
+                className="block dark:hidden w-auto h-15" // Ajusta h-8 (altura) según necesites tu diseño
+              />
+            
+              {/* 🌙 LOGO PARA MODO OSCURO: Se oculta por defecto, se muestra en modo oscuro */}
+              <Image
+                src={LogoDark}
+                alt="cdApp Logo"
+                priority
+                className="hidden dark:block w-auto h-15" // Mismas dimensiones para que no salte el layout
+              />
+            </Link>
           </DrawerHeader>
 
           {/* mobile */}
           <div className="p-4 pb-0">
-            <NavigationMenu className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <NavigationMenu className="mx-auto my-10">
 
-              <NavigationMenuList className="">
-                <nav className="flex gap-2">
-                  {routes.map((route, i) => (
-                    <DrawerClose asChild key={i}>
-                      <Link
-                        rel="noreferrer noopener"
-                        href={route.href}
-                        className={`text-[17px] ${buttonVariants({
-                          variant: "ghost",
-                        })}`}
-                        >
-                        {route.label}
-                      </Link>
-                    </DrawerClose>
-                  ))}
-                </nav>
+              <NavigationMenuList className="flex flex-col items-center w-full justify-center gap-6">
+         
+              {routes.map((route: RouteProps, i) => (
+                <DrawerClose asChild key={i}>
+                <Link
+                prefetch={true}
+                  rel="noreferrer noopener"
+                  href={route.href}
+                
+                  
+                >
+                  <Button  variant="outline" className={"text-[17px] font-bold! border-black p-4 bg-card"} >
+                  {route.label}
+                  </Button>
+                </Link>
+                </DrawerClose>
+              ))}
+           
               </NavigationMenuList>
               
             </NavigationMenu>
           </div>
 
 
-          <DrawerFooter>
-            <Button>Submit</Button>
+          <DrawerFooter className="my-10">
+           
+              
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="default">Cerrar</Button>
             </DrawerClose>
           </DrawerFooter>
         </div>

@@ -53,9 +53,10 @@ export const Navbar = () => {
   
   return (
     <header className="bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-0 sticky border-b top-0 z-40 ">
-      <div className="container flex flex-row justify-between items-center mx-auto relative h-13">
+      <div className="container flex flex-row justify-between items-center mx-auto px-3 relative h-13">
 
         <Link
+        prefetch={true}
   rel="noreferrer noopener"
   href="/"
   className="ml-2 flex items-center"
@@ -118,7 +119,13 @@ export const Navbar = () => {
 
         </div>
 
-        <MobileMenu routes = {routeList} />
+
+        <div className="flex gap-6 xl:hidden">
+          <ModeToggle></ModeToggle>
+ <MobileMenu routes = {routeList} />
+          </div>   
+
+       
 
       </div>
     </header>

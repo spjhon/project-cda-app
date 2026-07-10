@@ -1,13 +1,11 @@
-
-
+import Image from "next/image";
 import { CurrentYear } from "@/components/landingPage/CurrentYear";
-import  Hero from "@/components/landingPage/Hero";
+import Hero from "@/components/landingPage/Hero";
 import { HeroVideo } from "@/components/landingPage/HeroVideo";
 import { LogoMarquee } from "@/components/landingPage/LogoMarquee";
 import { Navbar } from "@/components/landingPage/NavBar/Navbar";
 import {
   AlertTriangle,
-
   Boxes,
   Clock,
   Cloud,
@@ -15,7 +13,6 @@ import {
   DatabaseZap,
   FileCode2,
   Computer,
-  
   LayoutTemplate,
   FileUser,
   LucideIcon,
@@ -26,6 +23,10 @@ import {
 import Link from "next/link";
 import { Suspense } from "react";
 
+import ImageRecepcionista from "../../public/landing_page_recepcionista_reziced.png";
+import ImageSecretaria from "../../public/langing_page_secretaria__reziced.png";
+import ImageDirectorTecnico from "../../public/langing_page_diirector_tecnico02__reziced.png";
+
 interface Feature {
   icon: LucideIcon;
   title: string;
@@ -33,129 +34,213 @@ interface Feature {
   color: string;
 }
 
+const features: Feature[] = [
+  // --- Tus originales traducidos ---
+  {
+    icon: Shield,
+    title: "Autenticación Robusta",
+    description:
+      "Inicio de sesión seguro con email/contraseña y proveedores como Google.",
+    color: "text-green-600",
+  },
+  {
+    icon: Database,
+    title: "Gestión de Archivos",
+    description:
+      "Almacenamiento integrado con Supabase Storage, descargas seguras y permisos.",
+    color: "text-orange-600",
+  },
 
+  {
+    icon: Clock,
+    title: "Gestión de Tickets",
+    description: "Sistema dashboard con comentarios en tiempo real",
+    color: "text-teal-600",
+  },
 
+  {
+    icon: Boxes,
+    title: "Arquitectura Multi-Tenant",
+    description:
+      "Aislamiento total por organización mediante subdominios o rutas dinámicas.",
+    color: "text-fuchsia-600",
+  },
+  {
+    icon: LayoutTemplate,
+    title: "Layout Responsivo Pro",
+    description: "Se adapta a mobiles y pantallas de escritorio",
+    color: "text-cyan-600",
+  },
+  {
+    icon: FileCode2,
+    title: "Menú Móvil Animado",
+    description:
+      "Drawer de shadcn con trigger de hamburguesa animado mediante CSS.",
+    color: "text-orange-500",
+  },
 
+  {
+    icon: AlertTriangle,
+    title: "Manejo de Errores 404",
+    description:
+      "Páginas de error personalizadas y estilizadas con el sistema de temas de shadcn.",
+    color: "text-red-700",
+  },
+  {
+    icon: Zap, // Importa 'Zap' de lucide-react
+    title: "Arquitectura RPC-First",
+    description:
+      "Comunicación eficiente entre cliente y servidor mediante llamadas a procedimientos remotos, centralizando la lógica de negocio.",
+    color: "text-yellow-600",
+  },
+  {
+    icon: Server, // Importa 'Server' de lucide-react
+    title: "Renderizado SSR Optimizado",
+    description:
+      "Uso avanzado de Server-Side Rendering con Next.js para garantizar velocidad de carga y SEO superior en rutas dinámicas.",
+    color: "text-indigo-500",
+  },
+  {
+    icon: DatabaseZap, // Importa 'DatabaseZap' o 'Table2' de lucide-react
+    title: "Esquema SQL Profesional",
+    description:
+      "Arquitectura de base de datos relacional en PostgreSQL con políticas de seguridad RLS y tipado estricto mediante esquemas.",
+    color: "text-blue-700",
+  },
+  {
+    icon: Cloud, // Importa 'Cloud' de lucide-react
+    title: "Despliegue en Netlify",
+    description:
+      "Infraestructura escalable desplegada globalmente con soporte nativo para funciones Edge y tiempos de respuesta mínimos.",
+    color: "text-cyan-500",
+  },
+];
 
-
-
-
-
-  const features: Feature[] = [
-    // --- Tus originales traducidos ---
-    {
-      icon: Shield,
-      title: "Autenticación Robusta",
-      description:
-        "Inicio de sesión seguro con email/contraseña y proveedores como Google.",
-      color: "text-green-600",
-    },
-    {
-      icon: Database,
-      title: "Gestión de Archivos",
-      description:
-        "Almacenamiento integrado con Supabase Storage, descargas seguras y permisos.",
-      color: "text-orange-600",
-    },
-
-    {
-      icon: Clock,
-      title: "Gestión de Tickets",
-      description: "Sistema dashboard con comentarios en tiempo real",
-      color: "text-teal-600",
-    },
-
-    {
-      icon: Boxes,
-      title: "Arquitectura Multi-Tenant",
-      description:
-        "Aislamiento total por organización mediante subdominios o rutas dinámicas.",
-      color: "text-fuchsia-600",
-    },
-    {
-      icon: LayoutTemplate,
-      title: "Layout Responsivo Pro",
-      description: "Se adapta a mobiles y pantallas de escritorio",
-      color: "text-cyan-600",
-    },
-    {
-      icon: FileCode2,
-      title: "Menú Móvil Animado",
-      description:
-        "Drawer de shadcn con trigger de hamburguesa animado mediante CSS.",
-      color: "text-orange-500",
-    },
-
-    {
-      icon: AlertTriangle,
-      title: "Manejo de Errores 404",
-      description:
-        "Páginas de error personalizadas y estilizadas con el sistema de temas de shadcn.",
-      color: "text-red-700",
-    },
-    {
-      icon: Zap, // Importa 'Zap' de lucide-react
-      title: "Arquitectura RPC-First",
-      description:
-        "Comunicación eficiente entre cliente y servidor mediante llamadas a procedimientos remotos, centralizando la lógica de negocio.",
-      color: "text-yellow-600",
-    },
-    {
-      icon: Server, // Importa 'Server' de lucide-react
-      title: "Renderizado SSR Optimizado",
-      description:
-        "Uso avanzado de Server-Side Rendering con Next.js para garantizar velocidad de carga y SEO superior en rutas dinámicas.",
-      color: "text-indigo-500",
-    },
-    {
-      icon: DatabaseZap, // Importa 'DatabaseZap' o 'Table2' de lucide-react
-      title: "Esquema SQL Profesional",
-      description:
-        "Arquitectura de base de datos relacional en PostgreSQL con políticas de seguridad RLS y tipado estricto mediante esquemas.",
-      color: "text-blue-700",
-    },
-    {
-      icon: Cloud, // Importa 'Cloud' de lucide-react
-      title: "Despliegue en Netlify",
-      description:
-        "Infraestructura escalable desplegada globalmente con soporte nativo para funciones Edge y tiempos de respuesta mínimos.",
-      color: "text-cyan-500",
-    },
-  ];
-
-  const stats = [
-    { label: "Maxima Velcidad", value: "SSR - SSG" },
-    { label: "Solo un viaje al servidor", value: "RPC" },
-    { label: "Login Sin Contraseña", value: "Google Auth" },
-    { label: "Un dominio, muchas organizaciones", value: "Multi-Tenant" },
-  ];
-
-
-
-
-
-
-
-
-
+const stats = [
+  { label: "Maxima Velcidad", value: "SSR - SSG" },
+  { label: "Solo un viaje al servidor", value: "RPC" },
+  { label: "Login Sin Contraseña", value: "Google Auth" },
+  { label: "Un dominio, muchas organizaciones", value: "Multi-Tenant" },
+];
 
 export default function Home() {
-  
-
-
-
   return (
     <div className="min-h-screen">
-
-<Navbar></Navbar>
-
-      
+      <Navbar></Navbar>
 
       <Hero></Hero>
 
-      
+      <section className="container flex items-center justify-center overflow-hidden mx-auto my-0 md:my-20">
+        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 px-6 py-12 lg:py-0">
+          {/* 📸 CONTENEDOR IMAGEN:
+        `order-last` hace que en móviles se vaya abajo. 
+        `lg:order-first` la regresa a la izquierda en pantallas grandes. */}
 
-      
+          {/* 📝 CONTENEDOR TEXTO:
+        `order-first` asegura que en móviles sea lo primero que se lea.
+        `lg:order-last` lo ubica a la derecha en pantallas grandes. */}
+          <div className="my-auto space-y-6 order-first lg:order-last">
+            <h2 className="text-4xl md:text-5xl font-bold leading-[1.2]! tracking-tight text-foreground">
+              ¿Qué hace exactamente <span className="text-primary">cdApp</span>?
+            </h2>
+
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Es una plataforma web diseñada exclusivamente para
+              <strong className="text-foreground font-semibold">
+                {" "}
+                Centros de Diagnóstico Automotor (CDA) en Colombia {" "}
+              </strong>
+               con el fin de automatizar y digitalizar el proceso de recepcion
+              y la orden de entrada, toma de datos estadisticos en el area de
+              secretaria, confirmacion de rtm terminado en el area del director
+              tecnico y un abanico de estadisticas y la monitorizacion del
+              proceso de cada vehiculo en el perfil de administrador, todo en
+              linea para poder ser consultado desde cualquier sitio.
+            </p>
+
+            {/* Bloques informativos por roles */}
+            <div className="grid gap-4 pt-2">
+              <div className="border-l-2 border-primary pl-4">
+                <h4 className="font-bold text-foreground">
+                  Recepción y Secretaría
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Automatiza la apertura de órdenes de entrada y la captura
+                  inteligente de datos de vehículos y propietarios de forma
+                  ágil.
+                </p>
+              </div>
+
+              <div className="border-l-2 border-primary pl-4">
+                <h4 className="font-bold text-foreground">Dirección Técnica</h4>
+                <p className="text-sm text-muted-foreground">
+                  Validación y confirmación inmediata de RTM finalizadas para
+                  agilizar la liberación del vehículo sin cuellos de botella.
+                </p>
+              </div>
+
+              <div className="border-l-2 border-primary pl-4">
+                <h4 className="font-bold text-foreground">
+                  Administración Central
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Monitoriza el estado del proceso de cada pista en línea y
+                  accede a analíticas avanzadas desde cualquier dispositivo para
+                  la toma de decisiones.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl mx-auto p-4">
+            {/* --- FILA ARRIBA --- */}
+            {/* Rectángulo Izquierda (Ocupa 2 columnas) */}
+            <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
+              <Image
+                alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
+                src={ImageRecepcionista} // 👈 Guarda la imagen generada en tu carpeta public/images/
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-w-768px) 100vw, 66vw"
+              />
+            </div>
+
+            {/* Espacio Cuadrado Derecha (Ocupa 1 columna) */}
+            <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10"></div>
+
+            {/* --- FILA CENTRO --- */}
+            {/* 🔑 Imagen Central: Ocupa las 3 columnas completas del grid */}
+            <div className="md:col-span-3 relative aspect-video md:aspect-16/7 rounded-2xl overflow-hidden border border-border bg-muted">
+              <Image
+                alt="Dashboard y estadísticas de administración"
+                src={ImageSecretaria}
+                fill
+                className="object-cover object-center" /* Con object-center forzamos a que el foco sea el medio */
+                sizes="100vw"
+              />
+            </div>
+
+            {/* --- FILA ABAJO --- */}
+            {/* Espacio Cuadrado Izquierda (Ocupa 1 columna) */}
+            <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10">
+              {/* ⏹️ Espacio vacío */}
+            </div>
+
+            {/* Rectángulo Derecha (Ocupa 2 columnas) */}
+            <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
+              <Image
+                alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
+                src={ImageDirectorTecnico} // 👈 Guarda la imagen generada en tu carpeta public/images/
+                fill
+                priority
+                className="object-cover shadow-2xl"
+                sizes="(max-w-768px) 100vw, 66vw"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <HeroVideo></HeroVideo>
 

@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
 
 const RESTRICTED_HOST = ["127.0.0.1", "cda-app.com", "cda-app"];
 
-const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found"];
+const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found", "/about"];
 
 const isMainDomain = RESTRICTED_HOST.includes(hostname);
 
@@ -54,7 +54,7 @@ if (isMainDomain) {
 
   // Si la ruta es "/" o "/admin", no necesitamos procesar nada más (ni Supabase)
   // Retornamos directamente para ahorrar recursos.
-  if (applicationPath === "/" || applicationPath === "/admin") {
+  if (applicationPath === "/" || applicationPath === "/admin" || applicationPath === "/about") {
     return supabaseResponse;
   }
 }
