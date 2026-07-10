@@ -136,18 +136,27 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
       if (data.success) {
         console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
         
-        /** 
+        
         setFormData((prev: ZodFullFormDataType) => ({
           ...prev,
+          soat_vencimiento_snapshot: data.payload.soat || prev.soat_vencimiento_snapshot,
           vehicle: {
             ...prev.vehicle,
-            marca: data.payload.marca || prev.vehicle.marca,
-            modelo: data.payload.modelo || prev.vehicle.modelo,
-            linea: data.payload.linea || prev.vehicle.linea,
-            // ... los demás datos que extraigas del RUNT
+            capacidad_pasajeros: data.payload.capacidad_pasajeros || prev.vehicle.capacidad_pasajeros,
+            cilindrada: data.payload.cilindrada_vehiculo || prev.vehicle.cilindrada,
+            clase: data.payload.clase_vehiculo || prev.vehicle.clase,
+            color: data.payload.color_vehiculo || prev.vehicle.color,
+            combustible: data.payload.combustible_vehiculo || prev.vehicle.combustible,
+            es_ensenanza: data.payload.es_ensenanza || prev.vehicle.es_ensenanza,
+            linea: data.payload.lineaVehiculo || prev.vehicle.linea,
+            
+            marca: data.payload.marca_vehiculo || prev.vehicle.marca,
+            modelo: data.payload.modelo_vehiculo || prev.vehicle.modelo,
+            tipo_servicio_vehiculo: data.payload.tipo_servicio || prev.vehicle.tipo_servicio_vehiculo
+            
           },
         }));
-        */
+        
 
 
 
@@ -343,34 +352,33 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
           </div>
 
           {/* 🔍 ESTADO DE BÚSQUEDA Y MENSAJES EN TIEMPO REAL */}
-{(solveRuntMutation.isPending || solveRuntMutation.isError || solveRuntMutation.data) && (
-  <div className={`p-3 rounded-lg border text-sm text-center transition-all ${
-    solveRuntMutation.isPending 
-      ? "bg-orange-50 border-orange-200 text-orange-800" 
-      : solveRuntMutation.isError 
-      ? "bg-destructive/10 border-destructive/20 text-destructive" 
-      : "bg-emerald-50 border-emerald-200 text-emerald-800"
-  }`}>
-    {solveRuntMutation.isPending && (
-      <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
-        <Loader2 className="h-4 w-4 animate-spin text-[#f57c00]" />
-        <span>Buscando datos en el RUNT... Por favor espera.</span>
-      </div>
-    )}
-    
-    {solveRuntMutation.isError && (
-      <p className="font-semibold">
-        ❌ {(solveRuntMutation.error as any)?.message || "Hubo un error de conexión con tu PC local."}
-      </p>
-    )}
+          {(solveRuntMutation.isPending || solveRuntMutation.isError || solveRuntMutation.data) && (
+            <div className={`p-3 rounded-lg border text-sm text-center transition-all ${
+              solveRuntMutation.isPending 
+                ? "bg-orange-50 border-orange-200 text-orange-800" 
+                : solveRuntMutation.isError 
+                ? "bg-destructive/10 border-destructive/20 text-destructive" 
+                : "bg-emerald-50 border-emerald-200 text-emerald-800"
+            }`}>
+              {solveRuntMutation.isPending && (
+                <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
+                  <Loader2 className="h-4 w-4 animate-spin text-[#f57c00]" />
+                  <span>Buscando datos en el RUNT... Por favor espera.</span>
+                </div>
+              )}
+              {solveRuntMutation.isError && (
+                <p className="font-semibold text-red-500">
+                  ❌ {(solveRuntMutation.error as Error)?.message || "Hubo un error de conexión con tu PC local."}
+                </p>
+              )}
 
-    {!solveRuntMutation.isPending && solveRuntMutation.data && (
-      <p className="font-medium">
-        ℹ️ {solveRuntMutation.data.message}
-      </p>
-    )}
-  </div>
-)}
+              {!solveRuntMutation.isPending && solveRuntMutation.data && (
+                <p className="font-medium">
+                  ℹ️ {solveRuntMutation.data.message}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* ACCIONES DEL FORMULARIO */}
           <div className="flex gap-3 pt-2">

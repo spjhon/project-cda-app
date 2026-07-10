@@ -1,6 +1,9 @@
+
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/landingPage/NavBar/theme-provider";
 
 
 export const metadata: Metadata = {
@@ -14,14 +17,20 @@ export default function RootLayout({
 }: Readonly<{children: React.ReactNode}>) {
 
   return (
-    <html lang="en" >
+    <html lang="es" suppressHydrationWarning>
       <body
-        className={` antialiased max-w-[2592px] mx-auto bg-[#FAFAFA] shadow-2xl`}
+        className={` antialiased max-w-[2592px] mx-auto shadow-2xl`}
       >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          >
         <TooltipProvider>
         {children}
         </TooltipProvider>
-       
+       </ThemeProvider>
       </body>
     </html>
   );

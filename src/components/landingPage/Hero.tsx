@@ -1,72 +1,103 @@
+
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { HeroCards } from "./HeroCards";
-import WassapLogo from "@/components/landingPage/svgs/WassapLogo";
+import { ArrowUpRight, CirclePlay } from "lucide-react";
+import Image from "next/image";
 
-export const Hero = () => {
+import ImageRecepcionista from "../../../public/landing_page_recepcionista_reziced.png"
+import ImageSecretaria from "../../../public/langing_page_secretaria__reziced.png"
+import ImageDirectorTecnico from "../../../public/langing_page_diirector_tecnico02__reziced.png"
+
+const Hero = () => {
   return (
-    <section className="my-30 grid xl:grid-cols-2 place-items-center md:gap-10 container mx-auto">
-
-      <div className="text-center lg:text-start space-y-6">
-
-        <main className="text-5xl md:text-6xl font-bold">
-
-          <h1 className="inline">
-             Tu {" "}
-            <span className="inline bg-gradient-to-r from-[#F596D3]  to-[#FF6500] text-transparent bg-clip-text">
-              SEGURIDAD
-            </span>{" "}
-            empieza antes de arrancar.
+    <div className="container flex items-center justify-center overflow-hidden mx-auto my-0 md:my-20">
+      <div className="max-w-7xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12 lg:py-0">
+        <div className="my-auto">
+          <Badge className="rounded-full shadow-3xl">
+            Version de Lanzamiento v1.0.0
+          </Badge>
+          <h1 className="mt-6 max-w-[17ch] text-4xl md:text-5xl lg:text-[2.75rem] xl:text-5xl font-bold leading-[1.2]! tracking-tight">
+            Organiza tu CDA: desde la orden de entrada hasta las métricas de tu negocio.
           </h1>
-
-          {" "}Pide tu{" "}
-
-          <h2 className="inline">
-            <span className="
-              inline 
-              bg-gradient-to-r from-[#61DAFB] via-[#1fc0f1] to-[#03a3d7] 
-              text-transparent 
-              bg-clip-text">
-              PERITAJE
-            </span>
-            {" "}
-            hoy.
-          </h2>
-
-        </main>
-
-        <p className="
-          text-xl text-muted-foreground 
-          md:w-10/12 
-          mx-auto lg:mx-0">
-          Con Jan Autos tu próximo carro, sin sorpresas. Nosotros lo revisamos por ti.
-        </p>
-
-        <div className="space-y-4 md:space-y-0 md:space-x-4">
-
-          <Button className=" w-full md:w-1/3 shadow-2xl">
-
-            <a
-              rel="noreferrer noopener"
-              href="https://wa.me/573215224583"
-              target="_blank"
-              className={`w-full flex items-center justify-center h-5 gap-2 shadow-2xl`}
-              aria-label="Contactar por WhatsApp"
+          <p className="mt-6 max-w-[60ch] text-lg">
+            Gracias a nuestra plataforma,
+           la información de tus vehículos, clientes y métricas en un solo lugar.
+           Automatiza tus recordatorios y mantén a tus clientes regresando a tu CDA.
+           Órdenes de entrada digitales, eficientes y estadísticas en tiempo real.
+          </p>
+          <div className="mt-12 flex items-center gap-4">
+            <Button size="lg" className="rounded-full text-base">
+              Contáctanos <ArrowUpRight className="h-5! w-5!" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full text-base shadow-none"
             >
-              <WassapLogo />
-              <span className="text-sm text-bold">Reserva tu cita ahora</span>
-            </a>
-          </Button>
-          
-
+              <CirclePlay className="h-5! w-5!" /> Mira la DEMO
+            </Button>
+          </div>
         </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl mx-auto p-4">
+  
+  {/* --- FILA ARRIBA --- */}
+  {/* Rectángulo Izquierda (Ocupa 2 columnas) */}
+  <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
+    <Image
+    alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
+    src={ImageRecepcionista} // 👈 Guarda la imagen generada en tu carpeta public/images/
+    fill
+    priority
+    className="object-cover"
+    sizes="(max-w-768px) 100vw, 66vw"
+  />
+   
+  </div>
+  
+  {/* Espacio Cuadrado Derecha (Ocupa 1 columna) */}
+  <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10">
+    
+  </div>
 
-      </div>
 
-      {/* Hero cards sections */}
-      <div className="z-10">
-        <HeroCards />
+  {/* --- FILA CENTRO --- */}
+  {/* 🔑 Imagen Central: Ocupa las 3 columnas completas del grid */}
+  <div className="md:col-span-3 relative aspect-video md:aspect-16/7 rounded-2xl overflow-hidden border border-border bg-muted">
+    <Image
+      alt="Dashboard y estadísticas de administración"
+      src={ImageSecretaria}
+      fill
+      className="object-cover object-center" /* Con object-center forzamos a que el foco sea el medio */
+      sizes="100vw"
+    />
+  </div>
+
+
+  {/* --- FILA ABAJO --- */}
+  {/* Espacio Cuadrado Izquierda (Ocupa 1 columna) */}
+  <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10">
+    {/* ⏹️ Espacio vacío */}
+  </div>
+
+  {/* Rectángulo Derecha (Ocupa 2 columnas) */}
+  <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
+    <Image
+    alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
+    src={ImageDirectorTecnico} // 👈 Guarda la imagen generada en tu carpeta public/images/
+    fill
+    priority
+    className="object-cover shadow-2xl"
+    sizes="(max-w-768px) 100vw, 66vw"
+  />
+    
+  </div>
+
+</div>
       </div>
-      
-    </section>
+    </div>
   );
 };
+
+export default Hero;
