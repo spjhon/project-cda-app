@@ -5,7 +5,7 @@ export default function AdminDashboardLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
   
-    <main className="bg-[#F5F5F5]">
+    <main className="">
     {children}
     </main>
   );

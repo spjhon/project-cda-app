@@ -12,7 +12,7 @@ export default function DashboardAdminPage() {
       <h2 className="text-3xl font-extrabold m-5">
         REGISTRAR NUEVO GERENTE EN TENANT
       </h2>
-      <AdminSignUpForm tenant={"fullmotos"}></AdminSignUpForm>
+      <AdminSignUpForm></AdminSignUpForm>
     </section>
   );
 }

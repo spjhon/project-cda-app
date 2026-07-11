@@ -27,6 +27,14 @@ export async function registerUserAction(tenant: string, formData: FormData) {
   const password = formData.get("password");
   const role = formData.get("role");
 
+
+
+ 
+  console.log(role);
+
+
+
+
   // 2. Validaciones de tipo y contenido
   if (
     typeof userName !== "string" ||
@@ -39,6 +47,12 @@ export async function registerUserAction(tenant: string, formData: FormData) {
   ) {
     return { error: "Los datos del formulario son inválidos." };
   }
+
+
+
+ 
+
+
 
   if (password.length < 6) {
     return { error: "La contraseña debe tener al menos 6 caracteres." };

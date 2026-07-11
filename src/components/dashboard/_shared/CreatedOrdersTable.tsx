@@ -577,57 +577,6 @@ export default function CreatedOrdersTable() {
         </div>
       </div>
 
-      {/* CONTENEDOR DE LA TABLA */}
-      <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background">
-        <Table>
-          <TableHeader className="bg-muted/50 border-b border-border">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="font-semibold text-foreground h-11">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow 
-                  key={row.id} 
-                  className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-12 text-muted-foreground font-medium"
-                >
-                  No se encontraron órdenes
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
       {/* PIE DE PÁGINA CON COMPONENTES DE PAGINACIÓN */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-2 bg-muted/30 rounded-xl border border-border shadow-sm">
         <div className="flex items-center gap-2">
@@ -697,6 +646,59 @@ export default function CreatedOrdersTable() {
           </PaginationContent>
         </Pagination>
       </div>
+
+      {/* CONTENEDOR DE LA TABLA */}
+      <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background">
+        <Table>
+          <TableHeader className="bg-muted/50 border-b border-border">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="font-semibold text-foreground h-11">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow 
+                  key={row.id} 
+                  className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="py-3">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-12 text-muted-foreground font-medium"
+                >
+                  No se encontraron órdenes
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      
     </div>
   );
 }

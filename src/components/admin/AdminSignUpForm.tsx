@@ -13,8 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { registerUserAction } from "@/lib/server-actions/register";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const SELECT_ROLES_SISTEMA = [
   { label: "Recepcionista", value: "recepcionista" },
@@ -24,24 +29,22 @@ const SELECT_ROLES_SISTEMA = [
 ];
 
 
-interface SignUpFormProps extends React.ComponentPropsWithoutRef<"div"> {
-  tenant: string;
-}
 
 export function AdminSignUpForm({
   className,
-  tenant,
   ...props
-}: SignUpFormProps) {
+}: React.ComponentPropsWithoutRef<"div">) {
+  const [tenant, setTenant] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [documentType, setDocumentType] = useState("cedula"); // Default según DB
+  const [documentType, setDocumentType] = useState("cedula");
   const [documentNumber, setDocumentNumber] = useState("");
   const [phone, setPhone] = useState("");
   const [userRole, setUserRole] = useState("");
-  
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,17 +53,22 @@ export function AdminSignUpForm({
     event.stopPropagation();
     setError(null);
 
+    if (!tenant.trim()) {
+      setError("Debe ingresar el tenant");
+      return;
+    }
+
     if (password !== repeatPassword) {
       setError("Las contraseñas no coinciden");
       return;
     }
 
-    if (password.length < 6) { // Recomendado subir de 3 a 6 por seguridad
+    if (password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
-    if (!userRole || userRole === undefined){
+    if (!userRole) {
       setError("Debe seleccionar un rol");
       return;
     }
@@ -68,21 +76,21 @@ export function AdminSignUpForm({
     setIsLoading(true);
 
     try {
-      // FormData capturará todos los inputs con el atributo 'fullmotos'
       const formData = new FormData(event.currentTarget);
-      
-      // 2. Llamas directamente a la función del servidor
-    const result = await registerUserAction(tenant, formData);
 
-    if (result.error) {
-      setError(result.error);
-    } else {
-      window.alert(result.message);
-      // Redirigir o limpiar form aquí
-    }
-      
+      const result = await registerUserAction(tenant, formData);
+
+      if (result.error) {
+        setError(result.error);
+      } else {
+        window.alert(result.message);
+      }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? "Error en el fetch: "+  err.message : "Ocurrió un error desconocido";
+      const errorMessage =
+        err instanceof Error
+          ? "Error en el fetch: " + err.message
+          : "Ocurrió un error desconocido";
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -90,17 +98,37 @@ export function AdminSignUpForm({
   }
 
   return (
-    <div className={cn("flex flex-col w-full max-w-md mx-auto gap-6", className)} {...props}>
+    <div
+      className={cn("flex flex-col w-full max-w-md mx-auto gap-6", className)}
+      {...props}
+    >
       <Card className="rounded-xs">
         <CardHeader>
           <CardTitle className="text-2xl">Registro</CardTitle>
-          <CardDescription>Crear cuenta en el taller: {tenant}</CardDescription>
+          <CardDescription>
+            {tenant
+              ? `Crear cuenta en: ${tenant}`
+              : "Ingrese el tenant del CDA"}
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit}>
             <fieldset className="flex flex-col gap-4">
-              
+
+              {/* TENANT */}
+              <div className="grid gap-2">
+                <Label htmlFor="tenant">Tenant / CDA</Label>
+                <Input
+                  id="tenant"
+                  name="tenant"
+                  placeholder="Ej: tecnofresno"
+                  required
+                  value={tenant}
+                  onChange={(e) => setTenant(e.target.value)}
+                />
+              </div>
+
               {/* NOMBRE COMPLETO */}
               <div className="grid gap-2">
                 <Label htmlFor="fullName">Nombre Completo</Label>
@@ -118,6 +146,7 @@ export function AdminSignUpForm({
               <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-1 grid gap-2">
                   <Label htmlFor="documentType">Tipo</Label>
+
                   <select
                     id="documentType"
                     name="documentType"
@@ -126,22 +155,32 @@ export function AdminSignUpForm({
                     onChange={(e) => setDocumentType(e.target.value)}
                   >
                     <option value="cedula">Cédula</option>
-                    <option value="cedula_extrangeria">C. Extranjería</option>
+                    <option value="cedula_extrangeria">
+                      C. Extranjería
+                    </option>
                     <option value="pasaporte">Pasaporte</option>
                     <option value="nit">NIT</option>
-                    <option value="targeta_identidad">T. Identidad</option>
+                    <option value="targeta_identidad">
+                      T. Identidad
+                    </option>
                   </select>
                 </div>
+
                 <div className="col-span-2 grid gap-2">
-                  <Label htmlFor="documentNumber">Número de Documento</Label>
+                  <Label htmlFor="documentNumber">
+                    Número de Documento
+                  </Label>
+
                   <Input
-                    type="number"
+                    type="string"
                     id="documentNumber"
                     name="documentNumber"
                     placeholder="12345678"
                     required
                     value={documentNumber}
-                    onChange={(e) => setDocumentNumber(e.target.value)}
+                    onChange={(e) =>
+                      setDocumentNumber(e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -149,6 +188,7 @@ export function AdminSignUpForm({
               {/* TELÉFONO */}
               <div className="grid gap-2">
                 <Label htmlFor="phone">Teléfono / WhatsApp</Label>
+
                 <Input
                   id="phone"
                   name="phone"
@@ -163,6 +203,7 @@ export function AdminSignUpForm({
               {/* EMAIL */}
               <div className="grid gap-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
+
                 <Input
                   id="email"
                   type="email"
@@ -174,9 +215,10 @@ export function AdminSignUpForm({
                 />
               </div>
 
-              {/* CONTRASEÑAS */}
+              {/* CONTRASEÑA */}
               <div className="grid gap-2">
                 <Label htmlFor="password">Contraseña</Label>
+
                 <Input
                   id="password"
                   type="password"
@@ -187,53 +229,83 @@ export function AdminSignUpForm({
                 />
               </div>
 
+              {/* REPETIR CONTRASEÑA */}
               <div className="grid gap-2">
-                <Label htmlFor="repeat-password">Repetir Contraseña</Label>
+                <Label htmlFor="repeat-password">
+                  Repetir Contraseña
+                </Label>
+
                 <Input
                   id="repeat-password"
                   type="password"
                   required
                   value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
+                  onChange={(e) =>
+                    setRepeatPassword(e.target.value)
+                  }
                 />
               </div>
 
-              {/* ROL DEL USUARIO (Solo para Administrador) */}
+              {/* ROL */}
               <div className="grid gap-2">
-              <Label htmlFor="role" className="text-slate-700 font-medium">Rol en el Sistema</Label>
-              <Select
-                items={SELECT_ROLES_SISTEMA}
-                value={userRole}
-                // 🌟 Controlamos el null de Base UI: si es null o vacío, lo dejamos como ""
-                onValueChange={(value) => setUserRole(value?value:"")}
-              >
-                {/* 🌟 Base UI utiliza el prop 'render' para inyectar nuestro Button de Shadcn sin duplicar nodos HTML */}
-                <SelectTrigger 
-                  id="role"
-                  render={
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-between bg-white font-normal h-10 border-input text-sm px-3 py-2" 
-                    />
+                <Label
+                  htmlFor="role"
+                  className="text-slate-700 font-medium"
+                >
+                  Rol en el Sistema
+                </Label>
+
+                <Select
+                  items={SELECT_ROLES_SISTEMA}
+                  value={userRole}
+                  onValueChange={(value) =>
+                    setUserRole(value ?? "")
                   }
                 >
-                  <SelectValue placeholder="Selecciona un rol" />
-                </SelectTrigger>
-                
-                <SelectContent alignItemWithTrigger={false}>
-                  {SELECT_ROLES_SISTEMA.map((rol) => (
-                    <SelectItem key={rol.value} value={rol.value}>
-                      {rol.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  <SelectTrigger
+                    id="role"
+                    render={
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between bg-white font-normal h-10 border-input text-sm px-3 py-2"
+                      />
+                    }
+                  >
+                    <SelectValue placeholder="Selecciona un rol" />
+                  </SelectTrigger>
 
-              {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+                  <SelectContent alignItemWithTrigger={false}>
+                    {SELECT_ROLES_SISTEMA.map((rol) => (
+                      <SelectItem
+                        key={rol.value}
+                        value={rol.value}
+                      >
+                        {rol.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <input
+                  type="hidden"
+                  name="role"
+                  value={userRole}
+                />
+              </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Procesando..." : "Registrarme"}
+              {error && (
+                <p className="text-sm font-medium text-red-500">
+                  {error}
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading
+                  ? "Procesando..."
+                  : "Registrarme"}
               </Button>
             </fieldset>
           </form>
