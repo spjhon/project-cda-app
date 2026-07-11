@@ -1,31 +1,29 @@
 import Image from "next/image";
-import { CurrentYear } from "@/components/landingPage/CurrentYear";
+
 import Hero from "@/components/landingPage/Hero";
 import { HeroVideo } from "@/components/landingPage/HeroVideo";
 import { LogoMarquee } from "@/components/landingPage/LogoMarquee";
 import { Navbar } from "@/components/landingPage/NavBar/Navbar";
 import {
-  AlertTriangle,
-  Boxes,
-  Clock,
-  Cloud,
+  Activity,
+  BellRing,
+  CalendarClock,
+  CarFront,
   Database,
-  DatabaseZap,
-  FileCode2,
-  Computer,
-  LayoutTemplate,
-  FileUser,
+  FileCheck2,
+  Globe,
   LucideIcon,
   Server,
-  Shield,
-  Zap,
+  TabletSmartphone,
 } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import ImageRecepcionista from "../../public/landing_page_recepcionista_reziced.png";
 import ImageSecretaria from "../../public/langing_page_secretaria__reziced.png";
 import ImageDirectorTecnico from "../../public/langing_page_diirector_tecnico02__reziced.png";
+import { Footer } from "@/components/landingPage/Footer";
+import PricingSection from "@/components/landingPage/PricingSection";
+import CTASection from "@/components/landingPage/CTASection";
 
 interface Feature {
   icon: LucideIcon;
@@ -35,92 +33,84 @@ interface Feature {
 }
 
 const features: Feature[] = [
-  // --- Tus originales traducidos ---
   {
-    icon: Shield,
-    title: "Autenticación Robusta",
+    icon: CarFront,
+    title: "Integración Automatizada RUNT",
     description:
-      "Inicio de sesión seguro con email/contraseña y proveedores como Google.",
-    color: "text-green-600",
+      "Extracción inteligente de datos directamente del portal RUNT. Agiliza la apertura de órdenes de entrada en segundos y elimina por completo los errores de digitación humana.",
+    color: "text-blue-600 dark:text-blue-400",
+  },
+  {
+    icon: FileCheck2,
+    title: "Trazabilidad ISO 17020",
+    description:
+      "Control inmutable de versiones en cada orden de entrada. El sistema blinda tu CDA registrando cada cambio para garantizar el cumplimiento absoluto ante auditorías de ONAC.",
+    color: "text-emerald-600 dark:text-emerald-400",
+  },
+  {
+    icon: TabletSmartphone,
+    title: "Recepción 100% Digital",
+    description:
+      "Captura de firmas de clientes de forma electrónica nativa mediante tabletas. Despídete de los archivos de papel y acelera el flujo de atención en ventanilla.",
+    color: "text-purple-600 dark:text-purple-400",
+  },
+  {
+    icon: BellRing,
+    title: "Fidelización y Alertas Inteligentes",
+    description:
+      "Motor de correos electrónicos automáticos para recordar a los clientes su próxima revisión anual y alertar sobre el vencimiento de los 15 días en vehículos reprobados.",
+    color: "text-orange-600 dark:text-orange-400",
   },
   {
     icon: Database,
-    title: "Gestión de Archivos",
+    title: "Bases de Datos Estructuradas",
     description:
-      "Almacenamiento integrado con Supabase Storage, descargas seguras y permisos.",
-    color: "text-orange-600",
+      "Gestión centralizada de vehículos, propietarios y clientes. Los datos de tu CDA están aislados de forma segura mediante políticas RLS (Row Level Security) y particionamiento.",
+    color: "text-cyan-600 dark:text-cyan-400",
   },
-
   {
-    icon: Clock,
-    title: "Gestión de Tickets",
-    description: "Sistema dashboard con comentarios en tiempo real",
-    color: "text-teal-600",
-  },
-
-  {
-    icon: Boxes,
-    title: "Arquitectura Multi-Tenant",
+    icon: Globe,
+    title: "Marca Blanca y Presencia Web",
     description:
-      "Aislamiento total por organización mediante subdominios o rutas dinámicas.",
-    color: "text-fuchsia-600",
+      "Despliegue de una Landing Page comercial exclusiva para tu centro de diagnóstico bajo un subdominio personalizado (tucda.cda-app.com).",
+    color: "text-indigo-600 dark:text-indigo-400",
   },
   {
-    icon: LayoutTemplate,
-    title: "Layout Responsivo Pro",
-    description: "Se adapta a mobiles y pantallas de escritorio",
-    color: "text-cyan-600",
-  },
-  {
-    icon: FileCode2,
-    title: "Menú Móvil Animado",
+    icon: CalendarClock,
+    title: "PQRS Integrados",
     description:
-      "Drawer de shadcn con trigger de hamburguesa animado mediante CSS.",
-    color: "text-orange-500",
-  },
-
-  {
-    icon: AlertTriangle,
-    title: "Manejo de Errores 404",
-    description:
-      "Páginas de error personalizadas y estilizadas con el sistema de temas de shadcn.",
-    color: "text-red-700",
+      "Radicación de quejas o apelaciones desde la Landing Page del CDA, emitiendo notificaciones en tiempo real al Administrador y al Director Técnico.",
+    color: "text-rose-600 dark:text-rose-400",
   },
   {
-    icon: Zap, // Importa 'Zap' de lucide-react
-    title: "Arquitectura RPC-First",
+    icon: Activity,
+    title: "Monitorización en Tiempo Real",
     description:
-      "Comunicación eficiente entre cliente y servidor mediante llamadas a procedimientos remotos, centralizando la lógica de negocio.",
-    color: "text-yellow-600",
+      "Dashboard directivo con sincronización instantánea. Controla los tiempos de ciclo, flujo en pistas y estadísticas operativas sin tener que recargar la página.",
+    color: "text-yellow-600 dark:text-yellow-400",
   },
   {
-    icon: Server, // Importa 'Server' de lucide-react
-    title: "Renderizado SSR Optimizado",
+    icon: Server,
+    title: "Arquitectura de Alto Rendimiento",
     description:
-      "Uso avanzado de Server-Side Rendering con Next.js para garantizar velocidad de carga y SEO superior en rutas dinámicas.",
-    color: "text-indigo-500",
-  },
-  {
-    icon: DatabaseZap, // Importa 'DatabaseZap' o 'Table2' de lucide-react
-    title: "Esquema SQL Profesional",
-    description:
-      "Arquitectura de base de datos relacional en PostgreSQL con políticas de seguridad RLS y tipado estricto mediante esquemas.",
-    color: "text-blue-700",
-  },
-  {
-    icon: Cloud, // Importa 'Cloud' de lucide-react
-    title: "Despliegue en Netlify",
-    description:
-      "Infraestructura escalable desplegada globalmente con soporte nativo para funciones Edge y tiempos de respuesta mínimos.",
-    color: "text-cyan-500",
+      "Infraestructura backend de grado industrial (RPC-first) en servidores dedicados. Adiós a los 'tiempos de arranque' o caídas del sistema en las horas pico de tu CDA.",
+    color: "text-slate-600 dark:text-slate-300",
   },
 ];
-
 const stats = [
-  { label: "Maxima Velcidad", value: "SSR - SSG" },
-  { label: "Solo un viaje al servidor", value: "RPC" },
-  { label: "Login Sin Contraseña", value: "Google Auth" },
-  { label: "Un dominio, muchas organizaciones", value: "Multi-Tenant" },
+  { label: "Cada integrante tiene su propio perfil", value: "Multi-Perfil" },
+  {
+    label: "Plataforma personalizada con el logo de tu CDA",
+    value: "Logo Propio",
+  },
+  {
+    label: "Tendras tu propio dominio TUCDA.cda-app.com",
+    value: "Dominio Propio",
+  },
+  {
+    label: "Datos en tiempo real desde el perfil del administrador",
+    value: "Real Time",
+  },
 ];
 
 export default function Home() {
@@ -148,10 +138,10 @@ export default function Home() {
               Es una plataforma web diseñada exclusivamente para
               <strong className="text-foreground font-semibold">
                 {" "}
-                Centros de Diagnóstico Automotor (CDA) en Colombia {" "}
+                Centros de Diagnóstico Automotor (CDA) en Colombia{" "}
               </strong>
-               con el fin de automatizar y digitalizar el proceso de recepcion
-              y la orden de entrada, toma de datos estadisticos en el area de
+              con el fin de automatizar y digitalizar el proceso de recepcion y
+              la orden de entrada, toma de datos estadisticos en el area de
               secretaria, confirmacion de rtm terminado en el area del director
               tecnico y un abanico de estadisticas y la monitorizacion del
               proceso de cada vehiculo en el perfil de administrador, todo en
@@ -244,15 +234,19 @@ export default function Home() {
 
       <HeroVideo></HeroVideo>
 
-      <section className="my-20 bg-linear-to-b from-white to-gray-50">
+      <section className="mt-10 mb-20  py-10  border-y border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-4xl font-bold text-primary-600">
+              <div key={index} className="text-center space-y-2">
+                {/* El número de la estadística resalta con el color primario del tema */}
+                <div className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-gray-600">{stat.label}</div>
+                {/* La etiqueta cambia de color de texto automáticamente según el fondo */}
+                <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
@@ -260,130 +254,59 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-gray-50">
+      <section
+        id="features"
+        className="py-24"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold">
-              Todo lo necesario para robustes en multi organización
+          {/* Encabezado Principal */}
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Todo lo necesario para una robusta gestión de tus ordenes de entrada y seguimiento del proceso
             </h2>
-            <p className="mt-4 text-xl text-gray-600">
-              Una Web App segura. Desde un sistema de autenticacion robusto
-              hasta seguridad a nivel de base de datos RLS.
+            <p className="max-w-3xl mx-auto text-lg text-muted-foreground">
+              Una plataforma web segura de extremo a extremo. Desde sistemas de
+              autenticación avanzados hasta aislamiento estricto de datos
+              mediante seguridad a nivel de filas (RLS).
             </p>
           </div>
+
+          {/* Grilla de Características */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-card text-card-foreground p-6 rounded-xl border border-border/60 shadow-xs hover:shadow-md dark:hover:border-border transition-all duration-200 flex flex-col justify-between"
               >
-                <feature.icon className={`h-8 w-8 ${feature.color}`} />
-                <h3 className="mt-4 text-xl font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-gray-600">{feature.description}</p>
+                <div>
+                  {/* Contenedor del Icono */}
+                  <div
+                    className={`inline-flex p-2 rounded-lg bg-muted mb-4 ${feature.color}`}
+                  >
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+
+                  <h3 className="text-xl font-semibold tracking-tight text-foreground">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      <PricingSection></PricingSection>
+
       <LogoMarquee></LogoMarquee>
 
-      <section className="py-24 bg-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            ¿Listo para escalar tu próximo proyecto SaaS?
-          </h2>
-          <p className="mt-4 text-xl opacity-90">
-            Actualmente estoy abierto a nuevas oportunidades y retos técnicos.
-            Si buscas a alguien que entienda el Full-Stack de verdad, hablemos.
-          </p>
+      <CTASection></CTASection>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="https://www.linkedin.com/in/aristizabaljuan/"
-              target="_blank"
-              className="px-8 py-4 rounded-xl bg-background text-foreground font-bold hover:bg-secondary transition-all shadow-xl hover:-translate-y-1 active:scale-95"
-            >
-              Ver Perfil de LinkedIn
-            </Link>
-
-            <Link
-              href="https://github.com/spjhon"
-              target="_blank"
-              className="px-8 py-4 rounded-xl border-2 border-primary-foreground text-primary-foreground font-bold hover:bg-primary-foreground/10 transition-all active:scale-95"
-            >
-              Explorar GitHub
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900">Prodcuto</h4>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="#features"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Especificaciones
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://github.com/spjhon/Book-Building-Production-Grade-with-Supabase"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-black hover:opacity-70 transition-all whitespace-nowrap"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Computer className="w-4 h-4" />
-                    <span>GitHub</span>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900">Recursos</h4>
-              <ul className="mt-4 space-y-2">
-                <li>
-                  <Link
-                    href="https://github.com/spjhon/Book-Building-Production-Grade-with-Supabase"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Documentación
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <Link
-              href="https://www.linkedin.com/in/aristizabaljuan/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mx-auto inline-flex items-center gap-2 text-sm font-medium text-black hover:opacity-70 transition-all group"
-            >
-              <FileUser className="w-4 h-4 text-[#0A66C2] group-hover:scale-110 transition-transform" />
-              <span>
-                {" "}
-                <Suspense
-                  fallback={
-                    <span className="animate-pulse bg-slate-200 rounded px-2 text-transparent">
-                      0000
-                    </span>
-                  }
-                >
-                  <CurrentYear />
-                </Suspense>
-                {" Juan Camilo Patiño Aristizabal. Código de libre uso."}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer></Footer>
     </div>
   );
 }

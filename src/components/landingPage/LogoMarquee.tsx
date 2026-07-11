@@ -1,144 +1,113 @@
-
 import { Marquee } from "@/components/ui/marquee";
-import NextjsLogo from "@/components/landingPage/svgStack/NextjsLogo"
-import TailwindLogo from "@/components/landingPage/svgStack/TailwindLogo"
-import ReactLogo from  "@/components/landingPage/svgStack/ReactLogo"
-import JavascriptLogo from "./svgStack/JavascriptLogo";
-import BemLogo from "./svgStack/BemLogo";
-import CloudfareLogo from "./svgStack/CloudfareLogo";
-import CSSLogo from "./svgStack/CSSLogo";
-import GitLogo from "./svgStack/GitLogo";
-import TypeScriptLogo from "./svgStack/TypeScriptLogo";
-import VisualstudioLogo from "./svgStack/VisualstudioLogo";
+import { 
+  ShieldCheck, 
+  Database, 
+  Layers, 
+  Scale, 
+  Cpu, 
+  Server, 
+  FileText, 
+  CheckCircle2 
+} from "lucide-react";
 
-
-const logos = [
+const stackCda = [
   {
-    
     id: "01",
-    logo: <NextjsLogo/>,
-    label: "Next js",
-    link: "https://nextjs.org/"
+    logo: <Scale className="w-8 h-8" />,
+    label: "Normativa ISO 17020",
+    description: "Alineación ONAC"
   },
-
   {
     id: "02",
-    logo: <TailwindLogo/>,
-    label: "Tailwind",
-    link: "https://tailwindcss.com/"
+    logo: <Database className="w-8 h-8" />,
+    label: "PostgreSQL Enterprise",
+    description: "Base de datos relacional"
   },
-
   {
     id: "03",
-    logo: <ReactLogo/>,
-    label: "React",
-    link: "https://es.react.dev/"
+    logo: <ShieldCheck className="w-8 h-8" />,
+    label: "Row Level Security (RLS)",
+    description: "Aislamiento estricto de datos"
   },
-
   {
     id: "04",
-    logo: <JavascriptLogo/>,
-    label: "Javascript",
-    link: "https://developer.mozilla.org/es/docs/Web/JavaScript"
+    logo: <Cpu className="w-8 h-8" />,
+    label: "Arquitectura RPC-First",
+    description: "Lógica centralizada segura"
   },
-  
   {
     id: "05",
-    logo: <BemLogo/>,
-    label: "Bem",
-    link: "https://en.bem.info/methodology/"
+    logo: <Server className="w-8 h-8" />,
+    label: "Infraestructura VPS dedicada",
+    description: "Cero cold-starts / caídas"
   },
-
   {
     id: "06",
-    logo: <CloudfareLogo/>,
-    label: "Cloudfare",
-    link: "https://www.cloudflare.com/"
+    logo: <Layers className="w-8 h-8" />,
+    label: "Estructura Multi-Tenant",
+    description: "Inquilinos 100% aislados"
   },
-
   {
     id: "07",
-    logo: <GitLogo/>,
-    label: "GIT",
-    link: "https://git-scm.com/V"
+    logo: <FileText className="w-8 h-8" />,
+    label: "Auditoría de Cambios",
+    description: "Trazabilidad inmutable"
   },
-
   {
     id: "08",
-    logo: <TypeScriptLogo/>,
-    label: "TypeScript",
-    link: "https://www.typescriptlang.org/"
-  },
-
-  {
-    id: "09",
-    logo: <VisualstudioLogo/>,
-    label: "Visual Studio",
-    link: "https://code.visualstudio.com/"
-  },
-
-  {
-    id: "10",
-    logo: <CSSLogo/>,
-    label: "CSS",
-    link: "https://developer.mozilla.org/en-US/docs/Web/CSS"
+    logo: <CheckCircle2 className="w-8 h-8" />,
+    label: "Integración RUNT",
+    description: "Extracción automatizada"
   }
-    
-    
 ];
 
-
-
-
-const ReviewCard = ({ 
+// Tarjeta interna estilizada para el CDA con soporte de temas
+const StackCard = ({ 
   logo, 
   label, 
-  link 
+  description 
 }: { 
   logo: React.ReactNode, 
   label: string, 
-  link: string 
+  description: string 
 }) => {
   return (
-    <a 
-      href={link} 
-      target="_blank" 
-      rel="noopener noreferrer" 
-      className="mx-5 flex flex-col items-center gap-2 group transition-all"
-    >
-      <div className="group-hover:grayscale-0 transition-all duration-300">
+    <div className="mx-4 flex items-center gap-4 px-5 py-3 rounded-xl bg-card border border-border/60 text-card-foreground shadow-xs min-w-[280px]">
+      <div className="text-primary flex-shrink-0 bg-primary/10 p-2 rounded-lg">
         {logo}
       </div>
-      <span className="text-sm font-medium text-muted-foreground group-hover:text-primary">
-        {label}
-      </span>
-    </a>
+      <div className="flex flex-col items-start">
+        <span className="text-sm font-bold tracking-tight text-foreground">
+          {label}
+        </span>
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {description}
+        </span>
+      </div>
+    </div>
   );
 };
 
-
-
-
-
 export function LogoMarquee() {
   return (
-    <section className="my-15" id="stack">
-      <h2 className="text-center text-3xl md:text-4xl font-bold py-10  ">
-        Herramientas modernas y {" "}
-        <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
-          CONFIABLES{" "}
-        </span>
-        
-      </h2>
-    <div className="container mx-auto relative flex w-full flex-col items-center justify-center overflow-hidden">
-      
-      <Marquee reverse pauseOnHover className="[--duration:30s]">
-        {logos.map((logo) => (
-          <ReviewCard key={logo.id} {...logo} />
-        ))}
-      </Marquee>
-      
-    </div>
+    <section className="py-16 bg-muted/20 border-y border-border/40" id="respaldo-tecnico">
+      <div className="max-w-7xl mx-auto px-4 text-center mb-10 space-y-3">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          Respaldo normativo e infraestructura de grado industrial
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+          cdApp está construido sobre los pilares tecnológicos más estrictos del mercado para asegurar la continuidad de tu pista.
+        </p>
+      </div>
+
+      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden masked-marquee">
+        {/* Marquee continuo con las especificaciones del SaaS */}
+        <Marquee reverse pauseOnHover className="[--duration:40s]">
+          {stackCda.map((item) => (
+            <StackCard key={item.id} {...item} />
+          ))}
+        </Marquee>
+      </div>
     </section>
   );
 }

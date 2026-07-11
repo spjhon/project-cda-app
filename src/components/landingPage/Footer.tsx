@@ -5,98 +5,117 @@ import Image from "next/image"; // 🔑 Importamos el componente de Next.js
 import LogoDark from "../../../public/logo_dark_transparente_resize_cropped.png"
 import LogoLight from "../../../public/logo_light_transparente_resize_cropped.png"
 export function Footer() {
-  const navigation = ["Soluciones", "Planes y Tarifas", "Conócenos", "Blog"];
+  const navigation = ["Soluciones", "Planes y Tarifas", "Conócenos", "Visita Nuestra DEMO"];
 
   return (
-    <div className="relative">
-      <div className="grid max-w-7xl grid-cols-1 gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700 lg:grid-cols-5">
-        <div className="lg:col-span-2">
-          <Link
-            prefetch={true}
-            rel="noreferrer noopener"
-            href="/"
-            className="ml-2 flex items-center"
-          >
-            {/* ☀️ LOGO PARA MODO CLARO: Se muestra por defecto, se oculta en modo oscuro */}
-            <Image
-              src={LogoLight}
-              alt="cdApp Logo"
-              priority // 🏎️ Le da prioridad de carga por estar en el Navbar (LCP optimization)
-              className="block dark:hidden w-auto h-8" // Ajusta h-8 (altura) según necesites tu diseño
-            />
+   <div className="w-full px-12"> {/* 3rem de espacio a los lados */}
+  
+  {/* 🔥 CONTENEDOR PRINCIPAL REESTRUCTURADO CON FLEXBOX */}
+  <div className="flex flex-col lg:flex-row max-w-7xl justify-between gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700">
+    
+    {/* COLUMNA 1: LOGO E INFO */}
+    <div className="flex flex-col max-w-md">
+      {/* El div contenedor ya no expande el link; w-fit hace que mida solo lo que mide el logo */}
+      <div className="w-fit">
+        <Link
+          prefetch={true}
+          rel="noreferrer noopener"
+          href="/"
+          className="flex items-center"
+        >
+          {/* ☀️ LOGO MODO CLARO */}
+          <Image
+            src={LogoLight}
+            alt="cdApp Logo"
+            priority
+            className="block dark:hidden w-auto h-8"
+          />
 
-            {/* 🌙 LOGO PARA MODO OSCURO: Se oculta por defecto, se muestra en modo oscuro */}
-            <Image
-              src={LogoDark}
-              alt="cdApp Logo"
-              priority
-              className="hidden dark:block w-auto h-8" // Mismas dimensiones para que no salte el layout
-            />
-          </Link>
-
-          <div className="max-w-md mt-4">
-            Jan Autos es un servicio de peritaje y asesoramiento automotriz.
-          </div>
-          <div className="max-w-md mt-4">E-mail: Correo de Jan Autos</div>
-          <div className="max-w-md mt-4">Cel: Telefono de Jan Autos</div>
-        </div>
-
-        <div>
-          <div className="flex flex-wrap w-full -mt-2 -ml-3 lg:ml-0">
-            {navigation.map((item, index) => (
-              <Link
-                key={index}
-                href="/"
-                className="w-full px-4 py-2 rounded-md"
-              >
-                {item}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="">
-          <div>Siguenos En</div>
-          <div className="flex mt-5 space-x-5">
-            <a
-              href="https://twitter.com/web3templates"
-              target="_blank"
-              rel="noopener"
-            >
-              <span className="sr-only">Twitter</span>
-              <Twitter />
-            </a>
-            <a
-              href="https://facebook.com/web3templates"
-              target="_blank"
-              rel="noopener"
-            >
-              <span className="sr-only">Facebook</span>
-              <Facebook />
-            </a>
-            <a
-              href="https://instagram.com/web3templates"
-              target="_blank"
-              rel="noopener"
-            >
-              <span className="sr-only">Instagram</span>
-              <Instagram />
-            </a>
-            <a href="https://linkedin.com/" target="_blank" rel="noopener">
-              <span className="sr-only">Linkedin</span>
-            </a>
-          </div>
-        </div>
+          {/* 🌙 LOGO MODO OSCURO */}
+          <Image
+            src={LogoDark}
+            alt="cdApp Logo"
+            priority
+            className="hidden dark:block w-auto h-8"
+          />
+        </Link>
       </div>
 
-      <div className="my-10 text-sm text-center text-gray-600 dark:text-gray-400">
-        Copyright ©{" "}
-        <Suspense fallback={<span>2026</span>}>
-          <DynamicYear />
-        </Suspense>{" "}
-        . Hecho con ♥ por Juan Aristizabal
+      <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+        Ecosistema integral para la administración, gestión de calidad y blindaje normativo de CDAs bajo la norma ISO 17020.
+      </p>
+      
+      <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+        <p><span className="font-medium text-foreground">E-mail:</span> spjhon@gmail.com</p>
+        <p><span className="font-medium text-foreground">Cel:</span> +57 321 522 4583</p>
       </div>
     </div>
+
+    {/* COLUMNA 2: NAVEGACIÓN */}
+    <div className="flex flex-col min-w-37.5">
+      <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
+        Enlaces
+      </span>
+      <div className="flex flex-col space-y-2">
+        {navigation.map((item, index) => (
+          <Link
+            key={index}
+            href="/"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors py-1"
+          >
+            {item}
+          </Link>
+        ))}
+      </div>
+    </div>
+
+    {/* COLUMNA 3: REDES SOCIALES */}
+    <div className="flex flex-col min-w-37.5">
+      <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
+        Síguenos en
+      </span>
+      <div className="flex items-center space-x-4">
+        <a
+          href="https://twitter.com/web3templates"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span className="sr-only">Twitter</span>
+          <Twitter size={20} />
+        </a>
+        <a
+          href="https://facebook.com/web3templates"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span className="sr-only">Facebook</span>
+          <Facebook size={20} />
+        </a>
+        <a
+          href="https://instagram.com/web3templates"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span className="sr-only">Instagram</span>
+          <Instagram size={20} />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* 🏢 COPYRIGHT CON SUSPENSE */}
+  <div className="py-10 mt-8 text-sm text-center text-gray-600 dark:text-gray-400 border-t border-gray-100/50 dark:border-trueGray-700/50">
+    Copyright ©{" "}
+    <Suspense fallback={<span>2026</span>}>
+      <DynamicYear />
+    </Suspense>{" "}
+    . Hecho con ♥ por Juan Aristizabal
+  </div>
+
+</div>
   );
 }
 
