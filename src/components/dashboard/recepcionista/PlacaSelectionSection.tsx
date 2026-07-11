@@ -997,7 +997,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   </span>
 
                   <div className="bg-card border-2 border-primary/30 rounded-2xl px-8 py-4 shadow-sm">
-                    <span className="font-black tracking-[0.25em] text-5xl md:text-6xl text-foreground">
+                    <span className="font-black tracking-[0.25em] text-3xl md:text-6xl text-foreground">
                       {formData.vehicle.placa}
                     </span>
                   </div>
