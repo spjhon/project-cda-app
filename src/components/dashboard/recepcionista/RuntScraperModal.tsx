@@ -224,184 +224,217 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
 
 
 
-
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={
- <Button
+return (
+  <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <DialogTrigger
+      render={
+        <Button
           type="button"
           disabled={!placa}
           className={`
             w-full h-16 gap-2 font-bold rounded-xl transition-all active:scale-95 text-lg
             ${
               placa
-                ? "bg-[#f57c00] hover:bg-[#e65100] text-white shadow-lg shadow-orange-100 cursor-pointer"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md cursor-pointer"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
             }
           `}
         >
           <Globe className="h-5 w-5" />
-          <span className="hidden md:inline">ACTUALIZAR DATOS VIA RUNT</span>
+          <span className="hidden md:inline">
+            ACTUALIZAR DATOS VIA RUNT
+          </span>
           <span className="md:hidden">RUNT</span>
         </Button>
-      }>
-       
-      </DialogTrigger>
+      }
+    ></DialogTrigger>
 
-      <DialogContent className="sm:max-w-106.25">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <Globe className="h-5 w-5 text-[#f57c00]" />
-            Consulta Automática RUNT
-          </DialogTitle>
-          <DialogDescription>
-            Buscando información oficial para el vehículo con placas{" "}
-            <strong className="text-foreground bg-slate-100 px-2 py-0.5 rounded uppercase tracking-wider">
-              {placa}
-            </strong>.
-          </DialogDescription>
-        </DialogHeader>
+    <DialogContent className="sm:max-w-106.25">
+      <DialogHeader>
+        <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <Globe className="h-5 w-5 text-primary" />
+          Consulta Automática RUNT
+        </DialogTitle>
 
-        <form onSubmit={handleSubmitRunt} className="space-y-4 pt-2">
-          {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
-          <div className="flex flex-col items-center justify-center border border-dashed rounded-xl p-3 bg-slate-50 min-h-25 relative">
-            {isLoadingCaptcha || isFetchingCaptcha ? (
-              <div className="flex flex-col items-center gap-2 text-slate-500 text-sm">
-                <Loader2 className="h-6 w-6 animate-spin text-[#f57c00]" />
-                <span>Conectando con el RUNT en tiempo real...</span>
+        <DialogDescription>
+          Buscando información oficial para el vehículo con placas{" "}
+          <strong className="text-foreground bg-muted px-2 py-0.5 rounded uppercase tracking-wider">
+            {placa}
+          </strong>
+          .
+        </DialogDescription>
+      </DialogHeader>
+
+      <form onSubmit={handleSubmitRunt} className="space-y-4 pt-2">
+        {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
+        <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-xl p-3 bg-muted min-h-25 relative">
+          {isLoadingCaptcha || isFetchingCaptcha ? (
+            <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <span>Conectando con el RUNT en tiempo real...</span>
+            </div>
+          ) : captchaImage ? (
+            <div className="flex flex-col items-center w-full gap-2">
+              <img
+                src={captchaImage}
+                alt="Captcha RUNT"
+                className="h-14 object-contain border border-border bg-card rounded shadow-sm"
+              />
+            </div>
+          ) : isErrorCaptcha ? (
+            <div className="text-center p-2">
+              <p className="text-xs text-destructive mb-2">
+                No se pudo conectar con el servidor local en tu casa.
+              </p>
+            </div>
+          ) : null}
+        </div>
+
+        {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
+        <div className="space-y-1">
+          <Label htmlFor="captcha" className="text-sm font-semibold">
+            Escribe las letras del Captcha
+          </Label>
+
+          <Input
+            id="captcha"
+            type="text"
+            placeholder="Ej: AB12"
+            value={captchaValue}
+            onChange={(e) => setCaptchaValue(e.target.value)}
+            className="font-mono text-center tracking-widest text-lg h-11"
+            maxLength={6}
+            required
+            disabled={
+              isLoadingCaptcha ||
+              solveRuntMutation.isPending ||
+              !captchaData?.captcha
+            }
+          />
+        </div>
+
+        {/* SELECT TIPO DE DOCUMENTO */}
+        <div className="space-y-1">
+          <Label htmlFor="tipoDoc" className="text-sm font-semibold">
+            Tipo de Documento del Propietario
+          </Label>
+
+          <Select
+            items={ID_DOCUMENT_OPTIONS}
+            value={tipoDocumento}
+            onValueChange={(v) =>
+              setTipoDocumento(v ? v : "cedula_ciudadania")
+            }
+          >
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Seleccione tipo" />
+            </SelectTrigger>
+
+            <SelectContent alignItemWithTrigger={false}>
+              {ID_DOCUMENT_OPTIONS.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* INPUT NÚMERO DE DOCUMENTO */}
+        <div className="space-y-1">
+          <Label htmlFor="numDoc" className="text-sm font-semibold">
+            Número de Documento
+          </Label>
+
+          <Input
+            id="numDoc"
+            type="text"
+            placeholder="Número de identificación"
+            value={numeroDocumento}
+            onChange={(e) =>
+              setNumeroDocumento(e.target.value)
+            }
+            className="h-11"
+            required
+            disabled={solveRuntMutation.isPending}
+          />
+        </div>
+
+        {/* ESTADO */}
+        {(solveRuntMutation.isPending ||
+          solveRuntMutation.isError ||
+          solveRuntMutation.data) && (
+          <div
+            className={`p-3 rounded-lg border text-sm text-center transition-all ${
+              solveRuntMutation.isPending
+                ? "bg-primary/10 border-primary/20 text-primary"
+                : solveRuntMutation.isError
+                ? "bg-destructive/10 border-destructive/20 text-destructive"
+                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+            }`}
+          >
+            {solveRuntMutation.isPending && (
+              <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span>
+                  Buscando datos en el RUNT... Por favor espera.
+                </span>
               </div>
-            ) : captchaImage? (
-              <div className="flex flex-col items-center w-full gap-2">
-                <img
-                  src={captchaImage}
-                  alt="Captcha RUNT"
-                  className="h-14 object-contain border bg-white rounded shadow-sm"
-                />
-                
-              </div>
-            ) : isErrorCaptcha ? (
-              <div className="text-center p-2">
-                <p className="text-xs text-destructive mb-2">No se pudo conectar con el servidor local en tu casa.</p>
-                
-              </div>
-            ) : null}
-          </div>
+            )}
 
-          {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
-          <div className="space-y-1">
-            <Label htmlFor="captcha" className="text-sm font-semibold">
-              Escribe las letras del Captcha
-            </Label>
-            <Input
-              id="captcha"
-              type="text"
-              placeholder="Ej: AB12"
-              value={captchaValue}
-              onChange={(e) => setCaptchaValue(e.target.value)}
-              className="font-mono text-center tracking-widest text-lg h-11"
-              maxLength={6}
-              required
-              disabled={isLoadingCaptcha || solveRuntMutation.isPending || !captchaData?.captcha}
-            />
-          </div>
+            {solveRuntMutation.isError && (
+              <p className="font-semibold text-destructive">
+                ❌{" "}
+                {(solveRuntMutation.error as Error)?.message ||
+                  "Hubo un error de conexión con tu PC local."}
+              </p>
+            )}
 
-          {/* SELECT TIPO DE DOCUMENTO */}
-          <div className="space-y-1">
-            <Label htmlFor="tipoDoc" className="text-sm font-semibold">
-              Tipo de Documento del Propietario
-            </Label>
-            <Select
-                items={ID_DOCUMENT_OPTIONS}
-                value={tipoDocumento}
-                onValueChange={(v) =>
-                setTipoDocumento(v ? v : "cedula_ciudadania")
-                }
-            >
-                <SelectTrigger className="h-11">
-                <SelectValue placeholder="Seleccione tipo" />
-                </SelectTrigger>
-
-                <SelectContent alignItemWithTrigger={false}>
-                {ID_DOCUMENT_OPTIONS.map((option) => (
-                    <SelectItem
-                    key={option.value}
-                    value={option.value}
-                    >
-                    {option.label}
-                    </SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-          </div>
-
-          {/* INPUT NÚMERO DE DOCUMENTO */}
-          <div className="space-y-1">
-            <Label htmlFor="numDoc" className="text-sm font-semibold">
-              Número de Documento
-            </Label>
-            <Input
-              id="numDoc"
-              type="text"
-              placeholder="Número de identificación"
-              value={numeroDocumento}
-              onChange={(e) => setNumeroDocumento(e.target.value)}
-              className="h-11"
-              required
-              disabled={solveRuntMutation.isPending}
-            />
-          </div>
-
-          {/* 🔍 ESTADO DE BÚSQUEDA Y MENSAJES EN TIEMPO REAL */}
-          {(solveRuntMutation.isPending || solveRuntMutation.isError || solveRuntMutation.data) && (
-            <div className={`p-3 rounded-lg border text-sm text-center transition-all ${
-              solveRuntMutation.isPending 
-                ? "bg-orange-50 border-orange-200 text-orange-800" 
-                : solveRuntMutation.isError 
-                ? "bg-destructive/10 border-destructive/20 text-destructive" 
-                : "bg-emerald-50 border-emerald-200 text-emerald-800"
-            }`}>
-              {solveRuntMutation.isPending && (
-                <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
-                  <Loader2 className="h-4 w-4 animate-spin text-[#f57c00]" />
-                  <span>Buscando datos en el RUNT... Por favor espera.</span>
-                </div>
-              )}
-              {solveRuntMutation.isError && (
-                <p className="font-semibold text-red-500">
-                  ❌ {(solveRuntMutation.error as Error)?.message || "Hubo un error de conexión con tu PC local."}
-                </p>
-              )}
-
-              {!solveRuntMutation.isPending && solveRuntMutation.data && (
+            {!solveRuntMutation.isPending &&
+              solveRuntMutation.data && (
                 <p className="font-medium">
                   ℹ️ {solveRuntMutation.data.message}
                 </p>
               )}
-            </div>
-          )}
-
-          {/* ACCIONES DEL FORMULARIO */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className="w-1/3 h-11"
-              disabled={solveRuntMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              className="w-2/3 h-11 bg-[#f57c00] hover:bg-[#e65100] font-bold text-white gap-2"
-              disabled={isLoadingCaptcha || solveRuntMutation.isPending || !captchaValue || !captchaData?.captcha}
-            >
-              {solveRuntMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {solveRuntMutation.isPending ? "Extrayendo..." : "Consultar e Importar"}
-            </Button>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+        )}
+
+        {/* BOTONES */}
+        <div className="flex gap-3 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+            className="w-1/3 h-11"
+            disabled={solveRuntMutation.isPending}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            type="submit"
+            className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2"
+            disabled={
+              isLoadingCaptcha ||
+              solveRuntMutation.isPending ||
+              !captchaValue ||
+              !captchaData?.captcha
+            }
+          >
+            {solveRuntMutation.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
+
+            {solveRuntMutation.isPending
+              ? "Extrayendo..."
+              : "Consultar e Importar"}
+          </Button>
+        </div>
+      </form>
+    </DialogContent>
+  </Dialog>
+);
 }

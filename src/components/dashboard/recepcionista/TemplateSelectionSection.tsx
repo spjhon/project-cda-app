@@ -48,56 +48,60 @@ export default function TemplateSelectionSection({activeTemplates, plantilla_id,
 
 
 
+return (
+  <fieldset>
+    <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
+      1. Selección de Plantilla Técnica
+    </legend>
 
+    <div className="flex flex-wrap gap-3">
+      {activeTemplates.map((template, index) => (
+        <Label
+          key={template.id}
+          className={`group border-2 rounded-xl shadow-sm relative flex flex-col gap-3 p-4 cursor-pointer transition-all hover:border-primary/30 hover:bg-accent ${
+            plantilla_id === template.id
+              ? "border-primary bg-accent"
+              : "border-border bg-card"
+          }`}
+        >
+          <div className="flex justify-between items-center w-full">
+            <div className="p-2 bg-card border border-border rounded-lg shadow-sm group-hover:border-primary/30">
+              {getTemplateIcon(index)}
+            </div>
 
-
-    
-  return (
-    <fieldset>
-          <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
-            1. Selección de Plantilla Técnica
-          </legend>
-          <div className="flex flex-wrap gap-3">
-            {activeTemplates.map((template, index) => (
-              <Label
-                key={template.id}
-                className={`group border-2 rounded-xl shadow-2xl relative flex flex-col gap-3  p-4 cursor-pointer transition-all hover:border-slate-300 hover:bg-[#ECF3FF] ${
-                  plantilla_id === template.id
-                    ? "border-slate-600 bg-[#ECF3FF]"
-                    : "border-slate-200"
-                }`}
-              >
-                <div className="flex justify-between items-center w-full">
-                  <div className="p-2 bg-white border rounded-lg shadow-sm group-hover:border-blue-200">
-                    {getTemplateIcon(index)}
-                  </div>
-               
-                  <Checkbox
-                    checked={plantilla_id === template.id}
-                    onCheckedChange={(checked) =>
-                      handleTemplateSelect(template.id, checked === true)
-                    }
-                    className="h-5 w-5 ml-4 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-slate-800">
-                    {template.template_name}
-                  </p>
-                  <div className="flex flex-wrap gap-y-1 gap-x-3 pt-1">
-                    <span className="flex items-center text-[11px] text-slate-500 gap-1">
-                      <Hash className="h-3 w-3" /> Cod: {template.document_code}
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      Version: {template.version}
-                    </span>
-                  </div>
-                </div>
-              </Label>
-            ))}
+            <Checkbox
+              checked={plantilla_id === template.id}
+              onCheckedChange={(checked) =>
+                handleTemplateSelect(
+                  template.id,
+                  checked === true
+                )
+              }
+              className="h-5 w-5 ml-4 rounded-full border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+            />
           </div>
-        </fieldset>
-  )
+
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-foreground">
+              {template.template_name}
+            </p>
+
+            <div className="flex flex-wrap gap-y-1 gap-x-3 pt-1">
+              <span className="flex items-center text-[11px] text-muted-foreground gap-1">
+                <Hash className="h-3 w-3" />
+                Cod: {template.document_code}
+              </span>
+
+              <span className="text-[11px] text-muted-foreground font-medium">
+                Version: {template.version}
+              </span>
+            </div>
+          </div>
+        </Label>
+      ))}
+    </div>
+  </fieldset>
+);
 }
 
 

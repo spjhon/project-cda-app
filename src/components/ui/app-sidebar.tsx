@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ClipboardList, FilePenLine, FileStack, LucideIcon, PlusCircle, UserCog} from "lucide-react";
+import { ClipboardList, FilePenLine, FileStack, LayoutDashboard, LucideIcon, PlusCircle, UserCog} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -22,6 +22,8 @@ import { LogoutButton } from "@/components/dashboard/recepcionista/LogoutButton"
 import { useContext } from "react";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { Separator } from "./separator";
+import { ModeToggle } from "../landingPage/NavBar/mode-toggle";
+import { Button } from "./button";
 
 
 interface NavItem {
@@ -193,7 +195,8 @@ const contextRecived = useContext(PermissionsContext);
             return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
           };
 
-          return (
+
+    return (
             <>
               {/* BLOQUE 1: DATOS DEL TENANT (CDA / ORGANIZACIÓN) */}
               <div className="flex items-center gap-3 group/tenant">
@@ -203,7 +206,7 @@ const contextRecived = useContext(PermissionsContext);
                     alt={tenantData?.name || "Organización"} 
                     className="object-contain p-1"
                   />
-                  <AvatarFallback className="rounded-lg bg-primary/5 text-primary text-xs font-bold">
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
                     {getTenantInitials(tenantData?.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -257,49 +260,36 @@ const contextRecived = useContext(PermissionsContext);
 
                 return (
                   <SidebarMenuItem key={item.href}>
-
-
-
-
                    
-                  <Link prefetch={true} href={item.href}>
-                <SidebarMenuButton
-                    isActive={active}
-                    className={`h-15 w-full justify-start rounded-md my-3 border border-slate-300 bg-[#ECF3FF] transition-all duration-75 cursor-pointer font-bold
-                      /* Sombra dura inicial (Fija en el fondo) */
-                      shadow-2xl
+                    <Link prefetch={true} href={item.href}>
+                      <SidebarMenuButton
+                        isActive={active}
+                        className={`h-15 w-full justify-start rounded-md my-3 border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground transition-all duration-75 cursor-pointer font-bold shadow-2xl active:bg-sidebar-accent
+                        
+                          ${active 
+                            ? "translate-x-0.5 translate-y-0.5 shadow-none bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border" 
+                            : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                          }
+                        `}
+                      >
+                        
+                        {/* Icono plano adaptativo */}
+                        <Icon className="w-20 shrink-0 text-sidebar-foreground" />
 
-                      active:bg-[#ECF3FF]
-                    
-                      ${active 
-                        ? "translate-x-0.5 translate-y-0.5 shadow-none bg-slate-100 text-slate-900" 
-                        : "text-slate-700 hover:text-slate-900 hover:bg-[#ECF3FF]"
-                      }
-                    `}
-                  >
-                    
-                      
-                      {/* Icono plano */}
-                      <Icon className="w-20 shrink-0 text-slate-900" />
-
-                      {/* Bloque de Textos con negrilla persistente */}
-                      <div className="flex flex-col text-left space-y-1 font-bold">
-                        <span className="text-sm tracking-tight leading-none text-slate-900">
-                          {item.title}
-                        </span>
-                        {item.description && (
-                          <span className="text-xs font-normal text-slate-500 tracking-wide leading-none">
-                            {item.description}
+                        {/* Bloque de Textos con tokens de Shadcn */}
+                        <div className="flex flex-col text-left space-y-1 font-bold">
+                          <span className="text-sm tracking-tight leading-none text-sidebar-foreground">
+                            {item.title}
                           </span>
-                        )}
-                      </div>
-                    
-                  </SidebarMenuButton>
-                </Link>
-
-
-
-
+                          {item.description && (
+                            <span className="text-xs font-normal text-sidebar-foreground/60 tracking-wide leading-none">
+                              {item.description}
+                            </span>
+                          )}
+                        </div>
+                      
+                      </SidebarMenuButton>
+                    </Link>
                     
                   </SidebarMenuItem>
                 );
@@ -309,12 +299,34 @@ const contextRecived = useContext(PermissionsContext);
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t m-auto">
-        <LogoutButton />
-        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-          SaaS CDA - v1.0
-        </span>
-      </SidebarFooter>
+     <SidebarFooter className="p-4 border-t border-sidebar-border/60 flex flex-col gap-3">
+
+  {/* Cambiar perfil */}
+  <Button
+  variant="outline"
+  className="w-full p-0"
+>
+  <Link
+    href="/dashboard"
+    prefetch
+    className="flex h-full w-full items-center justify-center gap-2 px-4 py-2"
+  >
+    <LayoutDashboard className="h-4 w-4" />
+    <span>Cambiar Perfil</span>
+  </Link>
+</Button>
+
+  {/* Acciones inferiores */}
+  <div className="flex items-center justify-center gap-2 w-full">
+    <LogoutButton />
+    <ModeToggle />
+  </div>
+
+  <span className="text-xs text-center text-muted-foreground font-medium uppercase tracking-wider">
+    SaaS CDA - v1.0
+  </span>
+
+</SidebarFooter>
     </Sidebar>
   );
 }

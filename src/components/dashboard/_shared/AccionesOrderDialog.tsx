@@ -52,7 +52,7 @@ export default function AccionesOrderDialog({
               {...props}
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-slate-500 hover:text-slate-900 shadow-2xl border border-slate-300 rounded-none"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-none"
             >
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Abrir acciones</span>
@@ -61,17 +61,17 @@ export default function AccionesOrderDialog({
         />
 
         {/* Ventana flotante del Diálogo - Ajustado a un tamaño más grande (max-w-xl) */}
-        <DialogContent className="sm:max-w-xl p-6">
+        <DialogContent className="sm:max-w-xl p-6 border-border bg-background">
           <DialogHeader className="text-center sm:text-center flex flex-col items-center">
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-slate-900 justify-center">
-              <FileText className="h-5 w-5 text-amber-500" />
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground justify-center">
+              <FileText className="h-5 w-5 text-amber-500 dark:text-amber-400" />
               Operaciones de Orden de Entrada
             </DialogTitle>
             
             {/* Descripción más grande, centrada y placa súper llamativa */}
-            <DialogDescription className="text-slate-500 text-sm mt-3 max-w-md text-center leading-relaxed">
+            <DialogDescription className="text-muted-foreground text-sm mt-3 max-w-md text-center leading-relaxed">
               Gestión de documentos públicos y estado operativo para la placa:
-              <span className="block mt-2 text-lg font-black text-slate-900 bg-slate-100 px-4 py-1.5 rounded-md border border-slate-200 tracking-wider w-fit mx-auto shadow-xs">
+              <span className="block mt-2 text-lg font-black text-foreground bg-muted px-4 py-1.5 rounded-md border border-border tracking-wider w-fit mx-auto shadow-xs">
                 {orden.placa?.toUpperCase()}
               </span>
             </DialogDescription>
@@ -82,10 +82,10 @@ export default function AccionesOrderDialog({
             
             {/* Sección PDF: Centrada */}
             <div className="flex flex-col gap-2.5 text-center">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Documentación PDF
               </span>
-              <div className="flex items-center justify-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 w-full">
+              <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
                 <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
                 <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
               </div>
@@ -93,20 +93,20 @@ export default function AccionesOrderDialog({
 
             {/* Sección Anular o Mensaje de Anulada: Centrada */}
             <div className="flex flex-col gap-2.5 text-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Control de Estado
-            </span>
-           {/* CONTENEDOR DINÁMICO: Ajusta su fondo/borde según si está bloqueado o permitido */}
+              </span>
+              {/* CONTENEDOR DINÁMICO: Ajusta su fondo/borde según si está bloqueado o permitido */}
               <div className={`flex items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
                 orden.estado_orden === "abierta" 
-                  ? "bg-stone-50/50 border-stone-100/50" // Fondo neutro si está abierta
-                  : "bg-red-50/50 border-red-100/50"    // Fondo de advertencia si no se puede anular
+                  ? "bg-muted/30 border-border/40" // Fondo neutro adaptado
+                  : "bg-destructive/5 border-destructive/20"    // Fondo de advertencia adaptado
               }`}>
 
                 {orden.estado_orden !== "abierta" ? (
                   /* CASO DE BLOQUEO: Cualquier estado diferente a 'abierta' (en_prueba, finalizada, anulada) */
-                  <div className="flex items-center gap-2 text-sm font-semibold text-red-600 bg-red-100/60 px-5 py-2.5 rounded-lg border border-red-200 shadow-xs animate-fade-in select-none">
-                    <Ban className="h-4 w-4 shrink-0" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-destructive bg-destructive/10 px-5 py-2.5 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none">
+                    <Ban className="h-4 w-4 shrink-0 text-destructive" />
                     <span>
                       {orden.estado_orden === "anulada" 
                         ? "Esta orden ya fue anulada" 
@@ -159,20 +159,12 @@ export default function AccionesOrderDialog({
 
   if (rol === "admin") {
     return (
-      
       <VerDetalleOrdenAdminDialog 
         orden={orden} 
         tenantId={tenantId} 
-    
-    
       />
-      
     );
   }
 
-
-
   return null;
 }
-
-

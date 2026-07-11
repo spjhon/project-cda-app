@@ -480,45 +480,29 @@ if (tieneCondicionesNoCumplidas) {
 
 
 
-
-
-
-
-
-  return (
-    <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8 bg-[#FAFAFA]">
-
-
-      
-
-
+return (
+    <form onSubmit={handleSubmit} className="p-8 mx-auto space-y-8">
 
       {/**TITULO SUPERIOR */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
           Nueva Orden de Entrada
         </h1>
-        <p className="text-slate-500">
+        <p className="text-slate-500 dark:text-slate-400">
           Complete la información del vehículo vinculada a una plantilla
           técnica.
         </p>
       </div>
 
-
-
-
-
       {/**El div que contiene todas las secciones del formulario */}
       <div className="flex flex-col gap-6">
-
-
 
         {/**badge de refresco de datos */}
         <div className="flex justify-start">
           {templateTableData?.query.isFetching ? (
             <Badge
               variant="secondary"
-              className="bg-blue-50 text-blue-700 border-blue-100 animate-pulse gap-1.5 px-3 py-1"
+              className="bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 animate-pulse gap-1.5 px-3 py-1"
             >
               <RefreshCcw className="h-3.5 w-3.5 animate-spin" />
               Sincronizando base de datos...
@@ -526,7 +510,7 @@ if (tieneCondicionesNoCumplidas) {
           ) : (
             <Badge
               variant="outline"
-              className="bg-green-50 text-green-700 border-green-200 gap-1.5 px-3 py-1"
+              className="bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 gap-1.5 px-3 py-1"
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
               Plantillas Actualizadas
@@ -534,18 +518,12 @@ if (tieneCondicionesNoCumplidas) {
           )}
         </div>
 
-
-
-
-
         {/**SECCION DE SELECCION DE PLANTILLA */}
         <TemplateSelectionSection
           activeTemplates={activeTemplates}
           plantilla_id={formData.plantilla_id}
           handleTemplateSelect={handleTemplateSelect}
         ></TemplateSelectionSection>
-
-
 
         {/**SECCION DE BUSQUEDA DE PLACA */}
         <PlacaSelectionSection
@@ -555,8 +533,6 @@ if (tieneCondicionesNoCumplidas) {
           setSignatureKey={setSignatureKey}
         ></PlacaSelectionSection>
 
-
-
         {/**SECCION DE LAS PERSONAS */}
         <PersonSection
           formData={formData}
@@ -565,8 +541,6 @@ if (tieneCondicionesNoCumplidas) {
           hayPlaca={formData.vehicle.placa ? true : false}
         />
 
-
-
         {/**SECCION DE DATOS DEL VEHICULO */}
         <VehicleDataSection
           selectedTemplate={selectedTemplate}
@@ -574,14 +548,12 @@ if (tieneCondicionesNoCumplidas) {
           setFormData={setFormData}
         />
 
-
-
         {/**SECCION DE LAS PRESIONES DEL VEHICULO */}
         <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
         >
-          <div className="border-t pt-6">
-            <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
+            <legend className="text-xs font-bold uppercase text-slate-400 dark:text-slate-500 tracking-widest my-5">
               5. Presiones
             </legend>
 
@@ -592,21 +564,19 @@ if (tieneCondicionesNoCumplidas) {
           </div>
         </fieldset>
 
-
-
         {/**Seccion de las observaciones */}
         <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
         >
-          <div className="border-t border-slate-100 pt-6">
-            <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
+            <legend className="text-xs font-bold uppercase text-slate-400 dark:text-slate-500 tracking-widest my-5">
               6. Observaciones Adicionales
             </legend>
 
-            <div className="bg-white p-1">
+            <div className="bg-transparent p-1">
               <Textarea
                 placeholder="Escriba aquí detalles relevantes sobre el estado del vehículo, hallazgos específicos o notas de la inspección..."
-                className="min-h-30 resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400 text-sm leading-relaxed"
+                className="min-h-30 resize-none border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 focus-visible:ring-blue-500 text-sm leading-relaxed"
                 value={formData.observaciones}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -615,15 +585,13 @@ if (tieneCondicionesNoCumplidas) {
                   }))
                 }
               />
-              <p className="mt-2 text-[10px] text-slate-400 italic font-medium">
+              <p className="mt-2 text-[10px] text-slate-400 dark:text-slate-500 italic font-medium">
                 * Estas observaciones quedarán registradas en el reporte final
                 de la orden de entrada.
               </p>
             </div>
           </div>
         </fieldset>
-
-
 
         {/**SECCION DE LAS CONDICIONES A CUMPLIR */}
         <ConditionsSwitchSections
@@ -633,8 +601,6 @@ if (tieneCondicionesNoCumplidas) {
           selectedTemplate={selectedTemplate ? true : false}
           hayPlaca={formData.vehicle.placa ? true : false}
         />
-
-
 
         {/**SECCION DE LAS FIRMAS */}
         <SignatureSection
@@ -649,17 +615,17 @@ if (tieneCondicionesNoCumplidas) {
         {/**SECCION finalizado de la orden de entrada */}
         <fieldset
           className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
-         >
-          <div className="flex flex-col items-center justify-center p-6 sm:p-10 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
-            <div className="p-3 bg-blue-100 rounded-full mb-4">
-              <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+        >
+          <div className="flex flex-col items-center justify-center p-6 sm:p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] bg-slate-50/50 dark:bg-slate-900/20">
+            <div className="p-3 bg-blue-100 dark:bg-blue-950 rounded-full mb-4">
+              <ShieldCheck className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-400" />
             </div>
 
             <div className="text-center max-w-md mb-8">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 uppercase tracking-tight">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-50 uppercase tracking-tight">
                 Finalizar Registro de Orden
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 mt-2">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
                 Asegúrese de que todos los datos hayan sido capturados
                 correctamente antes de proceder.
               </p>
@@ -668,7 +634,7 @@ if (tieneCondicionesNoCumplidas) {
             {/* EL BOTÓN CORREGIDO */}
             <Button
               type="submit"
-              className="group relative h-16 sm:h-20 w-full max-w-xl bg-slate-900 hover:bg-emerald-600 text-white rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] overflow-hidden px-4"
+              className="group relative h-16 sm:h-20 w-full max-w-xl bg-slate-900 hover:bg-emerald-600 dark:bg-slate-50 dark:hover:bg-emerald-600 text-white dark:text-slate-950 dark:hover:text-white rounded-2xl shadow-xl transition-all duration-500 hover:scale-[1.01] active:scale-[0.98] overflow-hidden px-4"
             >
               {/* Efecto Shimmer mejorado */}
               <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
@@ -680,7 +646,7 @@ if (tieneCondicionesNoCumplidas) {
                 </span>
 
                 {/* Contenedor del icono con espacio reservado para la animación */}
-                <div className="shrink-0 bg-white/10 p-2 rounded-xl group-hover:bg-white/20 transition-colors ml-2">
+                <div className="shrink-0 bg-white/10 dark:bg-slate-950/10 p-2 rounded-xl group-hover:bg-white/20 transition-colors ml-2">
                   <SendHorizontal className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </div>
               </div>
@@ -694,23 +660,20 @@ if (tieneCondicionesNoCumplidas) {
             />
 
             {/* Metadata inferior responsiva */}
-            <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
+            <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <div className="h-1 w-1 bg-slate-300 rounded-full" />
+                <div className="h-1 w-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
                 ISO 17020 COMPLIANT
               </span>
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <div className="h-1 w-1 bg-slate-300 rounded-full" />
+                <div className="h-1 w-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
                 ALMACENAMIENTO EN TIEMPO REAL
               </span>
             </div>
           </div>
         </fieldset>
 
-
-
       </div>
-
 
     </form>
   );

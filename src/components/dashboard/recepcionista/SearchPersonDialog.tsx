@@ -194,187 +194,152 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
   };
 
 
+return (
+  <Dialog open={open} onOpenChange={handleOpenChange}>
+    <DialogTrigger
+      render={
+        <Button
+          type="button"
+          variant="outline"
+          disabled={disabled}
+          className="w-full h-11 flex items-center justify-center gap-2 font-semibold"
+        >
+          <Search className="h-4 w-4" />
+          <span>Buscar Persona</span>
+        </Button>
+      }
+    />
 
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>
+          Buscar Persona
+        </DialogTitle>
 
+        <DialogDescription>
+          Busca automáticamente información del cliente.
+        </DialogDescription>
+      </DialogHeader>
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <div className="space-y-5 pt-2">
+        {/* CONTROLES SUPERIORES */}
+        {/**Actualiza un state local para ser enviado al state principal al hacer submit */}
+        <div className="space-y-2">
+          <Label className="text-[11px] font-bold uppercase text-muted-foreground">
+            Tipo Documento
+          </Label>
 
-
-			<DialogTrigger render={
-				<Button
-					type="button"
-					variant="outline"
-					disabled={disabled}
-					className="w-full h-11 flex items-center justify-center gap-2 font-semibold"
-					>
-					<Search className="h-4 w-4" />
-
-					<span>Buscar Persona</span>
-				</Button>
-			}/>
-        
-      
-
-
-
-      <DialogContent className="sm:max-w-md">
-
-
-        <DialogHeader>
-
-          <DialogTitle>
-            Buscar Persona
-          </DialogTitle>
-
-          <DialogDescription>
-            Busca automáticamente información del cliente.
-          </DialogDescription>
-
-        </DialogHeader>
-
-        <div className="space-y-5 pt-2">
-
-
-          {/* CONTROLES SUPERIORES */}
-					{/**Actualiza un state local para ser enviado al state principal al hacer submit */}
-          <div className="space-y-2">
-            <Label className="text-[11px] font-bold uppercase text-slate-500">
-              Tipo Documento
-            </Label>
-
-            <Select
-              items={ID_DOCUMENT_OPTIONS}
-              value={documentType}
-              onValueChange={(v) =>
-                setDocumentType(v ? v : "cedula_ciudadania")
-              }
-            >
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="Seleccione tipo" />
-              </SelectTrigger>
-
-              <SelectContent alignItemWithTrigger={false}>
-                {ID_DOCUMENT_OPTIONS.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value}
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-
-
-          <div className="space-y-2">
-            <Label className="text-[11px] font-bold uppercase text-slate-500">
-              Número Documento
-            </Label>
-
-            <Input
-              className="h-11"
-              placeholder="Ej: 10203040"
-              value={documentNumber}
-              onChange={(e) =>
-                setDocumentNumber(e.target.value)
-              }
-            />
-          </div>
-
-
-
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={
-							//En este disables, estamos diciendo que no este disponible sino hasta que se haya puesdo un numero y un tipo, sino no se puede
-              searchState === "loading" ||
-              !documentType ||
-              !documentNumber
+          <Select
+            items={ID_DOCUMENT_OPTIONS}
+            value={documentType}
+            onValueChange={(v) =>
+              setDocumentType(v ? v : "cedula_ciudadania")
             }
-            className="w-full h-11"
-           >
-            {searchState === "loading" ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Buscando...
-              </>
-            ) : (
-              <>
-                <Search className="h-4 w-4" />
-                Buscar
-              </>
-            )}
-          </Button>
+          >
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Seleccione tipo" />
+            </SelectTrigger>
 
-
-
-          {/* RESULTADO */}
-          {searchState !== "idle" && (
-
-
-            <div className="border rounded-xl p-4 bg-slate-50 space-y-4">
-
-              {searchState === "loading" && (
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Consultando información...
-                </div>
-              )}
-
-
-              {searchState === "found" && (
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 text-sm text-emerald-700">
-                    <CheckCircle2 className="h-5 w-5 shrink-0" />
-
-                    <span>{message}</span>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={handleAccept}
-                    className="w-full"
-                  >
-                    Aceptar
-                  </Button>
-                </div>
-              )}
-
-
-              {searchState === "not_found" && (
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 text-sm text-amber-700">
-                    <XCircle className="h-5 w-5 shrink-0" />
-
-                    <span>{message}</span>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={handleAccept}
-                    className="w-full"
-                  >
-                    Aceptar
-                  </Button>
-                </div>
-              )}
-
-							
-            </div>
-
-
-          )}
-
-
-
+            <SelectContent alignItemWithTrigger={false}>
+              {ID_DOCUMENT_OPTIONS.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
+        <div className="space-y-2">
+          <Label className="text-[11px] font-bold uppercase text-muted-foreground">
+            Número Documento
+          </Label>
 
-      </DialogContent>
-    </Dialog>
-  );
+          <Input
+            className="h-11"
+            placeholder="Ej: 10203040"
+            value={documentNumber}
+            onChange={(e) =>
+              setDocumentNumber(e.target.value)
+            }
+          />
+        </div>
+
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={
+            searchState === "loading" ||
+            !documentType ||
+            !documentNumber
+          }
+          className="w-full h-11"
+        >
+          {searchState === "loading" ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Buscando...
+            </>
+          ) : (
+            <>
+              <Search className="h-4 w-4" />
+              Buscar
+            </>
+          )}
+        </Button>
+
+        {/* RESULTADO */}
+        {searchState !== "idle" && (
+          <div className="border border-border rounded-xl p-4 bg-muted space-y-4">
+            {searchState === "loading" && (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Consultando información...
+              </div>
+            )}
+
+            {searchState === "found" && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-5 w-5 shrink-0" />
+
+                  <span>{message}</span>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={handleAccept}
+                  className="w-full"
+                >
+                  Aceptar
+                </Button>
+              </div>
+            )}
+
+            {searchState === "not_found" && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
+                  <XCircle className="h-5 w-5 shrink-0" />
+
+                  <span>{message}</span>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={handleAccept}
+                  className="w-full"
+                >
+                  Aceptar
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </DialogContent>
+  </Dialog>
+);
 };

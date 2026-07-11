@@ -64,7 +64,7 @@ export interface AdminAnalyticsDiaryData {
 
 
 
-export default async function AdminDashboardLayout({
+export default function AdminDashboardLayout({
   children,
  
 }: AdminDashboardLayout) {
@@ -168,7 +168,7 @@ const adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData> = (async () =
 
         <AppSidebar rol={"admin"} />
 
-        <SidebarInset className="md:m-0! bg-[#FAFAFA] ">
+        <SidebarInset className="md:m-0!  ">
           <HeaderSidebar></HeaderSidebar>
 
           {children}

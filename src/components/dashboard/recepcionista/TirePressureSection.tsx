@@ -320,7 +320,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
 
 
 <div className="space-y-3">
-  <span className="text-xs font-bold uppercase text-slate-400 tracking-widest">
+  <span className="text-xs font-bold uppercase text-muted-foreground tracking-widest">
     Predeterminados
   </span>
 
@@ -329,11 +329,11 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
       type="button"
       variant="outline"
       onClick={setMotoPreset}
-      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all"
+      className="h-24 flex-col gap-2 rounded-xl border-border hover:border-primary/30 hover:bg-accent transition-all"
     >
-      <Bike className="h-7 w-7 text-blue-600" />
+      <Bike className="h-7 w-7 text-primary" />
       <span className="text-sm font-bold">Moto</span>
-      <span className="text-[11px] text-slate-400 font-medium">
+      <span className="text-[11px] text-muted-foreground font-medium">
         2 llantas
       </span>
     </Button>
@@ -342,11 +342,11 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
       type="button"
       variant="outline"
       onClick={setCarroPreset}
-      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+      className="h-24 flex-col gap-2 rounded-xl border-border hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-all"
     >
       <Car className="h-7 w-7 text-emerald-600" />
       <span className="text-sm font-bold">Carro</span>
-      <span className="text-[11px] text-slate-400 font-medium">
+      <span className="text-[11px] text-muted-foreground font-medium">
         2 ejes + repuesto
       </span>
     </Button>
@@ -355,11 +355,11 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
       type="button"
       variant="outline"
       onClick={setCamionPreset}
-      className="h-24 flex-col gap-2 rounded-xl border-slate-200 hover:border-amber-300 hover:bg-amber-50 transition-all"
+      className="h-24 flex-col gap-2 rounded-xl border-border hover:border-amber-500/30 hover:bg-amber-500/10 transition-all"
     >
       <Truck className="h-7 w-7 text-amber-600" />
       <span className="text-sm font-bold">Camión</span>
-      <span className="text-[11px] text-slate-400 font-medium">
+      <span className="text-[11px] text-muted-foreground font-medium">
         Doble llanta + repuesto
       </span>
     </Button>
@@ -372,14 +372,15 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
       <div className="flex items-center justify-between">
 
         <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-slate-400" />
-          <span className="text-xs font-bold uppercase text-slate-400 tracking-widest">
+          <Gauge className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs font-bold uppercase text-muted-foreground tracking-widest">
             Configuración: {numEjes} Ejes
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/*#a11 ACTION */}
+          {
+}
           <Button
             type="button"
             variant="outline"
@@ -391,7 +392,8 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
             Agregar Eje
           </Button>
 
-          {/*#a11 ACTION */}
+          {
+}
           <Button
             type="button"
             variant="outline"
@@ -420,43 +422,45 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
           return (
             <div
               key={`axle-card-${ejeNum}`}
-              className="border rounded-xl bg-white shadow-sm overflow-hidden"
+              className="border rounded-xl bg-card shadow-sm overflow-hidden"
              >
 
               {/* Header del Eje individual */}
-              <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b">
+              <div className="flex items-center justify-between px-4 py-3 bg-muted border-b">
                 
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-black text-slate-800 uppercase tracking-tight">
+                  <span className="text-sm font-black text-foreground uppercase tracking-tight">
                     Eje {ejeNum}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-medium">
+                  <span className="text-[10px] text-muted-foreground font-medium">
                     {llantasDelEje.length} llanta
                     {llantasDelEje.length !== 1 ? "s" : ""}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/*#a11 ACTION */}
+                  {
+}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => addTire(ejeNum)}
-                    className="gap-1.5 text-xs font-bold h-7 text-blue-600 hover:bg-blue-50"
+                    className="gap-1.5 text-xs font-bold h-7 text-primary hover:bg-accent"
                   >
                     <Plus className="h-3 w-3" />
                     Llanta
                   </Button>
 
-                  {/*#a11 ACTION */}
+                  {
+}
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removeTire(ejeNum)}
                     disabled={llantasDelEje.length <= 1}
-                    className="gap-1.5 text-xs font-bold h-7 text-slate-400 hover:text-red-600"
+                    className="gap-1.5 text-xs font-bold h-7 text-muted-foreground hover:text-red-600"
                   >
                     <Minus className="h-3 w-3" />
                     Llanta
@@ -473,17 +477,17 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                 <Table>
 
                   <TableHeader>
-                    <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                      <TableHead className="text-left text-[10px] font-bold uppercase text-slate-400 h-auto pb-2 w-32">
+                    <TableRow className="border-b border-border hover:bg-transparent">
+                      <TableHead className="text-left text-[10px] font-bold uppercase text-muted-foreground h-auto pb-2 w-32">
                         Posición
                       </TableHead>
-                      <TableHead className="text-left text-[10px] font-bold uppercase text-slate-400 h-auto pb-2 w-28">
+                      <TableHead className="text-left text-[10px] font-bold uppercase text-muted-foreground h-auto pb-2 w-28">
                         Presión (PSI)
                       </TableHead>
-                      <TableHead className="text-center text-[10px] font-bold uppercase text-slate-400 h-auto pb-2 w-24">
+                      <TableHead className="text-center text-[10px] font-bold uppercase text-muted-foreground h-auto pb-2 w-24">
                         Ajuste
                       </TableHead>
-                      <TableHead className="text-left text-[10px] font-bold uppercase text-slate-400 h-auto pb-2 w-28">
+                      <TableHead className="text-left text-[10px] font-bold uppercase text-muted-foreground h-auto pb-2 w-28">
                         Ajustado (PSI)
                       </TableHead>
                     </TableRow>
@@ -497,10 +501,11 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                       return (
                         <TableRow
                           key={`tire-row-${idx}`}
-                          className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 "
+                          className="border-b border-slate-50 last:border-0 hover:bg-muted/50 "
                         >
                           <TableCell className="py-2 pr-2">
-                            {/*#a11 ACTION */}
+                            {
+}
                             <Select
                               value={llanta.posicion}
                               onValueChange={(val) => updateField(idx, "posicion", val?val:"centro")}
@@ -510,7 +515,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                                 label: p.label,
                               }))}
                             >
-                              <SelectTrigger className="h-9 text-xs border-slate-200 w-full">
+                              <SelectTrigger className="h-9 text-xs border-border w-full">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent alignItemWithTrigger={false}>
@@ -525,7 +530,8 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
 
                           <TableCell className="py-2 px-2">
                             <div className="relative">
-                              {/*#a11 ACTION */}
+                              {
+}
                               <Input
                                 required
                                 type="text"
@@ -534,10 +540,10 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                                 onChange={(e) =>
                                   handlePressureChange(idx, "presion_encontrada", e.target.value)
                                 }
-                                className="h-9 text-sm font-bold text-center border-slate-200 pr-8"
+                                className="h-9 text-sm font-bold text-center border-border pr-8"
                                 placeholder="0"
                               />
-                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-medium">
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-medium">
                                 PSI
                               </span>
                             </div>
@@ -549,7 +555,7 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                               onCheckedChange={(val) =>
                                 updateField(idx, "_requiere_ajuste", !!val)
                               }
-                              className="h-5 w-5 rounded border-slate-300 data-[state=checked]:bg-blue-600 m-auto"
+                              className="h-5 w-5 rounded border-border data-[state=checked]:bg-primary m-auto"
                             />
                           </TableCell>
 
@@ -566,14 +572,14 @@ const updateField = (index: number, field: keyof TirePressureEntry, value: TireP
                                 }
                                 className={`h-9 text-sm font-bold text-center pr-8 transition-all ${
                                   llanta._requiere_ajuste
-                                    ? "border-blue-200 bg-blue-50/50 text-blue-900"
-                                    : "bg-slate-50 text-slate-300 border-slate-100"
+                                    ? "border-primary/30 bg-primary/10 text-primary"
+                                    : "bg-muted text-muted-foreground border-border"
                                 }`}
                                 placeholder={llanta._requiere_ajuste ? "0" : "---"}
                               />
                               <span
                                 className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium ${
-                                  llanta._requiere_ajuste ? "text-blue-400" : "text-slate-300"
+                                  llanta._requiere_ajuste ? "text-primary/70" : "text-muted-foreground"
                                 }`}
                               >
                                 PSI

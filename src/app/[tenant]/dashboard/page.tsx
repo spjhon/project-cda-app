@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
       {/* Botón de regreso minimalista */}
       <div className="absolute top-8 left-8">
         <Button
@@ -119,12 +119,12 @@ export default function DashboardPage() {
           >
             Panel de Acceso
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight ">
             ¡Hola, {userName.split(" ")[0]}!
           </h1>
           <p className="text-muted-foreground">
             Hemos detectado múltiples perfiles para{" "}
-            <span className="font-semibold text-slate-700">{tenantName}</span>.
+            <span className="font-semibold">{tenantName}</span>.
             Selecciona con cuál deseas ingresar hoy:
           </p>
         </div>

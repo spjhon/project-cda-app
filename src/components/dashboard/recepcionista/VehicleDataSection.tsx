@@ -123,16 +123,16 @@ const requiereGas =
       className={`mt-2 transition-all duration-500 ${selectedTemplate && formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
     >
       <div className="border-t pt-6">
-        <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+        <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
           4. Datos del vehiculo
         </legend>
 
-        <div className="bg-slate-50/80 border rounded-xl p-6 space-y-10">
+        <div className="bg-muted/80 border rounded-xl p-6 space-y-10">
           {/* GRUPO 3.1: Identificación Básica */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Car className="h-4 w-4 text-slate-400" />
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <Car className="h-4 w-4 text-muted-foreground" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Identificación del Vehículo
               </span>
             </div>
@@ -217,8 +217,8 @@ const requiereGas =
           {/* GRUPO 3.2: Especificaciones Técnicas */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Hash className="h-4 w-4 text-slate-400" />
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <Hash className="h-4 w-4 text-muted-foreground" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Especificaciones Técnicas
               </span>
             </div>
@@ -408,11 +408,11 @@ const requiereGas =
           </div>
 
           {/* GRUPO 3.3: Snapshots Legales (SOAT y GAS) */}
-          <div className="pt-4 border-t border-slate-200">
-            <div className="bg-white p-5 rounded-xl border border-blue-100 shadow-sm space-y-6">
+          <div className="pt-4 border-t border-border">
+            <div className="bg-card p-5 rounded-xl border border-blue-100 shadow-sm space-y-6">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-800">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">
                   Documentación y Snapshots de Ley
                 </h3>
               </div>
@@ -511,7 +511,7 @@ const requiereGas =
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="h-px flex-1 bg-slate-200"></div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">
                 Estado Especial
               </span>
               <div className="h-px flex-1 bg-slate-200"></div>
@@ -546,18 +546,18 @@ const requiereGas =
               ].map((item) => (
                 <Label
                   key={item.id}
-                  className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-white hover:border-blue-300 ${
+                  className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-card hover:border-blue-300 ${
                     item.checked
                       ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
-                      : "border-slate-200"
+                      : "border-border"
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <div
                       className={`p-2 border rounded-lg transition-colors ${
                         item.checked
-                          ? "bg-white border-blue-100"
-                          : "bg-slate-50 border-slate-100"
+                          ? "bg-card border-blue-100"
+                          : "bg-muted border-slate-100"
                       }`}
                     >
                       {item.icon}
@@ -574,15 +574,15 @@ const requiereGas =
                           },
                         }))
                       }
-                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 ml-4"
+                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-primary ml-4"
                     />
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="text-[11px] font-black text-slate-800 uppercase leading-tight">
+                    <p className="text-[11px] font-black text-foreground uppercase leading-tight">
                       {item.label}
                     </p>
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-muted-foreground font-medium">
                       {item.desc}
                     </p>
                   </div>

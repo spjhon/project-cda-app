@@ -16,7 +16,7 @@ import {
   Server,
   TabletSmartphone,
 } from "lucide-react";
-import Link from "next/link";
+
 
 import ImageRecepcionista from "../../public/landing_page_recepcionista_reziced.png";
 import ImageSecretaria from "../../public/langing_page_secretaria__reziced.png";

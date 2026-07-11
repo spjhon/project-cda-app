@@ -3,7 +3,8 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils"; 
-import { LogOut } from "lucide-react"; // 🌟 El ícono famoso de la puerta de salida
+import { LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LogoutButtonProps {
   className?: string; 
@@ -28,22 +29,21 @@ export function LogoutButton({ className, children }: LogoutButtonProps) {
       method="POST"
       action={`/auth/logout/api`}
       onSubmit={handleLogout}
-      className="inline-block p-2" // Un pequeño padding para que la sombra del botón no se corte con el borde del header
+      className="inline-block"
     >
-      <button 
+      <Button 
         type="submit" 
+        variant="outline"
+        size="sm"
         className={cn(
-          // 🌟 Estilos base + Neo-Brutalismo con animación de presión
-          "flex items-center gap-2 px-4 py-2 text-sm font-black text-slate-900 bg-white border border-slate-300 rounded-md select-none transition-all cursor-pointer",
-          
-          "hover:bg-slate-50", 
-          "active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_rgba(15,23,42,1)]", // 💥 Efecto cuando se presiona (baja y la sombra se achica)
+          "h-9 gap-2 px-4 font-bold text-foreground border-border select-none transition-all cursor-pointer",
+          "active:translate-x-px active:translate-y-px", 
           className 
         )}
       >
         <span>{children || "Salir"}</span>
-        <LogOut className="h-4 w-4 shrink-0 stroke-[2.5]" /> {/* Ícono con buen grosor de línea */}
-      </button>
+        <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" />
+      </Button>
     </form>
   );
 }

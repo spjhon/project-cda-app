@@ -32,15 +32,14 @@ export default function HeaderSidebar() {
   });
 
   // 3. 🌟 FILTRO CLAVE: Nos quedamos estrictamente con los últimos dos elementos
-  const visibleItems = breadcrumbItems.slice(-2);
-
-  return (
-    <div className="flex flex-row justify-between items-center border bg-white mx-3">
+  const visibleItems = breadcrumbItems.slice(-1);
+return (
+    <div className="flex flex-row justify-between items-center  bg-background mx-3">
       <header className="flex flex-wrap h-16 shrink-0 items-center gap-2 px-4">
-        <SidebarTrigger className="-ml-1" />
+        <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
         <Separator
           orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-5 my-auto"
+          className="mx-2 data-[orientation=vertical]:h-5 my-auto bg-border"
         />
         <Breadcrumb>
           <BreadcrumbList>
@@ -52,13 +51,19 @@ export default function HeaderSidebar() {
                 <Fragment key={item.href}>
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                      <BreadcrumbPage className="font-medium text-foreground">{item.title}</BreadcrumbPage>
                     ) : (
-                      <Link href={item.href} prefetch={true}>{item.title}</Link>
+                      <Link 
+                        href={item.href} 
+                        prefetch={true}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {item.title}
+                      </Link>
                     )}
                   </BreadcrumbItem>
                   {/* Si hay dos elementos y es el primero, metemos el separador */}
-                  {!isLast && <BreadcrumbSeparator />}
+                  {!isLast && <BreadcrumbSeparator className="text-muted-foreground/60" />}
                 </Fragment>
               );
             })}
@@ -66,7 +71,9 @@ export default function HeaderSidebar() {
         </Breadcrumb>
       </header>
 
-      <LogoutButton />
+      <div className="px-4">
+        <LogoutButton />
+      </div>
     </div>
   );
 }

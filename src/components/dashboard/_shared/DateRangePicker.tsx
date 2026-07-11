@@ -1,6 +1,5 @@
 "use client"
 
-
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar as CalendarIcon, Check } from "lucide-react"
@@ -83,11 +82,11 @@ export function DateRangePicker({
               id="date"
               variant="outline"
               className={cn(
-                "w-70 justify-start text-left font-normal bg-white h-9 border-slate-200 shadow-sm hover:bg-slate-50",
+                "w-70 justify-start text-left font-normal bg-background h-9 border-border shadow-sm hover:bg-muted hover:text-muted-foreground",
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
+              <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
               {date?.from ? (
                 date.to ? (
                   <>
@@ -105,7 +104,7 @@ export function DateRangePicker({
         />
 
         <PopoverContent className="w-auto p-0 border-none shadow-xl" align="start">
-          <Card className="w-fit border-slate-200" size="sm">
+          <Card className="w-fit border-border bg-card" size="sm">
             <CardContent className="p-3">
               <Calendar
                 autoFocus
@@ -121,14 +120,14 @@ export function DateRangePicker({
               />
             </CardContent>
             
-            <CardFooter className="flex flex-col gap-3 border-t p-3 bg-slate-50/50">
+            <CardFooter className="flex flex-col gap-3 border-t border-border p-3 bg-muted/30">
               <div className="flex flex-wrap gap-2 w-full">
                 {presets.map((preset) => (
                   <Button
                     key={preset.label}
                     variant="outline"
                     size="sm"
-                    className="flex-1 min-w-25 text-xs font-medium bg-white border-slate-200 shadow-sm hover:bg-slate-50"
+                    className="flex-1 min-w-25 text-xs font-medium bg-background border-border shadow-sm hover:bg-muted"
                     onClick={() => {
                       const newRange = preset.getRange()
                       setLocalDate(newRange)
@@ -143,7 +142,7 @@ export function DateRangePicker({
               </div>
 
               <Button 
-                className="w-full text-xs font-semibold h-9 shadow-sm bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                className="w-full text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
                 onClick={handleApply}
                 disabled={!localDate?.from || !localDate?.to} 
               >

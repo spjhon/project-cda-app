@@ -73,7 +73,7 @@ const StackCard = ({
 }) => {
   return (
     <div className="mx-4 flex items-center gap-4 px-5 py-3 rounded-xl bg-card border border-border/60 text-card-foreground shadow-xs min-w-[280px]">
-      <div className="text-primary flex-shrink-0 bg-primary/10 p-2 rounded-lg">
+      <div className="text-primary shrink-0 bg-primary/10 p-2 rounded-lg">
         {logo}
       </div>
       <div className="flex flex-col items-start">

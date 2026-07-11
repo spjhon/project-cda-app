@@ -622,7 +622,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
       }`}
      >
       <div className="border-t pt-6">
-        <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+        <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
           2. Datos del Servicio
         </legend>
 
@@ -632,21 +632,21 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
             <div
               className={`p-3 rounded-full ${
                 selectedTemplate
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                  : "bg-slate-200 text-slate-400"
+                  ? "bg-primary text-primary-foreground shadow-md "
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               <FileCheck className="h-7 w-7" />
             </div>
 
             <div>
-              <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">
+              <h2 className="text-2xl font-black text-foreground uppercase tracking-tight leading-none">
                 {selectedTemplate
                   ? selectedTemplate.template_name
                   : "Formulario de Inspección"}
               </h2>
 
-              <p className="text-sm text-slate-500 font-mono mt-1 flex items-center gap-2">
+              <p className="text-sm text-muted-foreground font-mono mt-1 flex items-center gap-2">
                 <Hash className="h-3.5 w-3.5" />
 
                 {selectedTemplate
@@ -659,23 +659,23 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           {/* TIPO SERVICIO */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-slate-200"></div>
+              <div className="h-px flex-1 bg-muted"></div>
 
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">
                 Tipo de Inspección
               </span>
 
-              <div className="h-px flex-1 bg-slate-200"></div>
+              <div className="h-px flex-1 bg-muted"></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {SERVICE_TYPES.map((tipo) => (
                 <Label
                   key={tipo.id}
-                  className={`group relative flex flex-col gap-3 rounded-xl  border-2 p-4 cursor-pointer transition-all bg-white hover:bg-[#ECF3FF] ${
+                  className={`group relative flex flex-col gap-3 rounded-xl  border-2 p-4 cursor-pointer transition-all bg-card hover:bg-accent ${
                     formData.service_type === tipo.id
-                      ? "border-slate-600 bg-[#ECF3FF]"
-                      : "border-slate-200"
+                      ? "border-primary bg-accent"
+                      : "border-border"
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -692,16 +692,16 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                           tipo.id
                         )
                       }
-                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 ml-4"
+                      className="h-5 w-5 rounded-full border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary ml-4"
                     />
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="text-[11px] font-black text-slate-800 uppercase">
+                    <p className="text-[11px] font-black text-foreground uppercase">
                       {tipo.label}
                     </p>
 
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-muted-foreground font-medium">
                       {tipo.desc}
                     </p>
                   </div>
@@ -713,13 +713,13 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           {/* REINSPECCIÓN */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-slate-200"></div>
+              <div className="h-px flex-1 bg-muted"></div>
 
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">
                 Tipo de Orden
               </span>
 
-              <div className="h-px flex-1 bg-slate-200"></div>
+              <div className="h-px flex-1 bg-muted"></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -729,7 +729,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   label: "NUEVA INSPECCIÓN",
                   desc: "Inspección inicial del vehículo",
                   icon: (
-                    <FileCheck className="h-5 w-5 text-blue-600" />
+                    <FileCheck className="h-5 w-5 text-primary" />
                   ),
                 },
 
@@ -744,13 +744,13 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
               ].map((tipo) => (
                 <Label
                   key={tipo.id}
-                  className={`group relative rounded-xl flex flex-col gap-3 border-2 p-4 cursor-pointer transition-all bg-white hover:bg-[#ECF3FF] ${
+                  className={`group relative rounded-xl flex flex-col gap-3 border-2 p-4 cursor-pointer transition-all bg-card hover:bg-accent ${
                     (tipo.id === "reinspeccion" &&
                       formData.es_reinspeccion) ||
                     (tipo.id === "nueva" &&
                       !formData.es_reinspeccion)
-                      ? "border-slate-600 bg-[#ECF3FF]"
-                      : "border-slate-200"
+                      ? "border-primary bg-accent"
+                      : "border-border"
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -770,16 +770,16 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                           tipo.id ===  "reinspeccion"
                         )
                       }
-                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 ml-4"
+                      className="h-5 w-5 rounded-full border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary ml-4"
                     />
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="text-[11px] font-black text-slate-800 uppercase">
+                    <p className="text-[11px] font-black text-foreground uppercase">
                       {tipo.label}
                     </p>
 
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-muted-foreground font-medium">
                       {tipo.desc}
                     </p>
                   </div>
@@ -802,7 +802,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     render={
                       <Button
                         type="button"
-                        className="w-full h-16 gap-3 bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all active:scale-95 cursor-pointer text-lg"
+                        className="w-full h-16 gap-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all active:scale-95 cursor-pointer text-lg"
                       >
                         <Search className="h-6 w-6" />
 
@@ -815,7 +815,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
-                        <Search className="h-5 w-5 text-slate-500" />
+                        <Search className="h-5 w-5 text-muted-foreground" />
 
                        
 
@@ -831,7 +831,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     <div className="space-y-5 pt-2">
                       {/* INPUT */}
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
+                        <Label className="text-sm font-bold text-foreground">
                           Ingresar Placa
                         </Label>
 
@@ -843,7 +843,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                             )
                           }
                           placeholder="ABC123"
-                          className="h-14 uppercase font-black text-3xl border-slate-300 tracking-[0.2em] bg-white text-center"
+                          className="h-14 uppercase font-black text-3xl border-border tracking-[0.2em] bg-card text-center"
                           maxLength={7}
                           autoFocus
                         />
@@ -858,7 +858,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                             "loading" ||
                           !tempPlaca.trim()
                         }
-                        className="w-full h-12 gap-2 bg-slate-900 hover:bg-slate-800"
+                        className="w-full h-12 gap-2 bg-primary hover:bg-primary/90"
                       >
                         {searchStatus ===
                         "loading" ? (
@@ -878,10 +878,10 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
                       {/* RESULTADOS */}
                       {searchStatus !== "idle" && (
-                        <div className="border rounded-xl p-4 bg-slate-50 space-y-4">
+                        <div className="border rounded-xl p-4 bg-muted space-y-4">
                           {searchStatus ===
                             "loading" && (
-                            <div className="flex items-center gap-3 text-sm text-slate-600">
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <Loader2 className="h-4 w-4 animate-spin" />
 
                               Consultando información...
@@ -891,7 +891,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                           {searchStatus ===
                             "found" && (
                             <div className="space-y-4">
-                              <div className="flex items-start gap-3 text-sm text-emerald-700">
+                              <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
                                 <CheckCircle2 className="h-5 w-5 shrink-0" />
 
                                 <span>{message}</span>
@@ -912,7 +912,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                           {searchStatus ===
                             "not_found" && (
                             <div className="space-y-4">
-                              <div className="flex items-start gap-3 text-sm text-amber-700">
+                              <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
                                 <AlertTriangle className="h-5 w-5 shrink-0" />
 
                                 <span>{message}</span>
@@ -933,7 +933,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                           {searchStatus ===
                             "error" && (
                             <div className="space-y-4">
-                              <div className="flex items-start gap-3 text-sm text-red-700">
+                              <div className="flex items-start gap-3 text-sm text-destructive">
                                 <XCircle className="h-5 w-5 shrink-0" />
 
                                 <span>{message}</span>
@@ -985,19 +985,19 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                 rounded-2xl border-2 p-6 transition-all
                 ${
                   formData.vehicle.placa
-                    ? "border-blue-200 bg-blue-50/60"
-                    : "border-dashed border-slate-300 bg-slate-50"
+                    ? "border-primary/30 bg-primary/10"
+                    : "border-dashed border-border bg-muted"
                 }
               `}
              >
               {formData.vehicle.placa ? (
                 <div className="flex flex-col items-center justify-center text-center space-y-3">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
                     Placa Seleccionada
                   </span>
 
-                  <div className="bg-white border-2 border-blue-200 rounded-2xl px-8 py-4 shadow-sm">
-                    <span className="font-black tracking-[0.25em] text-5xl md:text-6xl text-slate-900">
+                  <div className="bg-card border-2 border-primary/30 rounded-2xl px-8 py-4 shadow-sm">
+                    <span className="font-black tracking-[0.25em] text-5xl md:text-6xl text-foreground">
                       {formData.vehicle.placa}
                     </span>
                   </div>
@@ -1005,8 +1005,8 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   <div
                     className={`flex items-center gap-2 text-xs font-semibold rounded-full px-4 py-2 border ${
                       isNewVehicle
-                        ? "bg-amber-50 border-amber-200 text-amber-700"
-                        : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
+                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
                     {isNewVehicle ? (
@@ -1023,7 +1023,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center py-6 text-sm font-medium text-slate-400">
+                <div className="flex items-center justify-center py-6 text-sm font-medium text-muted-foreground">
                   No hay placa seleccionada
                 </div>
               )}

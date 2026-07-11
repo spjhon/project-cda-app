@@ -352,20 +352,20 @@ function CuadroMetrica({ label, valor, esPrimario = false, isPorcentaje = false 
     <div 
       className={`
         flex flex-col items-center justify-center aspect-square
-        border border-slate-300 bg-white transition-all duration-300
+        border border-slate-300 bg-card transition-all duration-300
         active:translate-x-2 active:translate-y-2
         active:shadow-[0px_0px_0px_0px_rgba(15,23,42,1)]
         w-44 h-44
       `}
     >
-      <span className="text-15 font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 text-center px-2">
+      <span className="text-15 font-bold text-muted-500 uppercase tracking-[0.2em] mb-2 text-center px-2">
         {label}
       </span>
       <span 
         className={`tracking-tighter text-center px-2 font-black ${
           typeof valor === "number" 
-            ? esPrimario ? "text-blue-600 text-5xl" : "text-slate-900 text-5xl"
-            : "text-sm text-slate-400 font-medium normal-case tracking-normal"
+            ? esPrimario ? "text-blue-600 text-5xl" : "text-muted-900 text-5xl"
+            : "text-sm text-muted-400 font-medium normal-case tracking-normal"
         } ${isPorcentaje && typeof valor === "number" ? "text-4xl" : ""}`} // ◄ Ajuste: un poco más pequeño si es % para que quepa el símbolo
         style={{
           textShadow: typeof valor === "number"
@@ -473,23 +473,23 @@ export default function AnaliticaPorCantidad({
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-600" />
-          <h2 className="text-xl font-bold text-slate-800 tracking-tight">{titulo}</h2>
+          <h2 className="text-xl font-bold text-muted-800 tracking-tight">{titulo}</h2>
         </div>
         <div className="flex items-start gap-1.5">
-          <Info className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-slate-500 leading-relaxed">{descripcion}</p>
+          <Info className="h-4 w-4 text-muted-400 shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-500 leading-relaxed">{descripcion}</p>
         </div>
       </div>
 
       {/* Contenedor Flex Responsivo invocando el subcomponente */}
-      <div className="flex flex-wrap gap-5 w-full items-start">
+      <div className="flex flex-wrap gap-5 w-full items-center">
         <CuadroMetrica label="Hoy" valor={Number(datosSeparados.total_hoy)} esPrimario={true} isPorcentaje={isPorcentaje}/>
         <CuadroMetrica label="Ayer" valor={Number(datosSeparados.total_ayer)} isPorcentaje={isPorcentaje} />
         <CuadroMetrica label="Este Mes" valor={Number(datosSeparados.total_mes)} isPorcentaje={isPorcentaje}/>
         <CuadroMetrica label="Este Año" valor={Number(datosSeparados.total_anio)} isPorcentaje={isPorcentaje}/>
 
         {/* Nuevo bloque: Cuadro especial acoplado al seleccionador */}
-        <div className="flex items-center  gap-4">
+        <div className="flex flex-col sm:flex-row items-center  gap-4">
           <CuadroMetrica 
           isPorcentaje={isPorcentaje}
             label="Por Rango" 
@@ -499,8 +499,8 @@ export default function AnaliticaPorCantidad({
           
           <div className="flex flex-col flex-wrap gap-2 min-w-60">
             <div className="flex flex-col">
-              <h4 className="text-sm font-semibold text-slate-800">Filtrar por Fechas</h4>
-              <p className="text-xs text-slate-400">Rango personalizado de análisis</p>
+              <h4 className="text-sm font-semibold text-muted-800">Filtrar por Fechas</h4>
+              <p className="text-xs text-muted-400">Rango personalizado de análisis</p>
             </div>
 
             {/* Selector de Fecha de Shadcn */}
@@ -513,7 +513,7 @@ export default function AnaliticaPorCantidad({
                     !date && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
+                  <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
                   {date?.from ? (
                     date.to ? (
                       <>

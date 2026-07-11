@@ -26,7 +26,7 @@ export default function OficinaDashboardLayout({
 
           <AppSidebar rol={"oficina"}/>
 
-          <SidebarInset className="md:m-0! bg-[#FAFAFA]">
+          <SidebarInset className="md:m-0! ">
             <HeaderSidebar></HeaderSidebar>
             <main>
               

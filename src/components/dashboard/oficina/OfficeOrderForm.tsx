@@ -156,201 +156,267 @@ e.stopPropagation();
 
   // Variable de control para modular el renderizado condicional del nuevo input
   const mostrarNumAprobacion = formData.oficina_tipo_pago === "tarjeta_debito" || formData.oficina_tipo_pago === "tarjeta_credito";
+return (
+  <form onSubmit={handleSubmit} className="space-y-5">
+    {/* SECCIÓN 2: INFORMACIÓN MODIFICABLE (FORMULARIO) */}
+    <div className="bg-muted/50 p-4 rounded-xl border border-border space-y-4">
+      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block border-b border-border pb-1.5">
+        Datos de Facturación y Operación
+      </span>
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      
-      {/* SECCIÓN 2: INFORMACIÓN MODIFICABLE (FORMULARIO) */}
-      <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-4">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block border-b border-slate-200 pb-1.5">
-          Datos de Facturación y Operación
-        </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Input PIN */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oficina_pin"
+            className="text-foreground text-xs font-semibold"
+          >
+            PIN RUNT / Operación
+          </Label>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {/* Input PIN */}
-          <div className="space-y-1.5">
-            <Label htmlFor="oficina_pin" className="text-slate-700 text-xs font-semibold">
-              PIN RUNT / Operación
-            </Label>
-            <Input
-              id="oficina_pin"
-              name="oficina_pin"
-              placeholder="Ingrese el PIN asignado"
-              value={formData.oficina_pin}
-              onChange={handleChange}
-              className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" || orden.es_reinspeccion}
-            />
-          </div>
-
-          {/* Input Consecutivo Factura */}
-          <div className="space-y-1.5">
-            <Label htmlFor="oficina_consecutivo_factura" className="text-slate-700 text-xs font-semibold">
-              Consecutivo Factura
-            </Label>
-            <Input
-              id="oficina_consecutivo_factura"
-              name="oficina_consecutivo_factura"
-              placeholder="Ej: FE-1042"
-              value={formData.oficina_consecutivo_factura}
-              onChange={handleChange}
-              className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
-            />
-          </div>
-
-          {/* Input Valor Pagado */}
-          <div className="space-y-1.5">
-            <Label htmlFor="oficina_pago" className="text-slate-700 text-xs font-semibold">
-              Valor Recaudado ($)
-            </Label>
-            <Input
-              id="oficina_pago"
-              name="oficina_pago"
-              type="number"
-              min="0"
-              placeholder="0.00"
-              value={formData.oficina_pago === 0 ? "" : formData.oficina_pago}
-              onChange={handleChange}
-              className="bg-white h-10 text-xs"
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
-            />
-          </div>
-
-          {/* Select Tipo de Pago */}
-          <div className="space-y-1.5">
-            <Label htmlFor="oficina_tipo_pago" className="text-slate-700 text-xs font-semibold">
-              Método de Pago
-            </Label>
-            <Select
-              items={SELECT_METODO_PAGO}
-              value={formData.oficina_tipo_pago}
-              onValueChange={(value) => handleSelectChange(value || "efectivo")}
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
-            >
-              <SelectTrigger id="oficina_tipo_pago" className="bg-white h-10 text-xs">
-                <SelectValue placeholder="Seleccione método" />
-              </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                {SELECT_METODO_PAGO.map((metodo) => (
-                  <SelectItem key={metodo.value} value={metodo.value} className="text-xs">
-                    {metodo.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 🌟 NUEVO INPUT: NÚMERO DE APROBACIÓN REPOSITORIO TARJETAS */}
-          <div className="space-y-1.5">
-            <Label 
-              htmlFor="oficina_num_aprobacion" 
-              className="text-slate-700 text-xs font-semibold"
-            >
-              N° Aprobación / Voucher Tarjeta {mostrarNumAprobacion && <span className="text-red-500">*</span>}
-            </Label>
-            <Input
-              id="oficina_num_aprobacion"
-              name="oficina_num_aprobacion"
-              placeholder={
-                mostrarNumAprobacion 
-                  ? "Ingrese los dígitos" 
-                  : "Solo para Tarjetas"
-              }
-              value={formData.oficina_num_aprobacion}
-              onChange={handleChange}
-              required={mostrarNumAprobacion}
-             
-              disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" || !mostrarNumAprobacion  || orden.es_reinspeccion}
-              className="bg-white h-10 text-xs"
-            />
-          </div>
+          <Input
+            id="oficina_pin"
+            name="oficina_pin"
+            placeholder="Ingrese el PIN asignado"
+            value={formData.oficina_pin}
+            onChange={handleChange}
+            className="bg-background h-10 text-xs"
+            disabled={
+              orden.estado_orden === "finalizada" ||
+              orden.estado_orden === "anulada" ||
+              orden.es_reinspeccion
+            }
+          />
         </div>
 
-        {/* Switch Control Ventas SOAT */}
-        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 mt-1">
-          <div className="space-y-0.5 pr-2">
-            <Label htmlFor="se_compro_soat" className="text-xs font-bold text-slate-800">
-              ¿Se gestionó SOAT en el CDA?
-            </Label>
-            <p className="text-[11px] text-slate-500 leading-tight">
-              Active si el cliente adquirió la póliza aquí.
-            </p>
-          </div>
-          <Switch
-            id="se_compro_soat"
-            checked={formData.se_compro_soat}
-            onCheckedChange={handleSwitchChange}
-            disabled={orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"  || orden.es_reinspeccion}
+        {/* Input Consecutivo Factura */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oficina_consecutivo_factura"
+            className="text-foreground text-xs font-semibold"
+          >
+            Consecutivo Factura
+          </Label>
+
+          <Input
+            id="oficina_consecutivo_factura"
+            name="oficina_consecutivo_factura"
+            placeholder="Ej: FE-1042"
+            value={formData.oficina_consecutivo_factura}
+            onChange={handleChange}
+            className="bg-background h-10 text-xs"
+            disabled={
+              orden.estado_orden === "finalizada" ||
+              orden.estado_orden === "anulada" ||
+              orden.es_reinspeccion
+            }
+          />
+        </div>
+
+        {/* Input Valor Pagado */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oficina_pago"
+            className="text-foreground text-xs font-semibold"
+          >
+            Valor Recaudado ($)
+          </Label>
+
+          <Input
+            id="oficina_pago"
+            name="oficina_pago"
+            type="number"
+            min="0"
+            placeholder="0.00"
+            value={formData.oficina_pago === 0 ? "" : formData.oficina_pago}
+            onChange={handleChange}
+            className="bg-background h-10 text-xs"
+            disabled={
+              orden.estado_orden === "finalizada" ||
+              orden.estado_orden === "anulada" ||
+              orden.es_reinspeccion
+            }
+          />
+        </div>
+
+        {/* Select Tipo de Pago */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oficina_tipo_pago"
+            className="text-foreground text-xs font-semibold"
+          >
+            Método de Pago
+          </Label>
+
+          <Select
+            items={SELECT_METODO_PAGO}
+            value={formData.oficina_tipo_pago}
+            onValueChange={(value) =>
+              handleSelectChange(value || "efectivo")
+            }
+            disabled={
+              orden.estado_orden === "finalizada" ||
+              orden.estado_orden === "anulada" ||
+              orden.es_reinspeccion
+            }
+          >
+            <SelectTrigger
+              id="oficina_tipo_pago"
+              className="bg-background h-10 text-xs"
+            >
+              <SelectValue placeholder="Seleccione método" />
+            </SelectTrigger>
+
+            <SelectContent alignItemWithTrigger={false}>
+              {SELECT_METODO_PAGO.map((metodo) => (
+                <SelectItem
+                  key={metodo.value}
+                  value={metodo.value}
+                  className="text-xs"
+                >
+                  {metodo.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* NÚMERO DE APROBACIÓN */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="oficina_num_aprobacion"
+            className="text-foreground text-xs font-semibold"
+          >
+            N° Aprobación / Voucher Tarjeta{" "}
+            {mostrarNumAprobacion && (
+              <span className="text-destructive">*</span>
+            )}
+          </Label>
+
+          <Input
+            id="oficina_num_aprobacion"
+            name="oficina_num_aprobacion"
+            placeholder={
+              mostrarNumAprobacion
+                ? "Ingrese los dígitos"
+                : "Solo para Tarjetas"
+            }
+            value={formData.oficina_num_aprobacion}
+            onChange={handleChange}
+            required={mostrarNumAprobacion}
+            disabled={
+              orden.estado_orden === "finalizada" ||
+              orden.estado_orden === "anulada" ||
+              !mostrarNumAprobacion ||
+              orden.es_reinspeccion
+            }
+            className="bg-background h-10 text-xs"
           />
         </div>
       </div>
 
-      {/* SECCIÓN 3: DOCUMENTACIÓN PDF */}
-      <div className="flex flex-col gap-1.5 text-center">
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-          Visor de Documentos Públicos
-        </span>
-        <div className="flex items-center justify-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/60">
-          <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-          <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+      {/* Switch */}
+      <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-border mt-1">
+        <div className="space-y-0.5 pr-2">
+          <Label
+            htmlFor="se_compro_soat"
+            className="text-xs font-bold text-foreground"
+          >
+            ¿Se gestionó SOAT en el CDA?
+          </Label>
+
+          <p className="text-[11px] text-muted-foreground leading-tight">
+            Active si el cliente adquirió la póliza aquí.
+          </p>
         </div>
+
+        <Switch
+          id="se_compro_soat"
+          checked={formData.se_compro_soat}
+          onCheckedChange={handleSwitchChange}
+          disabled={
+            orden.estado_orden === "finalizada" ||
+            orden.estado_orden === "anulada" ||
+            orden.es_reinspeccion
+          }
+        />
       </div>
+    </div>
 
-      {/* SECCIÓN 4: CONTENEDOR DE ACCIONES Y BOTONES */}
-      <div className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
-        orden.estado_orden === "finalizada" || orden.estado_orden === "anulada"
-          ? "bg-red-50/50 border-red-100/50"    
-          : "bg-stone-50/50 border-stone-100/50" 
-      }`}>
+    {/* DOCUMENTOS */}
+    <div className="flex flex-col gap-1.5 text-center">
+      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+        Visor de Documentos Públicos
+      </span>
 
-        {orden.estado_orden === "finalizada" || orden.estado_orden === "anulada" ? (
-          <div className="flex items-center gap-2 text-xs font-semibold text-red-600 bg-red-100/60 px-4 py-2 rounded-lg border border-red-200/80 shadow-xs animate-fade-in select-none text-center">
-            <Ban className="h-4 w-4 shrink-0" />
-            <span>
-              {orden.estado_orden === "anulada" 
-                ? "Esta orden ya fue anulada" 
-                : "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-            <div className="w-full sm:w-auto order-2 sm:order-1">
-              <CancelOrder
-                orden={orden}
-                tenantId={tenantId}
-                mutation={mutation}
-              />
-            </div>
-
-            <div className="w-full sm:w-auto order-1 sm:order-2">
-              <Button
-                type="submit"
-                disabled={isSubmitting || (orden.estado_orden === "en_prueba" && orden.es_reinspeccion )}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70 disabled:cursor-not-allowed text-white font-bold h-10 text-xs transition-all rounded-lg shadow-sm gap-2 px-5"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Procesando pago...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    <span>Confirmar Información de Pago</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
+      <div className="flex items-center justify-center gap-3 p-2.5 bg-muted rounded-xl border border-border">
+        <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+        <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
       </div>
+    </div>
 
-      <ZodErrorDialog
-        isOpen={showErrorDialog}
-        setIsOpen={setShowErrorDialog}
-        errors={serverError}
-      />
-    </form>
-  );
+    {/* BOTONES */}
+    <div
+      className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
+        orden.estado_orden === "finalizada" ||
+        orden.estado_orden === "anulada"
+          ? "bg-destructive/5 border-destructive/20"
+          : "bg-muted/30 border-border"
+      }`}
+    >
+      {orden.estado_orden === "finalizada" ||
+      orden.estado_orden === "anulada" ? (
+        <div className="flex items-center gap-2 text-xs font-semibold text-destructive bg-destructive/10 px-4 py-2 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none text-center">
+          <Ban className="h-4 w-4 shrink-0" />
+
+          <span>
+            {orden.estado_orden === "anulada"
+              ? "Esta orden ya fue anulada"
+              : "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+          <div className="w-full sm:w-auto order-2 sm:order-1">
+            <CancelOrder
+              orden={orden}
+              tenantId={tenantId}
+              mutation={mutation}
+            />
+          </div>
+
+          <div className="w-full sm:w-auto order-1 sm:order-2">
+            <Button
+              type="submit"
+              disabled={
+                isSubmitting ||
+                (orden.estado_orden === "en_prueba" &&
+                  orden.es_reinspeccion)
+              }
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70 disabled:cursor-not-allowed text-white font-bold h-10 text-xs transition-all rounded-lg shadow-sm gap-2 px-5"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Procesando pago...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>Confirmar Información de Pago</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <ZodErrorDialog
+      isOpen={showErrorDialog}
+      setIsOpen={setShowErrorDialog}
+      errors={serverError}
+    />
+  </form>
+);
 }

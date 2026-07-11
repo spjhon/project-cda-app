@@ -144,7 +144,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
     }
     if (isFetching) {
       return (
-        <Badge variant="default" className="gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700">
+        <Badge variant="default" className="gap-1.5 px-3 py-1 bg-primary hover:bg-primary/90">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Actualizando datos...
         </Badge>
@@ -152,7 +152,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
     }
     if (isSuccess) {
       return (
-        <Badge variant="outline" className="gap-1.5 px-3 py-1 border-green-500 text-green-700 bg-green-50">
+        <Badge variant="outline" className="gap-1.5 px-3 py-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
           <CheckCircle2 className="h-3.5 w-3.5" />
           Datos Actualizados
         </Badge>
@@ -166,7 +166,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
   // 1. BLOQUE DE ERROR
   if (isError) {
     return (
-      <Alert variant="destructive" className="my-4 bg-red-50 border-red-200">
+      <Alert variant="destructive" className="my-4 bg-destructive/5 border-destructive/20">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle className="font-bold">Error de conexión</AlertTitle>
         <AlertDescription className="flex flex-col gap-3">
@@ -177,7 +177,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
             variant="outline" 
             size="sm" 
             onClick={() => refetch()}
-            className="w-fit bg-white hover:bg-red-100 border-red-200 text-red-700"
+            className="w-fit bg-background hover:bg-destructive/10 border-destructive/20 text-destructive"
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Reintentar ahora
@@ -190,9 +190,9 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
   // 2. ESTADO VACÍO
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg bg-slate-50/50">
-        <FileText className="h-10 w-10 text-slate-300 mb-2" />
-        <p className="text-slate-500 font-medium">No hay plantillas creadas aún.</p>
+      <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg bg-muted/30">
+        <FileText className="h-10 w-10 text-muted-foreground mb-2" />
+        <p className="text-muted-foreground font-medium">No hay plantillas creadas aún.</p>
       </div>
     );
   }
@@ -200,7 +200,7 @@ const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
 
 if (errorDeletingTemplate) {
   return (
-    <Alert variant="destructive" className="my-4 bg-red-50 border-red-200 animate-in fade-in-50 duration-200">
+    <Alert variant="destructive" className="my-4 bg-destructive/5 border-destructive/20 animate-in fade-in-50 duration-200">
       <AlertCircle className="h-4 w-4 text-red-600" />
       <AlertTitle className="font-bold text-red-800">Operación de borrado rechazada</AlertTitle>
       <AlertDescription className="flex flex-col gap-3 mt-1 text-red-700">
@@ -218,7 +218,7 @@ if (errorDeletingTemplate) {
             // o simplemente usar este botón para limpiar el estado del error
             resetDeleteMutation() // Elimina el banner de error de la pantalla de inmediato
           }}
-          className="w-fit bg-white hover:bg-red-100 border-red-200 text-red-700 font-medium shadow-xs transition-colors"
+          className="w-fit bg-background hover:bg-destructive/10 border-destructive/20 text-destructive font-medium shadow-xs transition-colors"
         >
           {isDeletingTemplate ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -235,10 +235,10 @@ if (errorDeletingTemplate) {
 
 
   return (
-    <div className="rounded-md border bg-white shadow-sm overflow-hidden m-5">
+    <div className="rounded-md border bg-card shadow-sm overflow-hidden m-5">
       {/* Cabecera de la tabla con el Badge de Estado */}
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           Listado de Plantillas
         </h2>
         <div>{renderStatusBadge()}</div>
@@ -246,7 +246,7 @@ if (errorDeletingTemplate) {
 
         <div className="flex flex-wrap items-center gap-4 px-5 mt-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase text-slate-500">Ordenar por Columna</label>
+            <label className="text-[10px] font-bold uppercase text-muted-foreground">Ordenar por Columna</label>
             <Select items={SELECT_ORDENADO_POR} value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
               <SelectTrigger className="w-45 h-9">
                 <SelectValue placeholder="Columna" />
@@ -263,7 +263,7 @@ if (errorDeletingTemplate) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase text-slate-500">Orden</label>
+            <label className="text-[10px] font-bold uppercase text-muted-foreground">Orden</label>
             <Select items={SELECT_ORDEN} value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
               <SelectTrigger className="w-37.5 h-9">
                 <SelectValue placeholder="Dirección" />
@@ -281,14 +281,14 @@ if (errorDeletingTemplate) {
 
       </div>
       <Table>
-        <TableHeader className="hidden md:table-header-group bg-slate-50/50">
+        <TableHeader className="hidden md:table-header-group bg-muted/30">
           <TableRow>
-            <TableHead className="font-bold text-slate-700">Código</TableHead>
-            <TableHead className="font-bold text-slate-700">Nombre de Plantilla</TableHead>
-            <TableHead className="font-bold text-center text-slate-700">Versión</TableHead>
-            <TableHead className="font-bold text-center text-slate-700">Fecha Documento</TableHead>
-            <TableHead className="font-bold text-slate-700">Estado</TableHead>
-            <TableHead className="text-right font-bold text-slate-700">Acciones</TableHead>
+            <TableHead className="font-bold text-foreground">Código</TableHead>
+            <TableHead className="font-bold text-foreground">Nombre de Plantilla</TableHead>
+            <TableHead className="font-bold text-center text-foreground">Versión</TableHead>
+            <TableHead className="font-bold text-center text-foreground">Fecha Documento</TableHead>
+            <TableHead className="font-bold text-foreground">Estado</TableHead>
+            <TableHead className="text-right font-bold text-foreground">Acciones</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -296,16 +296,16 @@ if (errorDeletingTemplate) {
           {sortedData.map((template) => (
             <TableRow 
               key={template.id} 
-              className="flex flex-col md:table-row p-4 md:p-0 hover:bg-slate-50/80 transition-colors border-b"
+              className="flex flex-col md:table-row p-4 md:p-0 hover:bg-muted/50 transition-colors border-b"
             >
 
 
               {/* 1. Celda: Código de Documento (NUEVA POSICIÓN) */}
               <TableCell className="md:table-cell py-2 md:py-4">
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
                   Código
                 </span>
-                <div className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit">
+                <div className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded w-fit">
                   {template.document_code}
                 </div>
               </TableCell>
@@ -314,10 +314,10 @@ if (errorDeletingTemplate) {
 
               {/* Celda: Nombre */}
               <TableCell className="md:table-cell py-2 md:py-4">
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
                   Nombre de Plantilla
                 </span>
-                <div className="font-semibold text-slate-900">
+                <div className="font-semibold text-foreground">
                   {template.template_name}
                 </div>
               </TableCell>
@@ -325,21 +325,23 @@ if (errorDeletingTemplate) {
 
               {/* Celda: Versión */}
               <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
                   Versión
                 </span>
-                <Badge variant="secondary" className="font-mono bg-slate-100 text-slate-700">
+
+                <Badge variant="secondary" className="font-mono">
                   v{template.version}
                 </Badge>
               </TableCell>
 
-              {/* Celda: Versión */}
+              {/* Celda: Fecha Documento */}
               <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
                   Fecha Documento
                 </span>
-                <Badge variant="secondary" className="font-mono bg-slate-100 text-slate-700">
-                  v{template.document_date}
+
+                <Badge variant="secondary" className="font-mono">
+                  {template.document_date}
                 </Badge>
               </TableCell>
 
@@ -347,7 +349,7 @@ if (errorDeletingTemplate) {
               {/* Estado de la plantilla */}
               <TableCell className="md:table-cell py-2 md:py-4">
                 {/* Etiqueta para móvil */}
-                <span className="md:hidden block text-[10px] font-extrabold text-slate-400 uppercase mb-1">
+                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
                   Estado
                 </span>
 
@@ -358,8 +360,8 @@ if (errorDeletingTemplate) {
                     className={`
                       capitalize 
                       ${template.is_active 
-                        ? "border-emerald-500 text-emerald-700 bg-emerald-50" 
-                        : "bg-red-100 text-red-700 hover:bg-red-200 border-red-200"
+                        ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" 
+                        : "bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20"
                       }
                     `}
                   >
@@ -430,7 +432,7 @@ if (errorDeletingTemplate) {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
                     title="Editar plantilla"
                     onClick={() => {
                       // Redirige a la misma página o layout agregando el query string seguro
@@ -446,7 +448,7 @@ if (errorDeletingTemplate) {
                  <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-slate-600 hover:text-red-600 hover:bg-red-50"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     title="Eliminar"
                     // 1. Deshabilitamos el botón de inmediato si otra plantilla o esta misma se está borrando
                     disabled={isDeletingTemplate} 
@@ -455,7 +457,7 @@ if (errorDeletingTemplate) {
                   >
                     {/* 3. Renderizado condicional: si está cargando, mostramos un spinner animado */}
                     {isDeletingTemplate ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                      <Loader2 className="h-4 w-4 animate-spin text-destructive" />
                     ) : (
                       <Trash2 className="h-4 w-4" />
                     )}

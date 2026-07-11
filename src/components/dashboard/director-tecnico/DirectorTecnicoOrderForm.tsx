@@ -158,178 +158,207 @@ export default function DirectorTecnicoOrderForm({
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      
-      {/* SECCIÓN DEL FORMULARIO: Adaptada dinámicamente según el dictamen técnico */}
-      <div className={`p-4 rounded-xl border transition-all duration-300 space-y-4 ${
+return (
+  <form onSubmit={handleSubmit} className="space-y-5">
+    
+    {/* SECCIÓN DEL FORMULARIO: Adaptada dinámicamente según el dictamen técnico */}
+    <div
+      className={`p-4 rounded-xl border transition-all duration-300 space-y-4 ${
         formData.resultado_revision === "aprobado"
-          ? "bg-emerald-50/20 border-emerald-200/60"
+          ? "bg-emerald-500/10 border-emerald-500/20"
           : formData.resultado_revision === "rechazado"
-          ? "bg-rose-50/10 border-rose-200/40"
-          : "bg-slate-50 border-slate-200"
-      }`}>
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block border-b border-slate-200 pb-1.5">
-          Cierre Técnico de Inspección (ISO 17020)
-        </span>
+          ? "bg-destructive/5 border-destructive/20"
+          : "bg-muted/30 border-border"
+      }`}
+    >
+      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block border-b border-border pb-1.5">
+        Cierre Técnico de Inspección (ISO 17020)
+      </span>
 
-        {/* Rejilla de Inputs de digitación técnica */}
-        <div className="grid grid-cols-1 gap-4">
-          
-          {/* Select: Resultado de la Revisión */}
-          <div className="space-y-1.5">
-            <Label htmlFor="resultado_revision" className="text-slate-700 font-semibold text-xs">
-              Resultado Final de la Inspección
-            </Label>
-            <Select
-              items={SELECT_RESULTADO}
-              value={formData.resultado_revision || ""}
-              onValueChange={(value) => handleSelectChange(value as "aprobado" | "rechazado")}
-              disabled={orden.estado_orden !== "en_prueba"} 
+      {/* Rejilla de Inputs de digitación técnica */}
+      <div className="grid grid-cols-1 gap-4">
+
+        {/* Select: Resultado de la Revisión */}
+        <div className="space-y-1.5">
+          <Label htmlFor="resultado_revision" className="text-foreground font-semibold text-xs">
+            Resultado Final de la Inspección
+          </Label>
+
+          <Select
+            items={SELECT_RESULTADO}
+            value={formData.resultado_revision || ""}
+            onValueChange={(value) =>
+              handleSelectChange(value as "aprobado" | "rechazado")
+            }
+            disabled={orden.estado_orden !== "en_prueba"}
+          >
+            <SelectTrigger
+              id="resultado_revision"
+              className="bg-background border-border font-medium text-xs h-9"
             >
-              <SelectTrigger id="resultado_revision" className="bg-white border-slate-200 font-medium text-xs h-9">
-                <SelectValue placeholder="Seleccione el dictamen final" />
-              </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                {SELECT_RESULTADO.map((item) => (
-                  <SelectItem key={item.value} value={item.value} className="text-xs">
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <SelectValue placeholder="Seleccione el dictamen final" />
+            </SelectTrigger>
 
-          {/* Input: Consecutivo FUR */}
-          <div className="space-y-1.5">
-            <Label htmlFor="consecutivo_fur" className="text-slate-700 font-medium text-xs">
-              Consecutivo FUR (Formato Único de Resultados)
-            </Label>
-            <Input
-              id="consecutivo_fur"
-              name="consecutivo_fur"
-              placeholder="Ej: FUR-482012"
-              value={formData.consecutivo_fur}
-              onChange={handleChange}
-              disabled={orden.estado_orden !== "en_prueba"} 
-              className="bg-white border-slate-200 font-mono text-xs h-9"
-            />
-          </div>
+            <SelectContent alignItemWithTrigger={false}>
+              {SELECT_RESULTADO.map((item) => (
+                <SelectItem
+                  key={item.value}
+                  value={item.value}
+                  className="text-xs"
+                >
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* Input: Consecutivo RTM (Controlado por tipo de servicio) */}
-          <div className="space-y-1.5">
-            <Label 
-              htmlFor="consecutivo_rtm" 
-              className={`text-slate-700 font-medium text-xs ${
-                formData.resultado_revision === "aprobado" && !noAplicaRTM ? "after:content-['_*_'] after:text-red-500" : ""
-              }`}
-            >
-              Consecutivo Certificado RTM
-            </Label>
-            <Input
-              id="consecutivo_rtm"
-              name="consecutivo_rtm"
-              placeholder={
-                noAplicaRTM 
-                  ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}` 
-                  : formData.resultado_revision === "rechazado" 
-                  ? "No aplica por rechazo del vehículo" 
-                  : "Ej: RTM-2026X"
-              }
-              disabled={noAplicaRTM || formData.resultado_revision === "rechazado" || orden.estado_orden !== "en_prueba" || !formData.resultado_revision}
-              value={noAplicaRTM || formData.resultado_revision === "rechazado" ? "" : formData.consecutivo_rtm}
-              onChange={handleChange}
-              className="bg-white border-slate-200 font-mono text-xs h-9 disabled:bg-slate-100/80 disabled:text-slate-400 disabled:cursor-not-allowed"
-            />
-          </div>
+        {/* Input: Consecutivo FUR */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="consecutivo_fur"
+            className="text-foreground font-medium text-xs"
+          >
+            Consecutivo FUR (Formato Único de Resultados)
+          </Label>
 
+          <Input
+            id="consecutivo_fur"
+            name="consecutivo_fur"
+            placeholder="Ej: FUR-482012"
+            value={formData.consecutivo_fur}
+            onChange={handleChange}
+            disabled={orden.estado_orden !== "en_prueba"}
+            className="bg-background border-border font-mono text-xs h-9"
+          />
+        </div>
+
+        {/* Input: Consecutivo RTM */}
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="consecutivo_rtm"
+            className={`text-foreground font-medium text-xs ${
+              formData.resultado_revision === "aprobado" && !noAplicaRTM
+                ? "after:content-['_*_'] after:text-destructive"
+                : ""
+            }`}
+          >
+            Consecutivo Certificado RTM
+          </Label>
+
+          <Input
+            id="consecutivo_rtm"
+            name="consecutivo_rtm"
+            placeholder={
+              noAplicaRTM
+                ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}`
+                : formData.resultado_revision === "rechazado"
+                ? "No aplica por rechazo del vehículo"
+                : "Ej: RTM-2026X"
+            }
+            disabled={
+              noAplicaRTM ||
+              formData.resultado_revision === "rechazado" ||
+              orden.estado_orden !== "en_prueba" ||
+              !formData.resultado_revision
+            }
+            value={
+              noAplicaRTM || formData.resultado_revision === "rechazado"
+                ? ""
+                : formData.consecutivo_rtm
+            }
+            onChange={handleChange}
+            className="bg-background border-border font-mono text-xs h-9 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+          />
         </div>
       </div>
+    </div>
 
-      {/* SECCIÓN DOCUMENTAL: SOPORTES DIGITALES */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5 pl-1">
-          <FileSearch className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Soportes Digitales de Entrada
+    {/* SECCIÓN DOCUMENTAL */}
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-1.5 pl-1">
+        <FileSearch className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+          Soportes Digitales de Entrada
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 p-2.5 bg-muted/30 rounded-xl border border-border">
+        <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+        <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+      </div>
+    </div>
+
+    {/* CONTENEDOR DE ACCIONES */}
+    <div
+      className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
+        orden.estado_orden !== "en_prueba"
+          ? "bg-destructive/5 border-destructive/20"
+          : "bg-muted/30 border-border"
+      }`}
+    >
+      {orden.estado_orden !== "en_prueba" ? (
+        <div className="flex items-center gap-2 text-xs font-semibold text-destructive bg-destructive/10 px-4 py-2.5 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none text-center">
+          <Ban className="h-4 w-4 shrink-0" />
+          <span>
+            {orden.estado_orden === "anulada" &&
+              "Esta orden ya fue anulada"}
+            {orden.estado_orden === "finalizada" &&
+              "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
+            {orden.estado_orden === "abierta" &&
+              "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-100/50 rounded-xl border border-slate-200/60">
-          <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-          <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+
+          <div className="w-full sm:w-auto order-2 sm:order-1">
+            <CancelOrder
+              orden={orden}
+              tenantId={tenantId}
+              mutation={mutation}
+            />
+          </div>
+
+          <div className="w-full sm:w-auto order-1 sm:order-2">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full sm:w-auto font-bold h-10 transition-all rounded-lg shadow-sm gap-2 text-xs  px-5 ${
+                formData.resultado_revision === "aprobado"
+                  ? "bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70"
+                  : formData.resultado_revision === "rechazado"
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-70"
+                  : "bg-primary hover:bg-primary/90 disabled:opacity-70"
+              } disabled:cursor-not-allowed`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Firmando y subiendo a plataforma RUNT...</span>
+                </>
+              ) : formData.resultado_revision === "rechazado" ? (
+                <>
+                  <ShieldAlert className="h-4 w-4" />
+                  <span>Cerrar con Defectos (Rechazado)</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Firmar y Emitir Certificado</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
+    </div>
 
-      {/* CONTENEDOR DE ACCIONES DINÁMICO */}
-      <div className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
-        orden.estado_orden !== "en_prueba"
-          ? "bg-red-50/50 border-red-100/50"     
-          : "bg-stone-50/50 border-stone-100/50" 
-      }`}>
-
-        {orden.estado_orden !== "en_prueba" ? (
-          <div className="flex items-center gap-2 text-xs font-semibold text-red-600 bg-red-100/60 px-4 py-2.5 rounded-lg border border-red-200/80 shadow-xs animate-fade-in select-none text-center">
-            <Ban className="h-4 w-4 shrink-0" />
-            <span>
-              {orden.estado_orden === "anulada" && "Esta orden ya fue anulada"}
-              {orden.estado_orden === "finalizada" && "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
-              {orden.estado_orden === "abierta" && "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-            
-            {/* Botón Izquierdo: Anular Orden */}
-            <div className="w-full sm:w-auto order-2 sm:order-1">
-              <CancelOrder
-                orden={orden}
-                tenantId={tenantId}
-                mutation={mutation}
-              />
-            </div>
-
-            {/* Botón Derecho: Guardar Cierre Técnico */}
-            <div className="w-full sm:w-auto order-1 sm:order-2">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full sm:w-auto font-bold h-10 transition-all rounded-lg shadow-sm gap-2 text-xs text-white px-5 ${
-                  formData.resultado_revision === "aprobado"
-                    ? "bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70"
-                    : formData.resultado_revision === "rechazado"
-                    ? "bg-slate-800 hover:bg-slate-900 disabled:bg-slate-800/70"
-                    : "bg-slate-900 hover:bg-slate-800 disabled:bg-slate-900/70"
-                } disabled:cursor-not-allowed`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Firmando y subiendo a plataforma RUNT...</span>
-                  </>
-                ) : formData.resultado_revision === "rechazado" ? (
-                  <>
-                    <ShieldAlert className="h-4 w-4" />
-                    <span>Cerrar con Defectos (Rechazado)</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>Firmar y Emitir Certificado</span>
-                  </>
-                )}
-              </Button>
-            </div>
-
-          </div>
-        )}
-      </div>
-
-      <ZodErrorDialog
-        isOpen={showErrorDialog}
-        setIsOpen={setShowErrorDialog}
-        errors={serverError}
-      />
-    </form>
-  );
+    <ZodErrorDialog
+      isOpen={showErrorDialog}
+      setIsOpen={setShowErrorDialog}
+      errors={serverError}
+    />
+  </form>
+);
 }

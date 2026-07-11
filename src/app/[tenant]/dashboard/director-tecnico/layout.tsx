@@ -22,6 +22,10 @@ export default function DirectorTecnicoDashboardLayout({
   children,
   params,
 }: DirectorTecnicoDashboardLayoutProps) {
+
+
+
+  
   // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
   const templateTabelDataPromise: Promise<OrderTemplate[] | null> =
     (async () => {
@@ -60,7 +64,7 @@ export default function DirectorTecnicoDashboardLayout({
         <SidebarProvider>
           <AppSidebar rol={"director-tecnico"} />
 
-          <SidebarInset className="md:m-0! bg-[#FAFAFA]">
+          <SidebarInset className="md:m-0!">
             <HeaderSidebar></HeaderSidebar>
             <main>{children}</main>
           </SidebarInset>

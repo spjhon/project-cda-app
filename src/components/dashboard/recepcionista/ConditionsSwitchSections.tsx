@@ -48,18 +48,18 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
 
   return (
     <fieldset className={`mt-2 transition-all duration-500 ${selectedTemplate && hayPlaca ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}>
-      <div className="border-t pt-6">
-        <legend className="text-xs font-bold uppercase text-slate-400 tracking-widest my-5">
+      <div className="border-t border-border pt-6">
+        <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
           7. Condiciones de Inspección
         </legend>
 
-        <div className="bg-slate-50/80 border rounded-xl p-6 space-y-4">
+        <div className="bg-muted/40 border border-border rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 rounded-xl bg-slate-900 text-white shadow-lg shadow-slate-200">
+            <div className="p-3 rounded-xl bg-foreground text-background shadow-xs">
               <ShieldAlert className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-black tracking-tight text-slate-900 uppercase">
+              <h2 className="text-xl font-black tracking-tight text-foreground uppercase">
                 Condiciones de Recepción
               </h2>
             </div>
@@ -80,18 +80,18 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
                 <Card
                   key={condition.id}
                   className={`
-                    rounded-xl border transition-all duration-200 px-5 py-5 
-                    ${isNoAplica ? "bg-slate-100 border-slate-300 opacity-90" : 
-                      cumple ? "bg-emerald-50 border-emerald-200 shadow-sm" : 
-                      "bg-red-50 border-red-200 shadow-sm"}
+                    rounded-xl border transition-all duration-200 px-5 py-5 shadow-xs
+                    ${isNoAplica ? "bg-muted/60 border-border opacity-80" : 
+                      cumple ? "bg-emerald-500/5 border-emerald-500/20" : 
+                      "bg-destructive/5 border-destructive/20"}
                   `}
                 >
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex gap-4 flex-1">
                       <div className={`shrink-0 flex h-12 w-12 items-center justify-center rounded-xl border-2
-                        ${isNoAplica ? "bg-slate-200 border-slate-300 text-slate-500" : 
-                          cumple ? "bg-white border-emerald-400 text-emerald-600" : 
-                          "bg-white border-red-400 text-red-600 shadow-md"}
+                        ${isNoAplica ? "bg-muted border-muted-foreground/20 text-muted-foreground" : 
+                          cumple ? "bg-background border-emerald-500 text-emerald-600" : 
+                          "bg-background border-destructive text-destructive shadow-xs"}
                       `}>
                         {isNoAplica ? <Ban className="h-6 w-6" /> : 
                          cumple ? <CheckCircle2 className="h-6 w-6" /> : 
@@ -100,11 +100,11 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
 
                       <div className="space-y-2">
                         {condition.is_special && (
-                          <Badge className="bg-slate-800 text-white border-none text-[9px] uppercase tracking-widest px-2 py-0.5">
+                          <Badge variant="secondary" className="text-[9px] uppercase tracking-widest px-2 py-0.5 font-bold">
                             {condition.special_condition_label}
                           </Badge>
                         )}
-                        <h4 className={`text-sm font-black leading-tight ${isNoAplica ? "text-slate-400" : "text-slate-800"}`}>
+                        <h4 className={`text-sm font-black leading-tight ${isNoAplica ? "text-muted-foreground/60" : "text-foreground"}`}>
                           {condition.label}
                         </h4>
                       </div>
@@ -112,7 +112,7 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
 
                     <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
                       <div className="flex items-center gap-4">
-                        <span className={`text-[10px] font-black uppercase ${!isNoAplica && !cumple ? "text-red-600" : "text-slate-400"}`}>
+                        <span className={`text-[10px] font-black uppercase ${!isNoAplica && !cumple ? "text-destructive" : "text-muted-foreground"}`}>
                           Falla
                         </span>
                         <Switch
@@ -121,24 +121,24 @@ export default function ConditionsSwitchSections({ conditions, results, setFormD
                           onCheckedChange={(val) => 
                             updateConditionValue(condition.id, val ? "cumple" : "no_cumple")
                           }
-                          className="scale-150 mx-2 data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-red-500 disabled:opacity-20"
+                          className="scale-150 mx-2 data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-destructive disabled:opacity-20"
                         />
-                        <span className={`text-[10px] font-black uppercase ${!isNoAplica && cumple ? "text-emerald-600" : "text-slate-400"}`}>
+                        <span className={`text-[10px] font-black uppercase ${!isNoAplica && cumple ? "text-emerald-600" : "text-muted-foreground"}`}>
                           Cumple
                         </span>
                       </div>
 
                       {condition.is_special && (
                         <Label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all
-                            ${isNoAplica ? "bg-slate-800 border-slate-900 text-white" : 
-                              "bg-white border-slate-200 text-slate-600 hover:border-slate-400"}
+                            ${isNoAplica ? "bg-foreground border-foreground text-background" : 
+                              "bg-background border-border text-muted-foreground hover:border-muted-foreground/40"}
                           `}>
                           <Checkbox
                             checked={isNoAplica}
                             onCheckedChange={(checked) => 
                               updateConditionValue(condition.id, checked ? "no_aplica" : "cumple")
                             }
-                            className={`h-5 w-5 ${isNoAplica ? "border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900" : ""}`}
+                            className={`h-5 w-5 ${isNoAplica ? "border-background data-[state=checked]:bg-background data-[state=checked]:text-foreground" : ""}`}
                           />
                           <span className="text-[10px] font-black uppercase tracking-tighter select-none">
                             No aplica
