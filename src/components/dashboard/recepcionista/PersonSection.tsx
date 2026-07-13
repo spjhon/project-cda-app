@@ -72,7 +72,7 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
         owner_data: newState 
           ? { ...prev.customer_data } 
           : {
-              id: "",
+              id: null,
               tipo_documento: "cedula_ciudadania",
               numero_documento: "",
               nombre_completo: "",

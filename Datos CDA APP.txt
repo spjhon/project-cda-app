@@ -42,6 +42,24 @@ PENDIENTES
 	- las tablas de las tortas para las categorias de: combustible, tipo de vehiculo, torta especial entre motos 2 y 4 tiempos
 	- en las tablas de barra va, en uno solo total rtm, total preventiva, total peritaje, en otro los reprobados (solo de rtm por ahora) y el soat
 
+MAS COSITAS QUE FALTAN
+- podder editarlas condiciones de inspeccion en la plantilla
+- en la plantilla de la firma, cambiar otros por un placeholder
+- cuadrar boton de creacion de plantilla
+- en el propietario del vehiculo que este bloqueado al menos que ingresen la cedula primero
+- agregar a los ejes que es llantas delanters y llantas traseras
+- al crear una orden de entrada que el mensaje sea mas coherente
+- que cuando se cree una orden de entrada vaya al principio otra vez
+- al confirmar la orden de entrada en el mensaje de confirmacio en el dt es muy largo
+- pensar que hacer si se mete la cedula mirilla
+- en la reinspeccion no esta arrastando el soat
+- las graficas no estan contando las reinspecciones
+- en chrome se ve las barras en las graficas del admin, mientras que en firefox no
+- la taza de rechazo no debe contar pruebas abiertas
+- que en la fecha de la tabla de orden de entrada, no deje seleccionar las fechas futuras
+- al momento de buscar la placa que el mensaje de error sea mas informativo y desactivar el boton de buscar para obligar a cerrar el dialog y volver a abrir
+
+
 FEATURES QUE FALTAN
 
 - administracion de reprobados
