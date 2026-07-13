@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-background px-4 text-center">
+    <div className="flex flex-col items-center justify-center min-h-dvh bg-background px-4 text-center">
       {/* El "404" usando el color primary de shadcn */}
       <h1 className="text-[8rem] md:text-[10rem] font-extrabold leading-none text-primary tracking-tighter">
         404
@@ -13,7 +13,7 @@ export default function NotFound() {
         Página no encontrada
       </h2>
       
-      <p className="mt-4 mb-8 max-w-[500px] text-lg text-muted-foreground">
+      <p className="mt-4 mb-8 max-w-125 text-lg text-muted-foreground">
         Lo sentimos, el subdominio al que intentas acceder no existe o no está registrado en nuestro sistema.
       </p>
 

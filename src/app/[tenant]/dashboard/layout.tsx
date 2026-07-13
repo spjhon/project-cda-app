@@ -29,12 +29,15 @@ export default async function DashboardLayout({
   children,
   params,
 }: DashboardLayout) {
-  const { tenant } = await params;
+  
 
 
 
 
-  const tenantPromise = fetchTenantData(tenant);
+const tenantPromise = (async () => {
+    const { tenant } = await params;
+    return fetchTenantData(tenant);
+  })();;
 
 
 
@@ -91,6 +94,7 @@ export default async function DashboardLayout({
 
   const RolesDataPromise: Promise<string[]> = (async () => {
     // Esperamos a que el tenant se resuelva para obtener su ID
+    const { tenant } = await params;
     const tenantResult = await fetchTenantData(tenant);
 
     if (!tenantResult?.data?.id || tenantResult.error) {

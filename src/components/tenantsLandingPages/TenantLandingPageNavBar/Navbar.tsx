@@ -9,12 +9,15 @@ import { MobileMenu } from "./MobileMenu";
 import Link from "next/link";
 import { RouteProps } from "../FullmotosLandingPage";
 
+
+
 interface NavBarProps {
   routeList: RouteProps[];
   logo: StaticImageData;
+  currentTenant: string;
 }
 
-export const Navbar = ({ routeList, logo }: NavBarProps) => {
+export const Navbar = ({ routeList, logo, currentTenant }: NavBarProps) => {
   return (
     <header className="bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-0 sticky border-b top-0 z-40 ">
       <div className="container flex flex-row justify-between items-center mx-auto px-3 relative h-15 md:h-20">
@@ -41,7 +44,7 @@ export const Navbar = ({ routeList, logo }: NavBarProps) => {
           />
         </Link>
 
-        <MobileMenu routes={routeList} />
+        <MobileMenu routes={routeList} logo={logo} currentTenant={currentTenant}/>
 
         <div className="flex gap-4 items-center">
           <div className="flex items-center justify-center gap-4 py-2">

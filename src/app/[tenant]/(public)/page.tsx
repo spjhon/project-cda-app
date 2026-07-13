@@ -1,4 +1,5 @@
 import FullmotosLandingPage from "@/components/tenantsLandingPages/FullmotosLandingPage";
+import TecnofresnoLandingPage from "@/components/tenantsLandingPages/TecnofresnoLandingPage";
 
 
 
@@ -23,10 +24,12 @@ export default async function TenantPage({params}: {params: Promise<{ tenant: st
 
 
 if (currentTenant === "fullmotos") {
-    return <FullmotosLandingPage />;
+    return <FullmotosLandingPage currentTenant={currentTenant} />;
   }
 
-
+if (currentTenant === "tecnofresno") {
+    return <TecnofresnoLandingPage  currentTenant={currentTenant} />;
+  }
 
 
 return (
