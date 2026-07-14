@@ -11,6 +11,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Button } from "../ui/button";
 import { Suspense } from "react";
 import DynamicYear from "../landingPage/DynamicYear";
+import PqrsfModal from "./modal/Pqrsf";
 
 
 const colorPalette = {
@@ -1377,11 +1378,7 @@ export default function TecnofresnoLandingPage({ currentTenant }: { currentTenan
 
     {/* Botón de llamado a la acción hacia el formulario */}
     <div className="w-full flex justify-center pt-2">
-      <Link href="/pqrsf" className="w-full sm:w-auto">
-        <Button className="w-full sm:w-auto h-12 bg-[#003049] dark:bg-[#fdf0d5] text-[#fdf0d5] dark:text-[#003049] hover:bg-[#004d6e] dark:hover:bg-[#e8d5b5] text-sm font-bold tracking-tight rounded-xl px-10 shadow-md transition-all">
-          Radicar una Solicitud Oficial
-        </Button>
-      </Link>
+      <PqrsfModal></PqrsfModal>
     </div>
 
   </div>

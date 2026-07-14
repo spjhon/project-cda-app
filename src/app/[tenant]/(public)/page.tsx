@@ -24,6 +24,7 @@ export default async function TenantPage({params}: {params: Promise<{ tenant: st
 
 
 if (currentTenant === "fullmotos") {
+
     return <FullmotosLandingPage currentTenant={currentTenant} />;
   }
 

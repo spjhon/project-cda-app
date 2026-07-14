@@ -21,11 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Navbar } from "@/components/tenantsLandingPages/TenantLandingPageNavBar/Navbar"
-import { RouteProps } from "@/components/tenantsLandingPages/FullmotosLandingPage"
-import logo from "../../../../../public/tenantsLanding/fullmotosla25/fullmotos_logo.jpg"
 import { useParams } from "next/navigation"
-
 
 interface PqrsfFormData {
   tipoTramite: string
@@ -38,7 +34,6 @@ interface PqrsfFormData {
   honeypot: string
 }
 
-// Opciones del select según la estructura de tus documentos
 const tramitesDisponibles = [
   { label: "Petición", value: "peticion" },
   { label: "Queja", value: "queja" },
@@ -46,29 +41,11 @@ const tramitesDisponibles = [
   { label: "Felicitación", value: "felicitacion" },
 ]
 
+export default function PqrsfModal() {
+  const params = useParams()
+  const tenant = params.tenant?.toString() || ""
 
-
-
-const routeList: RouteProps[] = [
-  {
-  
-    label: "Inicio",
-    href: "http://fullmotos.cda-app:3000/"
-  },
-  
-];
-
-
-
-
-
-export default function PqrsfFormulario() {
-
-  const params = useParams();
-  const tenant = params.tenant?.toString() || "";
-
-
-
+  const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState<PqrsfFormData>({
     tipoTramite: "",
     nombreCompleto: "",
@@ -107,28 +84,31 @@ export default function PqrsfFormulario() {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (formData.honeypot) return
-    console.log("Datos listos para enviar:", formData)
+    console.log("Datos listos para enviar para el tenant:", tenant, formData)
+    // Aquí integras tu lógica de envío o RPC
+    setOpen(false) // Opcional: cierra el modal tras un envío exitoso
   }
 
-  
-
   return (
-    <>
-    <Navbar routeList={routeList} logo={logo} currentTenant={tenant}></Navbar>
-    <section className="w-full flex justify-center py-12 px-6 md:px-12 select-none">
-      <div className="max-w-xl w-full bg-white dark:bg-[#051923] border border-[#006494]/10 dark:border-[#00a6fb]/20 rounded-2xl p-6 md:p-8 shadow-sm">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button className="w-full sm:w-auto h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl px-10 shadow-md transition-all">
+          Radicar una Solicitud Oficial
+        </Button>}>
         
-        <div className="mb-8 text-center sm:text-left">
-          <h2 className="text-2xl font-extrabold text-[#051923] dark:text-[#00a6fb] tracking-tight">
+      </DialogTrigger>
+
+      <DialogContent className="max-w-xl w-full max-h-[90vh] overflow-y-auto bg-white dark:bg-[#051923] border border-[#006494]/10 dark:border-[#00a6fb]/20 rounded-2xl p-6 md:p-8 shadow-lg">
+        <DialogHeader className="mb-4 text-center sm:text-left">
+          <DialogTitle className="text-2xl font-extrabold text-[#051923] dark:text-[#00a6fb] tracking-tight">
             Radicar Solicitud Oficial
-          </h2>
-          <p className="text-sm font-normal text-[#003554]/70 dark:text-white/60 mt-1">
-            Por favor completa todos los campos obligatorios para dar trámite a tu requerimiento.
-          </p>
-        </div>
+          </DialogTitle>
+          <DialogDescription className="text-sm font-normal text-[#003554]/70 dark:text-white/60 mt-1">
+            Por favor completa todos los campos obligatorios para dar trámite a tu requerimiento en cdApp.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={onSubmit} className="space-y-5">
-          
+          {/* Honeypot anti-spam */}
           <div className="hidden" aria-hidden="true">
             <input
               type="text"
@@ -140,13 +120,12 @@ export default function PqrsfFormulario() {
             />
           </div>
 
-          {/* Tipo de Trámite - Adaptado a tus Docs */}
+          {/* Tipo de Trámite */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
               Tipo de Trámite <span className="text-red-500">*</span>
             </label>
             <Select 
-              items={tramitesDisponibles} 
               value={formData.tipoTramite} 
               onValueChange={handleSelectChange}
             >
@@ -165,6 +144,7 @@ export default function PqrsfFormulario() {
             </Select>
           </div>
 
+          {/* Nombre Completo */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
               Nombre Completo <span className="text-red-500">*</span>
@@ -180,6 +160,7 @@ export default function PqrsfFormulario() {
             />
           </div>
 
+          {/* Teléfono y Correo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
@@ -212,6 +193,7 @@ export default function PqrsfFormulario() {
             </div>
           </div>
 
+          {/* Placa de Vehículo */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
               Placa de Vehículo <span className="text-gray-400 dark:text-gray-500">(Opcional)</span>
@@ -226,6 +208,7 @@ export default function PqrsfFormulario() {
             />
           </div>
 
+          {/* Descripción */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
               Descripción de los hechos <span className="text-red-500">*</span>
@@ -241,6 +224,7 @@ export default function PqrsfFormulario() {
             />
           </div>
 
+          {/* Checkbox y Sub-Dialog de Habeas Data */}
           <div className="flex items-start space-x-3 pt-2">
             <Checkbox
               id="habeasData"
@@ -256,12 +240,8 @@ export default function PqrsfFormulario() {
               Acepto los términos, condiciones y la política de tratamiento de datos personales de acuerdo con la ley de{" "}
               
               <Dialog>
-                <DialogTrigger render={
-                    <Button className="font-bold underline text-[#006494] dark:text-[#00a6fb] cursor-pointer hover:opacity-80 transition-opacity">
-                    Habeas Data
-                  </Button>
-                }>
-                  
+                <DialogTrigger className="font-bold underline text-[#006494] dark:text-[#00a6fb] cursor-pointer hover:opacity-80 transition-opacity bg-transparent p-0 border-none inline align-baseline">
+                  Habeas Data
                 </DialogTrigger>
                 <DialogContent className="max-w-lg bg-white dark:bg-[#051923] border border-[#006494]/20 dark:border-[#00a6fb]/20 rounded-2xl">
                   <DialogHeader>
@@ -269,15 +249,11 @@ export default function PqrsfFormulario() {
                       Política de Tratamiento de Datos (Ley 1581 de 2012)
                     </DialogTitle>
                     <DialogDescription className="text-sm font-normal text-[#003554]/70 dark:text-white/60 leading-relaxed pt-3 text-left space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                      
-                        En cumplimiento de la Ley Estatutaria 1581 de 2012 por la cual se dictan disposiciones generales para la protección de datos personales (Habeas Data), el <strong>CDA Fullmotos la 25</strong> informa que los datos suministrados en este formulario serán tratados de forma segura y confidencial.
-                      
-                      
-                        La finalidad de la recolección de estos datos es exclusivamente gestionar, evaluar y dar respuesta formal a las peticiones, quejas, reclamos, apelaciones y felicitaciones interpuestas por nuestros usuarios, garantizando la trazabilidad bajo las directrices exigidas por nuestros entes reguladores de acreditación y certificación.
-                      
-                     
-                        Como titular de la información, usted tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos personales en cualquier momento a través de nuestros canales de atención oficiales habilitados.
-                     
+                      En cumplimiento de la Ley Estatutaria 1581 de 2012 por la cual se dictan disposiciones generales para la protección de datos personales (Habeas Data), el sistema informa que los datos suministrados en este formulario serán tratados de forma segura y confidencial.
+                      <br /><br />
+                      La finalidad de la recolección de estos datos es exclusivamente gestionar, evaluar y dar respuesta formal a las peticiones, quejas, reclamos, apelaciones y felicitaciones interpuestas por nuestros usuarios, garantizando la trazabilidad bajo las directrices exigidas por nuestros entes reguladores de acreditación y certificación.
+                      <br /><br />
+                      Como titular de la información, usted tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos personales en cualquier momento a través de nuestros canales de atención oficiales habilitados.
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>
@@ -294,10 +270,8 @@ export default function PqrsfFormulario() {
               Radicar Requerimiento
             </Button>
           </div>
-
         </form>
-      </div>
-    </section>
-    </>
+      </DialogContent>
+    </Dialog>
   )
 }

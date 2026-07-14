@@ -61,6 +61,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 import { Button } from "../ui/button";
 import { Suspense } from "react";
+import Loading from "../ui/loading";
+import PqrsfModal from "./modal/Pqrsf";
 
 
 
@@ -1450,11 +1452,9 @@ export default function FullmotosLandingPage({ currentTenant }: { currentTenant:
 
         {/* Botón de llamado a la acción hacia el formulario */}
         <div className="w-full flex justify-center pt-2">
-          <Link href="/pqrsf" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl px-10 shadow-md transition-all">
-              Radicar una Solicitud Oficial
-            </Button>
-          </Link>
+          
+         <PqrsfModal></PqrsfModal>
+         
         </div>
 
       </div>
