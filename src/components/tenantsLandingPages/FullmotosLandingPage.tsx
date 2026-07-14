@@ -59,9 +59,9 @@ import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
 
-import { Button } from "../ui/button";
+
 import { Suspense } from "react";
-import Loading from "../ui/loading";
+
 import PqrsfModal from "./modal/Pqrsf";
 
 

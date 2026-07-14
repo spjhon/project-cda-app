@@ -24,6 +24,138 @@ import ImageDirectorTecnico from "../../public/langing_page_diirector_tecnico02_
 import { Footer } from "@/components/landingPage/Footer";
 import PricingSection from "@/components/landingPage/PricingSection";
 import CTASection from "@/components/landingPage/CTASection";
+import { Metadata } from "next";
+
+
+
+
+
+
+
+
+
+// Reemplaza con la URL de producción definitiva de cdApp
+const APP_URL = 'https://cda-app.com'; 
+
+export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
+  
+  title: {
+    template: '%s | cdApp',
+    default: 'cdApp - Software de Gestión Integral para CDA e Inspección Vehicular',
+  },
+  
+  description: 'Plataforma SaaS para Centros de Diagnóstico Automotor (CDA). Gestión de órdenes de entrada, base de datos de vehículos y propietarios, analítica avanzada, PQRSF automatizado y control de calidad bajo la norma ISO 17020.',
+  
+  // SEO Avanzado para Motores de Búsqueda
+  robots: {
+    index: true,
+    follow: true,
+    noarchive: false,
+    nosnippet: false,
+    notranslate: false,
+    noimageindex: false,
+    'max-snippet': -1,
+    'max-image-preview': 'large',
+    'max-video-preview': -1,
+  },
+  
+  generator: 'Next.js',
+  applicationName: 'cdApp',
+  referrer: 'origin-when-cross-origin',
+  
+  // Palabras clave exhaustivas cubriendo el core del negocio, la norma técnica y la geografía
+  keywords: [
+    // Core del Producto (SaaS & Inspección)
+    'SaaS para CDA', 'Software para Centros de Diagnóstico Automotor', 'Gestión de CDA Colombia', 
+    'Orden de entrada vehicular', 'Recepción de vehículos CDA', 'Expediente digital de vehículos',
+    'Analítica para CDA', 'Dashboard de inspección vehicular', 'Registro de propietarios y clientes',
+    'Pre-revision vehicular', 'Control de rechazos RTM', 'Historial técnico de vehículos',
+    
+    // Cumplimiento y Normativa (Vital para SEO B2B de este sector)
+    'Norma ISO 17020', 'Organismo de inspección tipo A', 'ONAC cumplimiento CDA', 
+    'Software acreditado ONAC', 'RUNT automatización', 'Regulación de transporte Colombia',
+    
+    // Funcionalidades específicas
+    'PQRSF para CDA', 'Formulario de apelaciones CDA', 'Peticiones quejas y reclamos inspección',
+    'Avisos de rechazo automáticos', 'Notificaciones por correo RTM', 'Alertas de vencimiento de revisión',
+    'Tenant landing pages', 'Portal personalizado por CDA', 'Multi-tenant vehicular software',
+    
+    // Ubicación y Contexto de Mercado
+    'RTM Colombia', 'Revisión Técnico-Mecánica', 'CDA en Bogotá', 'CDA en Medellín', 'CDA en Cali',
+    'CDA en Barranquilla', 'CDA en Bucaramanga', 'CDA en Manizales', 'Software automotriz Colombia',
+    
+    // Stack Tecnológico (Opcional, pero útil si buscas posicionarte ante desarrolladores o partners)
+    'Next.js 15', 'Supabase Postgres', 'TanStack Query', 'Tailwind CSS', 'Coolify VPS Deployment'
+  ],
+  
+  // Autores y Creadores (Adaptado a tu estructura)
+  authors: [
+    { name: 'Camilo Aristizábal', url: 'https://github.com/spjhon' }, 
+    { name: 'cdApp Engineering' }
+  ],
+  creator: 'Camilo Aristizábal',
+  publisher: 'cdApp Colombia',
+  
+  // Detección automática de formatos (desactivada en partes críticas para evitar parseos extraños del navegador)
+  formatDetection: {
+    email: false, // Evita que se confundan correos de rechazo con enlaces de acción planos
+    address: true,
+    telephone: true,
+  },
+  
+  // Open Graph (Para cuando compartan la app principal o las landings en WhatsApp, Slack o Facebook)
+  openGraph: {
+    title: 'cdApp - Optimiza tu Centro de Diagnóstico Automotor (CDA)',
+    description: 'Automatiza tus órdenes de entrada, gestiona PQRSF y automatiza avisos de rechazo de forma digital, ágil y conforme a la norma ISO 17020.',
+    url: APP_URL,
+    type: 'website',
+    siteName: 'cdApp Software',
+    locale: 'es_CO',
+    images: [
+      {
+        url: `https://lyktizihszlbmzzjrqye.supabase.co/storage/v1/object/public/tenants-public/public/OPENGRAPH.webp`,
+        width: 1200,
+        height: 630,
+        alt: 'cdApp - Dashboard de Analítica e Inspección de Vehículos',
+      }
+    ],
+  },
+  
+  // Twitter Cards
+  twitter: {
+    card: 'summary_large_image',
+    title: 'cdApp - Digitalización y Analítica para CDA',
+    description: 'Manejo de flujos de inspección, control de rechazos y notificaciones automáticas en un solo software.',
+    site: APP_URL,
+    creator: '@cdApp_co', // Reemplaza con tu Twitter/X real de empresa
+    images: [`https://lyktizihszlbmzzjrqye.supabase.co/storage/v1/object/public/tenants-public/public/OPENGRAPH.webp`],
+  },
+  
+  // Categoría de la aplicación para indexación en directorios
+  category: 'Software de Productividad y Gestión Automotriz',
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 interface Feature {
   icon: LucideIcon;

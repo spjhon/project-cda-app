@@ -29,6 +29,41 @@ const colorPalette = {
   papayaWhipDark: "#e8d5b5", // Texto en fondos papayaWhip / Sutilezas
 };
 
+
+//fotos instalacioens
+import instalaciones01 from "../../../public/tenantsLanding/tecnofresno/Instalaciones01.png"
+import instalaciones02 from "../../../public/tenantsLanding/tecnofresno/Instalaciones02.png"
+
+//Imagenes de la rtm de ejemplo
+import sensorialImage from "../../../public/tenantsLanding/fullmotosla25/pasosRTM_sensorial_reziced.webp"
+import lucesImage from "../../../public/tenantsLanding/fullmotosla25/pasosRTM_luces_reziced.webp"
+import gasesImage from "../../../public/tenantsLanding/fullmotosla25/pasosRTM_gasesreziced.webp"
+import sonometriaImage from "../../../public/tenantsLanding/fullmotosla25/sensorial_sonometro_reziced.jpg"
+import frenosImage from "../../../public/tenantsLanding/fullmotosla25/pasosRTM_frenos_reziced.webp"
+
+
+//Imagenes condicones para la inspeccion
+import motoDescargada from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_MotoDescargada.webp"
+import motoLimpia from "../../../public/tenantsLanding/fullmotosla25/condiconesEntrada_MotoLimpia.jpg"
+import motoBuenaPresion from "../../../public/tenantsLanding/fullmotosla25/condiconesEntrada_presionllantas.jpg"
+import motoSliders from "../../../public/tenantsLanding/fullmotosla25/condicnoesEntrada_sliders.webp"
+import motoAlarma from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_alarma.jpg"
+import motoCombustible from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_combustible.jpg"
+import motoSuspencion from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_suspencion.avif"
+import motoRejilla from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_rejilla-1.webp"
+import motoSoporte from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_soporteCentral.jpg"
+
+//Imagenes para los medios de pago
+import medioPagoEfectivo from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Efectivo.jpg"
+import medioPagoTarjeta from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Targeta.jpg"
+import medioPagoSistecredito from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Sistecredito.jpg"
+import medioPagoQR from "../../../public/tenantsLanding/fullmotosla25/MedioPago_QR.avif"
+import medioPagoTransferencia from "../../../public/tenantsLanding/fullmotosla25/MedioPago_Transferencia.jpg"
+
+
+
+
+
 //Props para la barra de navegacion
 export interface RouteProps {
   href: string;
@@ -80,61 +115,60 @@ const routeList: RouteProps[] = [
 
 
 
-
 const requisitosAsistencia = [
   {
     id: "01",
     titulo: "Vehículo Descargado",
     descripcion: "La motocicleta debe presentarse sin carga adicional, equipaje, alforjas pesadas o maleteros sobredimensionados.",
-    imagen: "/requisitos/descargado.jpg"
+    imagen: motoDescargada
   },
   {
     id: "02",
     titulo: "Condiciones de Limpieza",
     descripcion: "El vehículo debe estar limpio, libre de barro o grasa excesiva que impida la correcta inspección visual y sensorial.",
-    imagen: "/requisitos/limpieza.jpg"
+    imagen: motoLimpia
   },
   {
     id: "03",
     titulo: "Presión de Llantas",
     descripcion: "Ambas ruedas deben contar con la presión de aire adecuada según la especificación técnica del fabricante.",
-    imagen: "/requisitos/presion.jpg"
+    imagen: motoBuenaPresion
   },
   {
     id: "04",
     titulo: "Ejes Despejados",
     descripcion: "Retirar tapacubos, tapones de tuercas o sliders instalados en los ejes de las ruedas para permitir la sujeción e inspección.",
-    imagen: "/requisitos/ejes.jpg"
+    imagen: motoSliders
   },
   {
     id: "05",
     titulo: "Alarma Desactivada",
     descripcion: "Para las motocicletas que aplique, el sistema de alarma debe permanecer apagado para evitar bloqueos en la línea de prueba.",
-    imagen: "/requisitos/alarma.jpg"
+    imagen: motoAlarma
   },
   {
     id: "06",
     titulo: "Combustible Suficiente",
     descripcion: "Contar con al menos un cuarto (1/4) de tanque de combustible para poder realizar correctamente las pruebas dinámicas y de gases.",
-    imagen: "/requisitos/combustible.jpg"
+    imagen: motoCombustible
   },
   {
     id: "07",
     titulo: "Suspensión Libre",
     descripcion: "Sin abrazaderas fijas ni amarres improvisados en las cubiertas o fuelles de la suspensión delantera o trasera.",
-    imagen: "/requisitos/suspension.jpg"
+    imagen: motoSuspencion
   },
   {
     id: "08",
     titulo: "Escape sin Obstrucciones",
     descripcion: "El tubo de escape debe estar libre de aditamentos, mallas o deflectores que obstaculicen el ingreso de la sonda de gases.",
-    imagen: "/requisitos/escape.jpg"
+    imagen: motoRejilla
   },
   {
     id: "09",
     titulo: "Soporte Central (Scooters)",
     descripcion: "Las motocicletas tipo scooter deben asistir obligatoriamente con su soporte central (gato) en perfecto estado funcional.",
-    imagen: "/requisitos/soporte.jpg"
+    imagen: motoSoporte
   }
 ];
 
@@ -224,39 +258,147 @@ const mediosPago = [
   {
     id: "efectivo",
     titulo: "Efectivo",
-    imagen: "/pagos/efectivo.jpg"
+    imagen: medioPagoEfectivo
   },
   {
     id: "tarjetas",
     titulo: "Tarjetas Débito y Crédito",
-    imagen: "/pagos/tarjetas.jpg"
+    imagen: medioPagoTarjeta
   },
   {
     id: "sistecredito",
     titulo: "Sistecrédito",
-    imagen: "/pagos/sistecredito.jpg"
+    imagen: medioPagoSistecredito
   },
   {
     id: "qr",
     titulo: "Código QR (Bancolombia / Nequi / Daviplata)",
-    imagen: "/pagos/qr.jpg"
+    imagen: medioPagoQR
   },
   {
     id: "transferencia",
     titulo: "Transferencia Bancaria",
-    imagen: "/pagos/transferencia.jpg"
+    imagen: medioPagoTransferencia
   }
 ];
 
 
 
 const imagenesInstalaciones = [
-  { id: 1, src: "/images/instalaciones/fachada.jpg", alt: "Fachada principal del CDA Fullmotos la 25" },
-  { id: 2, src: "/images/instalaciones/pista-diagnostico.jpg", alt: "Pista técnica de diagnóstico y frenómetro" },
-  { id: 3, src: "/images/instalaciones/zona-espera.jpg", alt: "Zona de espera cómoda para clientes" },
-  { id: 4, src: "/images/instalaciones/analisis-gases.jpg", alt: "Estación de análisis de emisiones contaminantes" },
-  { id: 5, src: "/images/instalaciones/inspeccion-sensorial.jpg", alt: "Fosa de inspección sensorial para motocicletas" }
+  { id: 1, src: instalaciones01, alt: "Fachada principal del CDA Fullmotos la 25" },
+  { id: 2, src: instalaciones02, alt: "Pista técnica de diagnóstico y frenómetro" },
+  { id: 3, src: panoramico, alt: "Zona de espera cómoda para clientes" },
+  
 ];
+
+
+
+
+
+const rtmSteps = [
+  {
+    id: "sensorial",
+    tabLabel: "1. Sensorial",
+    title: "Inspección Sensorial Minuciosa",
+    emoji: "👀",
+    image: sensorialImage,
+    alt: "Inspección sensorial del chasis y llantas",
+    content: (
+      <>
+        Un inspector certificado evalúa visual y tácticamente{" "}
+        <strong className="text-[#051923] dark:text-white font-bold">
+          más de 75 posibles defectos
+        </strong>{" "}
+        normativos en la motocicleta. Esta rigurosa revisión abarca componentes
+        críticos como el chasis, sistema de suspensión, estado del cableado,
+        mangueras de fluidos, guayas, fijaciones mecánicas, presencia de
+        rozaduras peligrosas y la profundidad de labrado de ambas llantas.
+      </>
+    ),
+  },
+  {
+    id: "luces",
+    tabLabel: "2. Luces",
+    title: "Reglaje e Intensidad Lumínica",
+    emoji: "💡",
+    image: lucesImage,
+    alt: "Medición de faros con Luxómetro",
+    content: (
+      <>
+        Utilizamos un{" "}
+        <strong className="text-[#006494] dark:text-[#00a6fb] font-semibold">
+          Luxómetro de alta precisión
+        </strong>{" "}
+        para medir técnicamente tanto la intensidad de proyección como el ángulo
+        exacto de inclinación del haz de luz. Esto asegura que cuentes con una
+        visibilidad nocturna óptima y evita encandilar a los conductores que
+        transitan en sentido contrario.
+      </>
+    ),
+  },
+  {
+    id: "sonido",
+    tabLabel: "3. Sonoridad",
+    title: "Control de Emisiones Sonoras",
+    emoji: "🔊",
+    image: sonometriaImage,
+    alt: "Prueba de decibeles con Sonómetro",
+    content: (
+      <>
+        Realizamos la toma de muestreo acústico mediante un{" "}
+        <strong className="text-[#006494] dark:text-[#00a6fb] font-semibold">
+          Sonómetro homologado
+        </strong>{" "}
+        puesto cerca al escape. Con esto medimos los decibeles generados por el
+        motor para certificar que la motocicleta no incurra en contaminación
+        auditiva ni exceda los umbrales de ruido permitidos por la ley nacional.
+      </>
+    ),
+  },
+  {
+    id: "gases",
+    tabLabel: "4. Gases",
+    title: "Análisis de Gases Contaminantes",
+    emoji: "💨",
+    image: gasesImage,
+    alt: "Sonda del analizador de gases en el escape",
+    content: (
+      <>
+        Conectamos la motocicleta a un{" "}
+        <strong className="text-[#006494] dark:text-[#00a6fb] font-semibold">
+          Analizador de gases computarizado
+        </strong>{" "}
+        que mide el nivel de monóxido de carbono, hidrocarburos y oxígeno expulsa­
+        dos. Es una prueba indispensable para validar que el motor opere eficientemente
+        dentro de los límites ecológicos exigidos por las autoridades ambientales.
+      </>
+    ),
+  },
+  {
+    id: "frenos",
+    tabLabel: "5. Frenado",
+    title: "Prueba Especializada de Frenado",
+    emoji: "🛑",
+    image: frenosImage,
+    alt: "Motocicleta sobre los rodillos del frenómetro",
+    content: (
+      <>
+        Sometemos el vehículo al rodillo del{" "}
+        <strong className="text-[#006494] dark:text-[#00a6fb] font-semibold">
+          Frenómetro electrónico
+        </strong>{" "}
+        . Esta prueba automatizada calcula la fuerza de frenado por eje y la eficacia
+        total del sistema, garantizando que ante cualquier detención habitual o de
+        emergencia en la vía, la motocicleta responda con firmeza, equilibrio y total
+        control.
+      </>
+    ),
+  },
+];
+
+
+
+
 
 
 const preguntasFrecuentes = [
@@ -616,183 +758,78 @@ export default function TecnofresnoLandingPage({ currentTenant }: { currentTenan
 </section>
 
 
+<section
+      id="consisteRTM"
+      className="w-full flex items-center justify-center bg-transparent px-6 py-16 md:px-12 select-none transition-colors duration-300"
+    >
+      <div className="max-w-5xl w-full flex flex-col space-y-10">
+        {/* Encabezado */}
+        <div className="flex flex-col space-y-3 text-center items-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#669bbc] dark:text-[#fdf0d5]">
+            Inspección paso a paso
+          </span>
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#003049] dark:text-[#fdf0d5]">
+            ¿En qué consiste la Revisión Técnico-Mecánica?
+          </h2>
+          <p className="text-base md:text-lg font-normal text-[#003049]/80 dark:text-[#fdf0d5]/70 max-w-2xl">
+            Conoce las etapas reglamentarias que realizamos en nuestra pista
+            especializada para garantizar el estado óptimo de tu motocicleta y
+            vehículo liviano.
+          </p>
+        </div>
 
-<section id="consisteRTM" className="w-full flex items-center justify-center bg-transparent px-6 py-16 md:px-12 select-none transition-colors duration-300">
-  <div className="max-w-5xl w-full flex flex-col space-y-10">
-    
-    {/* Encabezado */}
-    <div className="flex flex-col space-y-3 text-center items-center">
-      <span className="text-xs font-bold uppercase tracking-wider text-[#669bbc] dark:text-[#fdf0d5]">
-        Inspección paso a paso
-      </span>
-      <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#003049] dark:text-[#fdf0d5]">
-        ¿En qué consiste la Revisión Técnico-Mecánica?
-      </h2>
-      <p className="text-base md:text-lg font-normal text-[#003049]/80 dark:text-[#fdf0d5]/70 max-w-2xl">
-        Conoce las etapas reglamentarias que realizamos en nuestra pista especializada para garantizar el estado óptimo de tu motocicleta y vehículo liviano.
-      </p>
-    </div>
+        {/* Componente Tabs Oficial de Shadcn UI */}
+        <Tabs defaultValue="sensorial" className="w-full flex flex-col space-y-6">
+          {/* Listado dinámico de pestañas */}
+          <TabsList className="inline-flex h-12 w-full items-center justify-start rounded-xl bg-[#669bbc]/5 dark:bg-[#003049]/60 p-1 text-[#003049]/70 dark:text-[#fdf0d5]/60 overflow-x-auto overflow-y-hidden border border-[#669bbc]/10 dark:border-[#fdf0d5]/20">
+            {rtmSteps.map((step) => (
+              <TabsTrigger
+                key={step.id}
+                value={step.id}
+                className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]"
+              >
+                {step.tabLabel}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-    {/* Componente Tabs Oficial de Shadcn UI */}
-    <Tabs defaultValue="sensorial" className="w-full flex flex-col space-y-6">
-      
-      {/* Listado de pestañas */}
-      <TabsList className="inline-flex h-12 w-full items-center justify-start rounded-xl bg-[#669bbc]/5 dark:bg-[#003049]/60 p-1 text-[#003049]/70 dark:text-[#fdf0d5]/60 overflow-x-auto overflow-y-hidden border border-[#669bbc]/10 dark:border-[#fdf0d5]/20">
-        <TabsTrigger value="sensorial" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          1. Sensorial
-        </TabsTrigger>
-        <TabsTrigger value="luces" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          2. Luces
-        </TabsTrigger>
-        <TabsTrigger value="sonido" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          3. Sonoridad
-        </TabsTrigger>
-        <TabsTrigger value="gases" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          4. Gases
-        </TabsTrigger>
-        <TabsTrigger value="frenos" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          5. Frenado
-        </TabsTrigger>
-        <TabsTrigger value="alineacion" className="font-semibold tracking-tight data-[state=active]:bg-white data-[state=active]:dark:bg-[#004d6e] data-[state=active]:text-[#003049] data-[state=active]:dark:text-[#fdf0d5]">
-          6. Alineación
-        </TabsTrigger>
-      </TabsList>
-
-      {/* Contenido 1: Sensorial */}
-      <TabsContent value="sensorial" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">👀</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Inspección Sensorial Minuciosa</CardTitle>
+          {/* Contenidos dinámicos de las pestañas */}
+          {rtmSteps.map((step) => (
+            <TabsContent
+              key={step.id}
+              value={step.id}
+              className="mt-0 focus-visible:outline-none"
+            >
+              <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
+                <div className="flex flex-col md:flex-row items-stretch justify-between mx-2">
+                  <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
+                    <CardHeader className="p-0 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{step.emoji}</span>
+                        <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">
+                          {step.title}
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
+                      {step.content}
+                    </CardContent>
+                  </div>
+                  <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
+                    <Image
+                      src={step.image}
+                      alt={step.alt}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Un inspector certificado evalúa visual y tácticamente <strong className="text-[#003049] dark:text-[#fdf0d5] font-bold">más de 75 posibles defectos</strong> normativos en la motocicleta. Esta rigurosa revisión abarca componentes críticos como el chasis, sistema de suspensión, estado del cableado, mangueras de fluidos, guayas, fijaciones mecánicas, presencia de rozaduras peligrosas y la profundidad de labrado de ambas llantas.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-sensorial.jpg" alt="Inspección sensorial del chasis y llantas" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-      {/* Contenido 2: Luces */}
-      <TabsContent value="luces" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">💡</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Reglaje e Intensidad Lumínica</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Utilizamos un <strong className="text-[#669bbc] dark:text-[#fdf0d5] font-semibold">Luxómetro de alta precisión</strong> para medir técnicamente tanto la intensidad de proyección como el ángulo exacto de inclinación del haz de luz. Esto asegura que cuentes con una visibilidad nocturna óptima y evita encandilar a los conductores que transitan en sentido contrario.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-luxometro.jpg" alt="Medición de faros con Luxómetro" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-      {/* Contenido 3: Sonido */}
-      <TabsContent value="sonido" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🔊</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Control de Emisiones Sonoras</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Realizamos la toma de muestreo acústico mediante un <strong className="text-[#669bbc] dark:text-[#fdf0d5] font-semibold">Sonómetro homologado</strong> puesto cerca al escape. Con esto medimos los decibeles generados por el motor para certificar que la motocicleta no incurra en contaminación auditiva ni exceda los umbrales de ruido permitidos por la ley nacional.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-sonometro.jpg" alt="Prueba de decibeles con Sonómetro" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-      {/* Contenido 4: Gases */}
-      <TabsContent value="gases" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">💨</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Análisis de Gases Contaminantes</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Conectamos la motocicleta a un <strong className="text-[#669bbc] dark:text-[#fdf0d5] font-semibold">Analizador de gases computarizado</strong> que mide el nivel de monóxido de carbono, hidrocarburos y oxígeno expulsados. Es una prueba indispensable para validar que el motor opere eficientemente dentro de los límites ecológicos exigidos por las autoridades ambientales.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-gases.jpg" alt="Sonda del analizador de gases en el escape" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-      {/* Contenido 5: Frenos */}
-      <TabsContent value="frenos" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🛑</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Prueba Especializada de Frenado</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Sometemos el vehículo al rodillo del <strong className="text-[#669bbc] dark:text-[#fdf0d5] font-semibold">Frenómetro electrónico</strong>. Esta prueba automatizada calcula la fuerza de frenado por eje y la eficacia total del sistema, garantizando que ante cualquier detención habitual o de emergencia en la vía, la motocicleta responda con firmeza, equilibrio y total control.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-frenos.jpg" alt="Motocicleta sobre los rodillos del frenómetro" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-      {/* Contenido 6: Alineación y Suspensión (NUEVO - Vehículos Livianos) */}
-      <TabsContent value="alineacion" className="mt-0 focus-visible:outline-none">
-        <Card className="border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] shadow-sm overflow-hidden">
-          <div className="flex flex-col md:flex-row items-stretch justify-between">
-            <div className="p-8 flex flex-col justify-center space-y-4 md:w-[60%]">
-              <CardHeader className="p-0 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">⚙️</span>
-                  <CardTitle className="text-xl font-bold text-[#003049] dark:text-[#fdf0d5]">Alineación y Suspensión</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 text-base font-normal text-[#003049]/90 dark:text-[#fdf0d5]/80 leading-relaxed">
-                Servicio exclusivo para <strong className="text-[#003049] dark:text-[#fdf0d5] font-bold">vehículos livianos</strong>. Verificamos el ángulo de convergencia, divergencia y caída de las ruedas con un <strong className="text-[#669bbc] dark:text-[#fdf0d5] font-semibold">alineador computarizado de última generación</strong>. Además, inspeccionamos el estado de amortiguadores, resortes y bujes de suspensión para garantizar una conducción estable, segura y un desgaste uniforme de las llantas.
-              </CardContent>
-            </div>
-            <div className="w-full md:w-[40%] min-h-64 md:min-h-auto relative">
-              <Image src="/ruta-alineacion.jpg" alt="Alineación y suspensión de vehículo liviano" fill className="object-cover" />
-            </div>
-          </div>
-        </Card>
-      </TabsContent>
-
-    </Tabs>
-  </div>
-</section>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    </section>
 
 
 <section id="preparacionRTM" className="w-full flex flex-col items-center justify-center bg-[#003049]/20 dark:bg-[#003049]/40 px-6 py-16 md:px-12 select-none transition-colors duration-300">
