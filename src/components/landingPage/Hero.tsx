@@ -4,6 +4,7 @@ import { ArrowUpRight, CirclePlay } from "lucide-react";
 import Image from "next/image";
 
 import ImageAdmin from "../../../public/langing_page_admin.webp";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -31,9 +32,15 @@ const Hero = () => {
             <Button
               variant="outline"
               size="lg"
-              className="rounded-full text-base shadow-none"
+              className="rounded-full text-base shadow-none w-40"
+             
             >
-              <CirclePlay className="h-5! w-5!" /> Mira la DEMO
+              <Link href="https://demo.cda-app.com/auth/login"
+              className="flex justify-center items-center gap-2"
+              >
+                <CirclePlay className="h-5 w-5" /> {/* Nota: quité el ! para evitar problemas de compilación si no usas Tailwind v4, pero puedes dejar "h-5! w-5!" si ya lo tienes configurado */}
+                Mira la DEMO
+              </Link>
             </Button>
           </div>
         </div>

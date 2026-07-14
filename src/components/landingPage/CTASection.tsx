@@ -71,7 +71,7 @@ export default function CTASection() {
               </Link>
 
               <Link
-                href="/demo"
+                href="https://demo.cda-app.com/auth/login"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-primary-foreground text-primary-foreground font-bold hover:bg-primary-foreground/10 transition-all hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2.5 text-base"
               >
                 <PlayCircle className="w-5 h-5" />
