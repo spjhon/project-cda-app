@@ -1,6 +1,6 @@
 "use client";
 
-import { UserContextData } from "@/app/[tenant]/dashboard/layout";
+import { UserContextData } from "@/app/[tenant]/(private)/dashboard/layout";
 import { TenantFetchResult } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { createContext, ReactNode, use } from "react";
 

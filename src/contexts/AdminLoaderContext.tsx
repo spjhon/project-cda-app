@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminAnalyticsData, AdminAnalyticsDiaryData } from "@/app/[tenant]/dashboard/admin/layout";
+import { AdminAnalyticsData, AdminAnalyticsDiaryData } from "@/app/[tenant]/(private)/dashboard/admin/layout";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, ReactNode, use } from "react";

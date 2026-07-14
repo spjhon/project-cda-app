@@ -34,8 +34,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
-import {DayChartItem, MonthChartItem } from "@/app/[tenant]/dashboard/admin/layout";
-import { CompleteDataRTMType } from "@/app/[tenant]/dashboard/admin/analitica/page";
+import {DayChartItem, MonthChartItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
+import { CompleteDataRTMType } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
 //import { useSidebar } from "@/components/ui/sidebar";
 
 
