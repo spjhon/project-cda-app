@@ -1415,7 +1415,7 @@ export default function TecnofresnoLandingPage({ currentTenant }: { currentTenan
 
     {/* Botón de llamado a la acción hacia el formulario */}
     <div className="w-full flex justify-center pt-2">
-      <PqrsfModal></PqrsfModal>
+      <PqrsfModal tenant={currentTenant}></PqrsfModal>
     </div>
 
   </div>

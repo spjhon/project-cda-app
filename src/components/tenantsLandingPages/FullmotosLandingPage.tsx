@@ -1453,7 +1453,7 @@ export default function FullmotosLandingPage({ currentTenant }: { currentTenant:
         {/* Botón de llamado a la acción hacia el formulario */}
         <div className="w-full flex justify-center pt-2">
           
-         <PqrsfModal></PqrsfModal>
+         <PqrsfModal tenant={currentTenant}></PqrsfModal>
          
         </div>
 

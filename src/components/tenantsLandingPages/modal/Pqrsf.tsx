@@ -21,7 +21,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useParams } from "next/navigation"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { radicarPQAF } from "@/lib/server-actions/radicarPQAF"
+
 
 interface PqrsfFormData {
   tipoTramite: string
@@ -41,9 +43,15 @@ const tramitesDisponibles = [
   { label: "Felicitación", value: "felicitacion" },
 ]
 
-export default function PqrsfModal() {
-  const params = useParams()
-  const tenant = params.tenant?.toString() || ""
+
+interface PqrsfModalProps {
+  tenant: string;
+}
+
+
+export default function PqrsfModal({tenant}: PqrsfModalProps) {
+  
+  
 
   const [open, setOpen] = useState(false)
   const [formData, setFormData] = useState<PqrsfFormData>({
@@ -55,7 +63,14 @@ export default function PqrsfModal() {
     descripcion: "",
     habeasData: false,
     honeypot: "",
-  })
+  });
+
+const [actionResult, setActionResult] = useState<{ success: boolean; motive: string } | null>(null);
+
+const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -81,16 +96,86 @@ export default function PqrsfModal() {
     }))
   }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+const handleOpenChange = (isOpen: boolean) => {
+  setOpen(isOpen)
+  
+  // Si el diálogo se está abriendo, limpiamos el resultado de la acción anterior
+  if (isOpen) {
+    setActionResult(null)
+  }
+}
+
+
+
+
+  const onSubmit = async  (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    e.stopPropagation();
+
+    setIsSubmitting(true);
+    setActionResult(null);
+
+
+
+
+
     if (formData.honeypot) return
     console.log("Datos listos para enviar para el tenant:", tenant, formData)
-    // Aquí integras tu lógica de envío o RPC
-    setOpen(false) // Opcional: cierra el modal tras un envío exitoso
+    
+
+
+    try {
+    // 1. Intentamos llamar al Server Action
+    const result = await radicarPQAF(tenant, formData)
+    
+    // Si el servidor respondió (bien o mal), guardamos su respuesta
+   if (result) {
+  setActionResult({
+    success: result.success,
+    motive: result.motive || "Ocurrió un error inesperado al procesar la solicitud."
+      });
+    } else {
+      setActionResult(null);
+    }
+
+
+
+
+    if (result.success) {
+     setFormData((prev) => ({
+      ...prev,
+    tipoTramite: "",
+    nombreCompleto: "",
+    telefono: "",
+    correo: "",
+    placa: "",
+    descripcion: "",
+    habeasData: false,
+    honeypot: "",
+     }))
+     
+
+
+    }
+  } catch (error) {
+    // 2. CAPTURA DE CAÍDAS DE RED / SERVIDOR (Offline, Error 500, Red caída)
+    console.error("Error de comunicación con el servidor:", error)
+    
+    // Aquí forzamos el estado de error en el cliente de forma manual
+    setActionResult({
+      success: false,
+      motive: "No logramos conectar con el servidor. Por favor, revisa tu conexión a internet o inténtalo de nuevo en unos minutos."
+    })
+  } finally {
+    // Esto se ejecuta SIEMPRE (haya o no error) para apagar el estado "Cargando..."
+    setIsSubmitting(false)
+  }
+
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button className="w-full sm:w-auto h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl px-10 shadow-md transition-all">
           Radicar una Solicitud Oficial
         </Button>}>
@@ -128,6 +213,7 @@ export default function PqrsfModal() {
             <Select 
               value={formData.tipoTramite} 
               onValueChange={handleSelectChange}
+              items={tramitesDisponibles}
             >
               <SelectTrigger className="w-full h-11 border-black dark:border-white/20 rounded-xl bg-card">
                 <SelectValue placeholder="Selecciona una opción" />
@@ -263,11 +349,38 @@ export default function PqrsfModal() {
           </div>
 
           <div className="pt-3">
+
+                  {/* Div de Estado / Alerta del Server Action */}
+            {actionResult && (
+              <div
+                className={`flex items-start gap-3 p-4 rounded-xl border text-sm transition-all animate-in fade-in duration-200 ${
+                  actionResult.success
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-400"
+                    : "bg-destructive/10 dark:bg-destructive/10 border-destructive/20 dark:border-destructive/30 text-destructive dark:text-red-400"
+                }`}
+              >
+                {actionResult.success ? (
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 shrink-0 text-destructive mt-0.5" />
+                )}
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-bold">
+                    {actionResult.success ? "¡Radicado Exitoso!" : "Error en el Radicado"}
+                  </span>
+                  <p className="text-xs opacity-90 leading-relaxed">
+                    {actionResult.motive}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <Button
               type="submit"
-              className="w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all"
+              disabled={isSubmitting}
+              className="w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Radicar Requerimiento
+              {isSubmitting ? "Radicando..." : "Radicar Requerimiento"}
             </Button>
           </div>
         </form>

@@ -705,6 +705,56 @@ export type Database = {
           },
         ]
       }
+      service_requirements: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          placa: string | null
+          requirement_type: string
+          sender_email: string
+          sender_name: string
+          sender_phone: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          placa?: string | null
+          requirement_type?: string
+          sender_email: string
+          sender_name: string
+          sender_phone?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          placa?: string | null
+          requirement_type?: string
+          sender_email?: string
+          sender_name?: string
+          sender_phone?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requirements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_users: {
         Row: {
           auth_user_id: string
@@ -1101,6 +1151,7 @@ export type Database = {
           version: number
         }[]
       }
+      get_my_tenants: { Args: never; Returns: string[] }
       get_tenant_data: {
         Args: { p_tenant_slug: string }
         Returns: {
