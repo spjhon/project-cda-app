@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
-import { Button } from "../ui/button";
+
 import { Suspense } from "react";
 import DynamicYear from "../landingPage/DynamicYear";
 import PqrsfModal from "./modal/Pqrsf";
@@ -1303,8 +1303,8 @@ export default function TecnofresnoLandingPage({ currentTenant }: { currentTenan
         </CarouselContent>
         
         {/* Controles de navegación */}
-        <CarouselPrevious className="hidden md:flex -left-12 border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] text-[#003049] dark:text-[#fdf0d5] hover:bg-[#c1121f]/10" />
-        <CarouselNext className="hidden md:flex -right-12 border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] text-[#003049] dark:text-[#fdf0d5] hover:bg-[#c1121f]/10" />
+        <CarouselPrevious className="flex left-[-30] sm:-left-12 border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] text-[#003049] dark:text-[#fdf0d5] hover:bg-[#c1121f]/10" />
+        <CarouselNext className="flex right-[-30] sm:-right-12 border-[#669bbc]/20 dark:border-[#fdf0d5]/30 bg-white dark:bg-[#003049] text-[#003049] dark:text-[#fdf0d5] hover:bg-[#c1121f]/10" />
       </Carousel>
     </div>
 

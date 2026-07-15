@@ -455,12 +455,6 @@ export interface RouteProps {
 
 
 
-//Props para la barra de navegacion
-export interface RouteProps {
-  href: string;
-  label: string;
-}
-
 const routeList: RouteProps[] = [
   {
   
@@ -1339,8 +1333,8 @@ export default function FullmotosLandingPage({ currentTenant }: { currentTenant:
             </CarouselContent>
             
             {/* Controles de navegación */}
-            <CarouselPrevious className="hidden md:flex -left-12 border-[#006494]/20 dark:border-[#00a6fb]/30 bg-white dark:bg-[#051923] text-[#051923] dark:text-[#00a6fb] hover:bg-[#00a6fb]/10" />
-            <CarouselNext className="hidden md:flex -right-12 border-[#006494]/20 dark:border-[#00a6fb]/30 bg-white dark:bg-[#051923] text-[#051923] dark:text-[#00a6fb] hover:bg-[#00a6fb]/10" />
+            <CarouselPrevious disabled={false} className="flex left-[-30] sm:-left-12  border-[#006494]/20 dark:border-[#00a6fb]/30 bg-white dark:bg-[#051923] text-[#051923] dark:text-[#00a6fb] hover:bg-[#00a6fb]/10" />
+            <CarouselNext disabled={false} className="flex right-[-30] sm:-right-12 border-[#006494]/20 dark:border-[#00a6fb]/30 bg-white dark:bg-[#051923] text-[#051923] dark:text-[#00a6fb] hover:bg-[#00a6fb]/10" />
           </Carousel>
         </div>
 
