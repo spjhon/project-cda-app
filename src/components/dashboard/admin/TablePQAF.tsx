@@ -34,6 +34,7 @@ import {
   Search,
   X,
   CalendarIcon,
+ 
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +58,7 @@ import { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { PQAFListItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
+import DetallesPQAFDialog from "./DetallesPQAFDialog";
 
 const columnHelper = createColumnHelper<PQAFListItem>();
 
@@ -316,17 +318,7 @@ export default function PQAFTable() {
         header: "Acciones",
         cell: ({ row }) => {
           const pqaf = row.original;
-
-          {
-            /**<DetallesPQAFDialog pqaf={pqaf} mutation={mutation}>
-              <Button size="sm" variant="outline" className="gap-1.5 h-8">
-                <Eye className="h-4 w-4 text-primary" />
-                <span>Detalles</span>
-              </Button>
-            </DetallesPQAFDialog> */
-          }
-
-          return <div>Detalles</div>;
+          return <DetallesPQAFDialog pqaf={pqaf} ></DetallesPQAFDialog>;
         },
       }),
     ],
