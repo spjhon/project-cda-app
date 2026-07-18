@@ -1151,6 +1151,33 @@ export type Database = {
           version: number
         }[]
       }
+      fetch_service_requirements_list: {
+        Args: {
+          p_fecha_desde?: string
+          p_fecha_hasta?: string
+          p_limit?: number
+          p_offset?: number
+          p_order_by_column?: string
+          p_order_by_direction?: string
+          p_search_column?: string
+          p_search_term?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          placa: string
+          requirement_type: string
+          sender_email: string
+          sender_name: string
+          sender_phone: string
+          status: string
+          tenant_id: string
+          total_count: number
+          updated_at: string
+        }[]
+      }
       get_my_tenants: { Args: never; Returns: string[] }
       get_tenant_data: {
         Args: { p_tenant_slug: string }

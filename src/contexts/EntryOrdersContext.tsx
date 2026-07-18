@@ -94,6 +94,10 @@ export default function EntryOrdersLoaderContext({
   const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5); // Por defecto 10 filas
 
+
+
+
+  
   const queryClient = useQueryClient();
 
   const permissionscontextRecived = useContext(PermissionsContext);

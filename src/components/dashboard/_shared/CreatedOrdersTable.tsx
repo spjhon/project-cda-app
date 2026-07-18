@@ -173,8 +173,7 @@ export default function CreatedOrdersTable() {
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
   const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
 
-  const { query, mutation } =
-    EntryOrdersContextRecived?.entryOrdersTableData || {};
+  const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
   const {
     orderByColumn = "fecha",

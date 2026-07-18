@@ -312,41 +312,44 @@ const handleOpenChange = (isOpen: boolean) => {
 
           {/* Checkbox y Sub-Dialog de Habeas Data */}
           <div className="flex items-start space-x-3 pt-2">
-            <Checkbox
-              id="habeasData"
-              required
-              checked={formData.habeasData}
-              onCheckedChange={handleCheckboxChange}
-              className="mt-1 border-black dark:border-white/40 data-[state=checked]:bg-[#006494] dark:data-[state=checked]:bg-[#00a6fb]"
-            />
-            <label
-              htmlFor="habeasData"
-              className="text-xs font-normal text-[#003554]/80 dark:text-white/70 leading-normal"
-            >
-              Acepto los términos, condiciones y la política de tratamiento de datos personales de acuerdo con la ley de{" "}
-              
-              <Dialog>
-                <DialogTrigger className="font-bold underline text-[#006494] dark:text-[#00a6fb] cursor-pointer hover:opacity-80 transition-opacity bg-transparent p-0 border-none inline align-baseline">
-                  Habeas Data
-                </DialogTrigger>
-                <DialogContent className="max-w-lg bg-white dark:bg-[#051923] border border-[#006494]/20 dark:border-[#00a6fb]/20 rounded-2xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-lg font-bold text-[#051923] dark:text-white">
-                      Política de Tratamiento de Datos (Ley 1581 de 2012)
-                    </DialogTitle>
-                    <DialogDescription className="text-sm font-normal text-[#003554]/70 dark:text-white/60 leading-relaxed pt-3 text-left space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                      En cumplimiento de la Ley Estatutaria 1581 de 2012 por la cual se dictan disposiciones generales para la protección de datos personales (Habeas Data), el sistema informa que los datos suministrados en este formulario serán tratados de forma segura y confidencial.
-                      <br /><br />
-                      La finalidad de la recolección de estos datos es exclusivamente gestionar, evaluar y dar respuesta formal a las peticiones, quejas, reclamos, apelaciones y felicitaciones interpuestas por nuestros usuarios, garantizando la trazabilidad bajo las directrices exigidas por nuestros entes reguladores de acreditación y certificación.
-                      <br /><br />
-                      Como titular de la información, usted tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos personales en cualquier momento a través de nuestros canales de atención oficiales habilitados.
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-              . <span className="text-red-500">*</span>
-            </label>
-          </div>
+  <Checkbox
+    id="habeasData"
+   
+    checked={formData.habeasData}
+    onCheckedChange={handleCheckboxChange}
+    className="mt-1 border-black dark:border-white/40 data-[state=checked]:bg-[#006494] dark:data-[state=checked]:bg-[#00a6fb]"
+  />
+  
+  {/* Cambiamos <label> por <div> para permitir elementos interactivos dentro sin romper el DOM */}
+  <div className="text-xs font-normal text-[#003554]/80 dark:text-white/70 leading-normal">
+    {/* Este label solo envuelve el texto plano inicial, así el clic aquí sí activa el checkbox */}
+    <label htmlFor="habeasData" className="cursor-pointer">
+      Acepto los términos, condiciones y la política de tratamiento de datos personales de acuerdo con la ley de{" "}
+    </label>
+    
+    <Dialog>
+      <DialogTrigger className="font-bold underline text-[#006494] dark:text-[#00a6fb] cursor-pointer hover:opacity-80 transition-opacity bg-transparent p-0 border-none inline align-baseline">
+        Habeas Data
+      </DialogTrigger>
+      <DialogContent className="max-w-lg bg-white dark:bg-[#051923] border border-[#006494]/20 dark:border-[#00a6fb]/20 rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold text-[#051923] dark:text-white">
+            Política de Tratamiento de Datos (Ley 1581 de 2012)
+          </DialogTitle>
+          <DialogDescription className="text-sm font-normal text-[#003554]/70 dark:text-white/60 leading-relaxed pt-3 text-left space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+            En cumplimiento de la Ley Estatutaria 1581 de 2012 por la cual se dictan disposiciones generales para la protección de datos personales (Habeas Data), el sistema informa que los datos suministrados en este formulario serán tratados de forma segura y confidencial.
+            <br /><br />
+            La finalidad de la recolección de estos datos es exclusivamente gestionar, evaluar y dar respuesta formal a las peticiones, quejas, reclamos, apelaciones y felicitaciones interpuestas por nuestros usuarios, garantizando la trazabilidad bajo las directrices exigidas por nuestros entes reguladores de acreditación y certificación.
+            <br /><br />
+            Como titular de la información, usted tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos personales en cualquier momento a través de nuestros canales de atención oficiales habilitados.
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+    
+    <span>.</span> <span className="text-red-500">*</span>
+  </div>
+</div>
 
           <div className="pt-3">
 
@@ -378,7 +381,7 @@ const handleOpenChange = (isOpen: boolean) => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full h-12 my-3 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? "Radicando..." : "Radicar Requerimiento"}
             </Button>

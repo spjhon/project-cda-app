@@ -104,6 +104,13 @@ const NavAdmin: NavItem[] = [
     href: "/dashboard/admin/analitica",
     icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
   },
+
+  {
+    title: "PQAF", // 🔥 NUEVO MÓDULO
+    description: "Peticiones, Quejas, Apelaciones, Felicitaciones",
+    href: "/dashboard/admin/pqaf",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
   
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
