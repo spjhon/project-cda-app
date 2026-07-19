@@ -58,7 +58,8 @@ MAS COSITAS QUE FALTAN
 - la taza de rechazo no debe contar pruebas abiertas
 - que en la fecha de la tabla de orden de entrada, no deje seleccionar las fechas futuras
 - al momento de buscar la placa que el mensaje de error sea mas informativo y desactivar el boton de buscar para obligar a cerrar el dialog y volver a abrir
-
+- el select en mobile de las quejas y apelaciones de la landing tiene un error al desplegarlo
+- en las quejas cuando se envia una nueva queja y se tiene abierto el detalles, se cambia al detalles de la mas reciente
 
 FEATURES QUE FALTAN
 
