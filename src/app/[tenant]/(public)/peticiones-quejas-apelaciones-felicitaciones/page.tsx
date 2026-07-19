@@ -30,7 +30,7 @@ export default function PqrsfPage({ params }: PageProps) {
       <div className="max-w-6xl w-full bg-white dark:bg-[#051923] border border-[#006494]/10 dark:border-[#00a6fb]/20 rounded-2xl p-6 md:p-8 shadow-lg">
         <header className="mb-6 text-center sm:text-left">
           <h1 className="text-2xl font-extrabold text-[#051923] dark:text-[#00a6fb] tracking-tight">
-            Radicar Solicitud Oficial
+            Radicar Solicitud
           </h1>
           <p className="text-sm font-normal text-[#003554]/70 dark:text-white/60 mt-1">
             Por favor completa todos los campos obligatorios para dar trámite a tu requerimiento.

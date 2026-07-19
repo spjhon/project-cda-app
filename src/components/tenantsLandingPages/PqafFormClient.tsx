@@ -22,8 +22,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import { radicarPQAF } from "@/lib/server-actions/radicarPQAF"
+import Link from "next/link"
 
 interface PqrsfFormData {
   tipoTramite: string
@@ -292,7 +293,7 @@ export default function PqafFormClient({ paramsPromise }: PqrsfFormClientProps) 
             placeholder="Describe detalladamente los hechos, motivos o sugerencia..."
             value={formData.descripcion}
             onChange={handleChange}
-            className="border-black dark:border-white/20 rounded-xl bg-card focus-visible:ring-[#006494] resize-none leading-relaxed flex-1 min-h-[220px] lg:h-full p-4"
+            className="border-black dark:border-white/20 rounded-xl bg-card focus-visible:ring-[#006494] resize-none leading-relaxed flex-1 min-h-55 lg:h-full p-4"
           />
         </div>
 
@@ -326,10 +327,21 @@ export default function PqafFormClient({ paramsPromise }: PqrsfFormClientProps) 
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            className="mb-4 w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Radicando..." : "Radicar Requerimiento"}
           </Button>
+
+          
+           <Link
+              href={`https://${tenant}.cda-app.com/`}
+              className="mt-3 w-full h-12 inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-[#051923] dark:text-white text-sm font-bold tracking-tight rounded-xl shadow-sm transition-all border border-slate-200 dark:border-white/10"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Regresar al Inicio</span>
+            </Link>
+        
+          
         </div>
       </div>
 
