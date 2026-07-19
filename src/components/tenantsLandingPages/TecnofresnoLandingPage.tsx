@@ -11,7 +11,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 import { Suspense } from "react";
 import DynamicYear from "../landingPage/DynamicYear";
-import PqrsfModal from "./modal/Pqrsf";
+
 
 
 const colorPalette = {
@@ -59,6 +59,7 @@ import medioPagoTarjeta from "../../../public/tenantsLanding/fullmotosla25/Medio
 import medioPagoSistecredito from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Sistecredito.jpg"
 import medioPagoQR from "../../../public/tenantsLanding/fullmotosla25/MedioPago_QR.avif"
 import medioPagoTransferencia from "../../../public/tenantsLanding/fullmotosla25/MedioPago_Transferencia.jpg"
+import { ArrowRight, FileText } from "lucide-react";
 
 
 
@@ -541,6 +542,10 @@ const Instagram = ({ size = 24 }) => (
 
 
 export default function TecnofresnoLandingPage({ currentTenant }: { currentTenant: string }) {
+
+
+const destinationUrl = `https://${currentTenant}.cda-app.com/peticiones-quejas-apelaciones-felicitaciones`;
+
   return (
     <>
       <Navbar routeList={routeList} logo={logo} currentTenant={currentTenant}></Navbar>
@@ -1415,7 +1420,24 @@ export default function TecnofresnoLandingPage({ currentTenant }: { currentTenan
 
     {/* Botón de llamado a la acción hacia el formulario */}
     <div className="w-full flex justify-center pt-2">
-      <PqrsfModal tenant={currentTenant}></PqrsfModal>
+      <div className="relative group w-full sm:w-auto inline-block">
+      {/* Efecto de resplandor / aura trasera animada */}
+      <div className="absolute -inset-1 bg-linear-to-r from-[#00a6fb] via-[#006494] to-[#0582ca] rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+      
+      {/* Botón Principal */}
+      <Link
+        href={destinationUrl}
+        className="relative w-full sm:w-auto h-14 px-8 inline-flex items-center justify-center gap-3 bg-linear-to-r from-[#051923] via-[#003554] to-[#051923] dark:from-[#00a6fb] dark:via-[#0582ca] dark:to-[#006494] text-white dark:text-[#051923] text-base font-extrabold tracking-wide rounded-2xl border border-white/10 dark:border-black/10 shadow-2xl transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center"
+      >
+        {/* Icono de documento */}
+        <FileText className="w-5 h-5 shrink-0 animate-bounce group-hover:animate-none" />
+        
+        <span>Radicar Solicitud Oficial (PQRSF)</span>
+        
+        {/* Flecha interactiva con desplazamiento */}
+        <ArrowRight className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5" />
+      </Link>
+    </div>
     </div>
 
   </div>

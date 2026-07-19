@@ -16,7 +16,6 @@ export async function generateStaticParams() {
 
 
 
-
 // 1. Configuración de SEO estática para cada Tenant
 const tenantMetadataConfig: Record<string, { title: string; description: string; keywords: string[]; imageOpenGraph: string }> = {
   fullmotos: {
