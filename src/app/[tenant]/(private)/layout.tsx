@@ -2,6 +2,22 @@ import Loading from "@/components/ui/loading";
 import AuthListener from "@/components/auth/AuthListener";
 import TanstackContext from "@/contexts/TanstackContext";
 import { Suspense } from "react";
+import { Metadata } from "next/types";
+
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s",
+    default: "Dashboard Centro de Diagnóstico Automotor",
+  },
+  description: "Plataforma oficial para la gestión de trámites, consultas del RUNT y radicación de PQRSF.",
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+
 
 export default function TenantLayout({
   children,

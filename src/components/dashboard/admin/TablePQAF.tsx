@@ -290,7 +290,7 @@ export default function PQAFTable() {
       }),
 
       columnHelper.accessor("updated_at", {
-        header: "Fecha Finalización",
+        header: "Fecha Ultima Actualizacion",
         cell: (info) => {
           const rawValue = info.getValue();
           if (!rawValue) {

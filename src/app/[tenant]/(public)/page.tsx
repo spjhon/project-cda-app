@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 // 1. Configuración de SEO estática para cada Tenant
 const tenantMetadataConfig: Record<string, { title: string; description: string; keywords: string[]; imageOpenGraph: string }> = {
   fullmotos: {
-    title: "CDA Full Motos - Revisión Técnico-Mecánica en tu Ciudad",
+    title: "CDA Fullmotos la 25 - Revisión Técnico-Mecánica en la ciudad de Manizales",
     description: "Saca tu Revisión Técnico-Mecánica exclusivo para motos en CDA Full Motos. Pista autorizada, inspección rápida, precisa y con tecnología de punta bajo la norma ISO 17020.",
     keywords: [
       "CDA Full Motos", 
@@ -118,7 +118,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: config.title,
     description: config.description,
     keywords: config.keywords,
-    
+    authors: [{ name: 'Juan Aristizabal', url: 'https://cda-app.com' }],
+  creator: 'Juan Aristizabal',
+  publisher: 'Juan Aristizabal',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    }},
     // Configuración Open Graph personalizada por CDA (para WhatsApp/Redes)
     openGraph: {
       title: config.title,
@@ -148,7 +160,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Alternativas canónicas para evitar contenido duplicado
     alternates: {
       canonical: tenantUrl,
+      languages: {
+      'es-MX': 'https://cda-app.com/',
+      
     },
+    },
+    
   };
 }
 
