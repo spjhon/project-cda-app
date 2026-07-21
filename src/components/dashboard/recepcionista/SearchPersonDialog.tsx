@@ -293,51 +293,52 @@ return (
 
         {/* RESULTADO */}
         {searchState !== "idle" && (
-          <div className="border border-border rounded-xl p-4 bg-muted space-y-4">
-            {searchState === "loading" && (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Consultando información...
-              </div>
-            )}
+  <div className="border border-border rounded-xl p-4 bg-muted space-y-4">
+    {/* 1. ESTADO: CARGANDO */}
+    {searchState === "loading" && (
+      <div className="flex items-center gap-3 text-sm text-muted-foreground py-2 justify-center">
+        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+        <span>Consultando información...</span>
+      </div>
+    )}
 
-            {searchState === "found" && (
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5 shrink-0" />
+    {/* 2. ESTADO: ÉXITO */}
+    {searchState === "found" && (
+      <div className="space-y-4">
+        <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          <span>{message}</span>
+        </div>
 
-                  <span>{message}</span>
-                </div>
+        <Button
+          type="button"
+          onClick={handleAccept}
+          className="w-full"
+        >
+          Aceptar
+        </Button>
+      </div>
+    )}
 
-                <Button
-                  type="button"
-                  onClick={handleAccept}
-                  className="w-full"
-                >
-                  Aceptar
-                </Button>
-              </div>
-            )}
+    {/* 3. ESTADO: NO ENCONTRADO */}
+    {searchState === "not_found" && (
+      <div className="space-y-4">
+        <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
+          <XCircle className="h-5 w-5 shrink-0" />
+          <span>{message}</span>
+        </div>
 
-            {searchState === "not_found" && (
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
-                  <XCircle className="h-5 w-5 shrink-0" />
-
-                  <span>{message}</span>
-                </div>
-
-                <Button
-                  type="button"
-                  onClick={handleAccept}
-                  className="w-full"
-                >
-                  Aceptar
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+        <Button
+          type="button"
+          onClick={handleAccept}
+          className="w-full"
+        >
+          Aceptar
+        </Button>
+      </div>
+    )}
+  </div>
+)}
       </div>
     </DialogContent>
   </Dialog>

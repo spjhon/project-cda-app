@@ -19,12 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -80,82 +75,70 @@ export interface PlacaSelectionSectionProps {
   selectedTemplate: OrderTemplate | undefined;
   formData: ZodFullFormDataType;
   setFormData: Dispatch<SetStateAction<ZodFullFormDataType>>;
-   setSignatureKey: Dispatch<SetStateAction<number>>;
+  setSignatureKey: Dispatch<SetStateAction<number>>;
 }
 
-type SearchStatus = | "idle" | "loading" | "found" | "not_found" | "error";
+type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
 
-
-
-
-
-
-
-
-
-
-export default function PlacaSelectionSection({selectedTemplate, setFormData, formData, setSignatureKey}: PlacaSelectionSectionProps) {
-
-  
+export default function PlacaSelectionSection({
+  selectedTemplate,
+  setFormData,
+  formData,
+  setSignatureKey,
+}: PlacaSelectionSectionProps) {
   // DIALOG STATES
   const [dialogOpen, setDialogOpen] = useState(false);
-  
+
   const [tempPlaca, setTempPlaca] = useState("");
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [message, setMessage] = useState("");
   const [isNewVehicle, setIsNewVehicle] = useState<boolean | null>(null);
 
-
-
   // SERVICE TYPE
   const handleServiceTypeChange = (type: ServiceType) => {
-
-const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
-
+    const initialData = getInitialOrderFormData(
+      formData.tenant_id,
+      formData.funcionario_id,
+      formData.plantilla_id,
+      formData.service_type,
+    );
 
     setFormData((prev) => ({
       ...prev,
-     ...initialData,
+      ...initialData,
       service_type: type,
       es_reinspeccion: type === "peritaje" ? false : prev.es_reinspeccion,
       condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
-    }));
-
-// ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
-
-
-  };
-
-
-
-
-  // REINSPECCIÓN
-  const handleReinspeccionChange = (checked: boolean) => {
-
-  const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
-
-
-
-    setFormData((prev) => ({
-      ...prev,
-       ...initialData,
-      es_reinspeccion: checked,
-      condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })), // Reseteamos la URL a vacío,
     }));
 
     // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+    setSignatureKey((prev) => prev + 1);
   };
 
+  // REINSPECCIÓN
+  const handleReinspeccionChange = (checked: boolean) => {
+    const initialData = getInitialOrderFormData(
+      formData.tenant_id,
+      formData.funcionario_id,
+      formData.plantilla_id,
+      formData.service_type,
+    );
 
+    setFormData((prev) => ({
+      ...prev,
+      ...initialData,
+      es_reinspeccion: checked,
+      condition_results: prev.condition_results,
+      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })), // Reseteamos la URL a vacío,
+    }));
 
+    // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
+    setSignatureKey((prev) => prev + 1);
+  };
 
   // ABRIR DIALOG
   const handleOpenChange = (open: boolean) => {
-
     setDialogOpen(open);
 
     if (open) {
@@ -163,21 +146,11 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
       setSearchStatus("idle");
       setMessage("");
     }
-
   };
 
-
-
-
-
-
   // BUSCAR PLACA
-  
+
   const handleBuscarPlaca = async () => {
-
-
-
-
     const placaLimpia = tempPlaca.trim().toUpperCase();
 
     if (!placaLimpia) return;
@@ -186,26 +159,25 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
     setSearchStatus("loading");
     setMessage("");
 
-
-
-
-    if (!formData.es_reinspeccion && formData.service_type === "RTM"){
-
-      try{
-        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+    if (!formData.es_reinspeccion && formData.service_type === "RTM") {
+      try {
+        const initialData = getInitialOrderFormData(
+          formData.tenant_id,
+          formData.funcionario_id,
+          formData.plantilla_id,
+          formData.service_type,
+        );
         // Inicializamos el cliente de Supabase del lado del navegador
         const supabaseBrowser = createSupabaseBrowserClient();
 
         // Llamamos directamente al RPC usando el SDK de frontend
-        const { data: RTMcheckInfo, error: ErrorRTMcheckInfo } = await supabaseBrowser.rpc(
-          "check_rtm_primera_vez_eligibility",
-          {
+        const { data: RTMcheckInfo, error: ErrorRTMcheckInfo } =
+          await supabaseBrowser.rpc("check_rtm_primera_vez_eligibility", {
             p_placa: placaLimpia,
             p_tenant_id: tenantId,
-          }
-        );
+          });
 
-         // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
+        // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
         if (ErrorRTMcheckInfo) {
           console.error("Error en RPC de Supabase:", ErrorRTMcheckInfo);
           setSearchStatus("error");
@@ -213,18 +185,17 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-          
-          condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+          setSignatureKey((prev) => prev + 1);
           return;
         }
-
-
-
-
 
         // Si la lógica de Postgres determinó que NO aplica a reinspección
         if (!RTMcheckInfo) {
@@ -233,46 +204,41 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-         
-           condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+          setSignatureKey((prev) => prev + 1);
           return; // 🛑 Frenamos el flujo aquí mismo
         }
 
-
-        if (!RTMcheckInfo[0].puede_primera_vez){
+        if (!RTMcheckInfo[0].puede_primera_vez) {
           setSearchStatus("error");
-           setMessage(RTMcheckInfo[0].motivo);
-           setFormData((prev) => ({
+          setMessage(RTMcheckInfo[0].motivo);
+          setFormData((prev) => ({
             ...prev,
             ...initialData,
-            
-             condition_results: prev.condition_results,
-     signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
-           return;
+          setSignatureKey((prev) => prev + 1);
+          return;
         }
-
-      }catch{
-
-      }finally{
-
+      } catch {
+      } finally {
       }
-
-    
-
-
     }
 
-
-
-    if (formData.es_reinspeccion && formData.service_type === "preventiva"){
-
+    if (formData.es_reinspeccion && formData.service_type === "preventiva") {
       try {
         // Inicializamos el cliente de Supabase del lado del navegador
         const supabaseBrowser = createSupabaseBrowserClient();
@@ -283,11 +249,15 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           {
             p_placa: placaLimpia,
             p_tenant_id: tenantId,
-          }
+          },
         );
 
-       
-        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+        const initialData = getInitialOrderFormData(
+          formData.tenant_id,
+          formData.funcionario_id,
+          formData.plantilla_id,
+          formData.service_type,
+        );
 
         // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
         if (rpcError) {
@@ -297,14 +267,17 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-          es_reinspeccion: true,
-          service_type: "preventiva",
-          condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            es_reinspeccion: true,
+            service_type: "preventiva",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
 
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+          setSignatureKey((prev) => prev + 1);
           return;
         }
 
@@ -315,32 +288,36 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-          es_reinspeccion: true,
-           service_type: "preventiva",
-           condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            es_reinspeccion: true,
+            service_type: "preventiva",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+          setSignatureKey((prev) => prev + 1);
           return; // 🛑 Frenamos el flujo aquí mismo
         }
 
-      
-
-        if (!rpcData[0].merece_reinspeccion){
+        if (!rpcData[0].merece_reinspeccion) {
           setSearchStatus("error");
-           setMessage(rpcData[0].motivo);
-           setFormData((prev) => ({
+          setMessage(rpcData[0].motivo);
+          setFormData((prev) => ({
             ...prev,
             ...initialData,
             es_reinspeccion: true,
-             service_type: "preventiva",
-             condition_results: prev.condition_results,
-     signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            service_type: "preventiva",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
-           return;
+          setSignatureKey((prev) => prev + 1);
+          return;
         }
 
         // Si Postgres dio luz verde, inyectamos el 'id_reprobado' en el estado
@@ -348,25 +325,15 @@ const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcion
           ...prev,
           id_reprobado: rpcData[0].id_reprobado,
         }));
-        
-
       } catch (err) {
         console.error("Error inesperado en el cliente:", err);
         setSearchStatus("error");
         setMessage("Ocurrió un error inesperado al validar la reinspección.");
         return;
       }
-
     }
 
-
-
-
-
-if (formData.es_reinspeccion && formData.service_type === "RTM"){
-
-  
-
+    if (formData.es_reinspeccion && formData.service_type === "RTM") {
       try {
         // Inicializamos el cliente de Supabase del lado del navegador
         const supabaseBrowser = createSupabaseBrowserClient();
@@ -377,13 +344,15 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           {
             p_placa: placaLimpia,
             p_tenant_id: tenantId,
-          }
+          },
         );
 
-        
-       
-       
-        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+        const initialData = getInitialOrderFormData(
+          formData.tenant_id,
+          formData.funcionario_id,
+          formData.plantilla_id,
+          formData.service_type,
+        );
 
         // Si hubo un error de red o de permisos (ej. error 403 o de sintaxis)
         if (rpcError) {
@@ -393,10 +362,13 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-          es_reinspeccion: true,
-          service_type: "RTM",
-          condition_results: prev.condition_results,
-          signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            es_reinspeccion: true,
+            service_type: "RTM",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
           setSignatureKey((prev) => prev + 1);
@@ -410,99 +382,91 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           setFormData((prev) => ({
             ...prev,
             ...initialData,
-          es_reinspeccion: true,
-           service_type: "RTM",
-           condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            es_reinspeccion: true,
+            service_type: "RTM",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
+          setSignatureKey((prev) => prev + 1);
           return; // 🛑 Frenamos el flujo aquí mismo
         }
 
-      
-
-        if (!rpcData[0].merece_reinspeccion){
+        if (!rpcData[0].merece_reinspeccion) {
           setSearchStatus("error");
-           setMessage(rpcData[0].motivo);
-           setFormData((prev) => ({
+          setMessage(rpcData[0].motivo);
+          setFormData((prev) => ({
             ...prev,
             ...initialData,
             es_reinspeccion: true,
-             service_type: "RTM",
-             condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+            service_type: "RTM",
+            condition_results: prev.condition_results,
+            signatures: prev.signatures.map((sig) => ({
+              ...sig,
+              signature_url: "",
+            })), // Reseteamos la URL a vacío,
           }));
           // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
-           return;
+          setSignatureKey((prev) => prev + 1);
+          return;
         }
 
         // Si Postgres dio luz verde, inyectamos el 'id_reprobado' en el estado
         setFormData((prev) => ({
           ...prev,
           id_reprobado: rpcData[0].id_reprobado,
-          
         }));
-        
-       
-
       } catch (err) {
         console.error("Error inesperado en el cliente:", err);
         setSearchStatus("error");
-        setMessage("Ocurrió un error inesperado al validar la reinspección de RTM.");
+        setMessage(
+          "Ocurrió un error inesperado al validar la reinspección de RTM.",
+        );
         return;
       }
-
-
-
-
-}
-
-
-
-
+    }
 
     try {
-      const { data, error, found } = await fetchDataWithPlaca(placaLimpia, tenantId);
+      const { data, error, found } = await fetchDataWithPlaca(
+        placaLimpia,
+        tenantId,
+      );
 
       if (error) {
         setSearchStatus("error");
-        setMessage(typeof error === "string"? error : error.message);
+        setMessage(typeof error === "string" ? error : error.message);
         return;
       }
-
-      
 
       // ACTUALIZA LA PLACA SIEMPRE
       setFormData((prev) => ({
         ...prev,
-       
+
         vehicle: {
           ...prev.vehicle,
           placa: placaLimpia,
         },
         condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })) // Reseteamos la URL a vacío,
+        signatures: prev.signatures.map((sig) => ({
+          ...sig,
+          signature_url: "",
+        })), // Reseteamos la URL a vacío,
       }));
 
       // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
-        setSignatureKey((prev) => prev + 1);
-
-
-
+      setSignatureKey((prev) => prev + 1);
 
       if (found) {
-        
         setIsNewVehicle(false);
         setSearchStatus("found");
         setMessage("Vehículo encontrado correctamente en la base de datos.");
 
-
         setFormData((prev) => {
           // 1. Extraemos los flags para trabajar más cómodo
           const isOwnerSame = data?.is_owner_same_as_customer ?? false;
-          
 
           return {
             ...prev,
@@ -513,105 +477,139 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
             vehicle: {
               ...prev.vehicle,
               placa: placaLimpia, // Forzamos la placa que se buscó con éxito
-              blindaje: data?.vehicle?.blindaje ?? prev.vehicle?.blindaje ?? false,
-              capacidad_pasajeros: data?.vehicle?.capacidad_pasajeros.toString() ?? prev.vehicle?.capacidad_pasajeros ?? "",
-              cilindrada: data?.vehicle?.cilindrada.toString() ?? prev.vehicle?.cilindrada ?? "",
+              blindaje:
+                data?.vehicle?.blindaje ?? prev.vehicle?.blindaje ?? false,
+              capacidad_pasajeros:
+                data?.vehicle?.capacidad_pasajeros.toString() ??
+                prev.vehicle?.capacidad_pasajeros ??
+                "",
+              cilindrada:
+                data?.vehicle?.cilindrada.toString() ??
+                prev.vehicle?.cilindrada ??
+                "",
               clase: data?.vehicle?.clase ?? prev.vehicle?.clase ?? "",
               color: data?.vehicle?.color ?? prev.vehicle?.color ?? "",
-              combustible: data?.vehicle?.combustible ?? prev.vehicle?.combustible ?? "",
-              es_ensenanza: data?.vehicle?.es_ensenanza ?? prev.vehicle?.es_ensenanza ?? false,
-              es_extranjero: data?.vehicle?.es_extranjero ?? prev.vehicle?.es_extranjero ?? false,
+              combustible:
+                data?.vehicle?.combustible ?? prev.vehicle?.combustible ?? "",
+              es_ensenanza:
+                data?.vehicle?.es_ensenanza ??
+                prev.vehicle?.es_ensenanza ??
+                false,
+              es_extranjero:
+                data?.vehicle?.es_extranjero ??
+                prev.vehicle?.es_extranjero ??
+                false,
               linea: data?.vehicle?.linea ?? prev.vehicle?.linea ?? "",
               marca: data?.vehicle?.marca ?? prev.vehicle?.marca ?? "",
-              modelo: data?.vehicle?.modelo.toString() ?? prev.vehicle?.modelo ?? "",
-              propietario_actual_id: data?.vehicle?.propietario_actual_id ?? prev.vehicle?.propietario_actual_id ?? null,
-              tipo_servicio_vehiculo: data?.vehicle?.tipo_servicio_vehiculo ?? prev.vehicle?.tipo_servicio_vehiculo ?? "",
-              tipo_vehiculo: data?.vehicle?.tipo_vehiculo ?? prev.vehicle?.tipo_vehiculo ?? "",
+              modelo:
+                data?.vehicle?.modelo.toString() ?? prev.vehicle?.modelo ?? "",
+              propietario_actual_id:
+                data?.vehicle?.propietario_actual_id ??
+                prev.vehicle?.propietario_actual_id ??
+                null,
+              tipo_servicio_vehiculo:
+                data?.vehicle?.tipo_servicio_vehiculo ??
+                prev.vehicle?.tipo_servicio_vehiculo ??
+                "",
+              tipo_vehiculo:
+                data?.vehicle?.tipo_vehiculo ??
+                prev.vehicle?.tipo_vehiculo ??
+                "",
             },
 
             // 👤 SECCIÓN: PROPIETARIO (OWNER)
             owner_data: {
               ...prev.owner_data,
               id: data?.owner_data?.id ?? prev.owner_data?.id ?? null,
-              tipo_documento: data?.owner_data?.tipo_documento ?? prev.owner_data?.tipo_documento ?? "cedula_ciudadania",
-              numero_documento: data?.owner_data?.numero_documento ?? prev.owner_data?.numero_documento ?? "",
-              nombre_completo: data?.owner_data?.nombre_completo ?? prev.owner_data?.nombre_completo ?? "",
-              telefono: data?.owner_data?.telefono ?? prev.owner_data?.telefono ?? "",
+              tipo_documento:
+                data?.owner_data?.tipo_documento ??
+                prev.owner_data?.tipo_documento ??
+                "cedula_ciudadania",
+              numero_documento:
+                data?.owner_data?.numero_documento ??
+                prev.owner_data?.numero_documento ??
+                "",
+              nombre_completo:
+                data?.owner_data?.nombre_completo ??
+                prev.owner_data?.nombre_completo ??
+                "",
+              telefono:
+                data?.owner_data?.telefono ?? prev.owner_data?.telefono ?? "",
               correo: data?.owner_data?.correo ?? prev.owner_data?.correo ?? "",
-              direccion: data?.owner_data?.direccion ?? prev.owner_data?.direccion ?? "",
+              direccion:
+                data?.owner_data?.direccion ?? prev.owner_data?.direccion ?? "",
             },
 
             // 🤝 SECCIÓN NUEVA: CLIENTE HISTÓRICO (CUSTOMER)
             customer_data: {
               ...prev.customer_data,
               id: data?.customer_data?.id ?? prev.customer_data?.id ?? null,
-              tipo_documento: data?.customer_data?.tipo_documento ?? prev.customer_data?.tipo_documento ?? "cedula_ciudadania",
-              numero_documento: data?.customer_data?.numero_documento ?? prev.customer_data?.numero_documento ?? "",
-              nombre_completo: data?.customer_data?.nombre_completo ?? prev.customer_data?.nombre_completo ?? "",
-              telefono: data?.customer_data?.telefono ?? prev.customer_data?.telefono ?? "",
-              correo: data?.customer_data?.correo ?? prev.customer_data?.correo ?? "",
-              direccion: data?.customer_data?.direccion ?? prev.customer_data?.direccion ?? "",
+              tipo_documento:
+                data?.customer_data?.tipo_documento ??
+                prev.customer_data?.tipo_documento ??
+                "cedula_ciudadania",
+              numero_documento:
+                data?.customer_data?.numero_documento ??
+                prev.customer_data?.numero_documento ??
+                "",
+              nombre_completo:
+                data?.customer_data?.nombre_completo ??
+                prev.customer_data?.nombre_completo ??
+                "",
+              telefono:
+                data?.customer_data?.telefono ??
+                prev.customer_data?.telefono ??
+                "",
+              correo:
+                data?.customer_data?.correo ?? prev.customer_data?.correo ?? "",
+              direccion:
+                data?.customer_data?.direccion ??
+                prev.customer_data?.direccion ??
+                "",
             },
-            
           };
         });
-        
-
-
-
-
       } else {
-        const initialData = getInitialOrderFormData(formData.tenant_id, formData.funcionario_id, formData.plantilla_id, formData.service_type);
+        const initialData = getInitialOrderFormData(
+          formData.tenant_id,
+          formData.funcionario_id,
+          formData.plantilla_id,
+          formData.service_type,
+        );
         setIsNewVehicle(true);
         setSearchStatus("not_found");
-        setMessage("No se encontraron registros previos. Puedes continuar con el registro manual.");
+        setMessage(
+          "No se encontraron registros previos. Puedes continuar con el registro manual.",
+        );
         setFormData((prev) => ({
-            ...prev,
-            ...initialData,
+          ...prev,
+          ...initialData,
           es_reinspeccion: prev.es_reinspeccion,
-           
-           condition_results: prev.condition_results,
-      signatures: prev.signatures.map((sig) => ({ ...sig, signature_url: "" })), // Reseteamos la URL a vacío,
-      vehicle: {
-        ...initialData.vehicle,
-        placa: prev.vehicle.placa
-      }
-          }));
-        
-      }
 
-
+          condition_results: prev.condition_results,
+          signatures: prev.signatures.map((sig) => ({
+            ...sig,
+            signature_url: "",
+          })), // Reseteamos la URL a vacío,
+          vehicle: {
+            ...initialData.vehicle,
+            placa: prev.vehicle.placa,
+          },
+        }));
+      }
     } catch (error) {
-
       console.log(error);
       setSearchStatus("error");
       setMessage("Ocurrió un error al consultar la información.");
-
     }
-
-
   };
-
-
-
-
-
-
-
 
   // ACEPTAR
   const handleAccept = () => {
-
     setDialogOpen(false);
     setSearchStatus("idle");
     setMessage("");
-
   };
-
-
-
-
-
 
   return (
     <fieldset
@@ -620,7 +618,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
           ? "opacity-100"
           : "opacity-40 pointer-events-none translate-y-4"
       }`}
-     >
+    >
       <div className="border-t pt-6">
         <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
           2. Datos del Servicio
@@ -679,19 +677,11 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    
-                      {tipo.icon}
-                    
+                    {tipo.icon}
 
                     <Checkbox
-                      checked={
-                        formData.service_type === tipo.id
-                      }
-                      onCheckedChange={() =>
-                        handleServiceTypeChange(
-                          tipo.id
-                        )
-                      }
+                      checked={formData.service_type === tipo.id}
+                      onCheckedChange={() => handleServiceTypeChange(tipo.id)}
                       className="h-5 w-5 rounded-full border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary ml-4"
                     />
                   </div>
@@ -728,47 +718,40 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                   id: "nueva",
                   label: "NUEVA INSPECCIÓN",
                   desc: "Inspección inicial del vehículo",
-                  icon: (
-                    <FileCheck className="h-5 w-5 text-primary" />
-                  ),
+                  icon: <FileCheck className="h-5 w-5 text-primary" />,
                 },
 
                 {
                   id: "reinspeccion",
                   label: "REINSPECCIÓN",
                   desc: "Revisión posterior a hallazgos",
-                  icon: (
-                    <RefreshCcw className="h-5 w-5 text-amber-600" />
-                  ),
+                  icon: <RefreshCcw className="h-5 w-5 text-amber-600" />,
                 },
               ].map((tipo) => (
                 <Label
                   key={tipo.id}
                   className={`group relative rounded-xl flex flex-col gap-3 border-2 p-4 cursor-pointer transition-all bg-card hover:bg-accent ${
-                    (tipo.id === "reinspeccion" &&
-                      formData.es_reinspeccion) ||
-                    (tipo.id === "nueva" &&
-                      !formData.es_reinspeccion)
+                    (tipo.id === "reinspeccion" && formData.es_reinspeccion) ||
+                    (tipo.id === "nueva" && !formData.es_reinspeccion)
                       ? "border-primary bg-accent"
                       : "border-border"
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    
-                      {tipo.icon}
-                    
+                    {tipo.icon}
 
                     <Checkbox
-                      disabled={formData.service_type === "peritaje" && tipo.id === "reinspeccion"}
+                      disabled={
+                        formData.service_type === "peritaje" &&
+                        tipo.id === "reinspeccion"
+                      }
                       checked={
                         tipo.id === "reinspeccion"
                           ? formData.es_reinspeccion
                           : !formData.es_reinspeccion
                       }
                       onCheckedChange={() =>
-                        handleReinspeccionChange(
-                          tipo.id ===  "reinspeccion"
-                        )
+                        handleReinspeccionChange(tipo.id === "reinspeccion")
                       }
                       className="h-5 w-5 rounded-full border-border data-[state=checked]:border-primary data-[state=checked]:bg-primary ml-4"
                     />
@@ -793,11 +776,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
               {/* BUSCAR */}
               <div className="md:col-span-8">
-                
-                <Dialog
-                  open={dialogOpen}
-                  onOpenChange={handleOpenChange}
-                 >
+                <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
                   <DialogTrigger
                     render={
                       <Button
@@ -806,8 +785,9 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                       >
                         <Search className="h-6 w-6" />
 
-                        
-                        {formData.es_reinspeccion?"BUSCAR PLACA PARA REINSPECCION":"BUSCAR PLACA"}
+                        {formData.es_reinspeccion
+                          ? "BUSCAR PLACA PARA REINSPECCION"
+                          : "BUSCAR PLACA"}
                       </Button>
                     }
                   />
@@ -817,14 +797,14 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                       <DialogTitle className="flex items-center gap-2">
                         <Search className="h-5 w-5 text-muted-foreground" />
 
-                       
-
-                        {formData.es_reinspeccion?"Buscar Reinspeccion":"Buscar Vehículo"}
+                        {formData.es_reinspeccion
+                          ? "Buscar Reinspeccion"
+                          : "Buscar Vehículo"}
                       </DialogTitle>
 
                       <DialogDescription>
-                        Ingresa la placa del vehículo
-                        para consultar información.
+                        Ingresa la placa del vehículo para consultar
+                        información.
                       </DialogDescription>
                     </DialogHeader>
 
@@ -838,9 +818,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                         <Input
                           value={tempPlaca}
                           onChange={(e) =>
-                            setTempPlaca(
-                              e.target.value.toUpperCase()
-                            )
+                            setTempPlaca(e.target.value.toUpperCase())
                           }
                           placeholder="ABC123"
                           className="h-14 uppercase font-black text-3xl border-border tracking-[0.2em] bg-card text-center"
@@ -854,23 +832,18 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                         type="button"
                         onClick={handleBuscarPlaca}
                         disabled={
-                          searchStatus ===
-                            "loading" ||
-                          !tempPlaca.trim()
+                          searchStatus === "loading" || !tempPlaca.trim()
                         }
                         className="w-full h-12 gap-2 bg-primary hover:bg-primary/90"
                       >
-                        {searchStatus ===
-                        "loading" ? (
+                        {searchStatus === "loading" ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-
                             Buscando...
                           </>
                         ) : (
                           <>
                             <Search className="h-4 w-4" />
-
                             Buscar
                           </>
                         )}
@@ -879,17 +852,14 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                       {/* RESULTADOS */}
                       {searchStatus !== "idle" && (
                         <div className="border rounded-xl p-4 bg-muted space-y-4">
-                          {searchStatus ===
-                            "loading" && (
+                          {searchStatus === "loading" && (
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <Loader2 className="h-4 w-4 animate-spin" />
-
                               Consultando información...
                             </div>
                           )}
 
-                          {searchStatus ===
-                            "found" && (
+                          {searchStatus === "found" && (
                             <div className="space-y-4">
                               <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
                                 <CheckCircle2 className="h-5 w-5 shrink-0" />
@@ -899,9 +869,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
                               <Button
                                 type="button"
-                                onClick={
-                                  handleAccept
-                                }
+                                onClick={handleAccept}
                                 className="w-full"
                               >
                                 Aceptar
@@ -909,8 +877,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                             </div>
                           )}
 
-                          {searchStatus ===
-                            "not_found" && (
+                          {searchStatus === "not_found" && (
                             <div className="space-y-4">
                               <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
                                 <AlertTriangle className="h-5 w-5 shrink-0" />
@@ -920,9 +887,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
                               <Button
                                 type="button"
-                                onClick={
-                                  handleAccept
-                                }
+                                onClick={handleAccept}
                                 className="w-full"
                               >
                                 Aceptar
@@ -930,8 +895,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                             </div>
                           )}
 
-                          {searchStatus ===
-                            "error" && (
+                          {searchStatus === "error" && (
                             <div className="space-y-4">
                               <div className="flex items-start gap-3 text-sm text-destructive">
                                 <XCircle className="h-5 w-5 shrink-0" />
@@ -941,9 +905,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
 
                               <Button
                                 type="button"
-                                onClick={
-                                  handleAccept
-                                }
+                                onClick={handleAccept}
                                 className="w-full"
                               >
                                 Aceptar
@@ -955,27 +917,15 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     </div>
                   </DialogContent>
                 </Dialog>
-               
-
-
-
               </div>
-
-
-
-
 
               {/* RUNT */}
               <div className="md:col-span-4">
-                <RuntScraperModal 
-                  formData={formData} 
-                  setFormData={setFormData} 
+                <RuntScraperModal
+                  formData={formData}
+                  setFormData={setFormData}
                 />
               </div>
-
-
-
-              
             </div>
 
             {/* ESTADO PLACA */}
@@ -989,7 +939,7 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                     : "border-dashed border-border bg-muted"
                 }
               `}
-             >
+            >
               {formData.vehicle.placa ? (
                 <div className="flex flex-col items-center justify-center text-center space-y-3">
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
@@ -1028,9 +978,6 @@ if (formData.es_reinspeccion && formData.service_type === "RTM"){
                 </div>
               )}
             </div>
-
-
-
           </div>
         </div>
       </div>

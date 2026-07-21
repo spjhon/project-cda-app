@@ -154,12 +154,12 @@ const completeDataRTM: CompleteDataRTMType | undefined = analyticsData
       }) ?? [],
 
       chart_rechazado_mes: analyticsData.chart_rechazado_mes?.map((item) => {
-        if (item.dia === diaActualStr) return { ...item, total_rechazado: (item.total?item.total:0) + totalRechazadosHoy }; 
+        if (item.dia === diaActualStr) return { ...item, total: (item.total?item.total:0) + totalRechazadosHoy }; 
         return item; 
       }) ?? [],
 
       chart_rechazado_anio: analyticsData.chart_rechazado_anio?.map((item) => {
-        if (item.mes === mesFormateado) return { ...item, total_rechazado: (item.total?item.total:0) + totalRechazadosHoy }; 
+        if (item.mes === mesFormateado) return { ...item, total: (item.total?item.total:0) + totalRechazadosHoy }; 
         return item; 
       }) ?? [],
 
@@ -196,7 +196,6 @@ const completeDataRTM: CompleteDataRTMType | undefined = analyticsData
 
     }
   : undefined;
-
 
 
 

@@ -79,17 +79,23 @@ export default function ReceptionistLoaderContext({
   initialPQAFPromise
 }: AdminLoaderContext) {
 
+ const analyticsData = use(adminAnalyticsPromise);
+ const initialAnalyticsDataDiary = use(adminAnalyticsDiaryPromise);
+const initialPQAFData = use(initialPQAFPromise);
+
+
 
 const pathname = usePathname();
 
 
- const analyticsData = use(adminAnalyticsPromise);
- const initialAnalyticsDataDiary = use(adminAnalyticsDiaryPromise);
+
+
+
+
 
  const permissionscontextRecived = useContext(PermissionsContext);
 const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
-const initialPQAFData = use(initialPQAFPromise);
 
 
 

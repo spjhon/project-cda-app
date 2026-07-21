@@ -181,8 +181,6 @@ const [captchaImage, setCaptchaImage] = useState<string | null>(null);
 
 
 
-
-
   // Manejador del cambio de estado del modal
   const handleOpenChange = (open: boolean) => {
    
@@ -284,7 +282,7 @@ return (
           ) : isErrorCaptcha ? (
             <div className="text-center p-2">
               <p className="text-xs text-destructive mb-2">
-                No se pudo conectar con el servidor local en tu casa.
+                No se pudo conectar con el servidor.
               </p>
             </div>
           ) : null}
@@ -371,7 +369,7 @@ return (
             className={`p-3 rounded-lg border text-sm text-center transition-all ${
               solveRuntMutation.isPending
                 ? "bg-primary/10 border-primary/20 text-primary"
-                : solveRuntMutation.isError
+                : solveRuntMutation.isError || !solveRuntMutation.data.success
                 ? "bg-destructive/10 border-destructive/20 text-destructive"
                 : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
             }`}
@@ -394,9 +392,16 @@ return (
             )}
 
             {!solveRuntMutation.isPending &&
-              solveRuntMutation.data && (
+              solveRuntMutation.data.success && (
                 <p className="font-medium">
                   ℹ️ {solveRuntMutation.data.message}
+                </p>
+              )}
+
+              {!solveRuntMutation.isPending &&
+              !solveRuntMutation.data.success && (
+                <p className="font-medium text-destructive">
+                  ❌ {solveRuntMutation.data.message}
                 </p>
               )}
           </div>
