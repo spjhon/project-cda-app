@@ -1,3 +1,4 @@
+import DemoLandingPage from "@/components/tenantsLandingPages/DemoLandingPage";
 import FullmotosLandingPage from "@/components/tenantsLandingPages/FullmotosLandingPage";
 import TecnofresnoLandingPage from "@/components/tenantsLandingPages/TecnofresnoLandingPage";
 import { Metadata } from "next";
@@ -9,6 +10,7 @@ export async function generateStaticParams() {
   return [
     { tenant: "fullmotos" },
     { tenant: "tecnofresno" },
+     { tenant: "demo" },
   ];
 }
 
@@ -195,6 +197,11 @@ if (currentTenant === "fullmotos") {
 if (currentTenant === "tecnofresno") {
     return <TecnofresnoLandingPage  currentTenant={currentTenant} />;
   }
+
+  if (currentTenant === "demo") {
+    return <DemoLandingPage  currentTenant={currentTenant} />;
+  }
+
 
 
 return (
