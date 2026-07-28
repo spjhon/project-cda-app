@@ -1,4 +1,3 @@
-import { Navbar } from "../tenantsLandingPages/TenantLandingPageNavBar/Navbar";
 import logo from "../../../public/tenantsLanding/fullmotosla25/fullmotos_logo.jpg";
 import hero from "../../../public/tenantsLanding/fullmotosla25/hero.webp";
 import panoramico from "../../../public/tenantsLanding/fullmotosla25/fullmotos_panoramico.png";
@@ -65,7 +64,34 @@ import {
 } from "../ui/carousel";
 
 import { Suspense } from "react";
-import { ArrowRight, FileText } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Calendar,
+  CreditCard,
+  FileCheck,
+  FileText,
+  HelpCircle,
+  Home,
+  Menu,
+  Phone,
+  ShieldCheck,
+  Tag,
+  Users,
+  Wrench,
+  X,
+} from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../ui/drawer";
+import { Button } from "../ui/button";
+import { ModeToggle } from "./TenantLandingPageNavBar/mode-toggle";
 
 const colorPalette = {
   freshSky: "#00a6fb", // Cyan vivo (Acentos / Destacados en oscuro)
@@ -468,49 +494,6 @@ export interface RouteProps {
   label: string;
 }
 
-const routeList: RouteProps[] = [
-  {
-    label: "Inicio",
-    href: "#hero",
-  },
-  {
-    label: "Quiénes Somos",
-    href: "#quienesSomos",
-  },
-  {
-    label: "Servicios",
-    href: "#servicios",
-  },
-  {
-    label: "¿En qué consiste?",
-    href: "#consisteRTM",
-  },
-  {
-    label: "Preparación",
-    href: "#preparacionRTM",
-  },
-  {
-    label: "Precios y Tarifas",
-    href: "#precios",
-  },
-  {
-    label: "Medios de Pago",
-    href: "#mediosPagos",
-  },
-  {
-    label: "Contacto y Horarios",
-    href: "#contactoHorarios",
-  },
-  {
-    label: "Preguntas Frecuentes",
-    href: "#preguntasFrecuentes",
-  },
-  {
-    label: "Nuestra Sede",
-    href: "#fotosSede",
-  },
-];
-
 const tramites = [
   {
     icono: "📢",
@@ -541,11 +524,253 @@ export default function FullmotosLandingPage({
 
   return (
     <>
-      <Navbar
-        routeList={routeList}
-        logo={logo}
-        currentTenant={currentTenant}
-      ></Navbar>
+      <header className="bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-0 sticky border-b top-0 z-40 ">
+        <div className="container flex flex-row justify-between items-center mx-auto px-3 relative h-15 md:h-20">
+          <Link
+            prefetch={true}
+            rel="noreferrer noopener"
+            href="/"
+            className="ml-2 flex items-center"
+          >
+            {/* ☀️ LOGO PARA MODO CLARO: Se muestra por defecto, se oculta en modo oscuro */}
+            <Image
+              src={logo}
+              alt="cdApp Logo"
+              priority // 🏎️ Le da prioridad de carga por estar en el Navbar (LCP optimization)
+              className="block dark:hidden w-auto h-15 md:h-20 rounded-xl" // Ajusta h-8 (altura) según necesites tu diseño
+            />
+
+            {/* 🌙 LOGO PARA MODO OSCURO: Se oculta por defecto, se muestra en modo oscuro */}
+            <Image
+              src={logo}
+              alt="cdApp Logo"
+              priority
+              className="hidden dark:block w-auto h-15 md:h-20 rounded-xl" // Mismas dimensiones para que no salte el layout
+            />
+          </Link>
+
+          <div className="flex items-center justify-center">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="border-[#006494]/30 dark:border-[#00a6fb]/30 font-bold gap-2 shadow-sm text-[#051923] dark:text-[#00a6fb] hover:bg-[#00a6fb]/10 dark:hover:bg-[#00a6fb]/20 transition-colors duration-200 cursor-pointer"
+                >
+                  <Menu className="h-4 w-4 text-[#00a6fb]" />
+                  <span>Menú</span>
+                </Button>
+              </DrawerTrigger>
+
+              {/* max-h-[85dvh] limita el Drawer al espacio visible */}
+              <DrawerContent className="bg-white dark:bg-[#051923] border-t border-[#006494]/20 dark:border-[#00a6fb]/20 max-h-[85dvh] flex flex-col p-0">
+                <div className="mx-auto w-full max-w-sm flex flex-col h-full overflow-hidden p-6 pb-2">
+                  {/* Encabezado Fijo */}
+                  <DrawerHeader className="p-0 flex items-center justify-between border-b border-[#006494]/15 dark:border-[#00a6fb]/15 pb-4 shrink-0">
+                    <DrawerTitle className="text-lg font-extrabold text-[#051923] dark:text-white flex items-center gap-2">
+                      <span className="text-[#00a6fb]">📌</span> Navegación
+                    </DrawerTitle>
+                    <DrawerClose asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-[#006494] dark:text-[#00a6fb] hover:text-[#00a6fb] hover:bg-[#00a6fb]/10 rounded-full"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </DrawerClose>
+                  </DrawerHeader>
+
+                  {/* Cuerpo Scrolleable con todos los enlaces */}
+                  <div className="overflow-y-auto my-4 pr-1">
+                    <nav className="flex flex-col space-y-1">
+                      <DrawerClose asChild>
+                        <Link
+                          href="#hero"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Home className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Inicio</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#quienesSomos"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Users className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Quiénes Somos</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#servicios"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <ShieldCheck className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Servicios Ofrecidos</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#consisteRTM"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <FileCheck className="h-4 w-4 text-[#00a6fb]" />
+                          <span>¿Qué es una RTM?</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#preparacionRTM"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Wrench className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Preparación del Vehículo</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#precios"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Tag className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Precios</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#mediosPagos"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <CreditCard className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Medios de Pago</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#contactoHorarios"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Phone className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Contacto y Horarios</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#preguntasFrecuentes"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <HelpCircle className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Preguntas Frecuentes</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#fotosSede"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <Building2 className="h-4 w-4 text-[#00a6fb]" />
+                          <span>Conoce Nuestra Sede</span>
+                        </Link>
+                      </DrawerClose>
+
+                      <DrawerClose asChild>
+                        <Link
+                          href="#pqaf"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#051923] dark:text-white hover:bg-[#00a6fb]/10 dark:hover:bg-[#003554] hover:text-[#00a6fb] dark:hover:text-[#00a6fb] transition-colors"
+                        >
+                          <FileText className="h-4 w-4 text-[#00a6fb]" />
+                          <span>
+                            Peticiones, Quejas, Apelaciones, Felicitaciones
+                          </span>
+                        </Link>
+                      </DrawerClose>
+                    </nav>
+                  </div>
+
+                  {/* Footer Fijo */}
+                  <DrawerFooter className="p-0 pt-2 border-t border-[#006494]/15 dark:border-[#00a6fb]/15 shrink-0">
+                    <DrawerClose asChild>
+                      <Link
+                        href={"#agendar"}
+                        className="w-full h-12 flex items-center justify-center gap-2 bg-[#00a6fb] hover:bg-[#0582ca] text-[#051923] font-black rounded-xl text-sm tracking-tight shadow-md transition-colors"
+                      >
+                        <Calendar className="h-4 w-4 text-[#051923]" />
+                        <span>Agendar Revisión</span>
+                      </Link>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
+
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center justify-center gap-4 py-2">
+              {/* WhatsApp */}
+              <a
+                rel="noreferrer noopener"
+                href="https://wa.me/573233303659"
+                target="_blank"
+                className="flex items-center justify-center"
+                aria-label="Contactar por WhatsApp"
+              >
+                <Button
+                  variant="outline"
+                  className="border border-black p-3 bg-card hover:bg-[#00a6fb]/10"
+                >
+                  <WhatsApp size={20} />
+                </Button>
+              </a>
+
+              {/* Facebook */}
+              <a
+                rel="noreferrer noopener"
+                href="https://www.facebook.com/fullmotosmanizales/?locale=es_LA"
+                target="_blank"
+                className="flex items-center justify-center"
+                aria-label="Ir a Facebook"
+              >
+                <Button
+                  variant="outline"
+                  className="border border-black p-3 bg-card hover:bg-[#00a6fb]/10"
+                >
+                  <Facebook size={20} />
+                </Button>
+              </a>
+
+              {/* Instagram */}
+              <a
+                rel="noreferrer noopener"
+                href="https://instagram.com"
+                target="_blank"
+                className="flex items-center justify-center"
+                aria-label="Ir a Instagram"
+              >
+                <Button
+                  variant="outline"
+                  className="border border-black p-3 bg-card hover:bg-[#00a6fb]/10"
+                >
+                  <Instagram size={20} />
+                </Button>
+              </a>
+            </div>
+
+            <ModeToggle />
+          </div>
+        </div>
+      </header>
+
       <section
         id="hero"
         className="w-full min-h-[85vh] flex items-center justify-center bg-[#00a6fb]/5 dark:bg-[#051923] px-6 py-12 md:px-12 select-none transition-colors duration-300"
@@ -580,7 +805,7 @@ export default function FullmotosLandingPage({
             <div className="flex flex-wrap gap-4 items-center justify-center md:justify-start">
               {/* Botón Principal: WhatsApp */}
               <a
-                href="https://wa.me/+573233303659"
+                href="https://wa.me/573233303659"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-all bg-[#00a6fb] text-[#051923] hover:bg-[#0582ca] hover:text-white dark:hover:bg-[#0582ca] h-11 px-8 shadow-sm"
@@ -593,7 +818,7 @@ export default function FullmotosLandingPage({
 
               {/* Botón Secundario: Agendar Cita */}
               <a
-                href="https://wa.me/+573233303659"
+                href="https://wa.me/573233303659"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors bg-[#003554] text-white hover:bg-[#003554]/90 dark:bg-[#006494] dark:hover:bg-[#0582ca] h-11 px-6 shadow-sm"
@@ -1495,7 +1720,7 @@ export default function FullmotosLandingPage({
       </section>
 
       <section
-        id="pqrsf"
+        id="pqaf"
         className="w-full flex flex-col items-center justify-center bg-transparent px-6 py-16 md:px-12 select-none transition-colors duration-300"
       >
         <div className="max-w-5xl w-full flex flex-col space-y-12">
@@ -1636,7 +1861,7 @@ export default function FullmotosLandingPage({
                 <WhatsApp size={22} />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/fullmotosmanizales/?locale=es_LA"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[#00a6fb] transition-colors"

@@ -14,7 +14,7 @@ export default function Loading() {
       {/* Texto sutil con espaciado elegante */}
       <div className="mt-6 flex flex-col items-center space-y-2">
         <span className="animate-pulse text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          Loading...
+          Cargando...⌚
         </span>
 
         <div className="h-px w-12 bg-linear-to-r from-transparent via-primary/50 to-transparent" />

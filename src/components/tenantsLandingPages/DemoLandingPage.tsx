@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-import { ArrowRight, Building2, Calendar, FileText, HelpCircle, Home, Menu, Phone, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, Building2, Calendar, CreditCard, FileCheck, FileText, HelpCircle, Home, Menu, Phone, ShieldCheck, Tag, Users, Wrench, X } from "lucide-react";
 
 import Image from "next/image";
 import demoLogo from "../../../public/tenantsLanding/demo/CDA demo logo resized and cropped.png";
@@ -58,7 +58,7 @@ import instalaciones03 from "../../../public/tenantsLanding/demo/Instalaciones_0
 import instalaciones04 from "../../../public/tenantsLanding/demo/Instalaciones_04.webp";
 import instalaciones05 from "../../../public/tenantsLanding/demo/Instalaciones_05.webp";
 import DynamicYear from "../landingPage/DynamicYear";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 
 
 
@@ -585,23 +585,34 @@ export default function DemoLandingPage({
             </div>
 
            {/* 2. Centro: Menú de Navegación Lateral (Drawer de Shadcn) */}
+
+
+
+
+
+
+
+
+
 <div className="flex items-center justify-center">
   <Drawer>
     <DrawerTrigger asChild>
       <Button
         variant="outline"
         size="default"
-        className="border-[#15616d]/20 dark:border-[#ffecd1]/20 font-bold gap-2 shadow-sm text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/40 dark:hover:bg-white/10 transition-colors duration-200 cursor-pointer"
+        className="border-[#15616d]/30 dark:border-[#15616d]/50 font-bold gap-2 shadow-sm text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 transition-colors duration-200 cursor-pointer"
       >
         <Menu className="h-4 w-4 text-[#ff7d00]" />
         <span>Menú</span>
       </Button>
     </DrawerTrigger>
 
-    <DrawerContent className="bg-white dark:bg-[#001524] border-t border-[#15616d]/20 dark:border-[#ffecd1]/20 p-6">
-      <div className="mx-auto w-full max-w-sm flex flex-col space-y-6">
-        {/* Encabezado del Drawer */}
-        <DrawerHeader className="p-0 flex items-center justify-between border-b border-[#15616d]/10 dark:border-[#ffecd1]/10 pb-4">
+    {/* max-h-[85dvh] limita el Drawer al espacio visible */}
+    <DrawerContent className="bg-[#ffecd1] dark:bg-[#001524] border-t border-[#15616d]/20 dark:border-[#15616d]/30 max-h-[85dvh] flex flex-col p-0">
+      <div className="mx-auto w-full max-w-sm flex flex-col h-full overflow-hidden p-6 pb-2">
+        
+        {/* Encabezado Fijo */}
+        <DrawerHeader className="p-0 flex items-center justify-between border-b border-[#15616d]/20 dark:border-[#15616d]/30 pb-4 shrink-0">
           <DrawerTitle className="text-lg font-extrabold text-[#001524] dark:text-[#ffecd1] flex items-center gap-2">
             <span className="text-[#ff7d00]">📌</span> Navegación
           </DrawerTitle>
@@ -609,94 +620,178 @@ export default function DemoLandingPage({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-[#15616d] dark:text-[#ffecd1]/80 hover:text-[#ff7d00] rounded-full"
+              className="h-8 w-8 text-[#15616d] dark:text-[#15616d] hover:text-[#ff7d00] dark:hover:text-[#ff7d00] hover:bg-[#15616d]/15 dark:hover:bg-[#15616d]/20 rounded-full"
             >
               <X className="h-4 w-4" />
             </Button>
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Lista de Botones / Enlaces por ID */}
-        <nav className="flex flex-col space-y-2">
-          <DrawerClose asChild>
-            <Link
-              href="#inicio"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <Home className="h-4 w-4 text-[#ff7d00]" />
-              <span>Inicio</span>
-            </Link>
-          </DrawerClose>
+        {/* Cuerpo Scrolleable con todos los enlaces */}
+        <div className="overflow-y-auto my-4 pr-1">
+          <nav className="flex flex-col space-y-1">
+            <DrawerClose asChild>
+              <Link
+                href="#hero"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Home className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Inicio</span>
+              </Link>
+            </DrawerClose>
 
-          <DrawerClose asChild>
-            <Link
-              href="#servicios"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <ShieldCheck className="h-4 w-4 text-[#ff7d00]" />
-              <span>Servicios y Cobertura</span>
-            </Link>
-          </DrawerClose>
+            <DrawerClose asChild>
+              <Link
+                href="#quienesSomos"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Users className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Quiénes Somos</span>
+              </Link>
+            </DrawerClose>
 
-          <DrawerClose asChild>
-            <Link
-              href="#fotosSede"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <Building2 className="h-4 w-4 text-[#ff7d00]" />
-              <span>Instalaciones</span>
-            </Link>
-          </DrawerClose>
+            <DrawerClose asChild>
+              <Link
+                href="#servicios"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <ShieldCheck className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Servicios Ofrecidos</span>
+              </Link>
+            </DrawerClose>
 
-          <DrawerClose asChild>
-            <Link
-              href="#contactoHorarios"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <Phone className="h-4 w-4 text-[#ff7d00]" />
-              <span>Contacto y Horarios</span>
-            </Link>
-          </DrawerClose>
+            <DrawerClose asChild>
+              <Link
+                href="#consisteRTM"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <FileCheck className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>¿Qué es una RTM?</span>
+              </Link>
+            </DrawerClose>
 
-          <DrawerClose asChild>
-            <Link
-              href="#preguntasFrecuentes"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <HelpCircle className="h-4 w-4 text-[#ff7d00]" />
-              <span>Preguntas Frecuentes</span>
-            </Link>
-          </DrawerClose>
+            <DrawerClose asChild>
+              <Link
+                href="#preparacionRTM"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Wrench className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Preparación del Vehículo</span>
+              </Link>
+            </DrawerClose>
 
-          <DrawerClose asChild>
-            <Link
-              href="#pqrsf"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#ffecd1]/50 dark:hover:bg-white/5 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
-            >
-              <FileText className="h-4 w-4 text-[#ff7d00]" />
-              <span>PQRSF y Apelaciones</span>
-            </Link>
-          </DrawerClose>
-        </nav>
+            <DrawerClose asChild>
+              <Link
+                href="#precios"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Tag className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Precios</span>
+              </Link>
+            </DrawerClose>
 
-        {/* Botón Destacado de Agendamiento en la Parte Inferior */}
-        <div className="pt-2">
+            <DrawerClose asChild>
+              <Link
+                href="#mediosPagos"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <CreditCard className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Medios de Pago</span>
+              </Link>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <Link
+                href="#contactoHorarios"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Phone className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Contacto y Horarios</span>
+              </Link>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <Link
+                href="#preguntasFrecuentes"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <HelpCircle className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Preguntas Frecuentes</span>
+              </Link>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <Link
+                href="#fotosSede"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <Building2 className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Conoce Nuestra Sede</span>
+              </Link>
+            </DrawerClose>
+
+            <DrawerClose asChild>
+              <Link
+                href="#pqaf"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-[#001524] dark:text-[#ffecd1] hover:bg-[#15616d]/10 dark:hover:bg-[#15616d]/20 hover:text-[#ff7d00] dark:hover:text-[#ff7d00] transition-colors"
+              >
+                <FileText className="h-4 w-4 text-[#ff7d00] dark:text-[#ff7d00]" />
+                <span>Peticiones, Quejas, Apelaciones, Felicitaciones</span>
+              </Link>
+            </DrawerClose>
+          </nav>
+        </div>
+
+        {/* Footer Fijo con el Botón CTA Principal */}
+        <DrawerFooter className="p-0 pt-2 border-t border-[#15616d]/20 dark:border-[#15616d]/30 shrink-0">
           <DrawerClose asChild>
             <Link
-              href={""}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full h-12 flex items-center justify-center gap-2 bg-[#ff7d00] hover:bg-[#78290f] text-white rounded-xl text-sm font-extrabold tracking-tight shadow-md transition-colors"
+              href={"#agendar"}
+              className="w-full h-12 flex items-center justify-center gap-2 bg-[#ff7d00] hover:bg-[#78290f] text-[#ffecd1] font-black rounded-xl text-sm tracking-tight shadow-md transition-colors"
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 text-[#ffecd1]" />
               <span>Agendar Revisión</span>
             </Link>
           </DrawerClose>
-        </div>
+        </DrawerFooter>
+
       </div>
     </DrawerContent>
   </Drawer>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             {/* 3. Extremo derecho: Botones de acciones y redes */}
             <div className="flex items-center space-x-3">
@@ -802,10 +897,10 @@ export default function DemoLandingPage({
 
                 {/* Botón Terciario: Ver Características */}
                 <a
-                  href="#caracteristicas"
+                  href="#servicios"
                   className="inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors border-2 border-[#15616d] text-[#15616d] bg-transparent hover:bg-[#15616d]/10 dark:border-[#ffecd1] dark:text-[#ffecd1] dark:hover:bg-[#ffecd1]/10 h-11 px-6"
                 >
-                  Características
+                  Servicios
                 </a>
               </div>
             </div>
