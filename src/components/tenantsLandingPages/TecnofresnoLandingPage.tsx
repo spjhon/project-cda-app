@@ -1302,29 +1302,28 @@ export default function TecnofresnoLandingPage({
 
 
 
-
 <section
   id="cintas-retroreflectivas"
-  className="bg-[#fdf0d5] py-24"
+  className="bg-[#fdf0d5] dark:bg-[#003049] py-24"
 >
   <div className="mx-auto max-w-7xl px-6 lg:px-8">
     <div className="mx-auto max-w-3xl text-center">
-      <span className="inline-flex rounded-full bg-[#c1121f]/10 px-4 py-1 text-sm font-semibold text-[#c1121f]">
+      <span className="inline-flex rounded-full bg-[#c1121f]/10 dark:bg-[#c1121f]/20 px-4 py-1 text-sm font-semibold text-[#c1121f] dark:text-[#fdf0d5]">
         Información importante
       </span>
 
-      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049]">
+      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049] dark:text-[#fdf0d5]">
         Cintas retroreflectivas
       </h2>
 
-      <p className="mt-5 text-lg leading-8 text-[#4a7a9c]">
+      <p className="mt-5 text-lg leading-8 text-[#4a7a9c] dark:text-[#669bbc]">
         Antes de asistir a la revisión técnico-mecánica verifica que tu
         vehículo cuente con las cintas retroreflectivas exigidas por la
         normativa vigente y que se encuentren correctamente instaladas.
       </p>
     </div>
 
-    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 bg-white shadow-2xl">
+    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 dark:border-[#669bbc]/40 bg-white dark:bg-[#004d6e] shadow-2xl">
       <Image
         src={cintas}
         alt="Guía de instalación de cintas retroreflectivas para vehículos"
@@ -1338,31 +1337,31 @@ export default function TecnofresnoLandingPage({
 </section>
 
 
-
 <section
   id="placas"
-  className="bg-[#fdf0d5] py-24"
+  className="bg-[#fdf0d5] dark:bg-[#003049] py-24"
 >
   <div className="mx-auto max-w-7xl px-6 lg:px-8">
     <div className="mx-auto max-w-3xl text-center">
-      <span className="inline-flex rounded-full bg-[#c1121f]/10 px-4 py-1 text-sm font-semibold text-[#c1121f]">
+      <span className="inline-flex rounded-full bg-[#c1121f]/10 dark:bg-[#c1121f]/20 px-4 py-1 text-sm font-semibold text-[#c1121f] dark:text-[#fdf0d5]">
         Información importante
       </span>
 
-      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049]">
-        Ubicacion de Placas en Vehiculos de Servico Público
+      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049] dark:text-[#fdf0d5]">
+        Ubicación de Placas en Vehículos de Servicio Público
       </h2>
 
-      <p className="mt-5 text-lg leading-8 text-[#4a7a9c]">
+      <p className="mt-5 text-lg leading-8 text-[#4a7a9c] dark:text-[#669bbc]">
         Antes de asistir a la revisión técnico-mecánica verifica que tu
-        vehículo de placas publicas y de enseñanza se ajuste a lo exigido por la autoridad competente
+        vehículo de placas públicas y de enseñanza se ajuste a lo exigido por
+        la autoridad competente.
       </p>
     </div>
 
-    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 bg-white shadow-2xl">
+    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 dark:border-[#669bbc]/40 bg-white dark:bg-[#004d6e] shadow-2xl">
       <Image
         src={placas}
-        alt="Guía de instalación de cintas retroreflectivas para vehículos"
+        alt="Guía de ubicación de placas para vehículos de servicio público"
         width={1400}
         height={1400}
         className="h-auto w-full object-cover"
