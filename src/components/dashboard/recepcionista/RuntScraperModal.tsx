@@ -426,7 +426,8 @@ return (
               isLoadingCaptcha ||
               solveRuntMutation.isPending ||
               !captchaValue ||
-              !captchaData?.captcha
+              !captchaData?.captcha ||
+              solveRuntMutation.isSuccess
             }
           >
             {solveRuntMutation.isPending && (

@@ -27,7 +27,7 @@ import motoBuenaPresion from "../../../public/tenantsLanding/demo/condiconesEntr
 import motoSliders from "../../../public/tenantsLanding/demo/condicnoesEntrada_sliders.webp";
 import motoAlarma from "../../../public/tenantsLanding/demo/condicionesEntrada_alarma.jpg";
 import motoCombustible from "../../../public/tenantsLanding/demo/condicionesEntrada_combustible.jpg";
-import motoSuspencion from "../../../public/tenantsLanding/demo/condicionesEntrada_suspencion.avif";
+import motoSuspencion from "../../../public/tenantsLanding/demo/condicionesEntrada_suspencion.webp";
 import motoRejilla from "../../../public/tenantsLanding/demo/condicionesEntrada_rejilla-1.webp";
 import motoSoporte from "../../../public/tenantsLanding/demo/condicionesEntrada_soporteCentral.jpg";
 
@@ -38,7 +38,7 @@ import motoSoporte from "../../../public/tenantsLanding/demo/condicionesEntrada_
 import medioPagoEfectivo from "../../../public/tenantsLanding/demo/MediosPago_Efectivo.jpg";
 import medioPagoTarjeta from "../../../public/tenantsLanding/demo/MediosPago_Targeta.jpg";
 import medioPagoSistecredito from "../../../public/tenantsLanding/demo/MediosPago_Sistecredito.jpg";
-import medioPagoQR from "../../../public/tenantsLanding/demo/MedioPago_QR.avif";
+import medioPagoQR from "../../../public/tenantsLanding/demo/MedioPago_QR.webp";
 import medioPagoTransferencia from "../../../public/tenantsLanding/demo/MedioPago_Transferencia.jpg";
 
 
