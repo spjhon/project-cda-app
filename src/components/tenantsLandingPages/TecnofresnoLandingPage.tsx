@@ -65,6 +65,24 @@ import motoSuspencion from "../../../public/tenantsLanding/fullmotosla25/condici
 import motoRejilla from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_rejilla-1.webp";
 import motoSoporte from "../../../public/tenantsLanding/fullmotosla25/condicionesEntrada_soporteCentral.jpg";
 
+//Para vehiculos
+import requisitoDescargado from "../../../public/tenantsLanding/tecnofresno/requisitoDescargado.jpg"
+import requisitoLimpio from "../../../public/tenantsLanding/tecnofresno/requisitoLimpio.jpg"
+import requisitoSinTapacubos from "../../../public/tenantsLanding/tecnofresno/requisitoSinTapacubos.webp"
+import requisitoBateria from "../../../public/tenantsLanding/tecnofresno/requisitoBateria.jpg"
+import requisitoLlantaRepuesto from "../../../public/tenantsLanding/tecnofresno/requisitoLlantaRepuesto.jpg"
+import requisitoCombustible from "../../../public/tenantsLanding/tecnofresno/requisitoCombustible.jpg"
+import requisitoCinturones from "../../../public/tenantsLanding/tecnofresno/requisitoCinturones.jpg"
+import requisitoSinElementosValor from "../../../public/tenantsLanding/tecnofresno/requisitoSinElementosValor.jpg"
+import requisitoAlMenosUnaLuz from "../../../public/tenantsLanding/tecnofresno/requisitoAlMenosUnaLuz.jpg"
+import requisitoElectronicaApagada from "../../../public/tenantsLanding/tecnofresno/requisitoElectronicaApagada.jpg"
+import requisitoFallaMotor from "../../../public/tenantsLanding/tecnofresno/requisitoFallaMotor.jpg"
+import requisitoCarpa from "../../../public/tenantsLanding/tecnofresno/requisitoCarpa.jpg"
+
+
+import cintas from "../../../public/tenantsLanding/tecnofresno/cintas.webp"
+import placas from "../../../public/tenantsLanding/tecnofresno/placas.jpg"
+
 //Imagenes para los medios de pago
 import medioPagoEfectivo from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Efectivo.jpg";
 import medioPagoTarjeta from "../../../public/tenantsLanding/fullmotosla25/MediosPago_Targeta.jpg";
@@ -169,6 +187,90 @@ const requisitosAsistencia = [
     descripcion:
       "Las motocicletas tipo scooter deben asistir obligatoriamente con su soporte central (gato) en perfecto estado funcional.",
     imagen: motoSoporte,
+  },
+  {
+    id: "10",
+    titulo: "El Vehículo este totalmente descargado",
+    descripcion:
+      "Vacío, sin elementos al interior del habitáculo de pasajeros y baúl que impidan realizar la labor de inspección.",
+    imagen: requisitoDescargado,
+  },
+  {
+    id: "11",
+    titulo: "El Vehículo este en óptimas condiciones de limpieza",
+    descripcion:
+      "Que permita la labor de inspección del vehículo.",
+    imagen: requisitoLimpio,
+  },
+  {
+    id: "12",
+    titulo: "El Vehículo se presente sin tapacubos (copas)",
+    descripcion:
+      "La presencia de los mismos en cualquiera de las llantas de servicio del vehículo impedirá la correcta inspección de rines y pernos ",
+    imagen: requisitoSinTapacubos,
+  },
+  {
+    id: "13",
+    titulo: "El Vehículo se encuentre con la batería accesible",
+    descripcion:
+      "De acuerdo al tipo de vehículo la ubicación de la batería y así mismo retire las tapas o accesorios que no permitan realizar la labor de inspección.",
+    imagen: requisitoBateria,
+  },
+  {
+    id: "14",
+    titulo: "La Llanta de repuesto",
+    descripcion:
+      "La Llanta de repuesto este accesible, Libre de tapas o protectores ",
+    imagen: requisitoLlantaRepuesto,
+  },
+  {
+    id: "15",
+    titulo: "El Vehiculo se presente con combustible suficiente",
+    descripcion:
+      "El medidor de combustible del vehículo o motocicleta indique un nivel no inferior al 50% del total de llenado del tanque de combustible. Lo anterior con el fin de garantizar la realización de la RTM Y EC.",
+    imagen: requisitoCombustible,
+  },
+  {
+    id: "16",
+    titulo: "Los cinturones de seguridad traseros sean accesibles",
+    descripcion:
+      "En vehículos modelo 2004 y posterior los cinturones de seguridad se encuentren asequibles para la realización de la labor de inspección.",
+    imagen: requisitoCinturones,
+  },
+  {
+    id: "17",
+    titulo: "El Vehículo se presente sin elementos de valor en su interior",
+    descripcion:
+      "Que no se encuentren elementos de valor tales como dinero, joyas entre otros al interior del vehículo.",
+    imagen: requisitoSinElementosValor,
+  },
+  {
+    id: "18",
+    titulo: "El vehículo cuente con al menos una luz funcional",
+    descripcion:
+      "Que al menos una de las luces (Direccionales, Luces Altas, Luces Bajas, Exploradoras) sea funcional (Encienda).",
+    imagen: requisitoAlMenosUnaLuz,
+  },
+   {
+    id: "19",
+    titulo: "El vehículo se presenta con los equipos eléctricos apagados",
+    descripcion:
+      "Que no se encuentre encendido ningún tipo de dispositivo o accesorio eléctrico en el vehículo o motocicleta (Aire acondicionado, radio, choque o ahogador).",
+    imagen: requisitoElectronicaApagada,
+  },
+  {
+    id: "20",
+    titulo: "Que el tablero de instrumentos permita visualizar los indicadores de falla del motor",
+    descripcion:
+      "No presente elementos que impidan acceder de forma visual u obstruyan el tablero de instrumentos y sus respectivos indicadores en el vehículo.",
+    imagen: requisitoFallaMotor,
+  },
+  {
+    id: "21",
+    titulo: "El Vehículo se presente con la carpa libre (Suelta) ",
+    descripcion:
+      "Que la carpa del vehículo se encuentre libre (sin asegurar). Lo anterior con el fin de garantizar la correcta labor de inspección del vehículo. Aplica para vehículos cuya carrocería sea tipo estacas.",
+    imagen: requisitoCarpa,
   },
 ];
 
@@ -822,7 +924,7 @@ export default function TecnofresnoLandingPage({
             <div className="flex flex-wrap gap-4 items-center">
               {/* Botón Principal: WhatsApp */}
               <a
-                href="https://wa.me/+573233303659"
+                href="https://wa.me/573113722639"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-all bg-[#c1121f] text-[#fdf0d5] hover:bg-[#9a0e19] hover:text-[#fdf0d5] dark:hover:bg-[#669bbc] h-11 px-8 shadow-sm"
@@ -835,7 +937,7 @@ export default function TecnofresnoLandingPage({
 
               {/* Botón Secundario: Agendar Cita */}
               <a
-                href="https://wa.me/+573233303659"
+                href="https://wa.me/573113722639"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md text-sm font-semibold transition-colors bg-[#003049] text-[#fdf0d5] hover:bg-[#004d6e] dark:bg-[#669bbc] dark:hover:bg-[#004d6e] h-11 px-6 shadow-sm"
@@ -1142,7 +1244,7 @@ export default function TecnofresnoLandingPage({
               Preparación para tu RTM
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#003049] dark:text-[#fdf0d5]">
-              ¿Cómo debe asistir tu motocicleta?
+              ¿Cómo debe asistir tu vehiculo?
             </h2>
             <p className="text-base md:text-lg font-normal text-[#003049]/80 dark:text-[#fdf0d5]/70 max-w-2xl">
               Para garantizar un proceso ágil y evitar rechazos preventivos,
@@ -1195,6 +1297,87 @@ export default function TecnofresnoLandingPage({
           </div>
         </div>
       </section>
+
+
+
+
+
+
+<section
+  id="cintas-retroreflectivas"
+  className="bg-[#fdf0d5] py-24"
+>
+  <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl text-center">
+      <span className="inline-flex rounded-full bg-[#c1121f]/10 px-4 py-1 text-sm font-semibold text-[#c1121f]">
+        Información importante
+      </span>
+
+      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049]">
+        Cintas retroreflectivas
+      </h2>
+
+      <p className="mt-5 text-lg leading-8 text-[#4a7a9c]">
+        Antes de asistir a la revisión técnico-mecánica verifica que tu
+        vehículo cuente con las cintas retroreflectivas exigidas por la
+        normativa vigente y que se encuentren correctamente instaladas.
+      </p>
+    </div>
+
+    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 bg-white shadow-2xl">
+      <Image
+        src={cintas}
+        alt="Guía de instalación de cintas retroreflectivas para vehículos"
+        width={1400}
+        height={1400}
+        className="h-auto w-full object-cover"
+        priority={false}
+      />
+    </div>
+  </div>
+</section>
+
+
+
+<section
+  id="placas"
+  className="bg-[#fdf0d5] py-24"
+>
+  <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl text-center">
+      <span className="inline-flex rounded-full bg-[#c1121f]/10 px-4 py-1 text-sm font-semibold text-[#c1121f]">
+        Información importante
+      </span>
+
+      <h2 className="mt-6 text-4xl font-bold tracking-tight text-[#003049]">
+        Ubicacion de Placas en Vehiculos de Servico Público
+      </h2>
+
+      <p className="mt-5 text-lg leading-8 text-[#4a7a9c]">
+        Antes de asistir a la revisión técnico-mecánica verifica que tu
+        vehículo de placas publicas y de enseñanza se ajuste a lo exigido por la autoridad competente
+      </p>
+    </div>
+
+    <div className="mt-14 overflow-hidden rounded-3xl border border-[#669bbc]/30 bg-white shadow-2xl">
+      <Image
+        src={placas}
+        alt="Guía de instalación de cintas retroreflectivas para vehículos"
+        width={1400}
+        height={1400}
+        className="h-auto w-full object-cover"
+        priority={false}
+      />
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
 
       <section
         id="precios"
@@ -1841,7 +2024,7 @@ export default function TecnofresnoLandingPage({
                 <span className="font-bold text-[#003049] dark:text-[#fdf0d5]">
                   Celular / WhatsApp:
                 </span>{" "}
-                +57 323 4690906
+                +57 311 372 2639
               </p>
             </div>
           </div>
