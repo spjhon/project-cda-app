@@ -101,18 +101,7 @@ export const Navbar = () => {
         
             
         <div className="hidden xl:flex gap-2 items-center">
-            <a
-              rel="noreferrer noopener"
-              href="https://wa.me/573215224583"
-              target="_blank"
-              className={` flex items-center justify-center gap-2`}
-              aria-label="Contactar por WhatsApp"
-            >
-              <Button variant="outline" className={"border border-black p-4"}>
-              <Megaphone></Megaphone>
-              <span className="text-sm font-bold">Redes Sociales</span>
-              </Button>
-            </a>
+           
 
             <ModeToggle />
           
