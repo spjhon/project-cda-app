@@ -40,11 +40,11 @@ export const Navbar = () => {
   const routeList: RouteProps[] = [
     {
     href: "/",
-    label: "Home",
+    label: "Inicio",
   },
   {
     href: "/about",
-    label: "Acerca de",
+    label: "Acerca de nosotros",
   },
   
   

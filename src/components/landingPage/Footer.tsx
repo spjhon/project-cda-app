@@ -1,149 +1,156 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import DynamicYear from "./DynamicYear";
-import Image from "next/image"; // 🔑 Importamos el componente de Next.js
-import LogoDark from "../../../public/logo_dark_transparente_resize_cropped.png"
-import LogoLight from "../../../public/logo_light_transparente_resize_cropped.png"
+import Image from "next/image";
+import LogoDark from "../../../public/logo_dark_transparente_resize_cropped.png";
+import LogoLight from "../../../public/logo_light_transparente_resize_cropped.png";
+
 export function Footer() {
-  const navigation = ["Soluciones", "Planes y Tarifas", "Conócenos", "Visita Nuestra DEMO"];
+  const navigation = [
+    { name: "Soluciones", href: "#soluciones", external: false },
+    { name: "Planes y Tarifas", href: "#pricing", external: false },
+    { name: "Conócenos", href: "https://cda-app.com/about", external: true, prefetch: true },
+    { name: "Visita Nuestra DEMO", href: "https://demo.cda-app.com/auth/login", external: true },
+  ];
 
   return (
-   <div className="w-full px-12"> {/* 3rem de espacio a los lados */}
-  
-  {/* 🔥 CONTENEDOR PRINCIPAL REESTRUCTURADO CON FLEXBOX */}
-  <div className="flex flex-col lg:flex-row max-w-7xl justify-between gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700">
-    
-    {/* COLUMNA 1: LOGO E INFO */}
-    <div className="flex flex-col max-w-md">
-      {/* El div contenedor ya no expande el link; w-fit hace que mida solo lo que mide el logo */}
-      <div className="w-fit">
-        <Link
-          prefetch={true}
-          rel="noreferrer noopener"
-          href="/"
-          className="flex items-center"
-        >
-          {/* ☀️ LOGO MODO CLARO */}
-          <Image
-            src={LogoLight}
-            alt="cdApp Logo"
-            priority
-            className="block dark:hidden w-auto h-8"
-          />
+    <div className="w-full px-12">
+      {/* CONTENEDOR PRINCIPAL REESTRUCTURADO CON FLEXBOX */}
+      <div className="flex flex-col lg:flex-row max-w-7xl justify-between gap-10 pt-10 mx-auto mt-5 border-t border-gray-100 dark:border-trueGray-700">
+        
+        {/* COLUMNA 1: LOGO E INFO */}
+        <div className="flex flex-col max-w-md">
+          <div className="w-fit">
+            <Link
+              prefetch={true}
+              rel="noreferrer noopener"
+              href="/"
+              className="flex items-center"
+            >
+              {/* ☀️ LOGO MODO CLARO */}
+              <Image
+                src={LogoLight}
+                alt="cdApp Logo"
+                priority
+                className="block dark:hidden w-auto h-8"
+              />
 
-          {/* 🌙 LOGO MODO OSCURO */}
-          <Image
-            src={LogoDark}
-            alt="cdApp Logo"
-            priority
-            className="hidden dark:block w-auto h-8"
-          />
-        </Link>
+              {/* 🌙 LOGO MODO OSCURO */}
+              <Image
+                src={LogoDark}
+                alt="cdApp Logo"
+                priority
+                className="hidden dark:block w-auto h-8"
+              />
+            </Link>
+          </div>
+
+          <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+            Ecosistema integral para la administración, gestión de calidad y blindaje normativo de CDAs bajo la norma ISO 17020.
+          </p>
+          
+          <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+            <p><span className="font-medium text-foreground">E-mail:</span> spjhon@gmail.com</p>
+            <p><span className="font-medium text-foreground">Cel:</span> +57 321 522 4583</p>
+          </div>
+        </div>
+
+        {/* COLUMNA 2: NAVEGACIÓN */}
+        <div className="flex flex-col min-w-37.5">
+          <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
+            Enlaces
+          </span>
+          <div className="flex flex-col space-y-2">
+            {navigation.map((item, index) =>
+              item.external ? (
+                <a
+                  key={index}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors py-1"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  key={index}
+                  href={item.href}
+                  prefetch={item.prefetch}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors py-1"
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* COLUMNA 3: REDES SOCIALES */}
+        <div className="flex flex-col min-w-37.5">
+          <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
+            Síguenos en
+          </span>
+          <div className="flex items-center space-x-4">
+            {/* WHATSAPP */}
+            <a
+              href="https://wa.me/573215224583"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <span className="sr-only">WhatsApp</span>
+              <WhatsApp size={20} />
+            </a>
+
+            {/* FACEBOOK */}
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <span className="sr-only">Facebook</span>
+              <Facebook size={20} />
+            </a>
+
+            {/* INSTAGRAM */}
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <span className="sr-only">Instagram</span>
+              <Instagram size={20} />
+            </a>
+          </div>
+        </div>
       </div>
 
-      <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-        Ecosistema integral para la administración, gestión de calidad y blindaje normativo de CDAs bajo la norma ISO 17020.
-      </p>
-      
-      <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-        <p><span className="font-medium text-foreground">E-mail:</span> spjhon@gmail.com</p>
-        <p><span className="font-medium text-foreground">Cel:</span> +57 321 522 4583</p>
+      {/* COPYRIGHT CON SUSPENSE */}
+      <div className="py-10 mt-8 text-sm text-center text-gray-600 dark:text-gray-400 border-t border-gray-100/50 dark:border-trueGray-700/50">
+        Copyright ©{" "}
+        <Suspense fallback={<span>2026</span>}>
+          <DynamicYear />
+        </Suspense>{" "}
+        . Hecho con ♥ por Juan Aristizabal
       </div>
     </div>
-
-    {/* COLUMNA 2: NAVEGACIÓN */}
-    <div className="flex flex-col min-w-37.5">
-      <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
-        Enlaces
-      </span>
-      <div className="flex flex-col space-y-2">
-        {navigation.map((item, index) => (
-          <Link
-            key={index}
-            href="/"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors py-1"
-          >
-            {item}
-          </Link>
-        ))}
-      </div>
-    </div>
-
-    {/* COLUMNA 3: REDES SOCIALES */}
-    <div className="flex flex-col min-w-37.5">
-      <span className="text-sm font-semibold tracking-wider uppercase text-foreground mb-3">
-        Síguenos en
-      </span>
-      <div className="flex items-center space-x-4">
-        <a
-          href="https://twitter.com/web3templates"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-primary transition-colors"
-        >
-          <span className="sr-only">Twitter</span>
-          <Twitter size={20} />
-        </a>
-        <a
-          href="https://facebook.com/web3templates"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-primary transition-colors"
-        >
-          <span className="sr-only">Facebook</span>
-          <Facebook size={20} />
-        </a>
-        <a
-          href="https://instagram.com/web3templates"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-primary transition-colors"
-        >
-          <span className="sr-only">Instagram</span>
-          <Instagram size={20} />
-        </a>
-      </div>
-    </div>
-  </div>
-
-  {/* 🏢 COPYRIGHT CON SUSPENSE */}
-  <div className="py-10 mt-8 text-sm text-center text-gray-600 dark:text-gray-400 border-t border-gray-100/50 dark:border-trueGray-700/50">
-    Copyright ©{" "}
-    <Suspense fallback={<span>2026</span>}>
-      <DynamicYear />
-    </Suspense>{" "}
-    . Hecho con ♥ por Juan Aristizabal
-  </div>
-
-</div>
   );
 }
 
-const Twitter = ({ size = 24 }) => (
+const WhatsApp = ({ size = 24 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
     height={size}
     viewBox="0 0 20 20"
-    version="1.1"
   >
-    <title>whatsapp [#128]</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-      <g
-        id="Dribbble-Light-Preview"
-        transform="translate(-300.000000, -7599.000000)"
-        fill="currentColor"
-      >
-        <g id="icons" transform="translate(56.000000, 160.000000)">
-          <path
-            d="M259.821,7453.12124 C259.58,7453.80344 258.622,7454.36761 257.858,7454.53266 C257.335,7454.64369 256.653,7454.73172 254.355,7453.77943 C251.774,7452.71011 248.19,7448.90097 248.19,7446.36621 C248.19,7445.07582 248.934,7443.57337 250.235,7443.57337 C250.861,7443.57337 250.999,7443.58538 251.205,7444.07952 C251.446,7444.6617 252.034,7446.09613 252.104,7446.24317 C252.393,7446.84635 251.81,7447.19946 251.387,7447.72462 C251.252,7447.88266 251.099,7448.05372 251.27,7448.3478 C251.44,7448.63589 252.028,7449.59418 252.892,7450.36341 C254.008,7451.35771 254.913,7451.6748 255.237,7451.80984 C255.478,7451.90987 255.766,7451.88687 255.942,7451.69881 C256.165,7451.45774 256.442,7451.05762 256.724,7450.6635 C256.923,7450.38141 257.176,7450.3464 257.441,7450.44643 C257.62,7450.50845 259.895,7451.56477 259.991,7451.73382 C260.062,7451.85686 260.062,7452.43903 259.821,7453.12124 M254.002,7439 L253.997,7439 L253.997,7439 C248.484,7439 244,7443.48535 244,7449 C244,7451.18666 244.705,7453.21526 245.904,7454.86076 L244.658,7458.57687 L248.501,7457.3485 C250.082,7458.39482 251.969,7459 254.002,7459 C259.515,7459 264,7454.51465 264,7449 C264,7443.48535 259.515,7439 254.002,7439"
-            id="whatsapp-[#128]"
-          ></path>
-        </g>
-      </g>
-    </g>
+    <path
+      fill="currentColor"
+      d="M10 0C4.477 0 0 4.477 0 10c0 2.187.705 4.215 1.904 5.861L.658 19.577l3.843-1.228A9.953 9.953 0 0010 20c5.523 0 10-4.477 10-10S15.523 0 10 0zm5.821 14.121c-.241.682-1.199 1.246-1.963 1.411-.523.111-1.205.199-3.503-.753-2.581-1.069-6.165-4.878-6.165-7.413 0-1.29.744-2.793 2.045-2.793.626 0 .764.012.97.506.241.582.829 2.017.899 2.164.289.603-.294.956-.717 1.481-.135.158-.288.329-.117.623.17.288.758 1.246 1.622 2.015 1.116.994 2.021 1.311 2.345 1.446.241.1.529.077.705-.111.223-.241.5-.641.782-1.035.199-.282.452-.317.717-.217.179.062 2.454 1.118 2.55 1.287.071.123.071.706-.17 1.388z"
+    />
   </svg>
 );
 
@@ -158,6 +165,7 @@ const Facebook = ({ size = 24 }) => (
     <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07" />
   </svg>
 );
+
 const Instagram = ({ size = 24 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

@@ -18,35 +18,48 @@ import {
 } from "lucide-react";
 
 
-import ImageRecepcionista from "../../public/landing_page_recepcionista_reziced.png";
-import ImageSecretaria from "../../public/langing_page_secretaria__reziced.png";
-import ImageDirectorTecnico from "../../public/langing_page_diirector_tecnico02__reziced.png";
 import { Footer } from "@/components/landingPage/Footer";
 import PricingSection from "@/components/landingPage/PricingSection";
 import CTASection from "@/components/landingPage/CTASection";
 import { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
 
-
-
-
-
-
-
-
+import hero01 from "../../public/tenantsLanding/cdApp/hero01.webp";
+import hero02 from "../../public/tenantsLanding/cdApp/hero02.webp";
+import hero03 from "../../public/tenantsLanding/cdApp/hero03.webp";
+import hero04 from "../../public/tenantsLanding/cdApp/hero04.webp";
+import hero05 from "../../public/tenantsLanding/cdApp/hero05.webp";
+import hero06 from "../../public/tenantsLanding/cdApp/hero06.webp";
+import hero07 from "../../public/tenantsLanding/cdApp/hero07.webp";
+import hero08 from "../../public/tenantsLanding/cdApp/hero08.webp";
+import hero09 from "../../public/tenantsLanding/cdApp/hero09.webp";
+import hero10 from "../../public/tenantsLanding/cdApp/hero10.webp";
+import hero11 from "../../public/tenantsLanding/cdApp/hero11.webp";
+import hero12 from "../../public/tenantsLanding/cdApp/hero12.webp";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Reemplaza con la URL de producción definitiva de cdApp
-const APP_URL = 'https://cda-app.com'; 
+const APP_URL = "https://cda-app.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  
+
   title: {
-    template: '%s | cdApp',
-    default: 'cdApp - Software de Gestión Integral para CDA e Inspección Vehicular',
+    template: "%s | cdApp",
+    default:
+      "cdApp - Software de Gestión Integral para CDA e Inspección Vehicular",
   },
-  
-  description: 'Plataforma SaaS para Centros de Diagnóstico Automotor (CDA). Gestión de órdenes de entrada, base de datos de vehículos y propietarios, analítica avanzada, PQRSF automatizado y control de calidad bajo la norma ISO 17020.',
-  
+
+  description:
+    "Plataforma SaaS para Centros de Diagnóstico Automotor (CDA). Gestión de órdenes de entrada, base de datos de vehículos y propietarios, analítica avanzada, PQRSF automatizado y control de calidad bajo la norma ISO 17020.",
+
   // SEO Avanzado para Motores de Búsqueda
   robots: {
     index: true,
@@ -55,107 +68,119 @@ export const metadata: Metadata = {
     nosnippet: false,
     notranslate: false,
     noimageindex: false,
-    'max-snippet': -1,
-    'max-image-preview': 'large',
-    'max-video-preview': -1,
+    "max-snippet": -1,
+    "max-image-preview": "large",
+    "max-video-preview": -1,
   },
-  
-  generator: 'Next.js',
-  applicationName: 'cdApp',
-  referrer: 'origin-when-cross-origin',
-  
+
+  generator: "Next.js",
+  applicationName: "cdApp",
+  referrer: "origin-when-cross-origin",
+
   // Palabras clave exhaustivas cubriendo el core del negocio, la norma técnica y la geografía
   keywords: [
     // Core del Producto (SaaS & Inspección)
-    'SaaS para CDA', 'Software para Centros de Diagnóstico Automotor', 'Gestión de CDA Colombia', 
-    'Orden de entrada vehicular', 'Recepción de vehículos CDA', 'Expediente digital de vehículos',
-    'Analítica para CDA', 'Dashboard de inspección vehicular', 'Registro de propietarios y clientes',
-    'Pre-revision vehicular', 'Control de rechazos RTM', 'Historial técnico de vehículos',
-    
+    "SaaS para CDA",
+    "Software para Centros de Diagnóstico Automotor",
+    "Gestión de CDA Colombia",
+    "Orden de entrada vehicular",
+    "Recepción de vehículos CDA",
+    "Expediente digital de vehículos",
+    "Analítica para CDA",
+    "Dashboard de inspección vehicular",
+    "Registro de propietarios y clientes",
+    "Pre-revision vehicular",
+    "Control de rechazos RTM",
+    "Historial técnico de vehículos",
+
     // Cumplimiento y Normativa (Vital para SEO B2B de este sector)
-    'Norma ISO 17020', 'Organismo de inspección tipo A', 'ONAC cumplimiento CDA', 
-    'Software acreditado ONAC', 'RUNT automatización', 'Regulación de transporte Colombia',
-    
+    "Norma ISO 17020",
+    "Organismo de inspección tipo A",
+    "ONAC cumplimiento CDA",
+    "Software acreditado ONAC",
+    "RUNT automatización",
+    "Regulación de transporte Colombia",
+
     // Funcionalidades específicas
-    'PQRSF para CDA', 'Formulario de apelaciones CDA', 'Peticiones quejas y reclamos inspección',
-    'Avisos de rechazo automáticos', 'Notificaciones por correo RTM', 'Alertas de vencimiento de revisión',
-    'Tenant landing pages', 'Portal personalizado por CDA', 'Multi-tenant vehicular software',
-    
+    "PQRSF para CDA",
+    "Formulario de apelaciones CDA",
+    "Peticiones quejas y reclamos inspección",
+    "Avisos de rechazo automáticos",
+    "Notificaciones por correo RTM",
+    "Alertas de vencimiento de revisión",
+    "Tenant landing pages",
+    "Portal personalizado por CDA",
+    "Multi-tenant vehicular software",
+
     // Ubicación y Contexto de Mercado
-    'RTM Colombia', 'Revisión Técnico-Mecánica', 'CDA en Bogotá', 'CDA en Medellín', 'CDA en Cali',
-    'CDA en Barranquilla', 'CDA en Bucaramanga', 'CDA en Manizales', 'Software automotriz Colombia',
-    
+    "RTM Colombia",
+    "Revisión Técnico-Mecánica",
+    "CDA en Bogotá",
+    "CDA en Medellín",
+    "CDA en Cali",
+    "CDA en Barranquilla",
+    "CDA en Bucaramanga",
+    "CDA en Manizales",
+    "Software automotriz Colombia",
+
     // Stack Tecnológico (Opcional, pero útil si buscas posicionarte ante desarrolladores o partners)
-    'Next.js 15', 'Supabase Postgres', 'TanStack Query', 'Tailwind CSS', 'Coolify VPS Deployment'
+    "Next.js 15",
+    "Supabase Postgres",
+    "TanStack Query",
+    "Tailwind CSS",
+    "Coolify VPS Deployment",
   ],
-  
+
   // Autores y Creadores (Adaptado a tu estructura)
   authors: [
-    { name: 'Camilo Aristizábal', url: 'https://github.com/spjhon' }, 
-    { name: 'cdApp Engineering' }
+    { name: "Camilo Aristizábal", url: "https://github.com/spjhon" },
+    { name: "cdApp Engineering" },
   ],
-  creator: 'Camilo Aristizábal',
-  publisher: 'cdApp Colombia',
-  
+  creator: "Camilo Aristizábal",
+  publisher: "cdApp Colombia",
+
   // Detección automática de formatos (desactivada en partes críticas para evitar parseos extraños del navegador)
   formatDetection: {
     email: false, // Evita que se confundan correos de rechazo con enlaces de acción planos
     address: true,
     telephone: true,
   },
-  
+
   // Open Graph (Para cuando compartan la app principal o las landings en WhatsApp, Slack o Facebook)
   openGraph: {
-    title: 'cdApp - Optimiza tu Centro de Diagnóstico Automotor (CDA)',
-    description: 'Automatiza tus órdenes de entrada, gestiona PQRSF y automatiza avisos de rechazo de forma digital, ágil y conforme a la norma ISO 17020.',
+    title: "cdApp - Optimiza tu Centro de Diagnóstico Automotor (CDA)",
+    description:
+      "Automatiza tus órdenes de entrada, gestiona PQRSF y automatiza avisos de rechazo de forma digital, ágil y conforme a la norma ISO 17020.",
     url: APP_URL,
-    type: 'website',
-    siteName: 'cdApp Software',
-    locale: 'es_CO',
+    type: "website",
+    siteName: "cdApp Software",
+    locale: "es_CO",
     images: [
       {
         url: `https://lyktizihszlbmzzjrqye.supabase.co/storage/v1/object/public/tenants-public/public/OPENGRAPH.webp`,
         width: 1200,
         height: 630,
-        alt: 'cdApp - Dashboard de Analítica e Inspección de Vehículos',
-      }
+        alt: "cdApp - Dashboard de Analítica e Inspección de Vehículos",
+      },
     ],
   },
-  
+
   // Twitter Cards
   twitter: {
-    card: 'summary_large_image',
-    title: 'cdApp - Digitalización y Analítica para CDA',
-    description: 'Manejo de flujos de inspección, control de rechazos y notificaciones automáticas en un solo software.',
+    card: "summary_large_image",
+    title: "cdApp - Digitalización y Analítica para CDA",
+    description:
+      "Manejo de flujos de inspección, control de rechazos y notificaciones automáticas en un solo software.",
     site: APP_URL,
-    creator: '@cdApp_co', // Reemplaza con tu Twitter/X real de empresa
-    images: [`https://lyktizihszlbmzzjrqye.supabase.co/storage/v1/object/public/tenants-public/public/OPENGRAPH.webp`],
+    creator: "@cdApp_co", // Reemplaza con tu Twitter/X real de empresa
+    images: [
+      `https://lyktizihszlbmzzjrqye.supabase.co/storage/v1/object/public/tenants-public/public/OPENGRAPH.webp`,
+    ],
   },
-  
+
   // Categoría de la aplicación para indexación en directorios
-  category: 'Software de Productividad y Gestión Automotriz',
+  category: "Software de Productividad y Gestión Automotriz",
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 interface Feature {
   icon: LucideIcon;
@@ -252,114 +277,759 @@ export default function Home() {
 
       <Hero></Hero>
 
-      <section className="container flex items-center justify-center overflow-hidden mx-auto my-0 md:my-20">
-        <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 px-6 py-12 lg:py-0">
-          {/* 📸 CONTENEDOR IMAGEN:
-        `order-last` hace que en móviles se vaya abajo. 
-        `lg:order-first` la regresa a la izquierda en pantallas grandes. */}
-
-          {/* 📝 CONTENEDOR TEXTO:
-        `order-first` asegura que en móviles sea lo primero que se lea.
-        `lg:order-last` lo ubica a la derecha en pantallas grandes. */}
-          <div className="my-auto space-y-6 order-first lg:order-last">
-            <h2 className="text-4xl md:text-5xl font-bold leading-[1.2]! tracking-tight text-foreground">
+      <section className="container mx-auto px-6 py-12 md:py-24 overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-20">
+          {/* ENCABEZADO PRINCIPAL DE LA SECCIÓN */}
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <Badge
+              variant="outline"
+              className="rounded-full px-4 py-1 text-sm border-primary/30 text-primary"
+            >
+              Ecosistema Integral para CDAs
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-[1.2]">
               ¿Qué hace exactamente <span className="text-primary">cdApp</span>?
             </h2>
-
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Es una plataforma web diseñada exclusivamente para
-              <strong className="text-foreground font-semibold">
-                {" "}
-                Centros de Diagnóstico Automotor (CDA) en Colombia{" "}
-              </strong>
-              con el fin de automatizar y digitalizar el proceso de recepcion y
-              la orden de entrada, toma de datos estadisticos en el area de
-              secretaria, confirmacion de rtm terminado en el area del director
-              tecnico y un abanico de estadisticas y la monitorizacion del
-              proceso de cada vehiculo en el perfil de administrador, todo en
-              linea para poder ser consultado desde cualquier sitio.
+              Una solución web todo en uno diseñada para Centros de Diagnóstico
+              Automotor en Colombia. Digitalizamos cada etapa de la inspección
+              RTM, garantizando trazabilidad total desde la atracción de
+              clientes hasta el control administrativo.
             </p>
+          </div>
 
-            {/* Bloques informativos por roles */}
-            <div className="grid gap-4 pt-2">
-              <div className="border-l-2 border-primary pl-4">
-                <h4 className="font-bold text-foreground">
-                  Recepción y Secretaría
+          {/* ------------------------------------------------------------- */}
+          {/* BLOQUE 1: ATRAE Y CONVIERTE (LANDING PAGE + PQAF) */}
+          {/* ------------------------------------------------------------- */}
+          <div className="space-y-8">
+            <div className="border-l-4 border-primary pl-4 space-y-2">
+              <h3 className="text-2xl font-bold text-foreground">
+                1. Presencia Digital Comercial y Gestión ISO 17020 (PQAF)
+              </h3>
+              <p className="text-muted-foreground max-w-3xl">
+                Tu CDA obtiene una landing page corporativa optimizada para
+                atraer clientes, informar tarifas y cumplir con los
+                requerimientos de atención al cliente mediante el módulo de
+                Peticiones, Quejas, Apelaciones y Felicitaciones (PQAF).
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Landing Page Comercial */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="relative w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero01}
+                          alt="Landing page pública del CDA con información comercial y agendamiento"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Portal Web Público del CDA
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Página institucional para proyección de marca, servicios
+                        y horarios de atención.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero01}
+                        alt="Landing page pública del CDA con información comercial y agendamiento"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Portal Web Público del CDA
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Automatiza la apertura de órdenes de entrada y la captura
-                  inteligente de datos de vehículos y propietarios de forma
-                  ágil.
+                  Página institucional para proyección de marca, servicios y
+                  horarios de atención.
                 </p>
               </div>
 
-              <div className="border-l-2 border-primary pl-4">
-                <h4 className="font-bold text-foreground">Dirección Técnica</h4>
+              {/* Formulario PQAF Landing */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero02}
+                          alt="Formulario de PQAF para clientes en la landing page"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Formulario de PQAF
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Módulo de Peticiones, Quejas, Aclaraciones y
+                        Felicitaciones integrado en la landing page.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero02}
+                        alt="Formulario de PQAF para clientes en la landing page"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Recepción Pública de PQAF
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  Validación y confirmación inmediata de RTM finalizadas para
-                  agilizar la liberación del vehículo sin cuellos de botella.
+                  Formulario dinámico para canalizar Peticiones, Quejas,
+                  Apelaciones y Felicitaciones.
                 </p>
               </div>
 
-              <div className="border-l-2 border-primary pl-4">
-                <h4 className="font-bold text-foreground">
-                  Administración Central
+              {/* Dashboard Admin PQAF */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero03}
+                          alt="Panel de administración para gestión y respuesta de PQAF"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Gestión Interna de PQAF
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Panel de administración para dar respuesta oportuna y
+                        seguimiento a las solicitudes registradas.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero03}
+                        alt="Panel de administración para gestión y respuesta de PQAF"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Gestión Interna de Calidad
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Monitoriza el estado del proceso de cada pista en línea y
-                  accede a analíticas avanzadas desde cualquier dispositivo para
-                  la toma de decisiones.
+                  Panel administrativo para dar respuesta oportuna a los
+                  requerimientos registrados.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl mx-auto p-4">
-            {/* --- FILA ARRIBA --- */}
-            {/* Rectángulo Izquierda (Ocupa 2 columnas) */}
-            <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
-              <Image
-                alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
-                src={ImageRecepcionista} // 👈 Guarda la imagen generada en tu carpeta public/images/
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-w-768px) 100vw, 66vw"
+          {/* ------------------------------------------------------------- */}
+          {/* BLOQUE 2: ÁREA DE RECEPCIÓN Y SECRETARÍA */}
+          {/* ------------------------------------------------------------- */}
+          <div className="space-y-8">
+            <div className="border-l-4 border-primary pl-4 space-y-2">
+              <h3 className="text-2xl font-bold text-foreground">
+                2. Recepción Inteligente y Órdenes de Entrada Digitales
+              </h3>
+              <p className="text-muted-foreground max-w-3xl">
+                Elimina los registros en papel y los errores manuales. Agiliza
+                el ingreso de vehículos combinando automatización con el RUNT,
+                formularios flexibles y firma digital.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Dashboard Creación Orden */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero04}
+                          alt="Dashboard de recepción para inicio de órdenes de entrada"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Dashboard de Recepción
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Punto de partida ágil para la apertura e inicio del
+                        proceso de recepción vehicular.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero04}
+                        alt="Dashboard de recepción para inicio de órdenes de entrada"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Dashboard de Recepción
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Punto de partida ágil para la apertura e inicio de recepción
+                  vehicular.
+                </p>
+              </div>
+
+              {/* Extracción RUNT */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero05}
+                          alt="Extracción automática de datos del vehículo directamente desde RUNT"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Extracción de Datos desde RUNT
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Autocompletado instantáneo de la ficha técnica del
+                        vehículo consultando la placa en el sistema RUNT.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero05}
+                        alt="Extracción automática de datos del vehículo directamente desde RUNT"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Scraping e Integración RUNT
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Autocompletado instantáneo de la ficha técnica del vehículo
+                  digitando solo la placa.
+                </p>
+              </div>
+
+              {/* Separación Cliente / Propietario */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero06}
+                          alt="Formulario con lógica separada para datos del cliente poseedor y el propietario"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Gestión de Cliente y Propietario
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Formulario con separación clara para la captura de datos
+                        del tenedor/poseedor y el propietario del vehículo.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero06}
+                        alt="Formulario con lógica separada para datos del cliente poseedor y el propietario"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Desacople Cliente vs Propietario
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Diferenciación Clara entre el tenedor/conductor actual y el
+                  titular según licencia.
+                </p>
+              </div>
+
+              {/* Plantillas de Ordenes */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero07}
+                          alt="Administrador de plantillas preconfiguradas para órdenes de entrada"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Plantillas de Orden de Entrada
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Administrador de plantillas preconfiguradas para
+                        agilizar la creación de órdenes según el tipo de
+                        servicio.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero07}
+                        alt="Administrador de plantillas preconfiguradas para órdenes de entrada"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Plantillas Personalizadas
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Configura inventarios previos según el tipo de vehículo
+                  (Motos, Livianos, Pesados).
+                </p>
+              </div>
+
+              {/* Firma Digital */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero08}
+                          alt="Captura de firma digital del cliente en la orden de entrada"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Firma Digital del Cliente
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Captura de firma manuscrita digital para la validación y
+                        autorización de la orden de entrada.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero08}
+                        alt="Captura de firma digital del cliente en la orden de entrada"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Firma Digital del Cliente
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Aceptación legal del estado del vehículo en pantalla táctil o
+                  tableta.
+                </p>
+              </div>
+
+              {/* Adjunto de Facturación / SOAT */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo para cumplir con la semántica de Base UI */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-16/10 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero09}
+                          alt="Módulo de secretaría para adjuntar número de factura, valores pagados y venta de SOAT"
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Módulo de Secretaría y Facturación
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Registro de número de factura, valores pagados y gestión
+                        complementaria para la venta de SOAT.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero09}
+                        alt="Módulo de secretaría para adjuntar número de factura, valores pagados y venta de SOAT"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-base">
+                  Módulo Financiero de Secretaría
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Registro de número de factura, recaudo, métodos de pago y
+                  venta cruzada de SOAT.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* BLOQUE 3: SUPERVISIÓN Y DIRECCIÓN TÉCNICA */}
+          {/* ------------------------------------------------------------- */}
+          <div className="space-y-8">
+            <div className="border-l-4 border-primary pl-4 space-y-2">
+              <h3 className="text-2xl font-bold text-foreground">
+                3. Control Operativo y Liberación por Dirección Técnica
+              </h3>
+              <p className="text-muted-foreground max-w-3xl">
+                Monitoreo centralizado del flujo de revisión. Cierra el ciclo
+                técnico agilizando la entrega de certificados RTM o informes de
+                rechazo.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Tabla de Ordenes Activas */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo manteniendo la proporción aspect-video */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-video rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero10}
+                          alt="Tabla de seguimiento y administración de ordenes de entrada registradas"
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Seguimiento de Órdenes de Entrada
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Tabla administrativa para el monitoreo, filtrado y
+                        gestión del estado de cada inspección registrada.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible para contención de la imagen */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero10}
+                        alt="Tabla de seguimiento y administración de ordenes de entrada registradas"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-lg">
+                  Monitoreo de Órdenes en Tiempo Real
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Vista unificada para rastrear en qué estado se encuentra cada
+                  vehículo dentro del circuito del CDA.
+                </p>
+              </div>
+
+              {/* Módulo Director Técnico */}
+              <div className="space-y-3">
+                <Dialog>
+                  {/* Trigger usando un <button> nativo manteniendo la proporción aspect-video */}
+                  <DialogTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="w-full aspect-video rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Image
+                          src={hero11}
+                          alt="Módulo del Director Técnico para dictamen final, FUR y certificado RUNT"
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                        />
+                      </button>
+                    }
+                  />
+
+                  {/* Modal con imagen grande y título visible */}
+                  <DialogContent
+                    className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    {/* Encabezado con título visible (shrink-0 para evitar que se colapse) */}
+                    <DialogHeader className="p-0 shrink-0">
+                      <DialogTitle className="text-xl font-bold text-foreground">
+                        Módulo de Director Técnico
+                      </DialogTitle>
+                      <DialogDescription className="text-sm text-muted-foreground">
+                        Emisión del dictamen final, generación del Formato Único
+                        de Resultados (FUR) y carga del certificado al RUNT.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Contenedor flexible que absorbe el alto restante */}
+                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                      <Image
+                        src={hero11}
+                        alt="Módulo del Director Técnico para dictamen final, FUR y certificado RUNT"
+                        className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                        priority
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <h4 className="font-semibold text-foreground text-lg">
+                  Validación del Director Técnico
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Ingreso del dictamen (Aprobado/Rechazado), asignación de
+                  consecutivos FUR y registro del certificado RTM emitido.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* BLOQUE 4: ADMINISTRACIÓN CENTRAL Y ESTADÍSTICAS */}
+          {/* ------------------------------------------------------------- */}
+          <div className="space-y-8">
+            <div className="border-l-4 border-primary pl-4 space-y-2">
+              <h3 className="text-2xl font-bold text-foreground">
+                4. Analítica de Negocio y Métricas en Tiempo Real
+              </h3>
+              <p className="text-muted-foreground max-w-3xl">
+                Toma decisiones estratégicas fundamentadas en datos reales.
+                Analiza volúmenes de inspección, índices de aprobación vs.
+                rechazo y rendimiento general.
+              </p>
+            </div>
+
+            <Dialog>
+              {/* Trigger usando un <button> nativo con proporciones panorámicas responsive */}
+              <DialogTrigger
+                render={
+                  <button
+                    type="button"
+                    className="w-full aspect-video md:aspect-21/9 rounded-2xl overflow-hidden border border-border bg-muted cursor-pointer text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Image
+                      src={hero12}
+                      alt="Dashboard gerencial con estadísticas de inspección y tasa de rechazo"
+                      className="object-cover"
+                      sizes="100vw"
+                    />
+                  </button>
+                }
               />
-            </div>
 
-            {/* Espacio Cuadrado Derecha (Ocupa 1 columna) */}
-            <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10"></div>
+              {/* Modal con imagen grande y título visible */}
+              <DialogContent
+                className="p-6 border-border bg-background flex flex-col max-h-[90vh] overflow-hidden gap-4"
+                style={{ maxWidth: "90vw" }}
+              >
+                {/* Encabezado con título visible */}
+                <DialogHeader className="p-0 shrink-0">
+                  <DialogTitle className="text-xl font-bold text-foreground">
+                    Dashboard Gerencial y Métricas
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Panel de analítica e indicadores clave para el seguimiento
+                    de la operación, volumen de inspecciones y tasas de rechazo.
+                  </DialogDescription>
+                </DialogHeader>
 
-            {/* --- FILA CENTRO --- */}
-            {/* 🔑 Imagen Central: Ocupa las 3 columnas completas del grid */}
-            <div className="md:col-span-3 relative aspect-video md:aspect-16/7 rounded-2xl overflow-hidden border border-border bg-muted">
-              <Image
-                alt="Dashboard y estadísticas de administración"
-                src={ImageSecretaria}
-                fill
-                className="object-cover object-center" /* Con object-center forzamos a que el foco sea el medio */
-                sizes="100vw"
-              />
-            </div>
-
-            {/* --- FILA ABAJO --- */}
-            {/* Espacio Cuadrado Izquierda (Ocupa 1 columna) */}
-            <div className="hidden md:block aspect-square rounded-2xl border border-dashed border-border/60 bg-muted/10">
-              {/* ⏹️ Espacio vacío */}
-            </div>
-
-            {/* Rectángulo Derecha (Ocupa 2 columnas) */}
-            <div className="md:col-span-2 relative aspect-video md:aspect-2/1 rounded-2xl overflow-hidden border border-border bg-muted">
-              <Image
-                alt="Recepcionista de CDA uniformado con overol azul recibiendo a un cliente y registrando datos en una tableta digital"
-                src={ImageDirectorTecnico} // 👈 Guarda la imagen generada en tu carpeta public/images/
-                fill
-                priority
-                className="object-cover shadow-2xl"
-                sizes="(max-w-768px) 100vw, 66vw"
-              />
-            </div>
+                {/* Contenedor flexible para contención de la imagen */}
+                <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                  <Image
+                    src={hero12}
+                    alt="Dashboard gerencial con estadísticas de inspección y tasa de rechazo"
+                    className="max-h-full max-w-full w-auto h-auto object-contain rounded-lg"
+                    priority
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
@@ -386,15 +1056,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section
-        id="features"
-        className="py-24"
-      >
+      <section id="features" className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Encabezado Principal */}
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Todo lo necesario para una robusta gestión de tus ordenes de entrada y seguimiento del proceso
+              Todo lo necesario para una robusta gestión de tus ordenes de
+              entrada y seguimiento del proceso
             </h2>
             <p className="max-w-3xl mx-auto text-lg text-muted-foreground">
               Una plataforma web segura de extremo a extremo. Desde sistemas de
