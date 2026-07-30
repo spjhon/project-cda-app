@@ -10,6 +10,7 @@ import {
   CalendarClock,
   CarFront,
   Database,
+  ExternalLink,
   FileCheck2,
   Globe,
   LucideIcon,
@@ -277,7 +278,7 @@ export default function Home() {
 
       <Hero></Hero>
 
-      <section className="container mx-auto px-6 py-12 md:py-24 overflow-hidden">
+      <section id={"soluciones"} className="container mx-auto px-6 py-12 md:py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-20">
           {/* ENCABEZADO PRINCIPAL DE LA SECCIÓN */}
           <div className="text-center max-w-3xl mx-auto space-y-4">
@@ -304,7 +305,7 @@ export default function Home() {
           <div className="space-y-8">
             <div className="border-l-4 border-primary pl-4 space-y-2">
               <h3 className="text-2xl font-bold text-foreground">
-                1. Presencia Digital Comercial y Gestión ISO 17020 (PQAF)
+                1. Presencia Digital Comercial y PQAF (Peticiones, Quejas, Apelacioens, Felicitaciones)
               </h3>
               <p className="text-muted-foreground max-w-3xl">
                 Tu CDA obtiene una landing page corporativa optimizada para
@@ -369,6 +370,15 @@ export default function Home() {
                   Página institucional para proyección de marca, servicios y
                   horarios de atención.
                 </p>
+                 <a
+            href="https://demo.cda-app.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline self-start sm:self-auto shrink-0"
+          >
+            Visitar Portal Web DEMO
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
               </div>
 
               {/* Formulario PQAF Landing */}
@@ -1034,7 +1044,7 @@ export default function Home() {
         </div>
       </section>
 
-      <HeroVideo></HeroVideo>
+      
 
       <section className="mt-10 mb-20  py-10  border-y border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
