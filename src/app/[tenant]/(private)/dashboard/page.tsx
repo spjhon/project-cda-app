@@ -96,21 +96,21 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 ">
       {/* Botón de regreso minimalista */}
       <div className="absolute top-8 left-8">
         <Button
           variant="ghost"
           className="text-muted-foreground hover:text-foreground"
         >
-          <Link href="/landingpage">
+          <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Regresar a la landing
           </Link>
         </Button>
       </div>
 
-      <div className="max-w-2xl w-full space-y-8">
+      <div className="max-w-2xl w-full space-y-8 mt-20">
         {/* Header de Bienvenida */}
         <div className="text-center space-y-2">
           <Badge
