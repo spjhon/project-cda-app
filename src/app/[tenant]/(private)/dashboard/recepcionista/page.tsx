@@ -590,6 +590,7 @@ export default function NewEntryOrder() {
             setFormData={setFormData}
             selectedTemplate={selectedTemplate ? true : false}
             hayPlaca={formData.vehicle.placa ? true : false}
+            formData={formData}
           />
 
           {/**SECCION finalizado de la orden de entrada */}

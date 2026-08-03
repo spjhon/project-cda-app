@@ -110,7 +110,7 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <div className="max-w-2xl w-full space-y-8 mt-20">
+      <div className="max-w-2xl w-full space-y-8 mt-20 md:mt-0">
         {/* Header de Bienvenida */}
         <div className="text-center space-y-2">
           <Badge
