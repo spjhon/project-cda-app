@@ -127,11 +127,6 @@ const supabaseBrowser = createSupabaseBrowserClient()
   //TANSTAK QUERY PARA LOS PQAF
   //--------------------------------------------
 
-
-
-
-
-
 //Manejo del query para mantener los datos actualizados
   const {
     data: PQAFData,

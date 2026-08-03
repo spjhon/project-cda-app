@@ -2077,13 +2077,14 @@ export default function OrderPDF({  orderData, templateData }: OrderPDFProps) {
         <GeneralInfoSection orderData={orderData} fechaEntrada={fechaEntrada} />
         <VehicleSection orderData={orderData} />
         <PressureSection orderData={orderData} />
+        <OwnerSection orderData={orderData} />
+        <ClientSection orderData={orderData} />
+        <ComplementarySignaturesSection orderData={orderData} templateData={templateData}/>
         <ConditionsSection orderData={orderData} templateData={templateData}/>
         <ObservationsSection orderData={orderData} />
         <ContractSection orderData={orderData} templateData={templateData}/>
         <InspectorSection orderData={orderData} />
-        <OwnerSection orderData={orderData} />
-        <ClientSection orderData={orderData} />
-        <ComplementarySignaturesSection orderData={orderData} templateData={templateData}/>
+        
         <DirectorSection orderData={orderData} />  {/* ← ANTES del footer */}
         <FooterSection orderData={orderData} fechaDoc={fechaDoc} />
         

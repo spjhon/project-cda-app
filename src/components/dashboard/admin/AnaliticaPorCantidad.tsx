@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Info, Calendar as CalendarIcon } from "lucide-react";
+import { Activity, Info, Calendar as CalendarIcon, Check } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
@@ -422,12 +422,34 @@ export default function AnaliticaPorCantidad({
   descripcion,
   datos,
 }: AnaliticaPorCantidadProps) {
-  // Estado local para almacenar el rango seleccionado
+  
+  // 🌟 Estado confirmado (el que realmente se usa para los cálculos/UI)
   const [date, setDate] = useState<DateRange | undefined>(undefined);
+  // 🌟 Estado borrador (aísla los clics dentro del calendario)
+  const [localDate, setLocalDate] = useState<DateRange | undefined>(undefined);
+  const [isOpen, setIsOpen] = useState(false);
+
+  console.log(`este es el date de: ${titulo}: `, date);
+
+
+   const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      // Al abrir, resincronizamos el borrador con la fecha confirmada
+      setLocalDate(date);
+    }
+  };
+
+
+  // Confirmar el rango seleccionado y cerrar el popover
+  const handleApply = () => {
+    setDate(localDate);
+    setIsOpen(false);
+  };
 
   // Si hay un rango completo, puedes simular o computar el valor (ej. 0 o fetch). 
   // Mientras falte un extremo, muestra el string por defecto.
-  const valorRangoEspecial = date?.from && date?.to ? 0 : "Seleccione rango";
+  const valorRangoEspecial = localDate?.from && localDate?.to ? 0 : "Seleccione rango";
 
   const isPorcentaje = titulo === "Tasa de Rechazo";
   
@@ -504,7 +526,8 @@ export default function AnaliticaPorCantidad({
             </div>
 
             {/* Selector de Fecha de Shadcn */}
-            <Popover>
+           {/* Selector de Fecha de Shadcn */}
+            <Popover open={isOpen} onOpenChange={handleOpenChange}>
               <PopoverTrigger render={<Button
                   id="date"
                   variant={"outline"}
@@ -515,7 +538,6 @@ export default function AnaliticaPorCantidad({
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
 
-                  
                   {date?.from ? (
                     date.to ? (
                       <>
@@ -532,18 +554,32 @@ export default function AnaliticaPorCantidad({
                 
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                autoFocus
-                  mode="range"
-                  defaultMonth={date?.from}
-                  selected={date}
-                  onSelect={setDate}
-                  numberOfMonths={2}
-                  locale={es}
-                  className="rounded-lg"
-                captionLayout="dropdown"
-                showOutsideDays={false}
-                />
+                <div className="p-3">
+                  <Calendar
+                    autoFocus
+                    mode="range"
+                    defaultMonth={localDate?.from}
+                    selected={localDate}
+                    onSelect={setLocalDate}
+                    numberOfMonths={2}
+                    locale={es}
+                    className="rounded-lg"
+                    captionLayout="dropdown"
+                    showOutsideDays={false}
+                  />
+                </div>
+                
+                {/* 🌟 Botón de Aplicar Rango aislado */}
+                <div className="border-t border-border p-3 bg-muted/30 flex justify-end">
+                  <Button
+                    className="w-full sm:w-auto text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
+                    onClick={handleApply}
+                    disabled={!localDate?.from || !localDate?.to}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    Aplicar Rango
+                  </Button>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
