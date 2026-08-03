@@ -37,14 +37,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
- 
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
- 
 } from "@/components/ui/alert-dialog";
+
 
 // 🌟 ESTADO INICIAL REUTILIZABLE (Con Return Explícito)
 export function getInitialOrderFormData(
@@ -452,8 +451,58 @@ export default function NewEntryOrder() {
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);
         queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+
+
+        /** 
+        const supabase = createSupabaseBrowserClient();
+        const { data: orderData, error } = await supabase.rpc(
+          "fetch_entry_order_by_id",
+          {
+            p_order_id: data,
+            p_tenant_id: PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "",
+          },
+        );
+
+        const orderDataTyped = (orderData as unknown as FetchEntryOrderResult[])?.[0];
+
+        if (error || !orderDataTyped) {
+          console.error("Error en RPC:", error);
+        }
+
+        console.log("📦 Datos de la orden obtenidos:", orderDataTyped);
+
         
+
+        const pdfBlob = await pdf(
+          <OrderPDF orderData={orderDataTyped ?? undefined} />,
+        ).toBlob();
+
+        // Crear una URL en memoria para el Blob
+        const url = URL.createObjectURL(pdfBlob);
+
+        // Crear un elemento <a> invisible para forzar la descarga
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Formateamos el nombre del archivo
+        const placa = formData.vehicle.placa
+          ? `_${formData.vehicle.placa}`
+          : "";
+        const fecha = new Date().toISOString().split("T")[0];
+        link.download = `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(
+          /\s+/g,
+          "_",
+        );
+
+        // Disparar clic y limpiar memoria
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+         */
       }
+
+     
     } catch (error: unknown) {
       alert("Ocurrio un error inesperado en la validacion: " + error);
     } finally {
@@ -668,19 +717,19 @@ export default function NewEntryOrder() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             {/* Al dar click en Continuar, cerramos el modal cambiando el estado a false */}
-            <AlertDialogAction 
-        onClick={() => {
-          setShowSuccessDialog(false); // Cierra el modal
-          
-          // 🔥 Sube al principio de la página justo al hacer click
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-          });
-        }}
-      >
-        Continuar
-      </AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                setShowSuccessDialog(false); // Cierra el modal
+
+                // 🔥 Sube al principio de la página justo al hacer click
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
+              }}
+            >
+              Continuar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
