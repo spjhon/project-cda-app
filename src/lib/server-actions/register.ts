@@ -96,7 +96,7 @@ const roleTrimmed = role.trim() as "gerente" | "recepcionista" | "aux_administra
   // 5. Creación en Auth (Admin)
   const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
     email: emailLowered,
-    email_confirm: false,
+    email_confirm: true,
     password: password,
     phone: phoneTrimmed,
     app_metadata: { tenants: [tenant] },

@@ -74,19 +74,35 @@ export interface FetchEntryOrderResult {
   vehiculo_es_ensenanza: boolean;
   vehiculo_tipo_servicio_vehiculo: string;
   vehiculo_es_extranjero: boolean;
+
+  // Snapshots Propietario (Actualizados)
   propietario_nombre: string;
   propietario_documento: string;
   propietario_tipo_documento: string;
+  propietario_telefono: string | null;   // 🌟 NUEVO
+  propietario_email: string | null;      // 🌟 NUEVO
+  propietario_direccion: string | null;  // 🌟 NUEVO
+
+  // Snapshots Cliente (Actualizados)
   cliente_nombre: string;
   cliente_documento: string;
   cliente_tipo_documento: string;
+  cliente_telefono: string | null;      // 🌟 NUEVO
+  cliente_email: string | null;         // 🌟 NUEVO
+  cliente_direccion: string | null;     // 🌟 NUEVO
+
+  // Snapshots Funcionario / Inspector
   funcionario_nombre: string;
   funcionario_documento: string;
   funcionario_firma: string | null;
+
+  // Snapshots Director Técnico
   director_tecnico_nombre: string | null;
   director_tecnico_documento: string | null;
   director_tecnico_tipo_documento: string | null;
   director_tecnico_firma: string | null;
+
+  // Colecciones de Datos Detalle
   presiones_llantas: TirePressureDetail[] | null;
   condiciones_plantilla: TemplateConditionDetail[] | null;
   firmas_orden: OrderSignatureDetail[] | null;

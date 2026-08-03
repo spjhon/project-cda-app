@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_order_by_id(UUID, UUID);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_order_by_id(
     p_order_id UUID,
     p_tenant_id UUID DEFAULT NULL

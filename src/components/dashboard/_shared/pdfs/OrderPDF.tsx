@@ -1588,48 +1588,81 @@ function OwnerSection({ orderData }: { orderData: FetchEntryOrderResult | undefi
   };
 
   return (
-    <View style={ownerStyles.container}>
-      <View style={ownerStyles.header}>
-        <Text style={ownerStyles.headerTitle}>
-          08. Datos del Propietario del Vehículo
+  <View style={ownerStyles.container}>
+  <View style={ownerStyles.header}>
+    <Text style={ownerStyles.headerTitle}>
+      08. Datos del Propietario del Vehículo
+    </Text>
+  </View>
+
+  <View style={ownerStyles.content}>
+    <View style={ownerStyles.gridRow}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Nombre Completo:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {orderData?.propietario_nombre || 'N/A'}
         </Text>
       </View>
+    </View>
 
-      <View style={ownerStyles.content}>
-        <View style={ownerStyles.gridRow}>
-          <View style={ownerStyles.labelCell}>
-            <Text style={ownerStyles.label}>Nombre Completo:</Text>
-          </View>
-          <View style={ownerStyles.valueCell}>
-            <Text style={ownerStyles.value}>
-              {orderData?.propietario_nombre || 'N/A'}
-            </Text>
-          </View>
-        </View>
-
-        <View style={ownerStyles.gridRow}>
-          <View style={ownerStyles.labelCell}>
-            <Text style={ownerStyles.label}>Tipo de Documento:</Text>
-          </View>
-          <View style={ownerStyles.valueCell}>
-            <Text style={ownerStyles.value}>
-              {formatDocumentType(orderData?.propietario_tipo_documento || "")}
-            </Text>
-          </View>
-        </View>
-
-        <View style={ownerStyles.gridRowLast}>
-          <View style={ownerStyles.labelCell}>
-            <Text style={ownerStyles.label}>Número de Documento:</Text>
-          </View>
-          <View style={ownerStyles.valueCell}>
-            <Text style={ownerStyles.value}>
-              {orderData?.propietario_documento || 'N/A'}
-            </Text>
-          </View>
-        </View>
+    <View style={ownerStyles.gridRow}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Tipo de Documento:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {formatDocumentType(orderData?.propietario_tipo_documento || "")}
+        </Text>
       </View>
     </View>
+
+    <View style={ownerStyles.gridRow}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Número de Documento:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {orderData?.propietario_documento || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={ownerStyles.gridRow}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Teléfono:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {orderData?.propietario_telefono || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={ownerStyles.gridRow}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Correo Electrónico:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {orderData?.propietario_email || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={ownerStyles.gridRowLast}>
+      <View style={ownerStyles.labelCell}>
+        <Text style={ownerStyles.label}>Dirección:</Text>
+      </View>
+      <View style={ownerStyles.valueCell}>
+        <Text style={ownerStyles.value}>
+          {orderData?.propietario_direccion || 'N/A'}
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
   );
 }
 
@@ -1654,55 +1687,88 @@ function ClientSection({ orderData }: { orderData: FetchEntryOrderResult | undef
 
   return (
     <View style={clientStyles.container}>
-      <View style={clientStyles.header}>
-        <Text style={clientStyles.headerTitle}>
-          09. Datos del Cliente que Realiza el Trámite
+  <View style={clientStyles.header}>
+    <Text style={clientStyles.headerTitle}>
+      09. Datos del Cliente que Realiza el Trámite
+    </Text>
+  </View>
+
+  <View style={clientStyles.content}>
+    <View style={clientStyles.gridRow}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Nombre Completo:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {orderData?.cliente_nombre || 'N/A'}
         </Text>
       </View>
+    </View>
 
-      <View style={clientStyles.content}>
-        <View style={clientStyles.gridRow}>
-          <View style={clientStyles.labelCell}>
-            <Text style={clientStyles.label}>Nombre Completo:</Text>
-          </View>
-          <View style={clientStyles.valueCell}>
-            <Text style={clientStyles.value}>
-              {orderData?.cliente_nombre || 'N/A'}
-            </Text>
-          </View>
-        </View>
-
-        <View style={clientStyles.gridRow}>
-          <View style={clientStyles.labelCell}>
-            <Text style={clientStyles.label}>Tipo de Documento:</Text>
-          </View>
-          <View style={clientStyles.valueCell}>
-            <Text style={clientStyles.value}>
-              {formatDocumentType(orderData?.cliente_tipo_documento || "")}
-            </Text>
-          </View>
-        </View>
-
-        <View style={clientStyles.gridRowLast}>
-          <View style={clientStyles.labelCell}>
-            <Text style={clientStyles.label}>Número de Documento:</Text>
-          </View>
-          <View style={clientStyles.valueCell}>
-            <Text style={clientStyles.value}>
-              {orderData?.cliente_documento || 'N/A'}
-            </Text>
-          </View>
-        </View>
-
-        {sameAsOwner && (
-          <View style={clientStyles.sameAsOwnerBadge}>
-            <Text style={clientStyles.sameAsOwnerText}>
-              ✓ El cliente es el propietario del vehículo
-            </Text>
-          </View>
-        )}
+    <View style={clientStyles.gridRow}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Tipo de Documento:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {formatDocumentType(orderData?.cliente_tipo_documento || "")}
+        </Text>
       </View>
     </View>
+
+    <View style={clientStyles.gridRow}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Número de Documento:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {orderData?.cliente_documento || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={clientStyles.gridRow}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Teléfono:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {orderData?.cliente_telefono || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={clientStyles.gridRow}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Correo Electrónico:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {orderData?.cliente_email || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    <View style={clientStyles.gridRowLast}>
+      <View style={clientStyles.labelCell}>
+        <Text style={clientStyles.label}>Dirección:</Text>
+      </View>
+      <View style={clientStyles.valueCell}>
+        <Text style={clientStyles.value}>
+          {orderData?.cliente_direccion || 'N/A'}
+        </Text>
+      </View>
+    </View>
+
+    {sameAsOwner && (
+      <View style={clientStyles.sameAsOwnerBadge}>
+        <Text style={clientStyles.sameAsOwnerText}>
+          ✓ El cliente es el propietario del vehículo
+        </Text>
+      </View>
+    )}
+  </View>
+</View>
   );
 }
 
