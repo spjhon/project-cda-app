@@ -474,7 +474,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
 
     ],
-    [tenantId, mutation, rol],
+    [],
   );
 
   const table = useReactTable({

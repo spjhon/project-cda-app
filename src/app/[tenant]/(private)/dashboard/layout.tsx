@@ -6,7 +6,7 @@ import PermissionsLoaderContext from "@/contexts/PermissionsLoaderContext";
 import { ReactNode, Suspense } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EntryOrderListItem, fetchEntryOrders } from "@/lib/server-actions/fetch_entry_orders_list";
-import { startOfMonth, format } from "date-fns";
+import { format } from "date-fns";
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 
 interface DashboardLayout {
@@ -137,8 +137,9 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
       redirect( `/error?type=Error al extraer tenant: ${tenantResult.error}`);
     }
 
-    const fechaDesde = format(startOfMonth(new Date()), "yyyy-MM-dd");
-    const fechaHasta = format(new Date(), "yyyy-MM-dd");
+    const hoy = format(new Date(), "yyyy-MM-dd");
+const fechaDesde = hoy;
+const fechaHasta = hoy;
 
     // ==========================================
     // 3. Traer órdenes iniciales

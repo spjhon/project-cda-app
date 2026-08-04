@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, format } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -83,8 +83,8 @@ export default function EntryOrdersLoaderContext({
   const [showDeleted, setShowDeleted] = useState<boolean>(false);
   // 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
+    from: new Date(),
+    to: new Date(),
   });
   // 🌟 NUEVOS ESTADOS: Inicializados con fallbacks seguros para el CDA
   const [searchColumn, setSearchColumn] = useState<string>("placa"); // Por defecto busca por Placa
