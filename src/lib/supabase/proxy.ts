@@ -11,7 +11,7 @@ export async function updateSession(request: NextRequest) {
   const [hostname, port] = getHostnameAndPort(request); 
   const applicationPath = request.nextUrl.pathname;
  
-  console.log(`[${request.method}] Proxy path: ${applicationPath}`);
+
 
 
   const tenantSlug = hostname.split(".")[0];
@@ -36,12 +36,12 @@ export async function updateSession(request: NextRequest) {
 
 
 const RESTRICTED_HOST = ["127.0.0.1", "cda-app.com", "cda-app"];
-
-const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found", "/about"];
-
 const isMainDomain = RESTRICTED_HOST.includes(hostname);
 
+
+
 if (isMainDomain) {
+  const LANDING_ROUTES = ["/", "/admin", "/admin/dashboard", "/not-found", "/about"];
   const isAllowedRoute = LANDING_ROUTES.includes(applicationPath);
 
   // Si intenta entrar a algo que no está en la lista (ej: /dashboard o /auth)
@@ -70,7 +70,9 @@ if (isMainDomain) {
     return supabaseResponse;
   }
 
-  
+  // Definimos las rutas protegidas que sí necesitan validación JWT
+  const isProtectedDashboard = applicationPath.startsWith("/dashboard");
+  const isProtectedAdminDashboard = applicationPath.startsWith("/admin/dashboard");
 
   // 1. CLIENTE SUPABASE
   const supabase = createServerClient<Database>(
@@ -95,21 +97,23 @@ if (isMainDomain) {
     },
   );
 
-  const { data } = await supabase.auth.getClaims(); //se obtiene el claims osea el usuario
-  const sessionUser = data?.claims; //se obtiene el usuario si es que existe y esta autenticado
+ 
+
+
+// ÚNICAMENTE llamamos a getClaims() si la ruta es protegida
+  let sessionUser = null;
+  if (isProtectedDashboard || isProtectedAdminDashboard) {
+    const { data } = await supabase.auth.getClaims(); //se obtiene el claims osea el usuario
+    sessionUser = data?.claims; //se obtiene el usuario si es que existe y esta autenticado
+  }
+
 
   //OBTENCION Y VERIFICACION DEL TENANT DESDE LA DB CON UN CACHE DE 1 MINUTO
 
   
   const tenantName = tenantSlug; //tenantData?.domain
 
-  /** 
-  if (!tenantName || error) {
-    console.log("Error proxy al buscar tenant")
-    console.dir(error, {depth: null})
-    return NextResponse.redirect(buildUrl(`/error?type=${error instanceof PostgrestError ? "Error proxy al buscar tenant: " + error.message : "Error proxy al buscar tenant."}`, tenantSlug, request), { status: 303 });
-  } 
-*/
+  
 
   //PROTECCION DE RUTAS
 

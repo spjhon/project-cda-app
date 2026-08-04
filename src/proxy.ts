@@ -1,20 +1,18 @@
-import { type NextRequest } from "next/server"
-import { updateSession } from "@/lib/supabase/proxy"
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
-  const res = await updateSession(request)
-  return res
+  return await updateSession(request);
 }
 
 export const config = {
   matcher: [
     /*
-     * 1. Mantenemos tus exclusiones: _next, favicon e imágenes.
-     * 2. Agregamos protección contra bots: 
-     * - Archivos .php (ataques comunes)
-     * - Prefijos wp- (WordPress scans)
-     * - Archivos .env (intentos de robo de credenciales)
+     * Excluimos explícitamente:
+     * - _next/static, _next/image
+     * - Archivos estáticos comunes (imágenes, fuentes, favicons, json, txt)
+     * - Ataques de bots (.php, wp-, .env)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|.*\\.php$|wp-.*|\\.env).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico|json)$|.*\\.php$|wp-.*|\\.env).*)",
   ],
-}
+};
