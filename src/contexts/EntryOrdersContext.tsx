@@ -185,7 +185,7 @@ export default function EntryOrdersLoaderContext({
 
     },
     initialData: entryOrdersTableData,
-    staleTime: 0,
+    staleTime: 10000,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
   });

@@ -25,7 +25,7 @@ export interface UserContextData {
   is_active: boolean;
 }
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
   params,
 }: DashboardLayout) {

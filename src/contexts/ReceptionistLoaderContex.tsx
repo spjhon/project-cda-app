@@ -79,7 +79,7 @@ export default function ReceptionistLoaderContext({
       return (data as unknown as OrderTemplate[]) || [];
     },
     initialData: templateTableData,
-    staleTime: 0,
+    staleTime: 10000,
     refetchInterval: 10000,
     refetchOnWindowFocus: false,
   });

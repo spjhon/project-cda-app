@@ -3,7 +3,7 @@
 import { createSupabaseAdminClient } from "../supabase/admin";
 import { PostgrestError } from "@supabase/supabase-js";
 import { cache } from "react";
-//import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 type TenantData = {
   domain: string;
@@ -29,7 +29,7 @@ export const fetchTenantData = cache(async (tenantSlug: string): Promise<TenantF
 
 
 
-  /**
+  
   // La directiva 'use cache' indica que esta función debe ser cacheada por Next.js
   //ESTE CACHE CAUSA ABORTOS EN DESARROLLO, DESCOMENTAR CUANDO SE VAYA A IR A PRODUCCION
   "use cache";
@@ -37,9 +37,10 @@ export const fetchTenantData = cache(async (tenantSlug: string): Promise<TenantF
   // Definimos un tag único basado en el slug para invalidación precisa
   cacheTag(`tenant-${tenantSlug}`);
 
-  // Configuramos la revalidación a 30 segundos usando perfiles o valores numéricos
-  cacheLife({ revalidate: 20, stale: 20, expire: 3600 });
- */
+ // Configuración de vida útil del caché en el servidor
+    // Para un Tenant (datos que casi nunca cambian), 1 hora de revalidación es excelente
+    cacheLife("hours");
+ 
 
 
 

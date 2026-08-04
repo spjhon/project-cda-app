@@ -197,7 +197,7 @@ const supabaseBrowser = createSupabaseBrowserClient()
 
     },
     initialData: initialPQAFData,
-    staleTime: 0,
+    staleTime: 10000,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
   });
