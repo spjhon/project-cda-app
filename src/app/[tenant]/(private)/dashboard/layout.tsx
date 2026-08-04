@@ -146,7 +146,7 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
     const ordersResult = await fetchEntryOrders({
       tenantId: tenantResult.data.id,
 
-      limit: 5,
+      limit: 50,
       fechaDesde: fechaDesde,
       fechaHasta: fechaHasta,
       offset: 0,

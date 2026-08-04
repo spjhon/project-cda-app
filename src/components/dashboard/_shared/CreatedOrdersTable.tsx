@@ -195,7 +195,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setSearchTerm = () => {},
     page = 1,
     setPage = () => {},
-    rowsPerPage = 5,
+    rowsPerPage = 50,
     setRowsPerPage = () => {},
   } = query || {};
 

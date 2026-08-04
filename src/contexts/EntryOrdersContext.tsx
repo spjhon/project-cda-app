@@ -92,7 +92,7 @@ export default function EntryOrdersLoaderContext({
 
   //paginacion       // Texto vacío al inicio
   const [page, setPage] = useState<number>(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(5); // Por defecto 10 filas
+  const [rowsPerPage, setRowsPerPage] = useState<number>(50); // Por defecto 10 filas
 
 
 
