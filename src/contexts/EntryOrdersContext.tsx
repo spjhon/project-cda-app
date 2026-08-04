@@ -16,7 +16,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface ReceptionistLoaderContext {
   children: ReactNode;
-  entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
+ // entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
 }
 
 export interface EntryOrdersLoaderContextType {
@@ -72,7 +72,7 @@ export interface EntryOrdersLoaderContextType {
 export const EntryOrdersContext = createContext<EntryOrdersLoaderContextType | null>(null);
 
 export default function EntryOrdersLoaderContext({
-  entryOrdersTableDataPromise,
+  
   children,
 }: ReceptionistLoaderContext) {
   //state para para que el query siepre mantenta el contexto de lo que debe mantener actualizado y en constante pooling
@@ -103,7 +103,7 @@ export default function EntryOrdersLoaderContext({
   const permissionscontextRecived = useContext(PermissionsContext);
   const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
-  const entryOrdersTableData = use(entryOrdersTableDataPromise);
+  //const entryOrdersTableData = use(entryOrdersTableDataPromise);
 
   const pathname = usePathname();
 
@@ -184,8 +184,8 @@ export default function EntryOrdersLoaderContext({
       return (data as EntryOrderListItem[]) || [];
 
     },
-    initialData: entryOrdersTableData,
-    staleTime: 10000,
+    initialData: null,
+    staleTime: 0,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
   });

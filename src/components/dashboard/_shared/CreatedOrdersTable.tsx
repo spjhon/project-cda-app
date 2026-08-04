@@ -523,6 +523,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
           </div>
 
           <Select
+          items={SELECT_COLUMNAS}
             value={orderByColumn}
             onValueChange={(v) => setOrderByColumn(v ? v : "fecha")}
           >

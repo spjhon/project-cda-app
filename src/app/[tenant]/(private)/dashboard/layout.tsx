@@ -117,7 +117,7 @@ const tenantPromise = (async () => {
 
 
 
-  
+  /** 
 
 const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
   (async () => {
@@ -162,7 +162,7 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
   })();
 
 
-
+*/
 
 
 
@@ -176,7 +176,7 @@ const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
          * Como children esta dentro de PermissionsLoaderContext, estos children no van a cargar sino hasta que lo que este dentro de PermissionsLoaderContext termine de cargar
          */}
         <PermissionsLoaderContext tenantPromise={tenantPromise} userPromise={userPromise} RolesDataPromise={RolesDataPromise}>
-          <EntryOrdersLoaderContext entryOrdersTableDataPromise={entryOrdersTableDataPromise}>
+          <EntryOrdersLoaderContext >
           {children}
           </EntryOrdersLoaderContext>
         </PermissionsLoaderContext>
