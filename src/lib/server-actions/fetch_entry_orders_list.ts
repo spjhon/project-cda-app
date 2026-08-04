@@ -7,6 +7,23 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // ======================================================
 // Tipos de una fila devuelta por fetch_entry_orders_list
 // ======================================================
+
+export interface TirePressureDetail {
+  id: string;
+  eje: number;
+  posicion: 
+    | "izquierda"
+    | "derecha"
+    | "centro"
+    | "izquierda_interior"
+    | "derecha_interior"
+    | "repuesto";
+  presion_encontrada: number | null;
+  presion_ajustada: number | null;
+}
+
+
+
 export type OfficePaymentType = 
   | 'efectivo' 
   | 'tarjeta_debito' 
@@ -16,45 +33,58 @@ export type OfficePaymentType =
   | 'transferencia' 
   | 'qr';
 
+
+
+
+  
 export interface EntryOrderListItem {
   id: string;
   placa: string;
   fecha: string;
   marca: string;
   linea: string;
-  
+
   // Datos del Propietario (Snapshots)
   propietario_nombre: string;
   propietario_documento: string;
   propietario_tipo_documento: string;
-  
+  propietario_telefono: string | null;  // 🌟 NUEVO
+  propietario_email: string | null;     // 🌟 NUEVO
+  propietario_direccion: string | null; // 🌟 NUEVO
+
   // Datos del Cliente (Snapshots)
   cliente_nombre: string;
   cliente_documento: string;
   cliente_tipo_documento: string;
-  
+  cliente_telefono: string | null;      // 🌟 NUEVO
+  cliente_email: string | null;         // 🌟 NUEVO
+  cliente_direccion: string | null;     // 🌟 NUEVO
+
   // Datos Operativos del Vehículo
   es_reinspeccion: boolean;
   kilometraje: string | null;
   soat_vencimiento_snapshot: string | null;
-  service_type: "RTM" | string; // Ajusta si manejas más tipos de servicio en el enum
+  service_type: "RTM" | string;
   vehiculo_tipo_snapshot: string;
   vehiculo_tipo_servicio_snapshot: string;
   estado_orden: string;
 
-  // 🌟 NUEVOS CAMPOS: INFORMACIÓN DE OFICINA
+  // Información de Oficina
   oficina_pin: string | null;
-  oficina_pago: number | null; // Mapea el numeric(12,2) de Postgres
+  oficina_pago: number | null;
   oficina_consecutivo_factura: string | null;
   oficina_tipo_pago: OfficePaymentType | null;
-  oficina_num_aprobacion: string | null,
-  
+  oficina_num_aprobacion: string | null;
+
   se_compro_soat: boolean;
   resultado_revision: string | null;
-  
-// 🌟 INYECTAR AQUÍ: Consecutivos de cierre técnico (ISO 17020)
+
+  // Consecutivos de cierre técnico (ISO 17020)
   consecutivo_fur: string | null;
   consecutivo_rtm: string | null;
+
+  // 🌟 NUEVO: Presiones de Llantas (agrupadas como JSONB)
+  presiones_llantas: TirePressureDetail[];
 
   // Metadata de paginación
   total_count: number;
