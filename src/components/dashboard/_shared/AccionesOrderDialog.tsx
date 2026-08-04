@@ -4,10 +4,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, FileText, Ban, } from "lucide-react";
+import { FileText, Ban } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
@@ -21,12 +19,14 @@ interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
   mutation: {
-    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string; }, unknown>;
+    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string }, unknown>;
     isCancelingOrder: boolean;
     errorCancelingOrder: Error | null;
     resetCancelError: () => void;
   };
   rol: string | undefined;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export default function AccionesOrderDialog({
@@ -34,8 +34,10 @@ export default function AccionesOrderDialog({
   tenantId,
   mutation,
   rol,
+  open,
+  onOpenChange,
 }: AccionesOrderDialogProps) {
-  // 🌟 Control 1: Si el rol es undefined, no se expone ninguna acción por seguridad
+  // 🌟 Control 1: Si el rol es undefined, no se expone ninguna acción
   if (!rol) {
     console.log("Acción denegada: El rol actual es undefined");
     return null;
@@ -44,31 +46,15 @@ export default function AccionesOrderDialog({
   // 🌟 Tratamiento para RECEPCIONISTA
   if (rol === "recepcionista") {
     return (
-      <Dialog>
-        {/* Botón disparador del diálogo usando la sintaxis render de Base UI */}
-        <DialogTrigger
-          render={(props) => (
-            <Button
-              {...props}
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-none"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Abrir acciones</span>
-            </Button>
-          )}
-        />
-
-        {/* Ventana flotante del Diálogo - Ajustado a un tamaño más grande (max-w-xl) */}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {/* Sin DialogTrigger: el botón vive ahora en la celda de la tabla */}
         <DialogContent className="sm:max-w-xl p-6 border-border bg-background">
           <DialogHeader className="text-center sm:text-center flex flex-col items-center">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground justify-center">
               <FileText className="h-5 w-5 text-amber-500 dark:text-amber-400" />
               Operaciones de Orden de Entrada
             </DialogTitle>
-            
-            {/* Descripción más grande, centrada y placa súper llamativa */}
+
             <DialogDescription className="text-muted-foreground text-sm mt-3 max-w-md text-center leading-relaxed">
               Gestión de documentos públicos y estado operativo para la placa:
               <span className="block mt-2 text-lg font-black text-foreground bg-muted px-4 py-1.5 rounded-md border border-border tracking-wider w-fit mx-auto shadow-xs">
@@ -77,10 +63,8 @@ export default function AccionesOrderDialog({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Grid de acciones requeridas para Recepción con contenidos centrados */}
           <div className="grid gap-6 py-4">
-            
-            {/* Sección PDF: Centrada */}
+            {/* Sección PDF */}
             <div className="flex flex-col gap-2.5 text-center">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Documentación PDF
@@ -91,77 +75,78 @@ export default function AccionesOrderDialog({
               </div>
             </div>
 
-            {/* Sección Anular o Mensaje de Anulada: Centrada */}
+            {/* Sección Control de Estado */}
             <div className="flex flex-col gap-2.5 text-center">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Control de Estado
               </span>
-              {/* CONTENEDOR DINÁMICO: Ajusta su fondo/borde según si está bloqueado o permitido */}
-              <div className={`flex items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
-                orden.estado_orden === "abierta" 
-                  ? "bg-muted/30 border-border/40" // Fondo neutro adaptado
-                  : "bg-destructive/5 border-destructive/20"    // Fondo de advertencia adaptado
-              }`}>
-
+              <div
+                className={`flex items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
+                  orden.estado_orden === "abierta"
+                    ? "bg-muted/30 border-border/40"
+                    : "bg-destructive/5 border-destructive/20"
+                }`}
+              >
                 {orden.estado_orden !== "abierta" ? (
-                  /* CASO DE BLOQUEO: Cualquier estado diferente a 'abierta' (en_prueba, finalizada, anulada) */
                   <div className="flex items-center gap-2 text-sm font-semibold text-destructive bg-destructive/10 px-5 py-2.5 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none">
                     <Ban className="h-4 w-4 shrink-0 text-destructive" />
                     <span>
-                      {orden.estado_orden === "anulada" 
-                        ? "Esta orden ya fue anulada" 
-                        : `No se puede anular la orden porque se encuentra en estado '${orden.estado_orden.replace('_', ' ')}'`}
+                      {orden.estado_orden === "anulada"
+                        ? "Esta orden ya fue anulada"
+                        : `No se puede anular la orden porque se encuentra en estado '${orden.estado_orden.replace("_", " ")}'`}
                     </span>
                   </div>
                 ) : (
-                  /* CASO PERMITIDO: La orden está estrictamente 'abierta' */
                   <CancelOrder
                     orden={orden}
                     tenantId={tenantId}
                     mutation={mutation}
                   />
                 )}
-
               </div>
             </div>
-            
           </div>
         </DialogContent>
       </Dialog>
     );
   }
-  // 🌟 Espacio reservado para los siguientes roles (oficina, gerente, etc.)
-  // Por ahora, si no es recepcionista no muestra nada hasta que los programemos.
 
   // 🌟 Tratamiento para OFICINA
   if (rol === "oficina") {
     return (
-      <AccionesOrderOfficeDialog 
-        orden={orden} 
-        tenantId={tenantId} 
-        rol={rol} 
+      <AccionesOrderOfficeDialog
+        orden={orden}
+        tenantId={tenantId}
+        rol={rol}
         mutation={mutation}
+        open={open}
+        onOpenChange={onOpenChange}
       />
     );
   }
 
-
+  // 🌟 Tratamiento para DIRECTOR TÉCNICO
   if (rol === "director-tecnico") {
     return (
-      <AccionesOrderDirectorTecnicoDialog 
-        orden={orden} 
-        tenantId={tenantId} 
-        rol={rol} 
+      <AccionesOrderDirectorTecnicoDialog
+        orden={orden}
+        tenantId={tenantId}
+        rol={rol}
         mutation={mutation}
+        open={open}
+        onOpenChange={onOpenChange}
       />
     );
   }
 
+  // 🌟 Tratamiento para ADMIN
   if (rol === "admin") {
     return (
-      <VerDetalleOrdenAdminDialog 
-        orden={orden} 
-        tenantId={tenantId} 
+      <VerDetalleOrdenAdminDialog
+        orden={orden}
+        tenantId={tenantId}
+        open={open}
+        onOpenChange={onOpenChange}
       />
     );
   }

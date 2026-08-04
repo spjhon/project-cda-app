@@ -56,6 +56,7 @@ import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
 import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
+import { Button } from "@/components/ui/button";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -172,6 +173,10 @@ export default function CreatedOrdersTable() {
 
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
   const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+
+  //con este state vamos a aislar el dialog de las acciones para que si se actualiza la tabla, no se actualice el dialog al mismo tiempo
+const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(null);
+
 
   const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
@@ -441,23 +446,33 @@ export default function CreatedOrdersTable() {
         },
       }),
 
-      columnHelper.display({
-        id: "acciones",
-        header: "Acciones",
-        cell: ({ row }) => {
-          const orden = row.original;
-          if (!mutation) return null;
 
-          return (
-            <AccionesOrderDialog
-              orden={orden}
-              tenantId={tenantId}
-              mutation={mutation}
-              rol={rol}
-            />
-          );
-        },
-      }),
+
+
+
+
+     columnHelper.display({
+  id: "acciones",
+  header: "Acciones",
+  cell: ({ row }) => {
+    const orden = row.original;
+
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setSelectedOrden(orden)}
+      >
+        Acciones
+      </Button>
+    );
+  },
+}),
+
+
+
+
+
     ],
     [tenantId, mutation, rol],
   );
@@ -477,6 +492,19 @@ export default function CreatedOrdersTable() {
 
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm ">
+      {/* DIÁLOGO ELEVADO (Fuera de la tabla) */}
+{selectedOrden && mutation && (
+  <AccionesOrderDialog
+    orden={selectedOrden}
+    tenantId={tenantId}
+    mutation={mutation}
+    rol={rol}
+    open={Boolean(selectedOrden)}
+    onOpenChange={(open) => {
+      if (!open) setSelectedOrden(null);
+    }}
+  />
+)}
       {/* SECCIÓN SUPERIOR: Info, Selects de Ordenamiento y Estado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-baseline gap-2">
