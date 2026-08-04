@@ -468,6 +468,13 @@ export default function CreatedOrdersTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+
+
+
+
+
+  
+
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm ">
       {/* SECCIÓN SUPERIOR: Info, Selects de Ordenamiento y Estado */}

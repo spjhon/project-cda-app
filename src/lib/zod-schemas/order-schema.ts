@@ -1,8 +1,5 @@
 // lib/schemas/order-form.schema.ts
 
-
-
-
 import { z } from "zod";
 
 /* =========================================================
@@ -34,12 +31,12 @@ const ClaseVehiculoEnum = [
   "motocicleta",
   "motocarro",
   "mototriciclo",
-  "cuatrimoto", // Ajustado de 'cuadrimoto' a 'cuatrimoto' según tu lista
+  "cuatrimoto",
   "remolque",
-  "semiremolque", // Ajustado con una sola 'r' según tu lista
+  "semiremolque",
   "volqueta",
   "sin_clase",
-  "maquinaria_construccion_o_minera", // Ajustado para coincidir con MAQ. CONSTRUCCION...
+  "maquinaria_construccion_o_minera",
   "ciclomotor",
   "tricimoto",
   "cuadriciclo",
@@ -141,85 +138,88 @@ export const PersonFormSchema = z.object({
 export const VehicleDataSchema = z.object({
   id: z.uuid().nullable(),
 
- placa: z
-  .string()
-  .trim() // 1. Limpiamos espacios primero
-  .min(5, "La placa debe tener al menos 5 caracteres") // 2. Validamos tamaño mínimo
-  .max(10, "La placa no puede exceder los 10 caracteres") // 3. Validamos tamaño máximo
-  .toUpperCase(), // 4. Al final, si todo es válido, lo transformamos a MAYÚSCULAS
+  placa: z
+    .string()
+    .trim()
+    .min(5, "La placa debe tener al menos 5 caracteres")
+    .max(10, "La placa no puede exceder los 10 caracteres")
+    .toUpperCase(),
 
   marca: z.string().min(1, "La marca es requerida"),
 
   linea: z.string().min(1, "La línea es requerida"),
 
   modelo: z
-  .string()
-  .length(4, { message: "El modelo debe tener exactamente 4 dígitos" })
-  .regex(/^\d+$/, { message: "El modelo solo debe contener números" }),
+    .string()
+    .length(4, { message: "El modelo debe tener exactamente 4 dígitos" })
+    .regex(/^\d+$/, { message: "El modelo solo debe contener números" }),
 
   color: z.string().min(1, "El color es requerido"),
 
   tipo_vehiculo: z.union([
- z.enum(TipoVehiculoEnum),
- z.literal("")
-  ],{error: () => ({ message: "El tipo de vehiculo es requerido o es invalido" })}),
+    z.enum(TipoVehiculoEnum),
+    z.literal("")
+  ], { error: () => ({ message: "El tipo de vehiculo es requerido o es invalido" }) }),
   
-  
-  
-  
- 
-
   clase: z.union([
-     z.enum(ClaseVehiculoEnum),
-     z.literal("")
-
-  ], {error: () => ({ message: "La clase de vehiculo es requerido o es invalido" })}),
+    z.enum(ClaseVehiculoEnum),
+    z.literal("")
+  ], { error: () => ({ message: "La clase de vehiculo es requerido o es invalido" }) }),
   
-  
- 
-
   combustible: z.union([
     z.enum(CombustibleEnum),
     z.literal("")
-  ], {error: () => ({ message: "El tipo de combustible es requerido o es invalido" })}),
+  ], { error: () => ({ message: "El tipo de combustible es requerido o es invalido" }) }),
 
   cilindrada: z
-  .string()
-  .min(2, { message: "Cilindrada inválida" }) // Al menos 2 dígitos (ej. 50)
-  .regex(/^\d+$/, { message: "La cilindrada solo debe contener números" })
-  .refine((val) => Number(val) >= 50, {
-    message: "La cilindrada mínima es 50",
-  }),
+    .string()
+    .min(2, { message: "Cilindrada inválida" })
+    .regex(/^\d+$/, { message: "La cilindrada solo debe contener números" })
+    .refine((val) => Number(val) >= 50, {
+      message: "La cilindrada mínima es 50",
+    }),
 
   blindaje: z.boolean(),
 
   capacidad_pasajeros: z
-  .string()
-  .min(1, { message: "La capacidad es obligatoria" })
-  .regex(/^\d+$/, { message: "Solo se permiten números" })
-  .refine((val) => Number(val) >= 1, {
-    message: "La capacidad mínima es 1 pasajero",
-  }),
+    .string()
+    .min(1, { message: "La capacidad es obligatoria" })
+    .regex(/^\d+$/, { message: "Solo se permiten números" })
+    .refine((val) => Number(val) >= 1, {
+      message: "La capacidad mínima es 1 pasajero",
+    }),
 
   es_ensenanza: z.boolean(),
 
-  //tipo_servicio_vehiculo: z.enum(TipoServicioVehiculoEnum, "Tipo de servicio requerido o esta erroneo").or(z.literal("", "El campo puede estar erroneo")),
-
-
-tipo_servicio_vehiculo: z.union(
-  [
-    z.enum(TipoServicioVehiculoEnum),
-    z.literal("")
-  ],
-  {
-    // En lugar de errorMap, se usa 'error' así:
-    error: () => ({ message: "El tipo de servicio es requerido o es inválido" })
-  }
-),
+  tipo_servicio_vehiculo: z.union(
+    [
+      z.enum(TipoServicioVehiculoEnum),
+      z.literal("")
+    ],
+    {
+      error: () => ({ message: "El tipo de servicio es requerido o es inválido" })
+    }
+  ),
 
   propietario_actual_id: z.uuid().nullable(),
 
   es_extranjero: z.boolean(),
+
+  // =========================================================
+  // 🆕 NUEVOS CAMPOS DEL RUNT
+  // =========================================================
+
+  // SOAT
+  soat_vigente_de_acuerdo_al_runt: z.string().optional(),
+
+  // RTM
+  fecha_vencimiento_rtm: z.string().optional(),
+  organismo_que_expidio_ultima_rtm: z.string().optional(),
+  rtm_vigente_de_acuerdo_al_runt: z.string().optional(),
+  se_encontro_fecha_vencimiento_rtm: z.string().optional(),
+
+  // Fecha de matrícula
+  fecha_matricula: z.string().optional(),
 });
 
 /* =========================================================
@@ -232,9 +232,9 @@ export const TirePressureEntrySchema = z.object({
   posicion: z.enum(TirePositionEnum, "Se requeire tener una posicion o esta errada"),
 
   presion_encontrada: z
-  .string()
-  .trim()
-  .min(1, "La presión es requerida"), // Evita que envíen campos vacíos
+    .string()
+    .trim()
+    .min(1, "La presión es requerida"),
 
   presion_ajustada: z.string(),
 
@@ -261,7 +261,6 @@ export const SignatureResultSchema = z.object({
 
   representative_type: z.string(),
 
-  // base64 o URL
   signature_url: z
     .string()
     .min(1, "La firma es requerida"),
@@ -350,7 +349,6 @@ export const ZodFullFormDataSchema = z.object({
    TYPES INFERIDOS
 ========================================================= */
 
-
 export type ZodFullFormDataType = z.infer<typeof ZodFullFormDataSchema>;
 
 export type ConditionResultEntry = z.infer<typeof ConditionResultEntrySchema>;
@@ -373,4 +371,4 @@ export type TipoServicioVehiculoEnumType = (typeof TipoServicioVehiculoEnum)[num
 
 export type TipoVehiculoEnumType = (typeof TipoVehiculoEnum)[number];
 
-export type EstadoOrdenEnumType = (typeof EstadoOrdenEnum)[number]
+export type EstadoOrdenEnumType = (typeof EstadoOrdenEnum)[number];

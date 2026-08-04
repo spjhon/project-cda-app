@@ -89,6 +89,14 @@ export function getInitialOrderFormData(
       tipo_servicio_vehiculo: "",
       propietario_actual_id: null,
       es_extranjero: false,
+
+      // 🆕 NUEVOS CAMPOS DEL RUNT
+      soat_vigente_de_acuerdo_al_runt: "",
+      fecha_vencimiento_rtm: "",
+      organismo_que_expidio_ultima_rtm: "",
+      rtm_vigente_de_acuerdo_al_runt: "",
+      se_encontro_fecha_vencimiento_rtm: "",
+      fecha_matricula: "",
     },
 
     // --- REGISTRO DE PRESIONES DE LLANTAS ---
@@ -370,83 +378,98 @@ export default function NewEntryOrder() {
 
         setShowSuccessDialog(true);
 
-        setFormData((prev) => ({
-          ...prev,
+      setFormData((prev) => ({
+  ...prev,
 
-          // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
+  // --- DATOS DE CONTROL Y LLAVES EXTERNAS ---
+  // (Estos NO se limpian porque son fijos: tenant_id, funcionario_id, plantilla_id, id_reprobado)
 
-          // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
-          kilometraje: "",
-          es_reinspeccion: false,
-          service_type: "RTM",
-          estado_orden: "abierta",
-          observaciones: "",
-          soat_vencimiento_snapshot: "",
-          gas_numero_snapshot: "",
-          gas_vencimiento_snapshot: "",
+  // --- DATOS DINÁMICOS DE LA ORDEN (Snapshots) ---
+  kilometraje: "",
+  es_reinspeccion: false,
+  service_type: "RTM",
+  estado_orden: "abierta",
+  observaciones: "",
+  soat_vencimiento_snapshot: "",
+  gas_numero_snapshot: "",
+  gas_vencimiento_snapshot: "",
 
-          vehicle: {
-            id: null,
-            placa: "",
-            marca: "",
-            linea: "",
-            modelo: "",
-            color: "",
-            tipo_vehiculo: "",
-            clase: "",
-            combustible: "",
-            cilindrada: "",
-            blindaje: false,
-            capacidad_pasajeros: "",
-            es_ensenanza: false,
-            tipo_servicio_vehiculo: "",
-            propietario_actual_id: null,
-            es_extranjero: false,
-          },
+  // --- ENTIDAD VEHÍCULO ---
+  vehicle: {
+    id: null,
+    placa: "",
+    marca: "",
+    linea: "",
+    modelo: "",
+    color: "",
+    tipo_vehiculo: "",
+    clase: "",
+    combustible: "",
+    cilindrada: "",
+    blindaje: false,
+    capacidad_pasajeros: "",
+    es_ensenanza: false,
+    tipo_servicio_vehiculo: "",
+    propietario_actual_id: null,
+    es_extranjero: false,
 
-          // --- REGISTRO DE PRESIONES DE LLANTAS (Detalle de la Orden) ---
-          tire_pressures: [
-            {
-              eje: 1,
-              posicion: "centro",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
-            {
-              eje: 2,
-              posicion: "centro",
-              presion_encontrada: "",
-              presion_ajustada: "",
-              _requiere_ajuste: false,
-            },
-          ],
+    // 🆕 NUEVOS CAMPOS DEL RUNT (se limpian)
+    soat_vigente_de_acuerdo_al_runt: "",
+    fecha_vencimiento_rtm: "",
+    organismo_que_expidio_ultima_rtm: "",
+    rtm_vigente_de_acuerdo_al_runt: "",
+    se_encontro_fecha_vencimiento_rtm: "",
+    fecha_matricula: "",
+  },
 
-          condition_results: prev.condition_results,
-          signatures: prev.signatures.map((sig) => ({
-            ...sig,
-            signature_url: "",
-          })), // Reseteamos la URL a vacío,
-          customer_data: {
-            id: null,
-            tipo_documento: "cedula_ciudadania",
-            numero_documento: "",
-            nombre_completo: "",
-            telefono: "",
-            correo: "",
-            direccion: "",
-          },
-          owner_data: {
-            id: null,
-            tipo_documento: "cedula_ciudadania",
-            numero_documento: "",
-            nombre_completo: "",
-            telefono: "",
-            correo: "",
-            direccion: "",
-          },
-          is_owner_same_as_customer: false,
-        }));
+  // --- REGISTRO DE PRESIONES DE LLANTAS ---
+  tire_pressures: [
+    {
+      eje: 1,
+      posicion: "centro",
+      presion_encontrada: "",
+      presion_ajustada: "",
+      _requiere_ajuste: false,
+    },
+    {
+      eje: 2,
+      posicion: "centro",
+      presion_encontrada: "",
+      presion_ajustada: "",
+      _requiere_ajuste: false,
+    },
+  ],
+
+  // --- RESULTADOS DE CONDICIONES (se mantienen) ---
+  condition_results: prev.condition_results,
+
+  // --- FIRMAS (se resetea la URL) ---
+  signatures: prev.signatures.map((sig) => ({
+    ...sig,
+    signature_url: "",
+  })),
+
+  // --- DATOS DE CLIENTE Y PROPIETARIO ---
+  customer_data: {
+    id: null,
+    tipo_documento: "cedula_ciudadania",
+    numero_documento: "",
+    nombre_completo: "",
+    telefono: "",
+    correo: "",
+    direccion: "",
+  },
+  owner_data: {
+    id: null,
+    tipo_documento: "cedula_ciudadania",
+    numero_documento: "",
+    nombre_completo: "",
+    telefono: "",
+    correo: "",
+    direccion: "",
+  },
+  is_owner_same_as_customer: false,
+}));
 
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);

@@ -141,11 +141,41 @@ export default function RuntScraperModal({
             es_ensenanza:
               data.payload.es_ensenanza || prev.vehicle.es_ensenanza,
             linea: data.payload.lineaVehiculo || prev.vehicle.linea,
-
             marca: data.payload.marca_vehiculo || prev.vehicle.marca,
             modelo: data.payload.modelo_vehiculo || prev.vehicle.modelo,
             tipo_servicio_vehiculo:
               data.payload.tipo_servicio || prev.vehicle.tipo_servicio_vehiculo,
+
+            // RTM - Fecha de vencimiento
+            fecha_vencimiento_rtm:
+              data.payload.fecha_vencimiento_RTM ||
+              prev.vehicle.fecha_vencimiento_rtm,
+
+            // RTM - Organismo que expidió
+            organismo_que_expidio_ultima_rtm:
+              data.payload.organismo_que_expidio_la_ultima_RTM ||
+              prev.vehicle.organismo_que_expidio_ultima_rtm,
+
+            // RTM - Vigente según RUNT
+            rtm_vigente_de_acuerdo_al_runt:
+              data.payload.RTM_vigente_de_acuerdo_al_runt !== undefined
+                ? data.payload.RTM_vigente_de_acuerdo_al_runt
+                : prev.vehicle.rtm_vigente_de_acuerdo_al_runt,
+
+            // RTM - Se encontró fecha de vencimiento
+            se_encontro_fecha_vencimiento_rtm:
+              data.payload.se_encontro_fecha_vencimiento_RTM !== undefined
+                ? data.payload.se_encontro_fecha_vencimiento_RTM
+                : prev.vehicle.se_encontro_fecha_vencimiento_rtm,
+
+            // Fecha de matrícula
+            fecha_matricula:
+              data.payload.fecha_matricula || prev.vehicle.fecha_matricula,
+
+            // ✅ SOAT vigente - AHORA DENTRO DE vehicle
+            soat_vigente_de_acuerdo_al_runt:
+              data.payload.SOAT_vigente_de_acuerdo_al_RUNT ||
+              prev.vehicle.soat_vigente_de_acuerdo_al_runt,
           },
         }));
 
