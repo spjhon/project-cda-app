@@ -5,8 +5,11 @@ import { redirect } from "next/navigation";
 import PermissionsLoaderContext from "@/contexts/PermissionsLoaderContext";
 import { ReactNode, Suspense } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { EntryOrderListItem, fetchEntryOrders } from "@/lib/server-actions/fetch_entry_orders_list";
-import { format } from "date-fns";
+import {
+  EntryOrderListItem,
+  fetchEntryOrders,
+} from "@/lib/server-actions/fetch_entry_orders_list";
+
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 
 interface DashboardLayout {
@@ -25,19 +28,19 @@ export interface UserContextData {
   is_active: boolean;
 }
 
-export default function DashboardLayout({
-  children,
-  params,
-}: DashboardLayout) {
-  
+
+export const instant = false;
+
+export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
 
 
-const tenantPromise = (async () => {
+  const tenantPromise = (async () => {
     const { tenant } = await params;
     return fetchTenantData(tenant);
-  })();;
+  })();
+
 
 
 
@@ -83,7 +86,7 @@ const tenantPromise = (async () => {
       document_type: serviceUserData?.document_type,
       document_number: serviceUserData?.document_number,
       signature_base64: serviceUserData?.signature_base64,
-      is_active: serviceUserData?.is_active
+      is_active: serviceUserData?.is_active,
     };
   })();
 
@@ -117,50 +120,46 @@ const tenantPromise = (async () => {
 
 
 
-  
 
-const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
-  (async () => {
 
-    const { tenant } = await params;
 
-    // ==========================================
-    // 1. Resolver tenant slug -> tenant real
-    // ==========================================
-    const tenantResult = await fetchTenantData(tenant);
+  const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
+    (async () => {
+      const { tenant } = await params;
 
-    if (!tenantResult?.data?.id) {
-      redirect( `/error?type=Error, no existe tenant en entryOrdersTableDataPromise`);
-    }
+      // ==========================================
+      // 1. Resolver tenant slug -> tenant real
+      // ==========================================
+      const tenantResult = await fetchTenantData(tenant);
 
-    if (tenantResult.error !== null) {
-      redirect( `/error?type=Error al extraer tenant: ${tenantResult.error}`);
-    }
+      if (!tenantResult?.data?.id) {
+        redirect(
+          `/error?type=Error, no existe tenant en entryOrdersTableDataPromise`,
+        );
+      }
 
-    const hoy = format(new Date(), "yyyy-MM-dd");
-const fechaDesde = hoy;
-const fechaHasta = hoy;
+      if (tenantResult.error !== null) {
+        redirect(`/error?type=Error al extraer tenant: ${tenantResult.error}`);
+      }
 
-    // ==========================================
-    // 3. Traer órdenes iniciales
-    // ==========================================
-    const ordersResult = await fetchEntryOrders({
-      tenantId: tenantResult.data.id,
+      // ==========================================
+      // 3. Traer órdenes iniciales
+      // ==========================================
+      const ordersResult = await fetchEntryOrders({
+        tenantId: tenantResult.data.id,
 
-      limit: 50,
-      fechaDesde: fechaDesde,
-      fechaHasta: fechaHasta,
-      offset: 0,
+        limit: 50,
 
-   
-    });
+        offset: 0,
+      });
 
-    if (ordersResult.error !== null) {
-      redirect( `/error?type=Error al extraer órdenes: ${ordersResult.error}`);
-    }
+      if (ordersResult.error !== null) {
+        redirect(`/error?type=Error al extraer órdenes: ${ordersResult.error}`);
+      }
 
-    return ordersResult.data;
-  })();
+      return ordersResult.data;
+    })();
+
 
 
 
@@ -176,12 +175,23 @@ const fechaHasta = hoy;
          * de este layout es client tambien, entonces tiene acceso tambien al context.
          * Como children esta dentro de PermissionsLoaderContext, estos children no van a cargar sino hasta que lo que este dentro de PermissionsLoaderContext termine de cargar
          */}
-        <PermissionsLoaderContext tenantPromise={tenantPromise} userPromise={userPromise} RolesDataPromise={RolesDataPromise}>
-          <EntryOrdersLoaderContext entryOrdersTableDataPromise={entryOrdersTableDataPromise}>
-          {children}
+        <PermissionsLoaderContext
+          tenantPromise={tenantPromise}
+          userPromise={userPromise}
+          RolesDataPromise={RolesDataPromise}
+        >
+          <EntryOrdersLoaderContext
+            entryOrdersTableDataPromise={entryOrdersTableDataPromise}
+          >
+            {children}
           </EntryOrdersLoaderContext>
         </PermissionsLoaderContext>
       </Suspense>
     </>
   );
 }
+
+
+
+
+

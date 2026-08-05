@@ -185,7 +185,7 @@ export const fetchEntryOrders = cache(
       
 
       return {
-        data: (data as EntryOrderListItem[]) || [],
+        data: (data as unknown as EntryOrderListItem[]) || [],
         error: null,
       };
 

@@ -1027,9 +1027,12 @@ export type Database = {
       fetch_entry_order_by_id: {
         Args: { p_order_id: string; p_tenant_id?: string }
         Returns: {
+          cliente_direccion: string
           cliente_documento: string
+          cliente_email: string
           cliente_id: string
           cliente_nombre: string
+          cliente_telefono: string
           cliente_tipo_documento: string
           condiciones_plantilla: Json
           consecutivo: number
@@ -1059,9 +1062,12 @@ export type Database = {
           plantilla_texto_contractual: string
           plantilla_version: number
           presiones_llantas: Json
+          propietario_direccion: string
           propietario_documento: string
+          propietario_email: string
           propietario_id: string
           propietario_nombre: string
+          propietario_telefono: string
           propietario_tipo_documento: string
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string
@@ -1102,8 +1108,11 @@ export type Database = {
           p_tenant_id: string
         }
         Returns: {
+          cliente_direccion: string
           cliente_documento: string
+          cliente_email: string
           cliente_nombre: string
+          cliente_telefono: string
           cliente_tipo_documento: string
           consecutivo_fur: string
           consecutivo_rtm: string
@@ -1120,8 +1129,12 @@ export type Database = {
           oficina_pin: string
           oficina_tipo_pago: Database["public"]["Enums"]["office_payment_type_enum"]
           placa: string
+          presiones_llantas: Json
+          propietario_direccion: string
           propietario_documento: string
+          propietario_email: string
           propietario_nombre: string
+          propietario_telefono: string
           propietario_tipo_documento: string
           resultado_revision: string
           se_compro_soat: boolean

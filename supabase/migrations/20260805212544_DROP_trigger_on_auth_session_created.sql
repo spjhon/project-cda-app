@@ -1,0 +1,1 @@
+drop trigger if exists on_auth_session_created on auth.sessions;

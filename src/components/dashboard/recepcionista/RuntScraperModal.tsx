@@ -37,8 +37,7 @@ export const ID_DOCUMENT_OPTIONS = [
   { label: "Tarjeta de Identidad", value: "tarjeta_identidad" },
   { label: "Registro Civil", value: "registro_civil" },
   { label: "Carnet Diplomático", value: "carnet_diplomatico" },
-  { label: "N.N.", value: "nn" },
-  { label: "TI2", value: "ti2" },
+  { label: "Permiso por Protección Temporal", value: "permiso_por_proteccion_temporal" },
 ];
 
 export default function RuntScraperModal({

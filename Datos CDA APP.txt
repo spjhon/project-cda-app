@@ -41,6 +41,8 @@ PENDIENTES
 - recordar que a la tabla de las placas agregarles los filtros para datos de un solo numero de consulta, para la analitica es:
 	- las tablas de las tortas para las categorias de: combustible, tipo de vehiculo, torta especial entre motos 2 y 4 tiempos
 	- en las tablas de barra va, en uno solo total rtm, total preventiva, total peritaje, en otro los reprobados (solo de rtm por ahora) y el soat
+- hacer un cron job para eliminar todas las sessiones a la media noche
+- hacer una proteccion para que el dt tenga que hacer la firma si o si
 
 MAS COSITAS QUE FALTAN
 - podder editarlas condiciones de inspeccion en la plantilla

@@ -57,6 +57,7 @@ import AccionesOrderDialog from "./AccionesOrderDialog";
 import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { Button } from "@/components/ui/button";
+import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -180,6 +181,8 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
   const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
+  
+
   const {
     orderByColumn = "fecha",
     setOrderByColumn = () => {},
@@ -198,6 +201,10 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     rowsPerPage = 50,
     setRowsPerPage = () => {},
   } = query || {};
+
+
+
+   
 
   const [inputValue, setInputValue] = useState(searchTerm);
 
@@ -681,6 +688,10 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
           </PaginationContent>
         </Pagination>
       </div>
+
+      <PreviousDayOrdersAlert
+  
+/>
 
       {/* CONTENEDOR DE LA TABLA */}
       <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background">

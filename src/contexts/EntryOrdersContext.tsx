@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { startOfMonth, format } from "date-fns";
+import { startOfMonth, format, startOfDay, subDays } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -17,6 +17,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 interface ReceptionistLoaderContext {
   children: ReactNode;
   entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
+}
+
+export interface PendingPreviousDayOrder {
+  id: string;
+  consecutivo: number;
+  fecha: string;
+  estado_orden: "abierta" | "en_prueba" | "finalizada" | "anulada";
+  vehiculo_placa_snapshot: string;
 }
 
 export interface EntryOrdersLoaderContextType {
@@ -29,32 +37,41 @@ export interface EntryOrdersLoaderContextType {
       refetchEntryOrders: () => void;
       isEntryOrdersSuccess: boolean;
 
-      // 🌟 CAMBIAMOS A ESTADOS SIMPLES Y LEGIBLES
+      // Ordenamiento
       orderByColumn: string;
       setOrderByColumn: (column: string) => void;
       orderByDirection: "ASC" | "DESC";
       setOrderByDirection: (direction: "ASC" | "DESC") => void;
 
-      //la habilidad de poder ver los anulados
+      // Ver anulados
       showDeleted: boolean;
       setShowDeleted: (show: boolean) => void;
 
-      // 🌟 NUEVOS TIPOS PARA EL COMPONENTE DATE-PICKER
+      // Filtro por fechas
       dateRange: DateRange | undefined;
       setDateRange: (range: DateRange | undefined) => void;
 
-      // 🌟 NUEVOS ESTADOS PARA LA BÚSQUEDA AVANZADA
+      // Búsqueda
       searchColumn: string;
       setSearchColumn: (col: string) => void;
       searchTerm: string;
       setSearchTerm: (term: string) => void;
 
-      //🌟 tipado para la paginacion
+      // Paginación
       page: number;
       setPage: (page: number) => void;
       rowsPerPage: number;
       setRowsPerPage: (rows: number) => void;
     };
+
+    ordenesDelDiaAnteriorQuery: {
+      pendingPreviousDayOrders: PendingPreviousDayOrder[] | undefined;
+
+      isLoadingPendingPreviousDayOrders: boolean;
+      isPendingPreviousDayOrdersError: boolean;
+      pendingPreviousDayOrdersError: Error | null;
+    };
+
     mutation: {
       cancelOrder: UseMutateFunction<
         string,
@@ -69,7 +86,8 @@ export interface EntryOrdersLoaderContextType {
   };
 }
 
-export const EntryOrdersContext = createContext<EntryOrdersLoaderContextType | null>(null);
+export const EntryOrdersContext =
+  createContext<EntryOrdersLoaderContextType | null>(null);
 
 export default function EntryOrdersLoaderContext({
   entryOrdersTableDataPromise,
@@ -79,7 +97,9 @@ export default function EntryOrdersLoaderContext({
   //se modifica desde otro lado y se mantiene el state aqui.
   // 1. Creamos los dos estados limpios con sus valores por defecto
   const [orderByColumn, setOrderByColumn] = useState<string>("fecha");
-  const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">( "DESC" );
+  const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">(
+    "DESC",
+  );
   const [showDeleted, setShowDeleted] = useState<boolean>(false);
   // 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -94,14 +114,11 @@ export default function EntryOrdersLoaderContext({
   const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(50); // Por defecto 10 filas
 
-
-
-
-  
   const queryClient = useQueryClient();
 
   const permissionscontextRecived = useContext(PermissionsContext);
-  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId =
+    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const entryOrdersTableData = use(entryOrdersTableDataPromise);
 
@@ -154,9 +171,6 @@ export default function EntryOrdersLoaderContext({
         ? format(dateRange.to, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
 
-
-   
-
       const { data, error } = await supabaseBrowser.rpc(
         "fetch_entry_orders_list",
         {
@@ -179,22 +193,58 @@ export default function EntryOrdersLoaderContext({
 
       if (error) throw new Error(error.message);
 
-      
-      
-      return (data as EntryOrderListItem[]) || [];
-
+      return (data as unknown as EntryOrderListItem[]) || [];
     },
     initialData: entryOrdersTableData,
     staleTime: 0,
     refetchInterval: 15000,
-    refetchOnWindowFocus: false,
   });
 
+  //QUERY PARA VERIFICAR QUE NO HAYAN ORDENES DE ENTRADA ABIERTAS DEL DIA ANTERIOR
+const {
+  data: pendingPreviousDayOrders = [],
+  isLoading: isLoadingPendingPreviousDayOrders,
+  isError: isPendingPreviousDayOrdersError,
+  error: pendingPreviousDayOrdersError,
+} = useQuery<PendingPreviousDayOrder[]>({
+  queryKey: ["pending-previous-day-orders", tenantId],
 
+  enabled: !!tenantId,
 
+  staleTime: Infinity,
+  gcTime: Infinity,
 
+  queryFn: async () => {
+    const fechaDesde = startOfDay(subDays(new Date(), 7)).toISOString();
+    const fechaHasta = startOfDay(new Date()).toISOString();
 
+    if (!tenantId) {
+      throw new Error("Tenant ID no definido.");
+    }
 
+    const { data, error } = await supabaseBrowser
+      .from("entry_orders")
+      .select(`
+        id,
+        consecutivo,
+        fecha,
+        estado_orden,
+        vehiculo_placa_snapshot
+      `)
+      .eq("tenant_id", tenantId)
+      .gte("fecha", fechaDesde)
+      .lt("fecha", fechaHasta)
+      .in("estado_orden", ["abierta", "en_prueba"])
+      .is("deleted_at", null)
+      .order("consecutivo");
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data ?? [];
+  },
+});
 
   //Mutaciioon para la anulacion de la orden
   // Estructura de la mutación de TanStack Query
@@ -246,9 +296,6 @@ export default function EntryOrdersLoaderContext({
     },
   });
 
-
-
-
   const EntryOrdersContextValue = {
     entryOrdersTableData: {
       query: {
@@ -285,6 +332,12 @@ export default function EntryOrdersLoaderContext({
         rowsPerPage,
         setRowsPerPage,
       },
+      ordenesDelDiaAnteriorQuery: {
+        pendingPreviousDayOrders,
+        isLoadingPendingPreviousDayOrders,
+        isPendingPreviousDayOrdersError,
+        pendingPreviousDayOrdersError,
+      },
       mutation: {
         cancelOrder: cancelOrder,
         isCancelingOrder: isCancelingOrder,
@@ -295,7 +348,7 @@ export default function EntryOrdersLoaderContext({
   };
 
   return (
-    <EntryOrdersContext.Provider value={ EntryOrdersContextValue }>
+    <EntryOrdersContext.Provider value={EntryOrdersContextValue}>
       {children}
     </EntryOrdersContext.Provider>
   );

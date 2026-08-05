@@ -39,9 +39,10 @@ import { Input } from "@/components/ui/input";
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
 import { fetchDataWithPlaca } from "@/lib/server-actions/fetch_data_with_placa";
-import { getInitialOrderFormData } from "@/app/[tenant]/(private)/dashboard/recepcionista/page";
+
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import RuntScraperModal from "./RuntScraperModal";
+import { getInitialOrderFormData } from "./NewEntryOrderComponent";
 
 interface ServiceOption {
   id: ServiceType;
