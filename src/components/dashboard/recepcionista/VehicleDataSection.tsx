@@ -73,8 +73,6 @@ export const CLASE_OPTIONS: ClaseOption[] = [
   { value: "cuadriciclo", label: "Cuadriciclo" },
 ];
 
-
-
 const VEHICLE_TYPE_ITEMS = [
   { label: "Liviano", value: "liviano" },
   { label: "Pesado", value: "pesado" },
@@ -85,9 +83,6 @@ const VEHICLE_TYPE_ITEMS = [
   { label: "Motocarro 2T", value: "motocarro_2t" },
   { label: "Motocarro Diesel", value: "motocarro_diesel" },
 ];
-
-
-
 
 export interface VehicleDataSectionProps {
   /** * La plantilla técnica seleccionada actualmente.
@@ -109,48 +104,30 @@ export default function VehicleDataSection({
   formData,
   setFormData,
 }: VehicleDataSectionProps) {
+  const requiereGas =
+    formData.vehicle.combustible === "gas_natural_vehicular" ||
+    formData.vehicle.combustible === "gas_gasolina";
 
+  // Función auxiliar (puede ir fuera del componente)
+  const calcularAntiguedad = (fechaMatricula: string): string => {
+    if (!fechaMatricula) return "";
 
+    const hoy = new Date();
+    const fecha = new Date(fechaMatricula);
 
+    if (isNaN(fecha.getTime())) return "";
 
-const requiereGas =
-  formData.vehicle.combustible === "gas_natural_vehicular" ||
-  formData.vehicle.combustible === "gas_gasolina";
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    const mes = hoy.getMonth() - fecha.getMonth();
 
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
+      años--;
+    }
 
-  
-
-
-
-
-// Función auxiliar (puede ir fuera del componente)
-const calcularAntiguedad = (fechaMatricula: string): string => {
-  if (!fechaMatricula) return "";
-  
-  const hoy = new Date();
-  const fecha = new Date(fechaMatricula);
-  
-  if (isNaN(fecha.getTime())) return "";
-  
-  let años = hoy.getFullYear() - fecha.getFullYear();
-  const mes = hoy.getMonth() - fecha.getMonth();
-  
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
-    años--;
-  }
-  
-  if (años === 0) return "HACE MENOS DE UN AÑO";
-  if (años === 1) return "HACE 1 AÑO";
-  return `HACE ${años} AÑOS`;
-};
-
-
-
-
-
-
-
-
+    if (años === 0) return "HACE MENOS DE UN AÑO";
+    if (años === 1) return "HACE 1 AÑO";
+    return `HACE ${años} AÑOS`;
+  };
 
   return (
     <fieldset
@@ -173,7 +150,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Marca</Label>
-                
+
                 <Input
                   required
                   placeholder="Ej: Chevrolet"
@@ -191,7 +168,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Línea</Label>
-            
+
                 <Input
                   required
                   placeholder="Ej: Spark GT"
@@ -209,7 +186,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Modelo (Año)</Label>
-            
+
                 <Input
                   required
                   type="number"
@@ -229,7 +206,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Color</Label>
-              
+
                 <Input
                   required
                   placeholder="Ej: Blanco Galaxia"
@@ -259,7 +236,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold">Cilindrada (cc)</Label>
-             
+
                 <Input
                   required
                   type="number"
@@ -281,7 +258,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
                 <Label className="text-xs font-semibold">
                   Capacidad Pasajeros
                 </Label>
-              
+
                 <Input
                   required
                   type="number"
@@ -369,7 +346,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
                 <Label className="text-xs font-semibold">
                   Tipo de Vehículo
                 </Label>
-            
+
                 <Select
                   required
                   value={formData.vehicle.tipo_vehiculo}
@@ -441,225 +418,245 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
             </div>
           </div>
 
-        {/* GRUPO 3.3: Snapshots Legales (SOAT y GAS) */}
-<div className="pt-4 border-t border-border">
-  <div className="bg-card p-5 rounded-xl border border-blue-100 shadow-sm space-y-6">
-    <div className="flex items-center gap-2">
-      <ShieldCheck className="h-5 w-5 text-primary" />
-      <h3 className="text-sm font-bold text-foreground">
-        Documentación y Snapshots de Ley
-      </h3>
-    </div>
+          {/* GRUPO 3.3: Snapshots Legales (SOAT y GAS) */}
+          <div className="pt-4 border-t border-border">
+            <div className="bg-card p-5 rounded-xl border border-blue-100 shadow-sm space-y-6">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">
+                  Documentación y Snapshots de Ley
+                </h3>
+              </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* --- SOAT --- */}
-      <div className="space-y-2">
-        <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
-          <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
-        </Label>
-        <Input
-          required
-          type="date"
-          className="border-blue-100 focus:ring-blue-500"
-          value={formData.soat_vencimiento_snapshot || ""}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              soat_vencimiento_snapshot: e.target.value,
-            }))
-          }
-        />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* --- SOAT --- */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
+                    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
+                  </Label>
+                  <Input
+                    required
+                    type="date"
+                    className="border-blue-100 focus:ring-blue-500"
+                    value={formData.soat_vencimiento_snapshot || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        soat_vencimiento_snapshot: e.target.value,
+                      }))
+                    }
+                  />
 
-        {/* 🆕 Estado del SOAT según RUNT */}
-        {formData.vehicle.soat_vigente_de_acuerdo_al_runt && (
-          <div className={`mt-2 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 ${
-            formData.vehicle.soat_vigente_de_acuerdo_al_runt === "VIGENTE"
-              ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-              : "bg-red-100 text-red-700 border border-red-200"
-          }`}>
-            <span className="text-base">
-              {formData.vehicle.soat_vigente_de_acuerdo_al_runt === "VIGENTE" ? "✅" : "❌"}
-            </span>
-            SOAT: {formData.vehicle.soat_vigente_de_acuerdo_al_runt}
+                  {/* 🆕 Estado del SOAT según RUNT */}
+                  {formData.vehicle.soat_vigente_de_acuerdo_al_runt && (
+                    <div
+                      className={`mt-2 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 ${
+                        formData.vehicle.soat_vigente_de_acuerdo_al_runt ===
+                        "VIGENTE"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          : "bg-red-100 text-red-700 border border-red-200"
+                      }`}
+                    >
+                      <span className="text-base">
+                        {formData.vehicle.soat_vigente_de_acuerdo_al_runt ===
+                        "VIGENTE"
+                          ? "✅"
+                          : "❌"}
+                      </span>
+                      SOAT: {formData.vehicle.soat_vigente_de_acuerdo_al_runt}
+                    </div>
+                  )}
+                </div>
+
+                {/* --- GAS - Número --- */}
+                <div
+                  className={`space-y-2 ${requiereGas ? "opacity-100" : "opacity-40 pointer-events-none"}`}
+                >
+                  <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5" /> Número Certificado Gas
+                  </Label>
+                  <Input
+                    required={requiereGas}
+                    disabled={!requiereGas}
+                    placeholder="N° de certificado"
+                    className="border-emerald-100 focus:ring-emerald-500"
+                    value={formData.gas_numero_snapshot}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gas_numero_snapshot: e.target.value.toUpperCase(),
+                      }))
+                    }
+                  />
+                </div>
+
+                {/* --- GAS - Vencimiento --- */}
+                <div
+                  className={`space-y-2 transition-all duration-300 ${
+                    formData.vehicle.combustible === "gas_natural_vehicular" ||
+                    formData.vehicle.combustible === "gas_gasolina"
+                      ? "opacity-100"
+                      : "opacity-40 pointer-events-none"
+                  }`}
+                >
+                  <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento Gas
+                  </Label>
+                  <Input
+                    type="date"
+                    className="border-emerald-100 focus:ring-emerald-500"
+                    value={formData.gas_vencimiento_snapshot || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        gas_vencimiento_snapshot: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 🆕 INFORMACIÓN DEL RUNT - Fecha de Matrícula */}
+              {formData.vehicle.fecha_matricula && (
+                <div className="bg-linear-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg">
+                      <CalendarDays className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">
+                        Fecha de Matrícula
+                      </span>
+                      <p className="text-sm font-bold text-indigo-900">
+                        {formData.vehicle.fecha_matricula}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="px-3 py-1 bg-indigo-100 rounded-lg border border-indigo-200 whitespace-nowrap">
+                    <span className="text-xs font-bold text-indigo-700">
+                      {calcularAntiguedad(formData.vehicle.fecha_matricula)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 🆕 INFORMACIÓN DEL RUNT - RTM */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-slate-600" />
+                  <span className="text-[10px] font-bold uppercase text-slate-600 tracking-wider">
+                    Información RTM (Revisión Técnico Mecánica)
+                  </span>
+                </div>
+
+                {/* Caso: No se encontraron datos de RTM */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  "NO" && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                      <p className="text-sm font-bold text-amber-800">
+                        No se encontraron datos de Revisión Técnico Mecánica
+                      </p>
+                      <p className="text-xs text-amber-600">
+                        El vehículo no tiene registro de RTM en el RUNT
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Caso: Sí se encontraron datos de RTM */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  "SI" && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Fecha de Vencimiento */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-3">
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Fecha de Vencimiento
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                        {formData.vehicle.fecha_vencimiento_rtm ||
+                          "No disponible"}
+                      </p>
+                    </div>
+
+                    {/* Estado (Vigente/No Vigente) */}
+                    <div
+                      className={`bg-white border rounded-lg p-3 ${
+                        formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI"
+                          ? "border-emerald-200"
+                          : "border-red-200"
+                      }`}
+                    >
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Estado
+                      </span>
+                      <p
+                        className={`text-sm font-bold mt-0.5 flex items-center gap-2 ${
+                          formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                          "SI"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span>
+                          {formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                          "SI"
+                            ? "✅"
+                            : "❌"}
+                        </span>
+                        {formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                        "SI"
+                          ? "VIGENTE"
+                          : "NO VIGENTE"}
+                      </p>
+                    </div>
+
+                    {/* Organismo que expidió */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-3">
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Organismo que expidió
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                        {formData.vehicle.organismo_que_expidio_ultima_rtm ||
+                          "No disponible"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Si no hay información de RTM (undefined o null) */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  undefined && (
+                  <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 flex items-center justify-center">
+                    <p className="text-xs text-slate-500">
+                      No se ha consultado información de RTM en el RUNT
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* --- Kilometraje --- */}
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-slate-700">
+                  Kilometraje Actual -Km-
+                </Label>
+                <Input
+                  min={0}
+                  type="text"
+                  placeholder="000000"
+                  className="h-12 text-lg font-mono font-bold"
+                  value={formData.kilometraje}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      kilometraje: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* --- GAS - Número --- */}
-      <div className={`space-y-2 ${requiereGas ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
-        <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-          <Globe className="h-3.5 w-3.5" /> Número Certificado Gas
-        </Label>
-        <Input
-          required={requiereGas}
-          disabled={!requiereGas}
-          placeholder="N° de certificado"
-          className="border-emerald-100 focus:ring-emerald-500"
-          value={formData.gas_numero_snapshot}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              gas_numero_snapshot: e.target.value.toUpperCase(),
-            }))
-          }
-        />
-      </div>
-
-      {/* --- GAS - Vencimiento --- */}
-      <div 
-        className={`space-y-2 transition-all duration-300 ${
-          formData.vehicle.combustible === "gas_natural_vehicular" || 
-          formData.vehicle.combustible === "gas_gasolina" 
-            ? "opacity-100" 
-            : "opacity-40 pointer-events-none"
-        }`}
-      >
-        <Label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-          <CalendarDays className="h-3.5 w-3.5" /> Vencimiento Gas
-        </Label>
-        <Input
-          type="date"
-          className="border-emerald-100 focus:ring-emerald-500"
-          value={formData.gas_vencimiento_snapshot || ""}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              gas_vencimiento_snapshot: e.target.value,
-            }))
-          }
-        />
-      </div>
-    </div>
-
-    {/* 🆕 INFORMACIÓN DEL RUNT - Fecha de Matrícula */}
-    {formData.vehicle.fecha_matricula && (
-  <div className="bg-linear-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-3">
-    <div className="flex items-center gap-3">
-      <div className="p-2 bg-indigo-100 rounded-lg">
-        <CalendarDays className="h-4 w-4 text-indigo-600" />
-      </div>
-      <div>
-        <span className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">
-          Fecha de Matrícula
-        </span>
-        <p className="text-sm font-bold text-indigo-900">
-          {formData.vehicle.fecha_matricula}
-        </p>
-      </div>
-    </div>
-    <div className="px-3 py-1 bg-indigo-100 rounded-lg border border-indigo-200 whitespace-nowrap">
-      <span className="text-xs font-bold text-indigo-700">
-        {calcularAntiguedad(formData.vehicle.fecha_matricula)}
-      </span>
-    </div>
-  </div>
-)}
-
-    {/* 🆕 INFORMACIÓN DEL RUNT - RTM */}
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="h-4 w-4 text-slate-600" />
-        <span className="text-[10px] font-bold uppercase text-slate-600 tracking-wider">
-          Información RTM (Revisión Técnico Mecánica)
-        </span>
-      </div>
-
-      {/* Caso: No se encontraron datos de RTM */}
-      {formData.vehicle.se_encontro_fecha_vencimiento_rtm === "NO" && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
-          <span className="text-2xl">⚠️</span>
-          <div>
-            <p className="text-sm font-bold text-amber-800">
-              No se encontraron datos de Revisión Técnico Mecánica
-            </p>
-            <p className="text-xs text-amber-600">
-              El vehículo no tiene registro de RTM en el RUNT
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Caso: Sí se encontraron datos de RTM */}
-      {formData.vehicle.se_encontro_fecha_vencimiento_rtm === "SI" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Fecha de Vencimiento */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3">
-            <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
-              Fecha de Vencimiento
-            </span>
-            <p className="text-sm font-bold text-slate-800 mt-0.5">
-              {formData.vehicle.fecha_vencimiento_rtm || "No disponible"}
-            </p>
-          </div>
-
-          {/* Estado (Vigente/No Vigente) */}
-          <div className={`bg-white border rounded-lg p-3 ${
-            formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI"
-              ? "border-emerald-200"
-              : "border-red-200"
-          }`}>
-            <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
-              Estado
-            </span>
-            <p className={`text-sm font-bold mt-0.5 flex items-center gap-2 ${
-              formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI"
-                ? "text-emerald-600"
-                : "text-red-600"
-            }`}>
-              <span>
-                {formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI" ? "✅" : "❌"}
-              </span>
-              {formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI" 
-                ? "VIGENTE" 
-                : "NO VIGENTE"}
-            </p>
-          </div>
-
-          {/* Organismo que expidió */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3">
-            <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
-              Organismo que expidió
-            </span>
-            <p className="text-sm font-bold text-slate-800 mt-0.5">
-              {formData.vehicle.organismo_que_expidio_ultima_rtm || "No disponible"}
-            </p>
-          </div>
-
-          
-        </div>
-      )}
-
-      {/* Si no hay información de RTM (undefined o null) */}
-      {formData.vehicle.se_encontro_fecha_vencimiento_rtm === undefined && (
-        <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 flex items-center justify-center">
-          <p className="text-xs text-slate-500">
-            No se ha consultado información de RTM en el RUNT
-          </p>
-        </div>
-      )}
-    </div>
-
-    {/* --- Kilometraje --- */}
-    <div className="space-y-2">
-      <Label className="text-xs font-bold text-slate-700">
-        Kilometraje Actual -Km-
-      </Label>
-      <Input
-        min={0}
-        type="number"
-        placeholder="000000"
-        className="h-12 text-lg font-mono font-bold"
-        value={formData.kilometraje}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            kilometraje: e.target.value,
-          }))
-        }
-      />
-    </div>
-  </div>
-</div>
 
           {/* Checkboxes de Estado Especial */}
           <div className="space-y-4">
@@ -716,7 +713,7 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
                     >
                       {item.icon}
                     </div>
-                
+
                     <Checkbox
                       checked={item.checked}
                       onCheckedChange={(checked) =>

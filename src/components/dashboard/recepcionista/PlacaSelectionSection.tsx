@@ -821,9 +821,19 @@ export default function PlacaSelectionSection({
                           onChange={(e) =>
                             setTempPlaca(e.target.value.toUpperCase())
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (!tempPlaca.trim()) return;
+
+                              // Aquí ejecutas la función/acción que deseas disparar
+                              handleBuscarPlaca();
+                            }
+                          }}
                           placeholder="ABC123"
                           className="h-14 uppercase font-black text-3xl border-border tracking-[0.2em] bg-card text-center"
-                          maxLength={7}
+                          maxLength={6}
+                          minLength={5}
                           autoFocus
                         />
                       </div>
@@ -890,6 +900,7 @@ export default function PlacaSelectionSection({
                                 type="button"
                                 onClick={handleAccept}
                                 className="w-full"
+                              
                               >
                                 Aceptar
                               </Button>
