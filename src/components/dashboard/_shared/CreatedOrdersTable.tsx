@@ -181,7 +181,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
   const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
-  
+ 
 
   const {
     orderByColumn = "fecha",
@@ -386,6 +386,27 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
           );
         },
       }),
+
+
+     columnHelper.accessor("se_compro_soat", {
+  header: "Se compró SOAT?",
+  cell: (info) => {
+    const boughtSoat = Boolean(info.getValue());
+
+    return (
+      <Badge
+        variant="outline"
+        className={
+          boughtSoat
+            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-bold"
+            : "text-muted-foreground border-border font-medium"
+        }
+      >
+        {boughtSoat ? "Sí" : "No"}
+      </Badge>
+    );
+  },
+}),
 
       columnHelper.accessor("es_reinspeccion", {
         header: "Tipo Inspección",

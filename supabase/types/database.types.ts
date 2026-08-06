@@ -1227,6 +1227,14 @@ export type Database = {
         }[]
       }
       get_my_tenants: { Args: never; Returns: string[] }
+      get_tenant_credits: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          cupo_certificados: number
+          cupo_fupas: number
+          updated_at: string
+        }[]
+      }
       get_tenant_data: {
         Args: { p_tenant_slug: string }
         Returns: {

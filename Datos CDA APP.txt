@@ -42,7 +42,18 @@ PENDIENTES
 	- las tablas de las tortas para las categorias de: combustible, tipo de vehiculo, torta especial entre motos 2 y 4 tiempos
 	- en las tablas de barra va, en uno solo total rtm, total preventiva, total peritaje, en otro los reprobados (solo de rtm por ahora) y el soat
 - hacer un cron job para eliminar todas las sessiones a la media noche
-- hacer una proteccion para que el dt tenga que hacer la firma si o si
+- sistema de fupas
+- cuadrar el mensaje del mes de la grafica de conteo de rtm
+- cuadrar la busqueda de conteo perzonalizado
+- cuadrar que los reprobados tambien tienen numero de rtm 
+- procesamiento de los datos de la tabla para que puedan ser descargados en formato excel
+- que si se compro soat en el establecimiento, muestre los datos en la tabla principal
+- que haya donde decir si es escuter o no
+- en la extencion, claro, cuando arrastra diesel se queda diesel
+- ojo con los diesel en motos
+- darle un bloqueo a la tabla de entry orders para que no pase a finalizada si esta anulada
+- que en el formulario de la orden de entrada diga hace cuando saco el tecno en meses
+
 
 MAS COSITAS QUE FALTAN
 - podder editarlas condiciones de inspeccion en la plantilla
@@ -68,8 +79,6 @@ FEATURES QUE FALTAN
 - administracion de reprobados
 - manejo y registro de usuarios en diferentes escalas, que el gerente cree director tecnico y el director tecnico cree los demas
 - avisos por email por ahora (recordatorios de los 15 dias y los anuales)
-- seccion del gerente
-- api runt
 - estadisticas de dinero recogido (se puede separa entre todo, solo rtm, solo preventiva, solo peritaje)
 
 

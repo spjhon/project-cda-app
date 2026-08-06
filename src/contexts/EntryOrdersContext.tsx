@@ -13,10 +13,12 @@ import { startOfMonth, format, startOfDay, subDays } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
 
 interface ReceptionistLoaderContext {
   children: ReactNode;
   entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
+  tenantCreditsPromise: Promise<TenantCredits | null>;
 }
 
 export interface PendingPreviousDayOrder {
@@ -91,6 +93,7 @@ export const EntryOrdersContext =
 
 export default function EntryOrdersLoaderContext({
   entryOrdersTableDataPromise,
+  tenantCreditsPromise,
   children,
 }: ReceptionistLoaderContext) {
   //state para para que el query siepre mantenta el contexto de lo que debe mantener actualizado y en constante pooling
@@ -117,10 +120,13 @@ export default function EntryOrdersLoaderContext({
   const queryClient = useQueryClient();
 
   const permissionscontextRecived = useContext(PermissionsContext);
-  const tenantId =
-    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+
+  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const entryOrdersTableData = use(entryOrdersTableDataPromise);
+  const tenantCredits = use(tenantCreditsPromise);
+
+  console.log(tenantCredits);
 
   const pathname = usePathname();
 

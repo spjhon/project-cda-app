@@ -11,6 +11,7 @@ import {
 } from "@/lib/server-actions/fetch_entry_orders_list";
 
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
+import { fetchTenantCredits, TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
 
 interface DashboardLayout {
   children: ReactNode;
@@ -165,6 +166,47 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
 
+//PROMESA PARA LA CONSULTA DE LAS FUTAS
+
+const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
+  const { tenant } = await params;
+
+  // ==========================================
+  // 1. Resolver tenant slug -> tenant real
+  // ==========================================
+  const tenantResult = await fetchTenantData(tenant);
+
+  if (!tenantResult?.data?.id) {
+    redirect(
+      `/error?type=Error, no existe tenant en tenantCreditsPromise`,
+    );
+  }
+
+  if (tenantResult.error !== null) {
+    redirect(`/error?type=Error al extraer tenant: ${tenantResult.error}`);
+  }
+
+  // ==========================================
+  // 2. Traer cupos / créditos del tenant
+  // ==========================================
+  const creditsResult = await fetchTenantCredits({
+    tenantId: tenantResult.data.id,
+  });
+
+  if (creditsResult.error !== null) {
+    redirect(`/error?type=Error al extraer cupos del tenant: ${creditsResult.error}`);
+  }
+
+  return creditsResult.data;
+})();
+
+
+
+
+
+
+
+
 
   return (
     <>
@@ -182,6 +224,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
         >
           <EntryOrdersLoaderContext
             entryOrdersTableDataPromise={entryOrdersTableDataPromise}
+            tenantCreditsPromise={tenantCreditsPromise}
           >
             {children}
           </EntryOrdersLoaderContext>
