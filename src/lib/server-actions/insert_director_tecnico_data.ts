@@ -11,6 +11,12 @@ interface UpdateDirectorTecnicoOrderArgs {
   serviceType: ServiceType;
 }
 
+// Interface para el retorno del RPC
+interface UpdateOrderResult {
+  id: string;
+  message: string;
+}
+
 export async function insertDirectorTecnicoData({ orderId, formData, serviceType }: UpdateDirectorTecnicoOrderArgs) {
 
   // 1. Validaciones básicas previas
@@ -48,17 +54,17 @@ export async function insertDirectorTecnicoData({ orderId, formData, serviceType
     serviceType: serviceType
   }
 
-  // 2. Validación estricta con el Zod Schema (Maneja el superRefine condicional)
+  // 2. Validación estricta con el Zod Schema
   const validatedFields = directorTecnicoOrderSchema.safeParse(dataToValidate);
 
   if (!validatedFields.success) {
     return { 
       data: null, 
-      error: validatedFields.error.issues // Devuelve el array $ZodIssue[] que lee tu ZodErrorDialog
+      error: validatedFields.error.issues
     };
   }
 
-  // 3. Extracción limpia de la data validada por Zod y control lógico preventivo
+  // 3. Extracción limpia de la data validada por Zod
   const { resultado_revision, consecutivo_fur, consecutivo_rtm } = validatedFields.data;
   
   // 💡 Blindaje: Si fue rechazado por defectos, el certificado RTM obligatoriamente viaja como NULL a Postgres
@@ -67,17 +73,16 @@ export async function insertDirectorTecnicoData({ orderId, formData, serviceType
   // 4. Inicialización del cliente de Supabase con sesión del servidor
   const supabaseServer = await createSupabaseServerClient();
 
-  // 5. Invocación segura mediante RPC-first pasando el payload a Postgres
-  // 🌟 Nota: Recuerda crear esta función rpc ('update_director_tecnico_order') en tu Postgres si no la tienes
+  // 5. Invocación segura mediante RPC-first
   const { data: dtUpdatedData, error } = await supabaseServer.rpc('update_director_tecnico_order', {
     p_order_id: orderId,
     p_resultado_revision: resultado_revision,
     p_consecutivo_fur: consecutivo_fur,
     p_consecutivo_rtm: rtmFinal ?? "",
     p_director_tecnico_tipo_documento_snapshot: formData.director_tecnico_tipo_documento_snapshot ?? "",
-  p_director_tecnico_numero_documento_snapshot: formData.director_tecnico_numero_documento_snapshot ?? "",
-  p_director_tecnico_nombre_snapshot: formData.director_tecnico_nombre_snapshot ?? "",
-  p_director_tecnico_firma_base64_snapshot: formData.director_tecnico_firma_base64_snapshot ?? ""
+    p_director_tecnico_numero_documento_snapshot: formData.director_tecnico_numero_documento_snapshot ?? "",
+    p_director_tecnico_nombre_snapshot: formData.director_tecnico_nombre_snapshot ?? "",
+    p_director_tecnico_firma_base64_snapshot: formData.director_tecnico_firma_base64_snapshot ?? ""
   });
 
   // 6. Gestión de errores provenientes del motor de base de datos
@@ -88,12 +93,28 @@ export async function insertDirectorTecnicoData({ orderId, formData, serviceType
     };
   }
 
-  // 7. Trazabilidad limpia en logs de la consola del servidor (Coolify/Docker)
-  console.log("Cierre técnico ISO 17020 actualizado correctamente:");
-  console.log(`Orden ID: ${orderId} | Dictamen: ${resultado_revision.toUpperCase()} | FUR: ${consecutivo_fur}`);
+  // 7. Validar que el RPC retornó datos
+  if (!dtUpdatedData) {
+    return { 
+      data: null, 
+      error: "No se recibió respuesta del servidor" 
+    };
+  }
 
+  // 8. ✅ CASTEO CORRECTO: Convertir a unknown primero, luego a UpdateOrderResult
+  const result = dtUpdatedData as unknown as UpdateOrderResult;
+
+  // 9. Trazabilidad limpia en logs
+  console.log("✅ Cierre técnico ISO 17020 actualizado correctamente:");
+  console.log(`📦 Orden ID: ${result.id} | Dictamen: ${resultado_revision.toUpperCase()} | FUR: ${consecutivo_fur}`);
+  console.log(`📝 Mensaje: ${result.message}`);
+
+  // 10. Retornar el objeto completo con id y message
   return { 
-    data: `Éxito: ${dtUpdatedData || "Datos técnicos guardados con éxito"}`, 
+    data: {
+      id: result.id,
+      message: result.message
+    },
     error: null
   };
 }

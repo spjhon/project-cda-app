@@ -791,6 +791,41 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_credits: {
+        Row: {
+          created_at: string
+          cupo_certificados: number
+          cupo_fupas: number
+          id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cupo_certificados?: number
+          cupo_fupas?: number
+          id?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cupo_certificados?: number
+          cupo_fupas?: number
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_credits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_permissions: {
         Row: {
           created_at: string
@@ -1216,7 +1251,7 @@ export type Database = {
           p_order_id: string
           p_resultado_revision: string
         }
-        Returns: string
+        Returns: Json
       }
       update_office_order_data:
         | {

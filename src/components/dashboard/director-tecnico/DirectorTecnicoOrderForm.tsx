@@ -23,6 +23,10 @@ import { insertDirectorTecnicoData } from "@/lib/server-actions/insert_director_
 import CancelOrder from "../_shared/CancelOrder";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { ServiceType } from "@/lib/zod-schemas/order-schema";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { FetchEntryOrderResult } from "@/lib/client-actions/fetch_entry_order_by_id";
+import { pdf } from "@react-pdf/renderer";
+import OrderPDF from "../_shared/pdfs/OrderPDF";
 
 export type ResultadoRevision = "aprobado" | "rechazado" | null;
 
@@ -101,63 +105,198 @@ export default function DirectorTecnicoOrderForm({
     setFormData((prev) => ({ ...prev, resultado_revision: value }));
   };
 
-  // Validación local y envío de datos
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
 
-    setIsSubmitting(true);
-    setServerError(null);
 
-    if (!formData.resultado_revision) {
-      alert("Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)");
-      setIsSubmitting(false);
-      return;
-    }
 
-    if (formData.consecutivo_fur.trim() === "") {
-      alert("El consecutivo del FUR es obligatorio para el cierre técnico");
-      setIsSubmitting(false);
-      return;
-    }
 
-    // 🌟 AJUSTADO: Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
-    if (!noAplicaRTM && formData.resultado_revision === "aprobado" && formData.consecutivo_rtm.trim() === "") {
-      alert("Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM");
-      setIsSubmitting(false);
-      return;
-    }
 
-    // Aseguramos mandar data limpia al server action en caso de que no aplique RTM
-    const payloadData = {
-      ...formData,
-      consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
-     
-    };
 
+
+
+// Validación local y envío de datos
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setIsSubmitting(true);
+  setServerError(null);
+
+  // ============================================================
+  // 1. VALIDACIONES INICIALES
+  // ============================================================
+  if (!formData.resultado_revision) {
+    setServerError("Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)");
+    setShowErrorDialog(true);
+    setIsSubmitting(false);
+    return;
+  }
+
+  if (formData.consecutivo_fur.trim() === "") {
+    setServerError("El consecutivo del FUR es obligatorio para el cierre técnico");
+    setShowErrorDialog(true);
+    setIsSubmitting(false);
+    return;
+  }
+
+  // 🌟 Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
+  if (!noAplicaRTM && formData.resultado_revision === "aprobado" && formData.consecutivo_rtm.trim() === "") {
+    setServerError("Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM");
+    setShowErrorDialog(true);
+    setIsSubmitting(false);
+    return;
+  }
+
+  // ============================================================
+  // 2. 🔍 VALIDACIÓN: Verificar si el director técnico tiene firma
+  // ============================================================
+  try {
+    const supabase = createSupabaseBrowserClient();
     
+    // Obtener el auth_user_id del director técnico actual
+    // Asumiendo que tienes el ID del director técnico en algún lado
+    const directorTecnicoAuthId = user?.id; // Ajusta según tu estructura
 
-    try {
-      const { data, error } = await insertDirectorTecnicoData({
-        orderId: orden.id,
-        formData: payloadData,
-        serviceType: orden.service_type as ServiceType,
-      });
-
-      if (error || !data) {
-        setServerError(error);
-        setShowErrorDialog(true);
-        return;
-      } else {
-        alert(data);
-        queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
-      }
-    } catch (error: unknown) {
-      alert("Ocurrió un error inesperado en la validación técnica: " + error);
-    } finally {
+    if (!directorTecnicoAuthId) {
+      setServerError("No se encontró el director técnico asignado a esta orden");
+      setShowErrorDialog(true);
       setIsSubmitting(false);
+      return;
     }
+
+    // Consultar si el director técnico tiene firma registrada
+    const { data: directorData, error: directorError } = await supabase
+      .from("service_users")
+      .select("id, full_name, signature_base64")
+      .eq("id", directorTecnicoAuthId)
+      .eq("is_active", true)
+      .single();
+
+    if (directorError) {
+      console.error("Error consultando director técnico:", directorError);
+      setServerError("Error al verificar la información del director técnico");
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!directorData) {
+      setServerError("No se encontró un director técnico activo para esta orden");
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verificar que el campo signature_base64 exista Y tenga contenido
+    const tieneFirma = directorData.signature_base64 && 
+                        directorData.signature_base64.trim() !== "";
+
+    if (!tieneFirma) {
+      setServerError(
+        `El director técnico ${directorData.full_name || "asignado"} no tiene una firma registrada.\n\n` +
+        "Por favor, registre su firma antes de realizar el cierre técnico."
+      );
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    console.log("✅ Director técnico verificado:", directorData.full_name, "con firma registrada");
+
+  } catch (error) {
+    console.error("Error en validación de firma:", error);
+    setServerError("Ocurrió un error al verificar la firma del director técnico");
+    setShowErrorDialog(true);
+    setIsSubmitting(false);
+    return;
+  }
+
+  // ============================================================
+  // 3. CONTINUAR CON EL CIERRE TÉCNICO
+  // ============================================================
+
+  // Aseguramos mandar data limpia al server action en caso de que no aplique RTM
+  const payloadData = {
+    ...formData,
+    consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
   };
+
+  try {
+    // 3.1 Insertar datos del director técnico
+    const { data, error } = await insertDirectorTecnicoData({
+      orderId: orden.id,
+      formData: payloadData,
+      serviceType: orden.service_type as ServiceType,
+    });
+
+    if (error || !data) {
+      setServerError(error);
+      setShowErrorDialog(true);
+      return;
+    }
+
+    // ✅ Ahora data tiene { id, message }
+    console.log("✅ Cierre técnico exitoso:", data.message);
+    console.log("📦 ID de la orden actualizada:", data.id);
+
+    alert(data.message);
+    queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+
+    // 3.2 Obtener la orden actualizada para el PDF
+    const supabase = createSupabaseBrowserClient();
+    const { data: orderData, error: orderDataError } = await supabase.rpc(
+      "fetch_entry_order_by_id",
+      {
+        p_order_id: data.id, // ✅ Usamos el ID retornado por el RPC
+        p_tenant_id: PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id || "",
+      },
+    );
+
+    const orderDataTyped = (orderData as unknown as FetchEntryOrderResult[])?.[0];
+
+    if (orderDataError || !orderDataTyped) {
+      console.error("Error en RPC:", orderDataError || "No se encontraron datos");
+      // No detenemos el flujo, solo mostramos el error en consola
+    }
+
+    console.log("📦 Datos de la orden obtenidos:", orderDataTyped);
+
+    // 3.3 Generar y descargar PDF
+    if (orderDataTyped) {
+      const pdfBlob = await pdf(
+        <OrderPDF orderData={orderDataTyped} />,
+      ).toBlob();
+
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      const placa = orderDataTyped.vehiculo_placa ? `_${orderDataTyped.vehiculo_placa}` : "";
+      const fecha = new Date().toISOString().split("T")[0];
+      link.download = `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(/\s+/g, "_");
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+  } catch (error: unknown) {
+    console.error("Error inesperado:", error);
+    setServerError("Ocurrió un error inesperado en la validación técnica: " + (error instanceof Error ? error.message : String(error)));
+    setShowErrorDialog(true);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
+
+
+
+
+
+
+
 return (
   <form onSubmit={handleSubmit} className="space-y-5">
     

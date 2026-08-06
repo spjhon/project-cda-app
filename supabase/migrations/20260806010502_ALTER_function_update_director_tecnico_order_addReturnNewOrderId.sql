@@ -1,3 +1,18 @@
+BEGIN;
+
+-- Eliminar la función vieja
+DROP FUNCTION IF EXISTS public.update_director_tecnico_order(
+    uuid,
+    text,
+    character varying,
+    character varying,
+    text,
+    character varying,
+    text,
+    text
+);
+
+-- Crear la función nueva (con el código que te pasé arriba)
 CREATE OR REPLACE FUNCTION public.update_director_tecnico_order(
     p_order_id uuid,
     p_resultado_revision text,
@@ -8,7 +23,7 @@ CREATE OR REPLACE FUNCTION public.update_director_tecnico_order(
     p_director_tecnico_nombre_snapshot text,
     p_director_tecnico_firma_base64_snapshot text
 )
-RETURNS jsonb  -- ✅ Cambio: retorna JSONB
+RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY INVOKER 
 SET search_path = public
@@ -38,7 +53,7 @@ BEGIN
         -- 🌟 CÁLCULO DE FECHA LÍMITE CON HORA EXACTA (Si es reprobada)
         fecha_limite_reinspeccion = CASE 
             WHEN LOWER(TRIM(p_resultado_revision)) = 'rechazado' THEN NOW() + INTERVAL '15 days'
-            ELSE fecha_limite_reinspeccion -- Mantiene lo que tenga si no es reprobada
+            ELSE fecha_limite_reinspeccion
         END,
 
         -- Transición de estado
@@ -47,7 +62,6 @@ BEGIN
     WHERE id = p_order_id;
 
     -- 🌟 2.5 NUEVO BLOQUE: ENLACE DE REINSPECCIÓN CON LA ORDEN VIEJA
-    -- Es totalmente independiente. Busca la orden vieja basándose en el id_reprobado de la actual.
     UPDATE public.entry_orders
     SET id_orden_reinspeccion = p_order_id
     WHERE id = (
@@ -70,3 +84,5 @@ BEGIN
 
 END;
 $$;
+
+COMMIT;

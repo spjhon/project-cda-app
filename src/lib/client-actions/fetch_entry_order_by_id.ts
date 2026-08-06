@@ -5,7 +5,6 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 // INTERFACES DE TIPADO (Mapeo estricto del RPC)
 // ==========================================
 
-
 export interface TirePressureDetail {
   eje: number;
   posicion: string;
@@ -108,6 +107,14 @@ export interface FetchEntryOrderResult {
   firmas_orden: OrderSignatureDetail[] | null;
 }
 
+// ==========================================
+// INTERFACE PARA EL RETORNO DEL RPC (JSONB)
+// ==========================================
+export interface UpdateOrderResult {
+  id: string;
+  message: string;
+}
+
 // Parámetros que requiere el hook para funcionar
 interface UseFetchEntryOrderParams {
   orderId: string | undefined;
@@ -130,18 +137,26 @@ export function useFetchEntryOrder({ orderId, tenantId, readyToProcess }: UseFet
       
       if (error) {
         console.error('Error en RPC:', error);
-        
+        throw new Error(error.message);
       }
       
       console.log('📦 Datos de la orden obtenidos:', data);
       
-      if (!data || data.length === 0) throw new Error;
+      // Verificar que data existe y no está vacío
+      if (!data || data.length === 0) {
+        throw new Error('No se encontraron datos para esta orden');
+      }
       
-      return data[0] as unknown as FetchEntryOrderResult;
+      // El RPC siempre retorna un array, tomamos el primer elemento
+      // y lo casteamos a nuestro tipo
+      const result = data[0] as unknown as FetchEntryOrderResult;
+      
+      console.log('📦 Orden procesada:', result.id);
+      
+      return result;
     },
     enabled: !!orderId && readyToProcess, 
     retry: 1,
-    
     refetchInterval: false,
     refetchOnWindowFocus: false,
   });
