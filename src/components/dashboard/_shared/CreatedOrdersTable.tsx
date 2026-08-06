@@ -58,6 +58,7 @@ import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext"
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { Button } from "@/components/ui/button";
 import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
+import { DownloadExcelButton } from "./DownloadExcelButton";
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -674,6 +675,12 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
             {Math.min(page * rowsPerPage, total)} de <span className="font-bold text-foreground">{total}</span>
           </span>
         </div>
+
+        {/* Aquí puedes renderizar el botón de Excel */}
+        <DownloadExcelButton 
+          data={EntryOrders} 
+          disabled={query?.isFetchingEntryOrders}
+        />
 
         <div className="flex items-center">{renderStatusBadge()}</div>
 

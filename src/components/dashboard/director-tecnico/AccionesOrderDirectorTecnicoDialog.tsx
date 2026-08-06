@@ -8,7 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Receipt, ShieldCheck, ShieldAlert, CreditCard } from "lucide-react";
+import { 
+  FileText, 
+  Receipt, 
+  ShieldCheck, 
+  ShieldAlert, 
+  CreditCard,
+  Phone,
+  Mail,
+  MapPin
+} from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import DirectorTecnicoOrderForm from "./DirectorTecnicoOrderForm";
 import { UseMutateFunction } from "@tanstack/react-query";
@@ -62,8 +71,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* 🌟 Ampliado a max-w-5xl o max-w-6xl para dar perfecto soporte a la UI de doble columna */}
-      <DialogContent className="sm:max-w-5xl p-6 overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-7xl p-6 overflow-y-auto max-h-[90vh]">
         <DialogHeader className="text-center flex flex-col items-center border-b border-border pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground justify-center">
             <ShieldCheck className="h-5 w-5 text-emerald-600" />
@@ -75,11 +83,9 @@ export default function AccionesOrderDirectorTecnicoDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* 🌟 CONTENEDOR PRINCIPAL: Rejilla inteligente de doble columna */}
+        {/* CONTENEDOR PRINCIPAL */}
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* ================================================================= */}
-          {/* COLUMNA IZQUIERDA: DATOS HISTÓRICOS Y AUDITORÍA DE ENTRADA        */}
-          {/* ================================================================= */}
+          {/* COLUMNA IZQUIERDA */}
           <div className="space-y-5">
             {/* SECCIÓN A: FICHA TÉCNICA DEL VEHÍCULO Y ACTORES */}
             <div className="bg-muted/50 p-5 rounded-xl border border-border">
@@ -110,28 +116,64 @@ export default function AccionesOrderDirectorTecnicoDialog({
 
               {/* Grid Informativo Principal */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-xs">
-                <div>
-                  <span className="text-muted-foreground block font-medium mb-0.5">Propietario</span>
-                  <span className="text-foreground font-semibold block truncate">
+                
+                {/* PROPIETARIO */}
+                <div className="space-y-1 bg-background/50 p-3 rounded-lg border border-border/60">
+                  <span className="text-muted-foreground block font-bold text-[11px] uppercase tracking-wider border-b border-border/40 pb-1">
+                    Propietario
+                  </span>
+                  <span className="text-foreground font-bold block truncate text-sm">
                     {orden.propietario_nombre || "N/A"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground block truncate mt-0.5">
-                    {orden.propietario_tipo_documento?.toUpperCase()}: {orden.propietario_documento}
+                  <span className="text-[10px] text-muted-foreground block truncate">
+                    {orden.propietario_tipo_documento?.toUpperCase()}: {orden.propietario_documento || "N/A"}
                   </span>
+
+                  <div className="pt-1.5 space-y-1 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Phone className="h-3 w-3 shrink-0 text-emerald-600" />
+                      <span className="truncate">{orden.propietario_telefono || "Sin teléfono"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Mail className="h-3 w-3 shrink-0 text-amber-600" />
+                      <span className="truncate">{orden.propietario_email || "Sin correo"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <MapPin className="h-3 w-3 shrink-0 text-sky-600" />
+                      <span className="truncate">{orden.propietario_direccion || "Sin dirección"}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <span className="text-muted-foreground block font-medium mb-0.5">
+                {/* CLIENTE / CONDUCTOR */}
+                <div className="space-y-1 bg-background/50 p-3 rounded-lg border border-border/60">
+                  <span className="text-muted-foreground block font-bold text-[11px] uppercase tracking-wider border-b border-border/40 pb-1">
                     Cliente / Conductor
                   </span>
-                  <span className="text-foreground font-semibold block truncate">
+                  <span className="text-foreground font-bold block truncate text-sm">
                     {orden.cliente_nombre || "N/A"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground block truncate mt-0.5">
-                    {orden.cliente_tipo_documento?.toUpperCase()}: {orden.cliente_documento}
+                  <span className="text-[10px] text-muted-foreground block truncate">
+                    {orden.cliente_tipo_documento?.toUpperCase()}: {orden.cliente_documento || "N/A"}
                   </span>
+
+                  <div className="pt-1.5 space-y-1 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Phone className="h-3 w-3 shrink-0 text-emerald-600" />
+                      <span className="truncate">{orden.cliente_telefono || "Sin teléfono"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Mail className="h-3 w-3 shrink-0 text-amber-600" />
+                      <span className="truncate">{orden.cliente_email || "Sin correo"}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <MapPin className="h-3 w-3 shrink-0 text-sky-600" />
+                      <span className="truncate">{orden.cliente_direccion || "Sin dirección"}</span>
+                    </div>
+                  </div>
                 </div>
 
+                {/* OTROS DATOS VEHICULARES */}
                 <div>
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Línea del Vehículo
@@ -221,7 +263,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   </span>
                 </div>
 
-                {/* N° DE APROBACIÓN VOUCHER (Renderizado condicional) */}
+                {/* N° DE APROBACIÓN VOUCHER */}
                 {esPagoTarjeta && (
                   <div className="col-span-2 bg-background/60 p-2.5 rounded-lg border border-emerald-200/50 flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -256,6 +298,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
             </div>
           </div>
 
+          {/* COLUMNA DERECHA */}
           <div className="lg:border-l lg:border-border lg:pl-6">
             <DirectorTecnicoOrderForm
               orden={orden}

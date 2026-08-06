@@ -315,32 +315,48 @@ return (
         </div>
       </div>
 
-      {/* Switch */}
-      <div className="flex items-center justify-between p-3 bg-background rounded-lg border border-border mt-1">
-        <div className="space-y-0.5 pr-2">
-          <Label
-            htmlFor="se_compro_soat"
-            className="text-xs font-bold text-foreground"
-          >
-            ¿Se gestionó SOAT en el CDA?
-          </Label>
+     {/* Switch con fondo condicional dinámico */}
+<div
+  className={`flex items-center justify-between p-3 rounded-lg border transition-colors duration-200 mt-1 ${
+    formData.se_compro_soat
+      ? "bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-amber-950/60 dark:border-amber-700/80 dark:text-amber-100"
+      : "bg-background border-border"
+  }`}
+>
+  <div className="space-y-0.5 pr-2">
+    <Label
+      htmlFor="se_compro_soat"
+      className={`text-xs font-bold transition-colors ${
+        formData.se_compro_soat
+          ? "text-emerald-950 dark:text-amber-100"
+          : "text-foreground"
+      }`}
+    >
+      ¿Se gestionó SOAT en el CDA?
+    </Label>
 
-          <p className="text-[11px] text-muted-foreground leading-tight">
-            Active si el cliente adquirió la póliza aquí.
-          </p>
-        </div>
+    <p
+      className={`text-[11px] leading-tight transition-colors ${
+        formData.se_compro_soat
+          ? "text-emerald-700 dark:text-amber-300/80"
+          : "text-muted-foreground"
+      }`}
+    >
+      Active si el cliente adquirió la póliza aquí.
+    </p>
+  </div>
 
-        <Switch
-          id="se_compro_soat"
-          checked={formData.se_compro_soat}
-          onCheckedChange={handleSwitchChange}
-          disabled={
-            orden.estado_orden === "finalizada" ||
-            orden.estado_orden === "anulada" ||
-            orden.es_reinspeccion
-          }
-        />
-      </div>
+  <Switch
+    id="se_compro_soat"
+    checked={formData.se_compro_soat}
+    onCheckedChange={handleSwitchChange}
+    disabled={
+      orden.estado_orden === "finalizada" ||
+      orden.estado_orden === "anulada" ||
+      orden.es_reinspeccion
+    }
+  />
+</div>
     </div>
 
     {/* DOCUMENTOS */}

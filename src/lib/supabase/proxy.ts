@@ -73,8 +73,18 @@ if (isMainDomain) {
   // Definimos las rutas protegidas que sí necesitan validación JWT
   const isProtectedDashboard = applicationPath.startsWith("/dashboard");
   const isProtectedAdminDashboard = applicationPath.startsWith("/admin/dashboard");
+ let sessionUser = null;
 
-  // 1. CLIENTE SUPABASE
+
+ 
+
+ 
+
+
+// ÚNICAMENTE llamamos a getClaims() si la ruta es protegida
+ 
+  if (isProtectedDashboard || isProtectedAdminDashboard) {
+     // 1. CLIENTE SUPABASE
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -96,13 +106,6 @@ if (isMainDomain) {
       },
     },
   );
-
- 
-
-
-// ÚNICAMENTE llamamos a getClaims() si la ruta es protegida
-  let sessionUser = null;
-  if (isProtectedDashboard || isProtectedAdminDashboard) {
     const { data } = await supabase.auth.getClaims(); //se obtiene el claims osea el usuario
     sessionUser = data?.claims; //se obtiene el usuario si es que existe y esta autenticado
   }
