@@ -18,12 +18,6 @@ import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
-  mutation: {
-    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string }, unknown>;
-    isCancelingOrder: boolean;
-    errorCancelingOrder: Error | null;
-    resetCancelError: () => void;
-  };
   rol: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,7 +26,6 @@ interface AccionesOrderDialogProps {
 export default function AccionesOrderDialog({
   orden,
   tenantId,
-  mutation,
   rol,
   open,
   onOpenChange,
@@ -48,6 +41,7 @@ export default function AccionesOrderDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         {/* Sin DialogTrigger: el botón vive ahora en la celda de la tabla */}
+        
         <DialogContent className="sm:max-w-xl p-6 border-border bg-background">
           <DialogHeader className="text-center sm:text-center flex flex-col items-center">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground justify-center">
@@ -100,7 +94,7 @@ export default function AccionesOrderDialog({
                   <CancelOrder
                     orden={orden}
                     tenantId={tenantId}
-                    mutation={mutation}
+                 
                   />
                 )}
               </div>
@@ -118,7 +112,7 @@ export default function AccionesOrderDialog({
         orden={orden}
         tenantId={tenantId}
         rol={rol}
-        mutation={mutation}
+       
         open={open}
         onOpenChange={onOpenChange}
       />
@@ -132,7 +126,7 @@ export default function AccionesOrderDialog({
         orden={orden}
         tenantId={tenantId}
         rol={rol}
-        mutation={mutation}
+        
         open={open}
         onOpenChange={onOpenChange}
       />

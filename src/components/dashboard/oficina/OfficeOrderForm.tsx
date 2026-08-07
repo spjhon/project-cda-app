@@ -35,12 +35,7 @@ export interface OfficeFormState {
 interface OfficeOrderFormProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
-  mutation: {
-    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string; }, unknown>;
-    isCancelingOrder: boolean;
-    errorCancelingOrder: Error | null;
-    resetCancelError: () => void;
-  };
+  
 }
 
 const SELECT_METODO_PAGO = [
@@ -56,7 +51,7 @@ const SELECT_METODO_PAGO = [
 export default function OfficeOrderForm({
   orden,
   tenantId,
-  mutation,
+ 
 }: OfficeOrderFormProps) {
 
   const queryClient = useQueryClient();
@@ -397,7 +392,7 @@ return (
             <CancelOrder
               orden={orden}
               tenantId={tenantId}
-              mutation={mutation}
+              
             />
           </div>
 

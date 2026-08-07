@@ -180,7 +180,7 @@ export default function CreatedOrdersTable() {
 const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(null);
 
 
-  const { query, mutation } = EntryOrdersContextRecived?.entryOrdersTableData || {};
+  const { query} = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
  
 
@@ -522,11 +522,11 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm ">
       {/* DIÁLOGO ELEVADO (Fuera de la tabla) */}
-{selectedOrden && mutation && (
+{selectedOrden && (
   <AccionesOrderDialog
     orden={selectedOrden}
     tenantId={tenantId}
-    mutation={mutation}
+  
     rol={rol}
     open={Boolean(selectedOrden)}
     onOpenChange={(open) => {

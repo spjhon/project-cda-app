@@ -252,55 +252,87 @@ const {
   },
 });
 
-  //Mutaciioon para la anulacion de la orden
-  // Estructura de la mutación de TanStack Query
-  const {
-    mutate: cancelOrder,
-    isPending: isCancelingOrder,
-    error: errorCancelingOrder,
-    reset: resetCancelError,
-  } = useMutation({
-    // Recibe un objeto con el ID de la orden y el tenant_id actual del contexto de permisos
-    mutationFn: async ({ id, tenantId }: { id: string; tenantId: string }) => {
-      // Ejecutamos el Soft Delete real mediante un .update()
-      const { data, error } = await supabaseBrowser
-        .from("entry_orders")
-        .update({
-          deleted_at: new Date().toISOString(),
-          estado_orden: "anulada", // Ajusta este string según tus enums o reglas de estado actuales
-        })
-        .eq("id", id)
-        .eq("tenant_id", tenantId) // Garantía multi-tenant estricta
-        .select("id"); // Usamos select para confirmar si la fila existía y el RLS aprobó la acción
 
-      if (error) {
-        throw new Error(
-          `Error al anular la orden de entrada: ${error.message}`,
-        );
-      }
 
-      // Si pasó con éxito pero el RLS bloqueó o no se encontró la fila (array vacío)
-      if (!data || data.length === 0) {
-        throw new Error(
-          "No se pudo anular la orden. No tienes los permisos necesarios o el registro no pertenece a tu organización.",
-        );
-      }
+// Mutación para la ANULACIÓN de la orden
+const {
+  mutate: cancelOrder,
+  isPending: isCancelingOrder,
+  error: errorCancelingOrder,
+  reset: resetCancelError,
+} = useMutation({
+  mutationFn: async ({ id, tenantId }: { id: string; tenantId: string }) => {
+    // 🌟 1. Validar el estado actual de la orden en la base de datos antes de anular
+    const { data: currentOrder, error: fetchError } = await supabaseBrowser
+      .from("entry_orders")
+      .select("estado_orden")
+      .eq("id", id)
+      .eq("tenant_id", tenantId)
+      .single();
 
-      return id;
-    },
+    if (fetchError) {
+      throw new Error(
+        `Error al verificar el estado de la orden: ${fetchError.message}`
+      );
+    }
 
-    // Al completarse de forma exitosa en la base de datos
-    onSuccess: () => {
-      // Invalidamos la caché de la lista de órdenes para que la tabla se refresque automáticamente
-      queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
-      // Aquí puedes meter tu toast: toast.success("Orden anulada correctamente")
-    },
+    if (!currentOrder) {
+      throw new Error("La orden de entrada no fue encontrada.");
+    }
 
-    // Captura de errores para la auditoría de consola
-    onError: (err: Error) => {
-      console.error("Fallo en la anulación de orden:", err.message);
-    },
-  });
+    console.log(currentOrder.estado_orden)
+
+    // 🌟 2. Bloqueo si ya está finalizada o anulada
+    if (
+      currentOrder.estado_orden === "finalizada" ||
+      currentOrder.estado_orden === "en_prueba"
+    ) {
+      throw new Error(
+        `No se puede anular la orden porque ya se encuentra en estado "${currentOrder.estado_orden.toUpperCase()}".`
+      );
+    }
+
+    // 🌟 3. Ejecutar el Soft Delete solo si pasa la validación
+    const { data, error } = await supabaseBrowser
+      .from("entry_orders")
+      .update({
+        deleted_at: new Date().toISOString(),
+        estado_orden: "anulada",
+      })
+      .eq("id", id)
+      .eq("tenant_id", tenantId)
+      .neq("estado_orden", "finalizada") // Filtro defensivo extra a nivel de query
+      .neq("estado_orden", "anulada")
+      .select("id");
+
+    if (error) {
+      throw new Error(
+        `Error al anular la orden de entrada: ${error.message}`
+      );
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error(
+        "No se pudo anular la orden. Es posible que haya cambiado de estado recientemente o no tengas permisos."
+      );
+    }
+
+    return id;
+  },
+
+  onSuccess: () => {
+    // Invalidamos la caché para refrescar la lista/tabla de órdenes
+    queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+  },
+
+  onError: (err: Error) => {
+    console.error("Fallo en la anulación de orden:", err.message);
+  },
+});
+
+
+
+
 
   const EntryOrdersContextValue = {
     entryOrdersTableData: {

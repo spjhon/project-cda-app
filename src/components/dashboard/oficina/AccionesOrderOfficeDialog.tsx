@@ -17,12 +17,7 @@ interface AccionesOrderOfficeDialogProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
   rol: string | undefined;
-  mutation: {
-    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string }, unknown>;
-    isCancelingOrder: boolean;
-    errorCancelingOrder: Error | null;
-    resetCancelError: () => void;
-  };
+  
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -31,7 +26,7 @@ export default function AccionesOrderOfficeDialog({
   orden,
   tenantId,
   rol,
-  mutation,
+  
   open,
   onOpenChange,
 }: AccionesOrderOfficeDialogProps) {
@@ -253,7 +248,7 @@ export default function AccionesOrderOfficeDialog({
             <OfficeOrderForm
               orden={orden}
               tenantId={tenantId}
-              mutation={mutation}
+              
             />
           </div>
         </div>

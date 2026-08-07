@@ -43,12 +43,7 @@ export interface DirectorTecnicoFormState {
 interface DirectorTecnicoOrderFormProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
-  mutation: {
-    cancelOrder: UseMutateFunction<string, Error, { id: string; tenantId: string; }, unknown>;
-    isCancelingOrder: boolean;
-    errorCancelingOrder: Error | null;
-    resetCancelError: () => void;
-  };
+  
 }
 
 const SELECT_RESULTADO = [
@@ -59,7 +54,7 @@ const SELECT_RESULTADO = [
 export default function DirectorTecnicoOrderForm({
   orden,
   tenantId,
-  mutation
+  
 }: DirectorTecnicoOrderFormProps) {
 
   const PermissioncontextRecived = useContext(PermissionsContext);
@@ -455,7 +450,7 @@ return (
             <CancelOrder
               orden={orden}
               tenantId={tenantId}
-              mutation={mutation}
+              
             />
           </div>
 
