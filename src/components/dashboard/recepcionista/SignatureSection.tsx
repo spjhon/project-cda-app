@@ -109,7 +109,7 @@ export default function SignatureSection({
                 <Dialog>
                   <DialogTrigger
                     render={
-                      <button className="flex items-center gap-1 text-[20px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-widest">
+                      <button className="flex items-center gap-1 text-[20px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-widest cursor-pointer">
                         <ScrollText className="h-9 w-9" />
                         Ver Condiciones Contractuales
                       </button>
@@ -183,11 +183,7 @@ export default function SignatureSection({
   );
 }
 
-{
-  /* --- SUBCOMPONENTE INDIVIDUAL CON CALLBACK REF SEGURO --- */
-}
-
-
+{/* --- SUBCOMPONENTE INDIVIDUAL OPTIMIZADO PARA MAXIMUM PERFORMANCE --- */}
 
 interface SignatureCardItemProps {
   signature: OrderTemplateSignature;
@@ -218,14 +214,14 @@ function SignatureCardItem({
     (s) => s.template_signature_id === signature.id,
   );
 
-  // Callback Ref con espera de frame para garantizar layout completo en Modales
+  // Callback Ref para medir contenedor dinámicamente
   const containerRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        
+
         if (width > 0 && height > 0) {
           setSize({
             width: Math.floor(width),
@@ -240,9 +236,8 @@ function SignatureCardItem({
     return () => observer.disconnect();
   }, []);
 
-  const handleSignatureUpdate = (pointsData: number[][]) => {
-    if (pointsData.length === 0) return;
-
+  // 🚀 EXTRAE LA IMAGEN Y ACTUALIZA EL STATE SOLO AL DAR CLIC EN "GUARDAR Y CERRAR"
+  const handleSaveAndClose = () => {
     const canvas = canvasRef.current?.canvas;
 
     if (canvas) {
@@ -373,7 +368,6 @@ function SignatureCardItem({
                 />
 
                 <DialogContent
-                
                   className="h-[98dvh] flex flex-col items-center justify-center p-0 overflow-hidden"
                   style={{ maxWidth: "98vw" }}
                   showCloseButton={false}
@@ -385,10 +379,8 @@ function SignatureCardItem({
                     </DialogTitle>
                   </DialogHeader>
 
-                  
-
                   <div
-                    className="w-full h-full border border-red-600 rounded-lg bg-card overflow-hidden "
+                    className="w-full h-full border border-red-600 rounded-lg bg-card overflow-hidden"
                     ref={containerRef}
                   >
                     {size.width > 0 && size.height > 0 && (
@@ -397,12 +389,11 @@ function SignatureCardItem({
                         ref={canvasRef}
                         width={size.width}
                         height={size.height}
-                        onPointer={handleSignatureUpdate}
                       />
                     )}
                   </div>
 
-                  {/* Barra flotante inferior: Funciona perfecto con el fixed original del modal */}
+                  {/* Barra flotante inferior */}
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1.5 rounded-full bg-background/80 backdrop-blur-md border border-border shadow-2xl">
                     <Button
                       type="button"
@@ -422,6 +413,7 @@ function SignatureCardItem({
                         <Button
                           type="button"
                           size="sm"
+                          onClick={handleSaveAndClose}
                           className="h-9 px-6 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full text-xs font-bold uppercase tracking-wider shadow-md transition-all active:scale-95"
                         >
                           Guardar y Cerrar

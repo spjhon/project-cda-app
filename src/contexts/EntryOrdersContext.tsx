@@ -334,6 +334,43 @@ const {
 
 
 
+//QUERY PARA MANTENER ACTUALIZADAS LAS FUPAS
+//QUERY PARA OBTENER LOS CRÉDITOS DEL TENANT
+const {
+  data: tenantCreditsData,
+  isFetching: isFetchingTenantCredits,
+  isError: isTenantCreditsError,
+  error: tenantCreditsError,
+  refetch: refetchTenantCredits,
+} = useQuery({
+  queryKey: ["tenant-credits", tenantId],
+  
+  enabled: !!tenantId,
+
+  staleTime: 0,
+  refetchInterval: 30000, // 30 segundos
+
+  queryFn: async () => {
+    if (!tenantId) {
+      throw new Error("Tenant ID no definido.");
+    }
+
+    const { data, error } = await supabaseBrowser.rpc("get_tenant_credits", {
+      p_tenant_id: tenantId,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data as unknown as TenantCredits;
+  },
+});
+
+
+
+
+
   const EntryOrdersContextValue = {
     entryOrdersTableData: {
       query: {
@@ -376,6 +413,14 @@ const {
         isPendingPreviousDayOrdersError,
         pendingPreviousDayOrdersError,
       },
+      // Dentro de entryOrdersTableData
+tenantCredits: {
+  data: tenantCreditsData,
+  isFetching: isFetchingTenantCredits,
+  isError: isTenantCreditsError,
+  error: tenantCreditsError,
+  refetch: refetchTenantCredits,
+},
       mutation: {
         cancelOrder: cancelOrder,
         isCancelingOrder: isCancelingOrder,

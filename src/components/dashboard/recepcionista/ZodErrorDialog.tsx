@@ -42,7 +42,7 @@ return (
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {isStringError
               ? "Ocurrió un problema inesperado al procesar la solicitud."
-              : `Se encontraron ${errors.length} inconsistencias antes de procesar el ingreso.`}
+              : `Se encontraron ${errors?.length} inconsistencias antes de procesar el ingreso.`}
           </DialogDescription>
         </div>
       </DialogHeader>
@@ -56,7 +56,7 @@ return (
             </p>
           </div>
         ) : (
-          errors.map((err, index) => {
+          errors?.map((err, index) => {
             const readablePath =
               Array.isArray(err.path) && err.path.length > 0
                 ? err.path.join(" ➔ ")

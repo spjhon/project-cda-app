@@ -46,15 +46,11 @@ PENDIENTES
 - cuadrar el mensaje del mes de la grafica de conteo de rtm
 - cuadrar la busqueda de conteo perzonalizado
 - cuadrar que los reprobados tambien tienen numero de rtm 
-- procesamiento de los datos de la tabla para que puedan ser descargados en formato excel
 - que si se compro soat en el establecimiento, muestre los datos en la tabla principal
 - que haya donde decir si es escuter o no
-- en la extencion, claro, cuando arrastra diesel se queda diesel
-- ojo con los diesel en motos
-- darle un bloqueo a la tabla de entry orders para que no pase a finalizada si esta anulada
-- que en el formulario de la orden de entrada diga hace cuando saco el tecno en meses
-- el calendario de la tabla principal no funciona muy bien para escoger fechas
-- el exportador de excel no exporta todo lo encontrado sino solo lo que muestra la pantalla
+- el sistema de anulado de las ordenes de entrada puede que no este funcionando bien
+- hacer la separacion entre efectivo y targeta cuando se pagan con las dos al mismo tiempo
+- 
 
 
 MAS COSITAS QUE FALTAN

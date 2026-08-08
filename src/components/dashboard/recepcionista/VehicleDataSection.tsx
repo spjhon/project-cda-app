@@ -23,7 +23,8 @@ import {
 } from "@/lib/zod-schemas/order-schema";
 import { Checkbox } from "../../ui/checkbox";
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { $ZodIssue } from "zod/v4/core";
 
 interface CombustibleOption {
   value: CombustibleType;
@@ -97,27 +98,133 @@ export interface VehicleDataSectionProps {
   /** * Función despachadora de React para actualizar el estado global desde los inputs del vehículo.
    */
   setFormData: Dispatch<SetStateAction<ZodFullFormDataType>>;
+
+  /** * Función para mostrar/ocultar el diálogo de error.
+   */
+  setShowErrorDialog: Dispatch<SetStateAction<boolean>>;
+
+  /** * Función para establecer el error del servidor.
+   * Puede ser un array de issues de Zod, un string o null.
+   */
+  setServerError: Dispatch<SetStateAction<$ZodIssue[] | null | string>>;
 }
 
 export default function VehicleDataSection({
   selectedTemplate,
   formData,
   setFormData,
+  setShowErrorDialog,
+  setServerError
 }: VehicleDataSectionProps) {
   const requiereGas =
     formData.vehicle.combustible === "gas_natural_vehicular" ||
     formData.vehicle.combustible === "gas_gasolina";
 
-// Función para calcular tiempo restante o vencido de la RTM
-const calcularTiempoRTM = (fechaVencimiento: string): string => {
+
+
+
+// 🟢 EFECTO: Evalúa si dispara o limpia el error cuando la fecha de la RTM cambia
+useEffect(() => {
+  
+  const fechaStr = formData.vehicle.fecha_vencimiento_rtm;
+ 
+  if (!fechaStr) {
+    setShowErrorDialog(false);
+    setServerError(null);
+    return;
+  }
+
+  const ahora = new Date();
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+
+  let fecha: Date;
+  if (fechaStr.includes("T")) {
+    const d = new Date(fechaStr);
+    fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  } else {
+    const partes = fechaStr.split(/[-/]/);
+    if (partes.length >= 3) {
+      fecha = new Date(
+        parseInt(partes[0], 10),
+        parseInt(partes[1], 10) - 1,
+        parseInt(partes[2], 10)
+      );
+    } else {
+      setShowErrorDialog(false);
+      setServerError(null);
+      return;
+    }
+  }
+
+  // Si la fecha parseada no es válida, limpiamos el error
+  if (isNaN(fecha.getTime())) {
+    setShowErrorDialog(false);
+    setServerError(null);
+    return;
+  }
+
+  // Calculamos la diferencia exacta en días naturales
+  const diferenciaMS = fecha.getTime() - hoy.getTime();
+  const diasTotalesVigentes = Math.round(diferenciaMS / (1000 * 60 * 60 * 24));
+
+ 
+
+  // Dispara el error si restan MÁS de 10 días, de lo contrario lo limpia
+  if (diasTotalesVigentes > 10) {
+    setShowErrorDialog(
+     true
+    );
+    setServerError(`ADVERTENCIA, AL TECNO TODAVIA LE QUEDA MAS DE 10 DIAS DE VIGENCIA (exactamente ${diasTotalesVigentes} dias de VIGENCIA), FAVOR COMPROBAR. De ser asi dar aviso al cliente para solicitar confirmacion`)
+  } else {
+    setShowErrorDialog(false);
+    setServerError(null);
+  }
+}, [formData.vehicle.fecha_vencimiento_rtm, setShowErrorDialog, setServerError]);
+
+
+
+
+
+
+
+// Función para calcular tiempo restante o vencido del SOAT
+const calcularTiempoSOAT = (fechaVencimiento: string): string => {
   if (!fechaVencimiento) return "";
 
-  const hoy = new Date();
-  const fecha = new Date(fechaVencimiento);
+  // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000)
+  const ahora = new Date();
+  const hoy = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+  );
 
+  // 2. Parseamos la fecha evitando desfases de zonas horarias (UTC vs Local)
+  let fecha: Date;
+  if (fechaVencimiento.includes("T")) {
+    // Si viene ISO completa con hora
+    const d = new Date(fechaVencimiento);
+    fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  } else {
+    // Si viene solo "YYYY-MM-DD" o "YYYY/MM/DD"
+    const partes = fechaVencimiento.split(/[-/]/);
+    if (partes.length < 3) return "";
+    fecha = new Date(
+      parseInt(partes[0], 10),
+      parseInt(partes[1], 10) - 1, // Los meses en JS van de 0 a 11
+      parseInt(partes[2], 10),
+    );
+  }
+
+  // Validamos que sea una fecha real en milisegundos
   if (isNaN(fecha.getTime())) return "";
 
-  // Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
+  // 3. Verificamos si es EXACTAMENTE el mismo día
+  if (fecha.getTime() === hoy.getTime()) {
+    return "VENCE HOY";
+  }
+
+  // 4. Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
   if (fecha > hoy) {
     let años = fecha.getFullYear() - hoy.getFullYear();
     let meses = fecha.getMonth() - hoy.getMonth();
@@ -143,8 +250,102 @@ const calcularTiempoRTM = (fechaVencimiento: string): string => {
     return `VIGENTE - ${partes.join(" Y ")} RESTANTES`;
   }
 
-  // Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
-  if (fecha < hoy) {
+  // 5. Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
+  let años = hoy.getFullYear() - fecha.getFullYear();
+  let meses = hoy.getMonth() - fecha.getMonth();
+  let dias = hoy.getDate() - fecha.getDate();
+
+  if (dias < 0) {
+    meses--;
+    const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+    dias += mesAnterior.getDate();
+  }
+
+  if (meses < 0) {
+    años--;
+    meses += 12;
+  }
+
+  const partes = [];
+  if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+  if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+  if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+  if (partes.length === 0) return "VENCE HOY";
+  return `VENCIDO HACE ${partes.join(" Y ")}`;
+};
+
+
+
+
+
+
+
+
+
+
+
+  // Función para calcular tiempo restante o vencido de la RTM
+  const calcularTiempoRTM = (fechaVencimiento: string): string => {
+    if (!fechaVencimiento) return "";
+
+    // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000)
+    const ahora = new Date();
+    const hoy = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate(),
+    );
+
+    // 2. Parseamos la fecha evitando desfases de zonas horarias (UTC vs Local)
+    let fecha: Date;
+    if (fechaVencimiento.includes("T")) {
+      // Si viene ISO completa con hora
+      const d = new Date(fechaVencimiento);
+      fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    } else {
+      // Si viene solo "YYYY-MM-DD" o "YYYY/MM/DD"
+      const partes = fechaVencimiento.split(/[-/]/);
+      if (partes.length < 3) return "";
+      fecha = new Date(
+        parseInt(partes[0], 10),
+        parseInt(partes[1], 10) - 1, // Los meses en JS van de 0 a 11
+        parseInt(partes[2], 10),
+      );
+    }
+
+    // 3. Verificamos si es EXACTAMENTE el mismo día
+    if (fecha.getTime() === hoy.getTime()) {
+      return "VENCE HOY";
+    }
+
+    // 4. Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
+    if (fecha > hoy) {
+      let años = fecha.getFullYear() - hoy.getFullYear();
+      let meses = fecha.getMonth() - hoy.getMonth();
+      let dias = fecha.getDate() - hoy.getDate();
+
+      if (dias < 0) {
+        meses--;
+        const mesAnterior = new Date(fecha.getFullYear(), fecha.getMonth(), 0);
+        dias += mesAnterior.getDate();
+      }
+
+      if (meses < 0) {
+        años--;
+        meses += 12;
+      }
+
+      const partes = [];
+      if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+      if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+      if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+      if (partes.length === 0) return "VENCE HOY";
+      return `VIGENTE - ${partes.join(" Y ")} RESTANTES`;
+    }
+
+    // 5. Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
     let años = hoy.getFullYear() - fecha.getFullYear();
     let meses = hoy.getMonth() - fecha.getMonth();
     let dias = hoy.getDate() - fecha.getDate();
@@ -167,68 +368,61 @@ const calcularTiempoRTM = (fechaVencimiento: string): string => {
 
     if (partes.length === 0) return "VENCE HOY";
     return `VENCIDO HACE ${partes.join(" Y ")}`;
-  }
+  };
 
-  // Si es exactamente hoy
-  return "VENCE HOY";
-};
+  // Función para calcular antigüedad de la fecha de matrícula (siempre hacia atrás)
+  const calcularAntiguedad = (fechaMatricula: string): string => {
+    if (!fechaMatricula) return "";
 
+    const hoy = new Date();
+    const fecha = new Date(fechaMatricula);
 
+    if (isNaN(fecha.getTime())) return "";
 
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    let meses = hoy.getMonth() - fecha.getMonth();
+    let dias = hoy.getDate() - fecha.getDate();
 
-// Función para calcular antigüedad de la fecha de matrícula (siempre hacia atrás)
-const calcularAntiguedad = (fechaMatricula: string): string => {
-  if (!fechaMatricula) return "";
+    // Ajustar si el día del mes aún no ha llegado
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      dias += mesAnterior.getDate();
+    }
 
-  const hoy = new Date();
-  const fecha = new Date(fechaMatricula);
+    // Ajustar si el mes aún no ha llegado
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
 
-  if (isNaN(fecha.getTime())) return "";
+    // Caso: menos de 1 día
+    if (años === 0 && meses === 0 && dias === 0) {
+      return "HACE MENOS DE 1 DÍA";
+    }
 
-  let años = hoy.getFullYear() - fecha.getFullYear();
-  let meses = hoy.getMonth() - fecha.getMonth();
-  let dias = hoy.getDate() - fecha.getDate();
+    // Caso: menos de 1 mes (solo días)
+    if (años === 0 && meses === 0) {
+      return `HACE ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`;
+    }
 
-  // Ajustar si el día del mes aún no ha llegado
-  if (dias < 0) {
-    meses--;
-    const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
-    dias += mesAnterior.getDate();
-  }
+    // Caso: menos de 1 año (meses y días)
+    if (años === 0) {
+      const parteMeses = `${meses} ${meses === 1 ? "MES" : "MESES"}`;
+      const parteDias =
+        dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
+      return `HACE ${parteMeses}${parteDias}`;
+    }
 
-  // Ajustar si el mes aún no ha llegado
-  if (meses < 0) {
-    años--;
-    meses += 12;
-  }
+    // Caso: 1 año o más (años, meses y días)
+    const parteAños = `${años} ${años === 1 ? "AÑO" : "AÑOS"}`;
+    const parteMeses =
+      meses > 0 ? ` Y ${meses} ${meses === 1 ? "MES" : "MESES"}` : "";
+    const parteDias =
+      dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
 
-  // Caso: menos de 1 día
-  if (años === 0 && meses === 0 && dias === 0) {
-    return "HACE MENOS DE 1 DÍA";
-  }
-
-  // Caso: menos de 1 mes (solo días)
-  if (años === 0 && meses === 0) {
-    return `HACE ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`;
-  }
-
-  // Caso: menos de 1 año (meses y días)
-  if (años === 0) {
-    const parteMeses = `${meses} ${meses === 1 ? "MES" : "MESES"}`;
-    const parteDias = dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
-    return `HACE ${parteMeses}${parteDias}`;
-  }
-
-  // Caso: 1 año o más (años, meses y días)
-  const parteAños = `${años} ${años === 1 ? "AÑO" : "AÑOS"}`;
-  const parteMeses = meses > 0 ? ` Y ${meses} ${meses === 1 ? "MES" : "MESES"}` : "";
-  const parteDias = dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
-  
-  return `HACE ${parteAños}${parteMeses}${parteDias}`;
-};
-
-
-
+    return `HACE ${parteAños}${parteMeses}${parteDias}`;
+  };
 
   return (
     <fieldset
@@ -531,43 +725,52 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* --- SOAT --- */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
-                  </Label>
-                  <Input
-                    required
-                    type="date"
-                    className="border-blue-100 focus:ring-blue-500"
-                    value={formData.soat_vencimiento_snapshot || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        soat_vencimiento_snapshot: e.target.value,
-                      }))
-                    }
-                  />
+<div className="space-y-2">
+  <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
+    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
+  </Label>
+  <Input
+    required
+    type="date"
+    className="border-blue-100 focus:ring-blue-500"
+    value={formData.soat_vencimiento_snapshot || ""}
+    onChange={(e) =>
+      setFormData((prev) => ({
+        ...prev,
+        soat_vencimiento_snapshot: e.target.value,
+      }))
+    }
+  />
 
-                  {/* 🆕 Estado del SOAT según RUNT */}
-                  {formData.vehicle.soat_vigente_de_acuerdo_al_runt && (
-                    <div
-                      className={`mt-2 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 ${
-                        formData.vehicle.soat_vigente_de_acuerdo_al_runt ===
-                        "VIGENTE"
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                          : "bg-red-100 text-red-700 border border-red-200"
-                      }`}
-                    >
-                      <span className="text-base">
-                        {formData.vehicle.soat_vigente_de_acuerdo_al_runt ===
-                        "VIGENTE"
-                          ? "✅"
-                          : "❌"}
-                      </span>
-                      SOAT: {formData.vehicle.soat_vigente_de_acuerdo_al_runt}
-                    </div>
-                  )}
-                </div>
+  {/* 🆕 Estado y Tiempo Restante del SOAT según RUNT */}
+  {formData.soat_vencimiento_snapshot && (
+    <div
+      className={`mt-2 p-2.5 rounded-lg border text-xs font-bold flex flex-col gap-1 ${
+        formData.vehicle.soat_vigente_de_acuerdo_al_runt === "VIGENTE"
+          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+          : "bg-red-50 text-red-800 border-red-200"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5">
+          <span>
+            {formData.vehicle.soat_vigente_de_acuerdo_al_runt === "VIGENTE"
+              ? "✅"
+              : "❌"}
+          </span>
+          SOAT: {formData.vehicle.soat_vigente_de_acuerdo_al_runt || "DESCONOCIDO"}
+        </span>
+      </div>
+
+      {/* Cálculo dinámico del tiempo restante o vencido */}
+      {calcularTiempoSOAT(formData.soat_vencimiento_snapshot) && (
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pl-6">
+          {calcularTiempoSOAT(formData.soat_vencimiento_snapshot)}
+        </span>
+      )}
+    </div>
+  )}
+</div>
 
                 {/* --- GAS - Número --- */}
                 <div
@@ -670,26 +873,31 @@ const calcularAntiguedad = (fechaMatricula: string): string => {
                 {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
                   "SI" && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
                     {/* Fecha de Vencimiento con antigüedad */}
-{/* Fecha de Vencimiento con estado de vigencia */}
-<div className="bg-white border border-slate-200 rounded-lg p-3">
-  <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
-    Fecha de Vencimiento
-  </span>
-  <p className="text-sm font-bold text-slate-800 mt-0.5">
-    {formData.vehicle.fecha_vencimiento_rtm || "No disponible"}
-  </p>
-  {formData.vehicle.fecha_vencimiento_rtm && (
-    <p className={`text-[9px] font-bold mt-1 ${
-      new Date(formData.vehicle.fecha_vencimiento_rtm) >= new Date()
-        ? "text-emerald-600"
-        : "text-red-600"
-    }`}>
-      {calcularTiempoRTM(formData.vehicle.fecha_vencimiento_rtm)}
-    </p>
-  )}
-</div>
+                    {/* Fecha de Vencimiento con estado de vigencia */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-3">
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Fecha de Vencimiento
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                        {formData.vehicle.fecha_vencimiento_rtm ||
+                          "No disponible"}
+                      </p>
+                      {formData.vehicle.fecha_vencimiento_rtm && (
+                        <p
+                          className={`text-[9px] font-bold mt-1 ${
+                            new Date(formData.vehicle.fecha_vencimiento_rtm) >=
+                            new Date()
+                              ? "text-emerald-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {calcularTiempoRTM(
+                            formData.vehicle.fecha_vencimiento_rtm,
+                          )}
+                        </p>
+                      )}
+                    </div>
 
                     {/* Estado (Vigente/No Vigente) */}
                     <div

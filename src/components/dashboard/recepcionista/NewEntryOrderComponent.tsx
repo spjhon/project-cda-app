@@ -582,6 +582,7 @@ export default function NewEntryOrderComponent() {
             setFormData={setFormData}
             formData={formData}
             setSignatureKey={setSignatureKey}
+           
           ></PlacaSelectionSection>
 
           {/**SECCION DE LAS PERSONAS */}
@@ -597,6 +598,8 @@ export default function NewEntryOrderComponent() {
             selectedTemplate={selectedTemplate}
             formData={formData}
             setFormData={setFormData}
+             setShowErrorDialog={setShowErrorDialog}
+             setServerError = {setServerError}
           />
 
           {/**SECCION DE LAS PRESIONES DEL VEHICULO */}
