@@ -385,7 +385,7 @@ function SignatureCardItem({
                   >
                     {size.width > 0 && size.height > 0 && (
                       <Signature
-                        options={{ size: 5, thinning: 0, smoothing: 0, streamline: 0, simulatePressure: false }}
+                        options={{ size: 3, thinning: 0, smoothing: 0, streamline: 0.5, simulatePressure: false }}
                         ref={canvasRef}
                         width={size.width}
                         height={size.height}
