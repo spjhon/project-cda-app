@@ -1226,6 +1226,47 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_entry_orders_for_export: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          cilindraje: number
+          cliente_direccion: string
+          cliente_documento: string
+          cliente_email: string
+          cliente_nombre: string
+          cliente_telefono: string
+          cliente_tipo_documento: string
+          consecutivo: number
+          consecutivo_fur: string
+          consecutivo_rtm: string
+          es_reinspeccion: boolean
+          estado_orden: Database["public"]["Enums"]["order_status_enum"]
+          fecha: string
+          id: string
+          kilometraje: string
+          linea: string
+          marca: string
+          modelo: number
+          oficina_consecutivo_factura: string
+          oficina_num_aprobacion: string
+          oficina_pago: number
+          oficina_pin: string
+          oficina_tipo_pago: Database["public"]["Enums"]["office_payment_type_enum"]
+          placa: string
+          propietario_direccion: string
+          propietario_documento: string
+          propietario_email: string
+          propietario_nombre: string
+          propietario_telefono: string
+          propietario_tipo_documento: string
+          resultado_revision: string
+          se_compro_soat: boolean
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          soat_vencimiento_snapshot: string
+          vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
+        }[]
+      }
       get_my_tenants: { Args: never; Returns: string[] }
       get_tenant_credits: {
         Args: { p_tenant_id: string }

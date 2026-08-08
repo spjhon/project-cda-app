@@ -58,7 +58,8 @@ import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext"
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { Button } from "@/components/ui/button";
 import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
-import { DownloadExcelButton } from "./DownloadExcelButton";
+import { ExportExcelButton } from "./DownloadExcelButton";
+
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
 
@@ -191,8 +192,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setOrderByDirection = () => {},
     showDeleted = false,
     setShowDeleted = () => {},
-    dateRange = undefined,
-    setDateRange = () => {},
+    
     searchColumn = "placa",
     setSearchColumn = () => {},
     searchTerm = "",
@@ -620,8 +620,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
           </div>
 
           <DateRangePicker
-            date={dateRange}
-            setDate={setDateRange}
+           
           ></DateRangePicker>
 
           <div className="flex items-center space-x-2 bg-background px-3 py-1.5 h-9 rounded-md border border-input shadow-sm hover:border-accent transition-colors">
@@ -676,11 +675,19 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
           </span>
         </div>
 
+
+
+
+
         {/* Aquí puedes renderizar el botón de Excel */}
-        <DownloadExcelButton 
-          data={EntryOrders} 
-          disabled={query?.isFetchingEntryOrders}
+        <ExportExcelButton 
+          
         />
+
+
+
+
+
 
         <div className="flex items-center">{renderStatusBadge()}</div>
 

@@ -331,6 +331,13 @@ CREATE INDEX IF NOT EXISTS entry_orders_fecha_idx ON public.entry_orders (fecha)
 -- Aislamiento RLS
 CREATE INDEX IF NOT EXISTS entry_orders_tenant_idx ON public.entry_orders (tenant_id);
 
+-- ============================================================================
+-- 1. CREACIÓN DEL ÍNDICE COMPUESTO
+-- Optimiza consultas filtradas/ordenadas por tenant_id y fecha.
+-- ============================================================================
+CREATE INDEX IF NOT EXISTS entry_orders_tenant_fecha_idx 
+ON public.entry_orders (tenant_id, fecha DESC);
+
 -- Búsqueda de historial por vehículo
 CREATE INDEX IF NOT EXISTS entry_orders_vehiculo_idx ON public.entry_orders (vehiculo_id);
 

@@ -108,26 +108,127 @@ export default function VehicleDataSection({
     formData.vehicle.combustible === "gas_natural_vehicular" ||
     formData.vehicle.combustible === "gas_gasolina";
 
-  // Función auxiliar (puede ir fuera del componente)
-  const calcularAntiguedad = (fechaMatricula: string): string => {
-    if (!fechaMatricula) return "";
+// Función para calcular tiempo restante o vencido de la RTM
+const calcularTiempoRTM = (fechaVencimiento: string): string => {
+  if (!fechaVencimiento) return "";
 
-    const hoy = new Date();
-    const fecha = new Date(fechaMatricula);
+  const hoy = new Date();
+  const fecha = new Date(fechaVencimiento);
 
-    if (isNaN(fecha.getTime())) return "";
+  if (isNaN(fecha.getTime())) return "";
 
-    let años = hoy.getFullYear() - fecha.getFullYear();
-    const mes = hoy.getMonth() - fecha.getMonth();
+  // Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
+  if (fecha > hoy) {
+    let años = fecha.getFullYear() - hoy.getFullYear();
+    let meses = fecha.getMonth() - hoy.getMonth();
+    let dias = fecha.getDate() - hoy.getDate();
 
-    if (mes < 0 || (mes === 0 && hoy.getDate() < fecha.getDate())) {
-      años--;
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(fecha.getFullYear(), fecha.getMonth(), 0);
+      dias += mesAnterior.getDate();
     }
 
-    if (años === 0) return "HACE MENOS DE UN AÑO";
-    if (años === 1) return "HACE 1 AÑO";
-    return `HACE ${años} AÑOS`;
-  };
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    const partes = [];
+    if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+    if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+    if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+    if (partes.length === 0) return "VENCE HOY";
+    return `VIGENTE - ${partes.join(" Y ")} RESTANTES`;
+  }
+
+  // Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
+  if (fecha < hoy) {
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    let meses = hoy.getMonth() - fecha.getMonth();
+    let dias = hoy.getDate() - fecha.getDate();
+
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      dias += mesAnterior.getDate();
+    }
+
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    const partes = [];
+    if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+    if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+    if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+    if (partes.length === 0) return "VENCE HOY";
+    return `VENCIDO HACE ${partes.join(" Y ")}`;
+  }
+
+  // Si es exactamente hoy
+  return "VENCE HOY";
+};
+
+
+
+
+// Función para calcular antigüedad de la fecha de matrícula (siempre hacia atrás)
+const calcularAntiguedad = (fechaMatricula: string): string => {
+  if (!fechaMatricula) return "";
+
+  const hoy = new Date();
+  const fecha = new Date(fechaMatricula);
+
+  if (isNaN(fecha.getTime())) return "";
+
+  let años = hoy.getFullYear() - fecha.getFullYear();
+  let meses = hoy.getMonth() - fecha.getMonth();
+  let dias = hoy.getDate() - fecha.getDate();
+
+  // Ajustar si el día del mes aún no ha llegado
+  if (dias < 0) {
+    meses--;
+    const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+    dias += mesAnterior.getDate();
+  }
+
+  // Ajustar si el mes aún no ha llegado
+  if (meses < 0) {
+    años--;
+    meses += 12;
+  }
+
+  // Caso: menos de 1 día
+  if (años === 0 && meses === 0 && dias === 0) {
+    return "HACE MENOS DE 1 DÍA";
+  }
+
+  // Caso: menos de 1 mes (solo días)
+  if (años === 0 && meses === 0) {
+    return `HACE ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`;
+  }
+
+  // Caso: menos de 1 año (meses y días)
+  if (años === 0) {
+    const parteMeses = `${meses} ${meses === 1 ? "MES" : "MESES"}`;
+    const parteDias = dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
+    return `HACE ${parteMeses}${parteDias}`;
+  }
+
+  // Caso: 1 año o más (años, meses y días)
+  const parteAños = `${años} ${años === 1 ? "AÑO" : "AÑOS"}`;
+  const parteMeses = meses > 0 ? ` Y ${meses} ${meses === 1 ? "MES" : "MESES"}` : "";
+  const parteDias = dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
+  
+  return `HACE ${parteAños}${parteMeses}${parteDias}`;
+};
+
+
+
 
   return (
     <fieldset
@@ -569,16 +670,26 @@ export default function VehicleDataSection({
                 {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
                   "SI" && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Fecha de Vencimiento */}
-                    <div className="bg-white border border-slate-200 rounded-lg p-3">
-                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
-                        Fecha de Vencimiento
-                      </span>
-                      <p className="text-sm font-bold text-slate-800 mt-0.5">
-                        {formData.vehicle.fecha_vencimiento_rtm ||
-                          "No disponible"}
-                      </p>
-                    </div>
+                    
+                    {/* Fecha de Vencimiento con antigüedad */}
+{/* Fecha de Vencimiento con estado de vigencia */}
+<div className="bg-white border border-slate-200 rounded-lg p-3">
+  <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+    Fecha de Vencimiento
+  </span>
+  <p className="text-sm font-bold text-slate-800 mt-0.5">
+    {formData.vehicle.fecha_vencimiento_rtm || "No disponible"}
+  </p>
+  {formData.vehicle.fecha_vencimiento_rtm && (
+    <p className={`text-[9px] font-bold mt-1 ${
+      new Date(formData.vehicle.fecha_vencimiento_rtm) >= new Date()
+        ? "text-emerald-600"
+        : "text-red-600"
+    }`}>
+      {calcularTiempoRTM(formData.vehicle.fecha_vencimiento_rtm)}
+    </p>
+  )}
+</div>
 
                     {/* Estado (Vigente/No Vigente) */}
                     <div

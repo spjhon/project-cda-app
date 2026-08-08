@@ -53,6 +53,8 @@ PENDIENTES
 - ojo con los diesel en motos
 - darle un bloqueo a la tabla de entry orders para que no pase a finalizada si esta anulada
 - que en el formulario de la orden de entrada diga hace cuando saco el tecno en meses
+- el calendario de la tabla principal no funciona muy bien para escoger fechas
+- el exportador de excel no exporta todo lo encontrado sino solo lo que muestra la pantalla
 
 
 MAS COSITAS QUE FALTAN

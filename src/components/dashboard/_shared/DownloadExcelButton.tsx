@@ -1,144 +1,166 @@
-"react-bootstrap";
-import React, { useState } from "react";
-import * as XLSX from "xlsx";
-import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
+"use client";
+
+import { useContext } from "react";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { useMutation } from "@tanstack/react-query";
+import { Workbook } from "exceljs";
+
 import { Button } from "@/components/ui/button";
-import { EntryOrderListItem, TirePressureDetail } from "@/lib/server-actions/fetch_entry_orders_list";
+import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
+export function ExportExcelButton() {
+  const context = useContext(EntryOrdersContext);
+  const dateRange = context?.entryOrdersTableData?.query?.dateRange;
+  const totalAdescargar = context?.entryOrdersTableData?.query?.entryOrdersData?.[0]?.total_count;
 
-interface DownloadExcelButtonProps {
-  data: EntryOrderListItem[];
-  disabled?: boolean;
-}
+  const exportMutation = useMutation({
+    mutationFn: async () => {
+      if (!dateRange?.from || !dateRange?.to) {
+        throw new Error("El rango de fechas no está definido");
+      }
 
-export const DownloadExcelButton: React.FC<DownloadExcelButtonProps> = ({
-  data,
-  disabled = false,
-}) => {
-  const [isExporting, setIsExporting] = useState(false);
+      const startDate = new Date(dateRange.from);
+      const endDate = new Date(dateRange.to);
 
-  // Helper para formatear presiones de llantas JSONB en un String entendible
-  const formatTirePressures = (pressures: TirePressureDetail[]): string => {
-    if (!pressures || pressures.length === 0) return "N/A";
-    return pressures
-      .map((p) => {
-        const enc = p.presion_encontrada !== null ? `${p.presion_encontrada} PSI` : "N/R";
-        const aju = p.presion_ajustada !== null ? `${p.presion_ajustada} PSI` : "N/R";
-        return `Eje ${p.eje} (${p.posicion}): Enc=${enc}, Ajus=${aju}`;
-      })
-      .join(" | ");
-  };
+      if (format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd")) {
+        endDate.setHours(23, 59, 59, 999);
+      }
 
-  // Helper para formatear fechas ISO
-  const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return "N/A";
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleString("es-CO", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
+      const supabaseBrowser = createSupabaseBrowserClient();
+
+      const { data: orders, error } = await supabaseBrowser.rpc(
+        "get_entry_orders_for_export",
+        {
+          p_start_date: startDate.toISOString(),
+          p_end_date: endDate.toISOString(),
+        }
+      );
+
+      if (error) {
+        throw new Error(error.message || "Error al obtener las órdenes de entrada");
+      }
+
+      if (!orders || orders.length === 0) {
+        throw new Error("No hay registros para exportar en el rango seleccionado");
+      }
+
+      // 1. Crear libro y hoja
+      const workbook = new Workbook();
+      const worksheet = workbook.addWorksheet("Órdenes de Entrada");
+
+      // 2. Definir columnas
+      worksheet.columns = [
+        { header: "Consecutivo", key: "consecutivo", width: 12 },
+        { header: "Fecha", key: "fecha", width: 20 },
+        { header: "Placa", key: "placa", width: 12 },
+        { header: "Marca", key: "marca", width: 15 },
+        { header: "Línea", key: "linea", width: 15 },
+        { header: "Modelo", key: "modelo", width: 10 },
+        { header: "Cilindraje", key: "cilindraje", width: 12 },
+
+        // Propietario
+        { header: "Propietario Nombre", key: "propietario_nombre", width: 25 },
+        { header: "Propietario Tipo Doc", key: "propietario_tipo_documento", width: 15 },
+        { header: "Propietario Doc", key: "propietario_documento", width: 18 },
+        { header: "Propietario Teléfono", key: "propietario_telefono", width: 15 },
+        { header: "Propietario Email", key: "propietario_email", width: 22 },
+        { header: "Propietario Dirección", key: "propietario_direccion", width: 22 },
+
+        // Cliente
+        { header: "Cliente Nombre", key: "cliente_nombre", width: 25 },
+        { header: "Cliente Tipo Doc", key: "cliente_tipo_documento", width: 15 },
+        { header: "Cliente Doc", key: "cliente_documento", width: 18 },
+        { header: "Cliente Teléfono", key: "cliente_telefono", width: 15 },
+        { header: "Cliente Email", key: "cliente_email", width: 22 },
+        { header: "Cliente Dirección", key: "cliente_direccion", width: 22 },
+
+        // Operativos
+        { header: "Tipo Servicio", key: "service_type", width: 15 },
+        { header: "Reinspección", key: "es_reinspeccion", width: 14 },
+        { header: "Kilometraje", key: "kilometraje", width: 14 },
+        { header: "Vencimiento SOAT", key: "soat_vencimiento_snapshot", width: 16 },
+        { header: "Tipo Vehículo", key: "vehiculo_tipo_snapshot", width: 18 },
+        { header: "Servicio Vehículo", key: "vehiculo_tipo_servicio_snapshot", width: 18 },
+        { header: "Estado Orden", key: "estado_orden", width: 15 },
+
+        // Oficina
+        { header: "PIN Oficina", key: "oficina_pin", width: 15 },
+        { header: "Pago", key: "oficina_pago", width: 14 },
+        { header: "Factura", key: "oficina_consecutivo_factura", width: 15 },
+        { header: "Tipo Pago", key: "oficina_tipo_pago", width: 15 },
+        { header: "Aprobación", key: "oficina_num_aprobacion", width: 15 },
+        { header: "Compró SOAT", key: "se_compro_soat", width: 14 },
+        { header: "Resultado", key: "resultado_revision", width: 18 },
+
+        // ISO 17020
+        { header: "FUR", key: "consecutivo_fur", width: 15 },
+        { header: "RTM", key: "consecutivo_rtm", width: 15 },
+      ];
+
+      // Formato negrita para la primera fila
+      worksheet.getRow(1).font = { bold: true };
+
+      // 3. Poblar datos
+      orders.forEach((row) => {
+        worksheet.addRow({
+          ...row,
+          fecha: row.fecha ? format(new Date(row.fecha), "dd/MM/yyyy HH:mm") : "",
+          es_reinspeccion: row.es_reinspeccion ? "SÍ" : "NO",
+          se_compro_soat: row.se_compro_soat ? "SÍ" : "NO",
+          oficina_pago: row.oficina_pago ? Number(row.oficina_pago) : 0,
+        });
       });
-    } catch {
-      return dateStr;
-    }
-  };
 
-  const handleExportExcel = () => {
-    if (!data || data.length === 0) return;
-
-    setIsExporting(true);
-
-    try {
-      // 1. Transformar y aplanar los datos para las filas de Excel
-      const formattedRows = data.map((item) => ({
-        "Fecha Registro": formatDate(item.fecha),
-        Placa: item.placa?.toUpperCase() || "",
-        Marca: item.marca || "",
-        Línea: item.linea || "",
-        "Tipo Vehículo": item.vehiculo_tipo_snapshot || "",
-        Servicio: item.vehiculo_tipo_servicio_snapshot || "",
-        "Tipo de Servicio": item.service_type || "",
-        "Estado Orden": item.estado_orden?.toUpperCase() || "",
-        "Es Reinspección": item.es_reinspeccion ? "SÍ" : "NO",
-        "¿Gestión SOAT en CDA?": item.se_compro_soat ? "SÍ" : "NO",
-        "Resultado Revisión": item.resultado_revision || "PENDIENTE",
-
-        // Datos del Propietario
-        "Propietario Nombre": item.propietario_nombre || "",
-        "Propietario Tipo Doc": item.propietario_tipo_documento || "",
-        "Propietario Doc": item.propietario_documento || "",
-        "Propietario Teléfono": item.propietario_telefono || "",
-        "Propietario Email": item.propietario_email || "",
-        "Propietario Dirección": item.propietario_direccion || "",
-
-        // Datos del Cliente
-        "Cliente Nombre": item.cliente_nombre || "",
-        "Cliente Tipo Doc": item.cliente_tipo_documento || "",
-        "Cliente Doc": item.cliente_documento || "",
-        "Cliente Teléfono": item.cliente_telefono || "",
-        "Cliente Email": item.cliente_email || "",
-        "Cliente Dirección": item.cliente_direccion || "",
-
-        // Datos Operativos
-        Kilometraje: item.kilometraje || "",
-        "Vencimiento SOAT": formatDate(item.soat_vencimiento_snapshot),
-        "Consecutivo FUR": item.consecutivo_fur || "",
-        "Consecutivo RTM": item.consecutivo_rtm || "",
-        "Presión de Llantas": formatTirePressures(item.presiones_llantas),
-
-        // Información de Oficina / Pago
-        "PIN Oficina": item.oficina_pin || "",
-        "Valor Pago": item.oficina_pago ?? 0,
-        "Consecutivo Factura": item.oficina_consecutivo_factura || "",
-        "Medio de Pago": item.oficina_tipo_pago ? item.oficina_tipo_pago.toUpperCase() : "",
-        "Nº Aprobación": item.oficina_num_aprobacion || "",
-      }));
-
-      // 2. Crear Worksheet
-      const worksheet = XLSX.utils.json_to_sheet(formattedRows);
-
-      // 3. Auto-ajustar ancho de las columnas dinámicamente
-      const colWidths = Object.keys(formattedRows[0] || {}).map((key) => {
-        const maxContentLength = Math.max(
-          key.length,
-          ...formattedRows.map((row) => String((row as Record<string, unknown>)[key] || "").length)
-        );
-        return { wch: Math.min(Math.max(maxContentLength + 3, 12), 50) };
+      // 4. Descargar archivo binario
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      worksheet["!cols"] = colWidths;
 
-      // 4. Crear Workbook y guardar archivo
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Ordenes_Entrada");
+      const fromFormatted = format(startDate, "yyyy-MM-dd");
+      const toFormatted = format(endDate, "yyyy-MM-dd");
+      const fileName = `Ordenes_Entrada_${fromFormatted}_a_${toFormatted}.xlsx`;
 
-      const today = new Date().toISOString().split("T")[0];
-      const filename = `Ordenes_Entrada_${today}.xlsx`;
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    },
+    onError: (error) => {
+      console.error("Error al exportar a Excel:", error);
+    },
+  });
 
-      XLSX.writeFile(workbook, filename);
-    } catch (error) {
-      console.error("Error exportando a Excel:", error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const isButtonDisabled =
+    !dateRange?.from || !dateRange?.to || exportMutation.isPending;
+
+  const totalCountLabel =
+    totalAdescargar !== undefined && totalAdescargar !== null
+      ? ` (${totalAdescargar})`
+      : "";
 
   return (
     <Button
       variant="outline"
       size="sm"
-      onClick={handleExportExcel}
-      disabled={disabled || isExporting || !data.length}
-      className="gap-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/40 transition-colors shadow-sm"
+      className="h-9 gap-2 text-xs font-medium border-border shadow-sm hover:bg-muted"
+      onClick={() => exportMutation.mutate()}
+      disabled={isButtonDisabled}
     >
-      {isExporting ? (
-        <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+      {exportMutation.isPending ? (
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       ) : (
-        <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+        <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
       )}
-      <span>Exportar Excel ({data.length})</span>
+      {exportMutation.isPending
+        ? "Generando Excel..."
+        : `Exportar Excel${totalCountLabel}`}
     </Button>
   );
-};
+}
