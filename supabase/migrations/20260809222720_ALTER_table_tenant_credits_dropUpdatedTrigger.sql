@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS set_tenant_credits_updated_at ON public.tenant_credits;

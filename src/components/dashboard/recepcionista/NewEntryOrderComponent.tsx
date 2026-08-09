@@ -149,14 +149,17 @@ export default function NewEntryOrderComponent() {
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
 
-  const templateTableData =
-    ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
+  const templateTableData = ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
   //FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
-  const activeTemplates =
-    templateTableData?.query.data?.filter((t) => t.is_active) || [];
+  const activeTemplates = templateTableData?.query.data?.filter((t) => t.is_active) || [];
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
+
+
+
+
+  
   // Estados para controlar el Dialog de errores
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   // Estado local para el cargando (reemplaza a isPending de useActionState)

@@ -18,7 +18,7 @@ import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
 import { $ZodIssue } from "zod/v4/core";
 
 import { ZodErrorDialog } from "../recepcionista/ZodErrorDialog";
-import { UseMutateFunction, useQueryClient } from "@tanstack/react-query";
+import {useQueryClient } from "@tanstack/react-query";
 import { insertDirectorTecnicoData } from "@/lib/server-actions/insert_director_tecnico_data";
 import CancelOrder from "../_shared/CancelOrder";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
@@ -214,6 +214,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     ...formData,
     consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
   };
+  
+ 
 
   try {
     // 3.1 Insertar datos del director técnico
@@ -253,7 +255,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       // No detenemos el flujo, solo mostramos el error en consola
     }
 
-    console.log("📦 Datos de la orden obtenidos:", orderDataTyped);
+   queryClient.invalidateQueries({
+        queryKey: ["tenant-credits", tenantId],
+      });
 
     // 3.3 Generar y descargar PDF
     if (orderDataTyped) {

@@ -86,6 +86,10 @@ export default function AdminDashboardLayout({
 }: AdminDashboardLayout) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
+
+
+
+
   const adminAnalyticsPromise: Promise<AdminAnalyticsData> = (async () => {
     const supabase = await createSupabaseServerClient();
 
@@ -132,6 +136,12 @@ export default function AdminDashboardLayout({
     };
   })();
 
+
+
+
+
+
+  
   const adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData> =
     (async () => {
       const supabase = await createSupabaseServerClient();
@@ -158,6 +168,12 @@ export default function AdminDashboardLayout({
         total_rtm_rechazados_hoy: 0, // ◄ Fallback seguro
       };
     })();
+
+
+
+
+
+
 
   const initialPQAFPromise: Promise<PQAFListItem[]> = (async () => {
     const { tenant } = await params;
@@ -195,6 +211,14 @@ export default function AdminDashboardLayout({
 
     return (data || []) as unknown as PQAFListItem[];
   })();
+
+
+
+
+
+
+
+
 
   return (
     

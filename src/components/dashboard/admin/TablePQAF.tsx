@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   Table,
@@ -34,6 +34,7 @@ import {
   Search,
   X,
   CalendarIcon,
+  Check,
  
 } from "lucide-react";
 
@@ -59,6 +60,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { PQAFListItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
 import DetallesPQAFDialog from "./DetallesPQAFDialog";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 const columnHelper = createColumnHelper<PQAFListItem>();
 
@@ -153,21 +155,69 @@ export default function PQAFTable() {
 
   const [inputValue, setInputValue] = useState(searchTerm);
 
-// NUVOS ESTADOS: Estado intermedio para las fechas y control de apertura del Popover
-  const [localRange, setLocalRange] = useState<DateRange | undefined>(dateRange);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+// Calculamos la fecha de hace un mes a partir de hoy
+  const oneMonthAgo = subMonths(new Date(), 1);
+  const today = new Date();
+
+  // 🌟 Estado local borrador del rango (Default: Hace 1 mes hasta hoy)
+  const [localDate, setLocalDate] = useState<DateRange | undefined>(
+    dateRange || { from: oneMonthAgo, to: today }
+  );
 
 
-  // Sincronizar el estado local si el dateRange global cambia externamente (ej. al limpiar filtros)
-  useMemo(() => {
-    setLocalRange(dateRange);
-  }, [dateRange]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleApplyDates = () => {
-    setDateRange(localRange);
-    setPage(1);
-    setIsPopoverOpen(false); // Cierra el popover al aplicar
+  // 🌟 Estados para mes visible de cada calendario
+ // 🌟 Estado para el mes visible de cada calendario
+  const [fromMonth, setFromMonth] = useState<Date>(
+    localDate?.from || oneMonthAgo
+  );
+  const [toMonth, setToMonth] = useState<Date>(
+    localDate?.to || today
+  );
+
+  // Sincronizar estados locales al abrir/cerrar el Popover
+ const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      const defaultFrom = dateRange?.from || subMonths(new Date(), 1);
+      const defaultTo = dateRange?.to || new Date();
+
+      setLocalDate(dateRange || { from: defaultFrom, to: defaultTo });
+      setFromMonth(defaultFrom);
+      setToMonth(defaultTo);
+    }
   };
+
+  // Presets rápidos
+ const presets = [
+    { label: "Hoy", getRange: () => ({ from: new Date(), to: new Date() }) },
+    { label: "Ayer", getRange: () => { const temp = subDays(new Date(), 1); return { from: temp, to: temp }; } },
+    { label: "Últimos 7 días", getRange: () => ({ from: subDays(new Date(), 6), to: new Date() }) },
+    { label: "Último Mes", getRange: () => ({ from: subMonths(new Date(), 1), to: new Date() }) }, // 👈 Preset
+  ];
+  // Handlers para evitar descontrol en selección de fechas
+  const handleSelectFrom = (selectedDay: Date | undefined) => {
+    setLocalDate((prev) => {
+      if (selectedDay && prev?.to && selectedDay > prev.to) return { from: selectedDay, to: undefined };
+      return { from: selectedDay, to: prev?.to };
+    });
+  };
+
+  const handleSelectTo = (selectedDay: Date | undefined) => {
+    setLocalDate((prev) => {
+      if (selectedDay && prev?.from && selectedDay < prev.from) return { from: selectedDay, to: undefined };
+      return { from: prev?.from, to: selectedDay };
+    });
+  };
+
+  const handleApply = () => {
+    setDateRange(localDate);
+    setPage(1);
+    setIsOpen(false);
+  };
+
+
 
 
   // Debounce para optimizar consultas de texto libre
@@ -418,18 +468,19 @@ export default function PQAFTable() {
 
           {/* Selector de Fechas */}
           {/* Selector de Fecha de Shadcn */}
-          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+         {/* Selector de Fechas (Doble Calendario + Presets) */}
+          <Popover open={isOpen} onOpenChange={handleOpenChange}>
             <PopoverTrigger
               render={
                 <Button
                   id="date"
-                  variant={"outline"}
+                  variant="outline"
                   className={cn(
-                    "w-full sm:w-auto justify-start text-left font-normal border-slate-300",
-                    !dateRange && "text-muted-foreground",
+                    "w-full sm:w-auto justify-start text-left font-normal bg-background h-9 border-input shadow-sm hover:bg-muted hover:text-muted-foreground",
+                    !dateRange && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
+                  <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                   {dateRange?.from ? (
                     dateRange.to ? (
                       <>
@@ -445,41 +496,76 @@ export default function PQAFTable() {
                 </Button>
               }
             />
-            <PopoverContent className="w-auto p-0 flex flex-col" align="start">
-              {/* El calendario ahora lee y escribe en el estado LOCAL */}
-              <Calendar
-                autoFocus
-                mode="range"
-                defaultMonth={localRange?.from || dateRange?.from}
-                selected={localRange}
-                onSelect={setLocalRange}
-                numberOfMonths={2}
-                locale={es}
-                className="rounded-t-lg"
-                captionLayout="dropdown"
-                showOutsideDays={false}
-              />
-              
-              {/* Barra de acciones inferior del calendario */}
-              <div className="p-3 border-t border-border bg-muted/20 flex items-center justify-end gap-2 rounded-b-lg">
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => {
-                    setLocalRange(dateRange); // Revierte al filtro activo actual
-                    setIsPopoverOpen(false);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={handleApplyDates}
-                  disabled={!localRange?.from} // Opcional: deshabilita si no hay selección mínima
-                >
-                  Aplicar
-                </Button>
-              </div>
+            <PopoverContent className="w-auto p-0 border-none shadow-xl" align="start">
+              <Card className="w-fit border-border bg-card" size="sm">
+                <CardContent className="p-3 flex flex-col md:flex-row gap-4 divide-y md:divide-y-0 md:divide-x divide-border">
+                  {/* CALENDARIO DESDE */}
+                  <div className="flex flex-col gap-1 pt-2 md:pt-0">
+                    <span className="text-xs font-semibold text-muted-foreground px-2">Desde:</span>
+                    <Calendar
+                      locale={es}
+                      autoFocus
+                      mode="single"
+                      selected={localDate?.from}
+                      onSelect={handleSelectFrom}
+                      month={fromMonth}
+                      onMonthChange={setFromMonth}
+                      numberOfMonths={1}
+                      className="rounded-lg"
+                      captionLayout="dropdown"
+                      showOutsideDays={false}
+                    />
+                  </div>
+
+                  {/* CALENDARIO HASTA */}
+                  <div className="flex flex-col gap-1 pt-2 md:pt-0 md:pl-4">
+                    <span className="text-xs font-semibold text-muted-foreground px-2">Hasta:</span>
+                    <Calendar
+                      locale={es}
+                      mode="single"
+                      selected={localDate?.to}
+                      onSelect={handleSelectTo}
+                      month={toMonth}
+                      onMonthChange={setToMonth}
+                      numberOfMonths={1}
+                      className="rounded-lg"
+                      captionLayout="dropdown"
+                      showOutsideDays={false}
+                      disabled={localDate?.from ? { before: localDate.from } : undefined}
+                    />
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex flex-col gap-3 border-t border-border p-3 bg-muted/30">
+                  <div className="flex flex-wrap gap-2 w-full">
+                    {presets.map((preset) => (
+                      <Button
+                        key={preset.label}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 min-w-25 text-xs font-medium bg-background border-border shadow-sm hover:bg-muted"
+                        onClick={() => {
+                          const newRange = preset.getRange();
+                          setLocalDate(newRange);
+                          if (newRange.from) setFromMonth(newRange.from);
+                          if (newRange.to) setToMonth(newRange.to);
+                        }}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+
+                  <Button
+                    className="w-full text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
+                    onClick={handleApply}
+                    disabled={!localDate?.from || !localDate?.to}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    Aplicar Rango
+                  </Button>
+                </CardFooter>
+              </Card>
             </PopoverContent>
           </Popover>
         </div>

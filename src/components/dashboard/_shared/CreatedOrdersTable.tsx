@@ -59,6 +59,7 @@ import { AdminContext } from "@/contexts/AdminLoaderContext";
 import { Button } from "@/components/ui/button";
 import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
 import { ExportExcelButton } from "./DownloadExcelButton";
+import { TenantCreditsManager } from "./TenantCreditsManager";
 
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();
@@ -176,6 +177,11 @@ export default function CreatedOrdersTable() {
 
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
   const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+
+
+ 
+
+
 
   //con este state vamos a aislar el dialog de las acciones para que si se actualiza la tabla, no se actualice el dialog al mismo tiempo
 const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(null);
@@ -515,7 +521,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
 
 
-
+console.log("ROL REGISTRADO: ", rol)
 
   
 
@@ -676,18 +682,19 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
         </div>
 
 
+       
 
 
 
-        {/* Aquí puedes renderizar el botón de Excel */}
-        <ExportExcelButton 
+{(rol === "oficina" || rol === "admin") && (
+  <TenantCreditsManager />
+)}
+
+{(rol === "oficina" || rol === "admin" || rol === "director-tecnico") && (
+  <ExportExcelButton 
           
         />
-
-
-
-
-
+)}
 
         <div className="flex items-center">{renderStatusBadge()}</div>
 

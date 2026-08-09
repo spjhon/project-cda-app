@@ -64,7 +64,7 @@ CREATE INDEX tenant_credits_tenant_id_idx ON public.tenant_credits (tenant_id);
 -- GRANTS
 -- ==========================================
 
-GRANT SELECT ON TABLE public.tenant_credits TO authenticated;
+GRANT SELECT, UPDATE ON TABLE public.tenant_credits TO authenticated;
 GRANT ALL ON TABLE public.tenant_credits TO service_role;
 
 

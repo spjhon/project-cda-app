@@ -153,6 +153,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                   Desde:
                 </span>
                 <Calendar
+                locale={es}
                   autoFocus
                   mode="single"
                   selected={localDate?.from}
@@ -172,6 +173,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                   Hasta:
                 </span>
                 <Calendar
+                locale={es}
                   mode="single"
                   selected={localDate?.to}
                   onSelect={handleSelectTo}

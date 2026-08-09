@@ -73,6 +73,14 @@ export interface EntryOrdersLoaderContextType {
       isPendingPreviousDayOrdersError: boolean;
       pendingPreviousDayOrdersError: Error | null;
     };
+        // 🆕 Créditos del tenant
+    tenantCredits: {
+      data: TenantCredits | null;
+      isFetching: boolean;
+      isError: boolean;
+      error: Error | null;
+      refetch: () => void;
+    };
 
     mutation: {
       cancelOrder: UseMutateFunction<
@@ -121,20 +129,32 @@ export default function EntryOrdersLoaderContext({
 
   const permissionscontextRecived = useContext(PermissionsContext);
 
-  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId =
+    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const entryOrdersTableData = use(entryOrdersTableDataPromise);
+
+
+
   const tenantCredits = use(tenantCreditsPromise);
 
-  console.log(tenantCredits);
+  
 
   const pathname = usePathname();
 
   const supabaseBrowser = createSupabaseBrowserClient();
 
+
+
+
+
+
+
   //--------------------------------------------
   //TANSTAK QUERY PARA LAS ORDENES DE ENTRADA
   //--------------------------------------------
+
+
 
   //Manejo del query para mantener los datos actualizados
   const {
@@ -206,166 +226,190 @@ export default function EntryOrdersLoaderContext({
     refetchInterval: 15000,
   });
 
+
+
+
+
+
+
+
+
+
+
+
   //QUERY PARA VERIFICAR QUE NO HAYAN ORDENES DE ENTRADA ABIERTAS DEL DIA ANTERIOR
-const {
-  data: pendingPreviousDayOrders = [],
-  isLoading: isLoadingPendingPreviousDayOrders,
-  isError: isPendingPreviousDayOrdersError,
-  error: pendingPreviousDayOrdersError,
-} = useQuery<PendingPreviousDayOrder[]>({
-  queryKey: ["pending-previous-day-orders", tenantId],
+  const {
+    data: pendingPreviousDayOrders = [],
+    isLoading: isLoadingPendingPreviousDayOrders,
+    isError: isPendingPreviousDayOrdersError,
+    error: pendingPreviousDayOrdersError,
+  } = useQuery<PendingPreviousDayOrder[]>({
+    queryKey: ["pending-previous-day-orders", tenantId],
 
-  enabled: !!tenantId,
+    enabled: !!tenantId,
 
-  staleTime: Infinity,
-  gcTime: Infinity,
+    staleTime: Infinity,
+    gcTime: Infinity,
 
-  queryFn: async () => {
-    const fechaDesde = startOfDay(subDays(new Date(), 7)).toISOString();
-    const fechaHasta = startOfDay(new Date()).toISOString();
+    queryFn: async () => {
+      const fechaDesde = startOfDay(subDays(new Date(), 7)).toISOString();
+      const fechaHasta = startOfDay(new Date()).toISOString();
 
-    if (!tenantId) {
-      throw new Error("Tenant ID no definido.");
-    }
+      if (!tenantId) {
+        throw new Error("Tenant ID no definido.");
+      }
 
-    const { data, error } = await supabaseBrowser
-      .from("entry_orders")
-      .select(`
+      const { data, error } = await supabaseBrowser
+        .from("entry_orders")
+        .select(
+          `
         id,
         consecutivo,
         fecha,
         estado_orden,
         vehiculo_placa_snapshot
-      `)
-      .eq("tenant_id", tenantId)
-      .gte("fecha", fechaDesde)
-      .lt("fecha", fechaHasta)
-      .in("estado_orden", ["abierta", "en_prueba"])
-      .is("deleted_at", null)
-      .order("consecutivo");
+      `,
+        )
+        .eq("tenant_id", tenantId)
+        .gte("fecha", fechaDesde)
+        .lt("fecha", fechaHasta)
+        .in("estado_orden", ["abierta", "en_prueba"])
+        .is("deleted_at", null)
+        .order("consecutivo");
 
-    if (error) {
-      throw new Error(error.message);
-    }
+      if (error) {
+        throw new Error(error.message);
+      }
 
-    return data ?? [];
-  },
-});
-
-
-
-// Mutación para la ANULACIÓN de la orden
-const {
-  mutate: cancelOrder,
-  isPending: isCancelingOrder,
-  error: errorCancelingOrder,
-  reset: resetCancelError,
-} = useMutation({
-  mutationFn: async ({ id, tenantId }: { id: string; tenantId: string }) => {
-    // 🌟 1. Validar el estado actual de la orden en la base de datos antes de anular
-    const { data: currentOrder, error: fetchError } = await supabaseBrowser
-      .from("entry_orders")
-      .select("estado_orden")
-      .eq("id", id)
-      .eq("tenant_id", tenantId)
-      .single();
-
-    if (fetchError) {
-      throw new Error(
-        `Error al verificar el estado de la orden: ${fetchError.message}`
-      );
-    }
-
-    if (!currentOrder) {
-      throw new Error("La orden de entrada no fue encontrada.");
-    }
-
-    console.log(currentOrder.estado_orden)
-
-    // 🌟 2. Bloqueo si ya está finalizada o anulada
-    if (
-      currentOrder.estado_orden === "finalizada" ||
-      currentOrder.estado_orden === "en_prueba"
-    ) {
-      throw new Error(
-        `No se puede anular la orden porque ya se encuentra en estado "${currentOrder.estado_orden.toUpperCase()}".`
-      );
-    }
-
-    // 🌟 3. Ejecutar el Soft Delete solo si pasa la validación
-    const { data, error } = await supabaseBrowser
-      .from("entry_orders")
-      .update({
-        deleted_at: new Date().toISOString(),
-        estado_orden: "anulada",
-      })
-      .eq("id", id)
-      .eq("tenant_id", tenantId)
-      .neq("estado_orden", "finalizada") // Filtro defensivo extra a nivel de query
-      .neq("estado_orden", "anulada")
-      .select("id");
-
-    if (error) {
-      throw new Error(
-        `Error al anular la orden de entrada: ${error.message}`
-      );
-    }
-
-    if (!data || data.length === 0) {
-      throw new Error(
-        "No se pudo anular la orden. Es posible que haya cambiado de estado recientemente o no tengas permisos."
-      );
-    }
-
-    return id;
-  },
-
-  onSuccess: () => {
-    // Invalidamos la caché para refrescar la lista/tabla de órdenes
-    queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
-  },
-
-  onError: (err: Error) => {
-    console.error("Fallo en la anulación de orden:", err.message);
-  },
-});
+      return data ?? [];
+    },
+  });
 
 
 
 
 
-//QUERY PARA MANTENER ACTUALIZADAS LAS FUPAS
-//QUERY PARA OBTENER LOS CRÉDITOS DEL TENANT
-const {
-  data: tenantCreditsData,
-  isFetching: isFetchingTenantCredits,
-  isError: isTenantCreditsError,
-  error: tenantCreditsError,
-  refetch: refetchTenantCredits,
-} = useQuery({
-  queryKey: ["tenant-credits", tenantId],
-  
-  enabled: !!tenantId,
 
-  staleTime: 0,
-  refetchInterval: 30000, // 30 segundos
 
-  queryFn: async () => {
-    if (!tenantId) {
-      throw new Error("Tenant ID no definido.");
-    }
 
-    const { data, error } = await supabaseBrowser.rpc("get_tenant_credits", {
-      p_tenant_id: tenantId,
-    });
 
-    if (error) {
-      throw new Error(error.message);
-    }
 
-    return data as unknown as TenantCredits;
-  },
-});
+
+  // Mutación para la ANULACIÓN de la orden
+  const {
+    mutate: cancelOrder,
+    isPending: isCancelingOrder,
+    error: errorCancelingOrder,
+    reset: resetCancelError,
+  } = useMutation({
+    mutationFn: async ({ id, tenantId }: { id: string; tenantId: string }) => {
+      // 🌟 1. Validar el estado actual de la orden en la base de datos antes de anular
+      const { data: currentOrder, error: fetchError } = await supabaseBrowser
+        .from("entry_orders")
+        .select("estado_orden")
+        .eq("id", id)
+        .eq("tenant_id", tenantId)
+        .single();
+
+      if (fetchError) {
+        throw new Error(
+          `Error al verificar el estado de la orden: ${fetchError.message}`,
+        );
+      }
+
+      if (!currentOrder) {
+        throw new Error("La orden de entrada no fue encontrada.");
+      }
+
+      // 🌟 2. Bloqueo si ya está finalizada o anulada
+      if (
+        currentOrder.estado_orden === "finalizada" ||
+        currentOrder.estado_orden === "en_prueba"
+      ) {
+        throw new Error(
+          `No se puede anular la orden porque ya se encuentra en estado "${currentOrder.estado_orden.toUpperCase()}".`,
+        );
+      }
+
+      // 🌟 3. Ejecutar el Soft Delete solo si pasa la validación
+      const { data, error } = await supabaseBrowser
+        .from("entry_orders")
+        .update({
+          deleted_at: new Date().toISOString(),
+          estado_orden: "anulada",
+        })
+        .eq("id", id)
+        .eq("tenant_id", tenantId)
+        .neq("estado_orden", "finalizada") // Filtro defensivo extra a nivel de query
+        .neq("estado_orden", "anulada")
+        .select("id");
+
+      if (error) {
+        throw new Error(
+          `Error al anular la orden de entrada: ${error.message}`,
+        );
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error(
+          "No se pudo anular la orden. Es posible que haya cambiado de estado recientemente o no tengas permisos.",
+        );
+      }
+
+      return id;
+    },
+
+    onSuccess: () => {
+      // Invalidamos la caché para refrescar la lista/tabla de órdenes
+      queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+    },
+
+    onError: (err: Error) => {
+      console.error("Fallo en la anulación de orden:", err.message);
+    },
+  });
+
+
+
+
+
+
+
+  //QUERY PARA MANTENER ACTUALIZADAS LAS FUPAS
+  //QUERY PARA OBTENER LOS CRÉDITOS DEL TENANT
+  const {
+    data: tenantCreditsData,
+    isFetching: isFetchingTenantCredits,
+    isError: isTenantCreditsError,
+    error: tenantCreditsError,
+    refetch: refetchTenantCredits,
+  } = useQuery({
+    queryKey: ["tenant-credits", tenantId],
+
+    enabled: !!tenantId,
+    initialData: tenantCredits,
+    staleTime: 0,
+    refetchInterval: 15000, // 30 segundos
+
+    queryFn: async () => {
+      if (!tenantId) {
+        throw new Error("Tenant ID no definido.");
+      }
+
+      const { data, error } = await supabaseBrowser.rpc("get_tenant_credits", {
+        p_tenant_id: tenantId,
+      }).single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data as unknown as TenantCredits;
+    },
+  });
+
+
+
 
 
 
@@ -414,13 +458,13 @@ const {
         pendingPreviousDayOrdersError,
       },
       // Dentro de entryOrdersTableData
-tenantCredits: {
-  data: tenantCreditsData,
-  isFetching: isFetchingTenantCredits,
-  isError: isTenantCreditsError,
-  error: tenantCreditsError,
-  refetch: refetchTenantCredits,
-},
+      tenantCredits: {
+        data: tenantCreditsData,
+        isFetching: isFetchingTenantCredits,
+        isError: isTenantCreditsError,
+        error: tenantCreditsError,
+        refetch: refetchTenantCredits,
+      },
       mutation: {
         cancelOrder: cancelOrder,
         isCancelingOrder: isCancelingOrder,

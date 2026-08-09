@@ -1,15 +1,17 @@
 "use client";
 
-import { AdminAnalyticsData, AdminAnalyticsDiaryData, PQAFListItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
+import {
+  AdminAnalyticsData,
+  AdminAnalyticsDiaryData,
+  PQAFListItem,
+} from "@/app/[tenant]/(private)/dashboard/admin/layout";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, ReactNode, use, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
-
-
 
 interface AdminLoaderContext {
   children: ReactNode;
@@ -17,18 +19,14 @@ interface AdminLoaderContext {
   adminAnalyticsPromise: Promise<AdminAnalyticsData>;
   adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData>;
   initialPQAFPromise: Promise<PQAFListItem[]>;
-
 }
-
-
-
 
 export interface AdminContextType {
   AdminContextValue: {
     rol: string;
     analyticsData: AdminAnalyticsData;
     analyticsDataDiary: AdminAnalyticsDiaryData;
-    
+
     PQAFQuery: {
       PQAFData: PQAFListItem[] | null;
       isFetchingPQAF: boolean;
@@ -62,59 +60,41 @@ export interface AdminContextType {
   };
 }
 
-
-
-
-
-
-
-
 export const AdminContext = createContext<AdminContextType | null>(null);
 
 export default function ReceptionistLoaderContext({
   rol,
   children,
-  adminAnalyticsPromise ,
+  adminAnalyticsPromise,
   adminAnalyticsDiaryPromise,
-  initialPQAFPromise
+  initialPQAFPromise,
 }: AdminLoaderContext) {
+  const analyticsData = use(adminAnalyticsPromise);
+  const initialAnalyticsDataDiary = use(adminAnalyticsDiaryPromise);
+  const initialPQAFData = use(initialPQAFPromise);
 
- const analyticsData = use(adminAnalyticsPromise);
- const initialAnalyticsDataDiary = use(adminAnalyticsDiaryPromise);
-const initialPQAFData = use(initialPQAFPromise);
+  const pathname = usePathname();
 
+  const permissionscontextRecived = useContext(PermissionsContext);
+  const tenantId =
+    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
+  const supabaseBrowser = createSupabaseBrowserClient();
 
-const pathname = usePathname();
-
-
-
-
-
-
-
- const permissionscontextRecived = useContext(PermissionsContext);
-const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
-
-
-
-
-const supabaseBrowser = createSupabaseBrowserClient()
-
-
-
-// 1. Estados locales para simular el comportamiento del servidor
+  // 1. Estados locales para simular el comportamiento del servidor
   const [orderByColumn, setOrderByColumn] = useState<string>("created_at");
-  const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">("DESC");
-  
+  const [orderByDirection, setOrderByDirection] = useState<"ASC" | "DESC">(
+    "DESC",
+  );
+
+ // 1. Rango de fechas por defecto: Desde hace 1 mes hasta Hoy
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date()),
-    });
+    from: subMonths(new Date(), 1),
+    to: new Date(),
+  });
 
-    const [searchColumn, setSearchColumn] = useState<string>("placa"); // Por defecto busca por Placa
-    const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [searchColumn, setSearchColumn] = useState<string>("placa"); // Por defecto busca por Placa
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
@@ -122,12 +102,11 @@ const supabaseBrowser = createSupabaseBrowserClient()
 
 
 
-
-//--------------------------------------------
+  //--------------------------------------------
   //TANSTAK QUERY PARA LOS PQAF
   //--------------------------------------------
 
-//Manejo del query para mantener los datos actualizados
+  //Manejo del query para mantener los datos actualizados
   const {
     data: PQAFData,
     isFetching: isFetchingPQAF,
@@ -144,7 +123,7 @@ const supabaseBrowser = createSupabaseBrowserClient()
       orderByDirection,
       dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
       dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "null",
-     
+
       searchColumn, // 🌟 NUEVO: Si cambian de 'placa' a 'marca', la caché debe cambiar
       searchTerm, // (Ya lo tenías, perfecto para el texto del input)
       page, // 🌟 NUEVO: Si cambian de página (1, 2, 3...), hay que traer datos nuevos
@@ -152,49 +131,44 @@ const supabaseBrowser = createSupabaseBrowserClient()
     ],
 
     queryFn: async () => {
-      console.log(
-        `Pidiendo PQAF: ${orderByColumn} ${orderByDirection}`,
-      );
+      console.log(`Pidiendo PQAF: ${orderByColumn} ${orderByDirection}`);
 
       //await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // 🌟 Control preventivo de seguridad por si limpian el calendario
       // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
+     // 🌟 Control preventivo de seguridad por si limpian el calendario
       const fechaDesde = dateRange?.from
         ? format(dateRange.from, "yyyy-MM-dd")
-        : format(startOfMonth(new Date()), "yyyy-MM-dd");
+        : format(subMonths(new Date(), 1), "yyyy-MM-dd"); // 👈 Cambiado a hace 1 mes
+        
       const fechaHasta = dateRange?.to
         ? format(dateRange.to, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
 
+      // Petición directa al nuevo RPC de Postgres
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_service_requirements_list",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_limit: rowsPerPage,
+          // MATEMÁTICA LÓGICA: Saltamos las filas según la página actual
+          p_offset: (page - 1) * rowsPerPage,
+          p_order_by_column: orderByColumn,
+          p_order_by_direction: orderByDirection,
+          p_fecha_desde: fechaDesde,
+          p_fecha_hasta: fechaHasta,
+          p_search_column: searchColumn, // Pasa la columna dinámica seleccionada en tu UI
+          p_search_term: searchTerm,
+        },
+      );
 
-   // Petición directa al nuevo RPC de Postgres
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_service_requirements_list",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_limit: rowsPerPage,
-        // MATEMÁTICA LÓGICA: Saltamos las filas según la página actual
-        p_offset: (page - 1) * rowsPerPage,
-        p_order_by_column: orderByColumn,
-        p_order_by_direction: orderByDirection,
-        p_fecha_desde: fechaDesde,
-        p_fecha_hasta: fechaHasta,
-        p_search_column: searchColumn, // Pasa la columna dinámica seleccionada en tu UI
-        p_search_term: searchTerm,
+      if (error) {
+        throw new Error(error.message);
       }
-    );
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // Casteas al tipo de lista de tu interfaz correspondiente (ej. PQAFListItem[])
-    return (data as PQAFListItem[]) || [];
-
-      
-
-
+      // Casteas al tipo de lista de tu interfaz correspondiente (ej. PQAFListItem[])
+      return (data as PQAFListItem[]) || [];
     },
     initialData: initialPQAFData,
     staleTime: 0,
@@ -212,43 +186,30 @@ const supabaseBrowser = createSupabaseBrowserClient()
 
 
 
-
-
-
-
-
-const { data: analyticsDataDiary } = useQuery({
+  const { data: analyticsDataDiary } = useQuery({
     queryKey: ["admin_analytics_diary", rol], // La key asegura que no se mezcle caché si cambias de rol
     queryFn: async () => {
       // Llamada directa al RPC
-      const { data, error } = await supabaseBrowser.rpc("fetch_admin_analitics_diary");
-      
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_analitics_diary",
+      );
+
       if (error) {
         console.error("Error en polling de analytics:", error);
         throw error;
       }
-      
-      // Supabase suele devolver un array de los ROWS de Postgres. 
+
+      // Supabase suele devolver un array de los ROWS de Postgres.
       // Si tu función devuelve una sola fila con los datos consolidados, extraemos el índice 0.
-      return data?.[0] as AdminAnalyticsDiaryData; 
+      return data?.[0] as AdminAnalyticsDiaryData;
     },
     // Le inyectamos la data del servidor para que haya CERO tiempo de carga inicial
-    initialData: initialAnalyticsDataDiary, 
+    initialData: initialAnalyticsDataDiary,
     // Tiempo en milisegundos para volver a consultar (ej: 15000 = 15 segundos)
-    refetchInterval: 15000, 
+    refetchInterval: 15000,
     // Refresca si el administrador cambia de pestaña y vuelve
-    refetchOnWindowFocus: true, 
+    refetchOnWindowFocus: true,
   });
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -287,7 +248,7 @@ const { data: analyticsDataDiary } = useQuery({
       setPage,
       rowsPerPage,
       setRowsPerPage,
-    }
+    },
   };
 
   return (

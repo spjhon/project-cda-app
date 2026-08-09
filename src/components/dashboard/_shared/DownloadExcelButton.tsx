@@ -13,7 +13,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 export function ExportExcelButton() {
   const context = useContext(EntryOrdersContext);
   const dateRange = context?.entryOrdersTableData?.query?.dateRange;
-  const totalAdescargar = context?.entryOrdersTableData?.query?.entryOrdersData?.[0]?.total_count;
+  const totalAdescargar =
+    context?.entryOrdersTableData?.query?.entryOrdersData?.[0]?.total_count;
 
   const exportMutation = useMutation({
     mutationFn: async () => {
@@ -22,29 +23,31 @@ export function ExportExcelButton() {
       }
 
       const startDate = startOfDay(new Date(dateRange.from));
-const endDate = endOfDay(new Date(dateRange.to));
-
-    
+      const endDate = endOfDay(new Date(dateRange.to));
 
       const supabaseBrowser = createSupabaseBrowserClient();
 
-      console.log("Inicio de dia: ", startDate)
-      console.log("Fin dia: ", endDate)
+      console.log("Inicio de dia: ", startDate);
+      console.log("Fin dia: ", endDate);
 
       const { data: orders, error } = await supabaseBrowser.rpc(
-  "get_entry_orders_for_export",
-  {
-    p_start_date: startDate.toISOString(),
-    p_end_date: endDate.toISOString(),
-  }
-);
+        "get_entry_orders_for_export",
+        {
+          p_start_date: startDate.toISOString(),
+          p_end_date: endDate.toISOString(),
+        },
+      );
 
       if (error) {
-        throw new Error(error.message || "Error al obtener las órdenes de entrada");
+        throw new Error(
+          error.message || "Error al obtener las órdenes de entrada",
+        );
       }
 
       if (!orders || orders.length === 0) {
-        throw new Error("No hay registros para exportar en el rango seleccionado");
+        throw new Error(
+          "No hay registros para exportar en el rango seleccionado",
+        );
       }
 
       // 1. Crear libro y hoja
@@ -63,15 +66,31 @@ const endDate = endOfDay(new Date(dateRange.to));
 
         // Propietario
         { header: "Propietario Nombre", key: "propietario_nombre", width: 25 },
-        { header: "Propietario Tipo Doc", key: "propietario_tipo_documento", width: 15 },
+        {
+          header: "Propietario Tipo Doc",
+          key: "propietario_tipo_documento",
+          width: 15,
+        },
         { header: "Propietario Doc", key: "propietario_documento", width: 18 },
-        { header: "Propietario Teléfono", key: "propietario_telefono", width: 15 },
+        {
+          header: "Propietario Teléfono",
+          key: "propietario_telefono",
+          width: 15,
+        },
         { header: "Propietario Email", key: "propietario_email", width: 22 },
-        { header: "Propietario Dirección", key: "propietario_direccion", width: 22 },
+        {
+          header: "Propietario Dirección",
+          key: "propietario_direccion",
+          width: 22,
+        },
 
         // Cliente
         { header: "Cliente Nombre", key: "cliente_nombre", width: 25 },
-        { header: "Cliente Tipo Doc", key: "cliente_tipo_documento", width: 15 },
+        {
+          header: "Cliente Tipo Doc",
+          key: "cliente_tipo_documento",
+          width: 15,
+        },
         { header: "Cliente Doc", key: "cliente_documento", width: 18 },
         { header: "Cliente Teléfono", key: "cliente_telefono", width: 15 },
         { header: "Cliente Email", key: "cliente_email", width: 22 },
@@ -81,9 +100,17 @@ const endDate = endOfDay(new Date(dateRange.to));
         { header: "Tipo Servicio", key: "service_type", width: 15 },
         { header: "Reinspección", key: "es_reinspeccion", width: 14 },
         { header: "Kilometraje", key: "kilometraje", width: 14 },
-        { header: "Vencimiento SOAT", key: "soat_vencimiento_snapshot", width: 16 },
+        {
+          header: "Vencimiento SOAT",
+          key: "soat_vencimiento_snapshot",
+          width: 16,
+        },
         { header: "Tipo Vehículo", key: "vehiculo_tipo_snapshot", width: 18 },
-        { header: "Servicio Vehículo", key: "vehiculo_tipo_servicio_snapshot", width: 18 },
+        {
+          header: "Servicio Vehículo",
+          key: "vehiculo_tipo_servicio_snapshot",
+          width: 18,
+        },
         { header: "Estado Orden", key: "estado_orden", width: 15 },
 
         // Oficina
@@ -107,7 +134,9 @@ const endDate = endOfDay(new Date(dateRange.to));
       orders.forEach((row) => {
         worksheet.addRow({
           ...row,
-          fecha: row.fecha ? format(new Date(row.fecha), "dd/MM/yyyy HH:mm") : "",
+          fecha: row.fecha
+            ? format(new Date(row.fecha), "dd/MM/yyyy HH:mm")
+            : "",
           es_reinspeccion: row.es_reinspeccion ? "SÍ" : "NO",
           se_compro_soat: row.se_compro_soat ? "SÍ" : "NO",
           oficina_pago: row.oficina_pago ? Number(row.oficina_pago) : 0,

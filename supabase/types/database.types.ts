@@ -1326,6 +1326,27 @@ export type Database = {
             }
             Returns: string
           }
+      update_tenant_credits: {
+        Args: {
+          p_certificados_delta?: number
+          p_fupas_delta?: number
+          p_tenant_id: string
+        }
+        Returns: {
+          created_at: string
+          cupo_certificados: number
+          cupo_fupas: number
+          id: string
+          tenant_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenant_credits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       condition_response_enum: "cumple" | "no_cumple" | "no_aplica"
