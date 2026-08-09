@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { FileSpreadsheet, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { useMutation } from "@tanstack/react-query";
 import { Workbook } from "exceljs";
 
@@ -21,22 +21,23 @@ export function ExportExcelButton() {
         throw new Error("El rango de fechas no está definido");
       }
 
-      const startDate = new Date(dateRange.from);
-      const endDate = new Date(dateRange.to);
+      const startDate = startOfDay(new Date(dateRange.from));
+const endDate = endOfDay(new Date(dateRange.to));
 
-      if (format(startDate, "yyyy-MM-dd") === format(endDate, "yyyy-MM-dd")) {
-        endDate.setHours(23, 59, 59, 999);
-      }
+    
 
       const supabaseBrowser = createSupabaseBrowserClient();
 
+      console.log("Inicio de dia: ", startDate)
+      console.log("Fin dia: ", endDate)
+
       const { data: orders, error } = await supabaseBrowser.rpc(
-        "get_entry_orders_for_export",
-        {
-          p_start_date: startDate.toISOString(),
-          p_end_date: endDate.toISOString(),
-        }
-      );
+  "get_entry_orders_for_export",
+  {
+    p_start_date: startDate.toISOString(),
+    p_end_date: endDate.toISOString(),
+  }
+);
 
       if (error) {
         throw new Error(error.message || "Error al obtener las órdenes de entrada");
