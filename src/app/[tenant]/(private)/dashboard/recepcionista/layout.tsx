@@ -15,7 +15,7 @@ import ReceptionistLoaderContext from "@/contexts/ReceptionistLoaderContex";
 import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { redirect } from "next/navigation";
-import { connection } from "next/server";
+
 
 
 interface ReceptionistDashboardLayoutProps {
@@ -25,13 +25,13 @@ interface ReceptionistDashboardLayoutProps {
 
 
 
-
+export const instant = false
 
 export default async function ReceptionistDashboardLayout({children, params}: ReceptionistDashboardLayoutProps) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
 
-await connection();
+
 
 
 

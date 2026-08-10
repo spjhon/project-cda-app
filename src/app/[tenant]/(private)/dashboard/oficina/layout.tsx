@@ -7,19 +7,20 @@ import { ReactNode } from "react";
 
 interface OficinaDashboardLayout {
   children: ReactNode;
-  params: Promise<{ tenant: string }>;
+  
 }
 
 
 
 
-
+export const instant = false
 
 
 export default function OficinaDashboardLayout({
   children,
 }: OficinaDashboardLayout) {
   return (
+   
     <OficinaLoaderContext rol={"oficina"}>
     <SidebarProvider>
           
@@ -40,5 +41,6 @@ export default function OficinaDashboardLayout({
 
         </SidebarProvider>
         </OficinaLoaderContext>
+       
   );
 }
