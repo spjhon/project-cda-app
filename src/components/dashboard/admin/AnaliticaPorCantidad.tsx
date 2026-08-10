@@ -1,7 +1,7 @@
 "use client";
 
 import { Activity, Info, Calendar as CalendarIcon, Check } from "lucide-react";
-import { format } from "date-fns";
+import { format, subDays, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
@@ -11,6 +11,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -33,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {DayChartItem, MonthChartItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
 import { CompleteDataRTMType } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
 //import { useSidebar } from "@/components/ui/sidebar";
@@ -401,20 +402,15 @@ function CuadroMetrica({ label, valor, esPrimario = false, isPorcentaje = false 
 
 
 
-
-
-
-
-// ============================================================================
-// 2. COMPONENTE PRINCIPAL
-// ============================================================================
-
-
+// Asume tus propios componentes / tipos de gráficas
+// import { CuadroMetrica } from "./CuadroMetrica";
+// import { ChartBarMonthInteractive } from "./ChartBarMonthInteractive";
+// import { ChartBarYearInteractive } from "./ChartBarYearInteractive";
 
 interface AnaliticaPorCantidadProps {
   titulo: string;
   descripcion: string;
-  datos: CompleteDataRTMType | undefined
+  datos: CompleteDataRTMType | undefined;
 }
 
 export default function AnaliticaPorCantidad({
@@ -422,164 +418,306 @@ export default function AnaliticaPorCantidad({
   descripcion,
   datos,
 }: AnaliticaPorCantidadProps) {
-  
-  // 🌟 Estado confirmado (el que realmente se usa para los cálculos/UI)
+  // 🌟 Estado confirmado global/padre
   const [date, setDate] = useState<DateRange | undefined>(undefined);
-  // 🌟 Estado borrador (aísla los clics dentro del calendario)
-  const [localDate, setLocalDate] = useState<DateRange | undefined>(undefined);
+
+  // 🌟 Estado borrador (aísla la interacción dentro del popover)
+  const [localDate, setLocalDate] = useState<DateRange | undefined>(date);
   const [isOpen, setIsOpen] = useState(false);
 
-  console.log(`este es el date de: ${titulo}: `, date);
+  // 🌟 Meses visibles para el Calendario Doble
+  const defaultFromMonth = subMonths(new Date(), 1);
+  const defaultToMonth = new Date();
 
+  const [fromMonth, setFromMonth] = useState<Date>(
+    date?.from || defaultFromMonth
+  );
+  const [toMonth, setToMonth] = useState<Date>(
+    date?.to || defaultToMonth
+  );
 
-   const handleOpenChange = (open: boolean) => {
+  // Sincronizar borrador y meses al abrir el Popover
+  const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
-      // Al abrir, resincronizamos el borrador con la fecha confirmada
-      setLocalDate(date);
+      const initialFrom = date?.from || subMonths(new Date(), 1);
+      const initialTo = date?.to || new Date();
+
+      setLocalDate(date || { from: initialFrom, to: initialTo });
+      setFromMonth(initialFrom);
+      setToMonth(initialTo);
     }
   };
 
+  // Presets rápidos
+  const presets = [
+    { label: "Hoy", getRange: () => ({ from: new Date(), to: new Date() }) },
+    {
+      label: "Ayer",
+      getRange: () => {
+        const temp = subDays(new Date(), 1);
+        return { from: temp, to: temp };
+      },
+    },
+    {
+      label: "Últimos 7 días",
+      getRange: () => ({ from: subDays(new Date(), 6), to: new Date() }),
+    },
+    {
+      label: "Último Mes",
+      getRange: () => ({ from: subMonths(new Date(), 1), to: new Date() }),
+    },
+  ];
 
-  // Confirmar el rango seleccionado y cerrar el popover
+  // Controladores de selección independiente
+  const handleSelectFrom = (selectedDay: Date | undefined) => {
+    setLocalDate((prev) => {
+      if (selectedDay && prev?.to && selectedDay > prev.to) {
+        return { from: selectedDay, to: undefined };
+      }
+      return { from: selectedDay, to: prev?.to };
+    });
+  };
+
+  const handleSelectTo = (selectedDay: Date | undefined) => {
+    setLocalDate((prev) => {
+      if (selectedDay && prev?.from && selectedDay < prev.from) {
+        return { from: prev?.from, to: undefined };
+      }
+      return { from: prev?.from, to: selectedDay };
+    });
+  };
+
+  // Confirmar el rango seleccionado
   const handleApply = () => {
     setDate(localDate);
     setIsOpen(false);
   };
 
-  // Si hay un rango completo, puedes simular o computar el valor (ej. 0 o fetch). 
-  // Mientras falte un extremo, muestra el string por defecto.
-  const valorRangoEspecial = localDate?.from && localDate?.to ? 0 : "Seleccione rango";
+  const valorRangoEspecial =
+    date?.from && date?.to ? 0 : "Seleccione rango";
 
   const isPorcentaje = titulo === "Tasa de Rechazo";
-  
 
-  const datosSeparados = {
-    total_hoy: 0,
-    total_ayer: 0,
-    total_mes: 0,
-    total_anio: 0,
-    chartMonthData: [] as DayChartItem[],
-    chartYearData: [] as MonthChartItem[]
-  }
+  // Mapeo dinámico de datos estructurados según el tipo de métrica
+  const datosSeparados = useMemo(() => {
+    const base = {
+      total_hoy: 0,
+      total_ayer: 0,
+      total_mes: 0,
+      total_anio: 0,
+      chartMonthData: [] as DayChartItem[],
+      chartYearData: [] as MonthChartItem[],
+    };
 
-  if (titulo === "Inspecciones Realizadas"){
-    datosSeparados.total_hoy = datos?.total_rtm_hoy ?? 0;
-    datosSeparados.total_ayer = datos?.total_rtm_ayer ?? 0;
-    datosSeparados.total_mes = datos?.total_rtm_mes_actual ?? 0;
-    datosSeparados.total_anio = datos?.total_rtm_anio_actual ?? 0;
-    datosSeparados.chartMonthData = datos?.chart_mes_actual ?? [];
-    datosSeparados.chartYearData = datos?.chart_anio_actual ?? [];
-  }else if (titulo === "Cantidad RTM Reprobadas") { // ◄ Nueva condición para los rechazos
-    datosSeparados.total_hoy = datos?.total_rtm_rechazados_hoy ?? 0;
-    datosSeparados.total_ayer = datos?.total_rechazado_ayer ?? 0;
-    datosSeparados.total_mes = datos?.total_rechazado_mes ?? 0;
-    datosSeparados.total_anio = datos?.total_rechazado_anio ?? 0;
-    datosSeparados.chartMonthData = datos?.chart_rechazado_mes ?? [];
-    datosSeparados.chartYearData = datos?.chart_rechazado_anio ?? [];
-  }else if (titulo === "Tasa de Rechazo") {
+    if (!datos) return base;
 
-  datosSeparados.total_hoy = datos?.tasa_rechazo_hoy ?? 0;
-  datosSeparados.total_ayer = datos?.tasa_rechazo_ayer ?? 0;
-  datosSeparados.total_mes = datos?.tasa_rechazo_mes ?? 0;
-  datosSeparados.total_anio = datos?.tasa_rechazo_anio ?? 0;
-  datosSeparados.chartMonthData = datos?.chart_tasa_rechazo_mes ?? [];
-  datosSeparados.chartYearData = datos?.chart_tasa_rechazo_anio ?? [];
+    if (titulo === "Inspecciones Realizadas") {
+      return {
+        total_hoy: datos.total_rtm_hoy ?? 0,
+        total_ayer: datos.total_rtm_ayer ?? 0,
+        total_mes: datos.total_rtm_mes_actual ?? 0,
+        total_anio: datos.total_rtm_anio_actual ?? 0,
+        chartMonthData: datos.chart_mes_actual ?? [],
+        chartYearData: datos.chart_anio_actual ?? [],
+      };
+    }
 
-}
+    if (titulo === "Cantidad RTM Reprobadas") {
+      return {
+        total_hoy: datos.total_rtm_rechazados_hoy ?? 0,
+        total_ayer: datos.total_rechazado_ayer ?? 0,
+        total_mes: datos.total_rechazado_mes ?? 0,
+        total_anio: datos.total_rechazado_anio ?? 0,
+        chartMonthData: datos.chart_rechazado_mes ?? [],
+        chartYearData: datos.chart_rechazado_anio ?? [],
+      };
+    }
+
+    if (titulo === "Tasa de Rechazo") {
+      return {
+        total_hoy: datos.tasa_rechazo_hoy ?? 0,
+        total_ayer: datos.tasa_rechazo_ayer ?? 0,
+        total_mes: datos.tasa_rechazo_mes ?? 0,
+        total_anio: datos.tasa_rechazo_anio ?? 0,
+        chartMonthData: datos.chart_tasa_rechazo_mes ?? [],
+        chartYearData: datos.chart_tasa_rechazo_anio ?? [],
+      };
+    }
+
+    return base;
+  }, [titulo, datos]);
 
   return (
     <div className="flex flex-col gap-6 pl-2 md:pl-4">
-      
       {/* Encabezado con Iconos */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-600" />
-          <h2 className="text-xl font-bold text-muted-800 tracking-tight">{titulo}</h2>
+          <h2 className="text-xl font-bold text-muted-800 tracking-tight">
+            {titulo}
+          </h2>
         </div>
         <div className="flex items-start gap-1.5">
           <Info className="h-4 w-4 text-muted-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-muted-500 leading-relaxed">{descripcion}</p>
+          <p className="text-sm text-muted-500 leading-relaxed">
+            {descripcion}
+          </p>
         </div>
       </div>
 
-      {/* Contenedor Flex Responsivo invocando el subcomponente */}
+      {/* Contenedor Flex Responsivo para Métricas */}
       <div className="flex flex-wrap gap-5 w-full items-center">
-        <CuadroMetrica label="Hoy" valor={Number(datosSeparados.total_hoy)} esPrimario={true} isPorcentaje={isPorcentaje}/>
-        <CuadroMetrica label="Ayer" valor={Number(datosSeparados.total_ayer)} isPorcentaje={isPorcentaje} />
-        <CuadroMetrica label="Este Mes" valor={Number(datosSeparados.total_mes)} isPorcentaje={isPorcentaje}/>
-        <CuadroMetrica label="Este Año" valor={Number(datosSeparados.total_anio)} isPorcentaje={isPorcentaje}/>
-
-        {/* Nuevo bloque: Cuadro especial acoplado al seleccionador */}
-        <div className="flex flex-col sm:flex-row items-center  gap-4">
-          <CuadroMetrica 
+        <CuadroMetrica
+          label="Hoy"
+          valor={Number(datosSeparados.total_hoy)}
+          esPrimario={true}
           isPorcentaje={isPorcentaje}
-            label="Por Rango" 
-            valor={valorRangoEspecial} 
-            esPrimario={typeof valorRangoEspecial === "number"} 
+        />
+        <CuadroMetrica
+          label="Ayer"
+          valor={Number(datosSeparados.total_ayer)}
+          isPorcentaje={isPorcentaje}
+        />
+        <CuadroMetrica
+          label="Este Mes"
+          valor={Number(datosSeparados.total_mes)}
+          isPorcentaje={isPorcentaje}
+        />
+        <CuadroMetrica
+          label="Este Año"
+          valor={Number(datosSeparados.total_anio)}
+          isPorcentaje={isPorcentaje}
+        />
+
+        {/* Cuadro especial acoplado al seleccionador de rango */}
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <CuadroMetrica
+            isPorcentaje={isPorcentaje}
+            label="Por Rango"
+            valor={valorRangoEspecial}
+            esPrimario={typeof valorRangoEspecial === "number"}
           />
-          
+
           <div className="flex flex-col flex-wrap gap-2 min-w-60">
             <div className="flex flex-col">
-              <h4 className="text-sm font-semibold text-muted-800">Filtrar por Fechas</h4>
-              <p className="text-xs text-muted-400">Rango personalizado de análisis</p>
+              <h4 className="text-sm font-semibold text-muted-800">
+                Filtrar por Fechas
+              </h4>
+              <p className="text-xs text-muted-400">
+                Rango personalizado de análisis
+              </p>
             </div>
 
-            {/* Selector de Fecha de Shadcn */}
-           {/* Selector de Fecha de Shadcn */}
+            {/* Selector de Fechas (Doble Calendario + Presets) */}
             <Popover open={isOpen} onOpenChange={handleOpenChange}>
-              <PopoverTrigger render={<Button
-                  id="date"
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal border-slate-300",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
-
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, "dd LLL, yyyy", { locale: es })} -{" "}
-                        {format(date.to, "dd LLL, yyyy", { locale: es })}
-                      </>
-                    ) : (
-                      format(date.from, "dd LLL, yyyy", { locale: es })
-                    )
-                  ) : (
-                    <span>Elegir periodo</span>
-                  )}
-                </Button>}>
-                
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <div className="p-3">
-                  <Calendar
-                    autoFocus
-                    mode="range"
-                    defaultMonth={localDate?.from}
-                    selected={localDate}
-                    onSelect={setLocalDate}
-                    numberOfMonths={2}
-                    locale={es}
-                    className="rounded-lg"
-                    captionLayout="dropdown"
-                    showOutsideDays={false}
-                  />
-                </div>
-                
-                {/* 🌟 Botón de Aplicar Rango aislado */}
-                <div className="border-t border-border p-3 bg-muted/30 flex justify-end">
+              <PopoverTrigger
+                render={
                   <Button
-                    className="w-full sm:w-auto text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
-                    onClick={handleApply}
-                    disabled={!localDate?.from || !localDate?.to}
+                    id="date"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal border-slate-300 bg-background h-9 shadow-sm hover:bg-muted hover:text-muted-foreground",
+                      !date && "text-muted-foreground"
+                    )}
                   >
-                    <Check className="h-3.5 w-3.5" />
-                    Aplicar Rango
+                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "dd LLL, yyyy", { locale: es })}{" "}
+                          - {format(date.to, "dd LLL, yyyy", { locale: es })}
+                        </>
+                      ) : (
+                        format(date.from, "dd LLL, yyyy", { locale: es })
+                      )
+                    ) : (
+                      <span>Elegir periodo</span>
+                    )}
                   </Button>
-                </div>
+                }
+              />
+              <PopoverContent
+                className="w-auto p-0 border-none shadow-xl"
+                align="start"
+              >
+                <Card className="w-fit border-border bg-card" size="sm">
+                  <CardContent className="p-3 flex flex-col md:flex-row gap-4 divide-y md:divide-y-0 md:divide-x divide-border">
+                    {/* CALENDARIO DESDE */}
+                    <div className="flex flex-col gap-1 pt-2 md:pt-0">
+                      <span className="text-xs font-semibold text-muted-foreground px-2">
+                        Desde:
+                      </span>
+                      <Calendar
+                        locale={es}
+                        autoFocus
+                        mode="single"
+                        selected={localDate?.from}
+                        onSelect={handleSelectFrom}
+                        month={fromMonth}
+                        onMonthChange={setFromMonth}
+                        numberOfMonths={1}
+                        className="rounded-lg"
+                        captionLayout="dropdown"
+                        showOutsideDays={false}
+                      />
+                    </div>
+
+                    {/* CALENDARIO HASTA */}
+                    <div className="flex flex-col gap-1 pt-2 md:pt-0 md:pl-4">
+                      <span className="text-xs font-semibold text-muted-foreground px-2">
+                        Hasta:
+                      </span>
+                      <Calendar
+                        locale={es}
+                        mode="single"
+                        selected={localDate?.to}
+                        onSelect={handleSelectTo}
+                        month={toMonth}
+                        onMonthChange={setToMonth}
+                        numberOfMonths={1}
+                        className="rounded-lg"
+                        captionLayout="dropdown"
+                        showOutsideDays={false}
+                        disabled={
+                          localDate?.from
+                            ? { before: localDate.from }
+                            : undefined
+                        }
+                      />
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="flex flex-col gap-3 border-t border-border p-3 bg-muted/30">
+                    <div className="flex flex-wrap gap-2 w-full">
+                      {presets.map((preset) => (
+                        <Button
+                          key={preset.label}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 min-w-25 text-xs font-medium bg-background border-border shadow-sm hover:bg-muted"
+                          onClick={() => {
+                            const newRange = preset.getRange();
+                            setLocalDate(newRange);
+                            if (newRange.from) setFromMonth(newRange.from);
+                            if (newRange.to) setToMonth(newRange.to);
+                          }}
+                        >
+                          {preset.label}
+                        </Button>
+                      ))}
+                    </div>
+
+                    <Button
+                      className="w-full text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
+                      onClick={handleApply}
+                      disabled={!localDate?.from || !localDate?.to}
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      Aplicar Rango
+                    </Button>
+                  </CardFooter>
+                </Card>
               </PopoverContent>
             </Popover>
           </div>
@@ -587,17 +725,21 @@ export default function AnaliticaPorCantidad({
       </div>
 
       {/* ESPACIO PARA LAS GRÁFICAS */}
-      <div className="  mt-6 flex flex-row flex-wrap gap-6">
-
-        <div className="overflow-scroll ">
-        <ChartBarMonthInteractive chartMonthData={datosSeparados.chartMonthData} isPorcentaje={isPorcentaje}></ChartBarMonthInteractive>
+      <div className="mt-6 flex flex-row flex-wrap gap-6">
+        <div className="overflow-scroll">
+          <ChartBarMonthInteractive
+            chartMonthData={datosSeparados.chartMonthData}
+            isPorcentaje={isPorcentaje}
+          />
         </div>
-        
-        <div className="overflow-scroll ">
-        <ChartBarYearInteractive chartYearData={datosSeparados.chartYearData} isPorcentaje={isPorcentaje}></ChartBarYearInteractive>
+
+        <div className="overflow-scroll">
+          <ChartBarYearInteractive
+            chartYearData={datosSeparados.chartYearData}
+            isPorcentaje={isPorcentaje}
+          />
         </div>
       </div>
-
     </div>
   );
 }

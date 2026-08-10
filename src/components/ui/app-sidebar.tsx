@@ -268,7 +268,7 @@ const contextRecived = useContext(PermissionsContext);
                 return (
                   <SidebarMenuItem key={item.href}>
                    
-                    <Link prefetch={true} href={item.href}>
+                    <Link href={item.href}>
                       <SidebarMenuButton
                         isActive={active}
                         className={`h-15 w-full justify-start rounded-md my-3 border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground transition-all duration-75 cursor-pointer font-bold shadow-2xl active:bg-sidebar-accent

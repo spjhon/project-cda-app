@@ -12,7 +12,7 @@ import {
 
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 import { fetchTenantCredits, TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
-import { connection } from "next/server";
+
 
 interface DashboardLayout {
   children: ReactNode;
@@ -33,10 +33,10 @@ export interface UserContextData {
 
 
 
-export default async function DashboardLayout({ children, params }: DashboardLayout) {
+export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
-await connection();
+
 
   const tenantPromise = (async () => {
     const { tenant } = await params;
