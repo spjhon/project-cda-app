@@ -12,18 +12,21 @@ import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached
 
 import { ReactNode, Suspense } from "react";
 import Loading from "@/components/ui/loading";
+import { connection } from "next/server";
 
 interface DirectorTecnicoDashboardLayoutProps {
   children: ReactNode;
   params: Promise<{ tenant: string }>;
 }
 
-export default function DirectorTecnicoDashboardLayout({
+export const instant = false;
+
+export default async function DirectorTecnicoDashboardLayout({
   children,
   params,
 }: DirectorTecnicoDashboardLayoutProps) {
 
-
+await connection();
 
   
   // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera

@@ -6,7 +6,10 @@ import AdminLoaderContext from "@/contexts/AdminLoaderContext";
 import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+
+import { connection } from "next/server";
+import Loading from "@/components/ui/loading";
 
 interface AdminDashboardLayout {
   children: ReactNode;
@@ -80,14 +83,14 @@ export interface PQAFListItem {
 
 export const instant = false;
 
-export default function AdminDashboardLayout({
+export default async function AdminDashboardLayout({
   children,
   params,
 }: AdminDashboardLayout) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
 
-
+await connection();
 
 
   const adminAnalyticsPromise: Promise<AdminAnalyticsData> = (async () => {
@@ -221,7 +224,7 @@ export default function AdminDashboardLayout({
 
 
   return (
-    
+    <Suspense fallback={<Loading />}>
     <AdminLoaderContext
       rol={"admin"}
       adminAnalyticsPromise={adminAnalyticsPromise}
@@ -237,6 +240,7 @@ export default function AdminDashboardLayout({
         </SidebarInset>
       </SidebarProvider>
     </AdminLoaderContext>
+    </Suspense>
   
   );
 }

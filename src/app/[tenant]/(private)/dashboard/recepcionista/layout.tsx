@@ -15,6 +15,7 @@ import ReceptionistLoaderContext from "@/contexts/ReceptionistLoaderContex";
 import { fetchAllTemplates, OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 
 
@@ -32,7 +33,7 @@ export default async function ReceptionistDashboardLayout({children, params}: Re
 
 
 
-
+await connection();
 
 
 

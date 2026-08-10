@@ -1,9 +1,17 @@
+
+
 import { LoginForm } from "@/components/auth/LoginForm";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+
+
+export const instant = false
+
+
 
 /**
  * This is a server component that handles rendering the login page (the login is in its own separate component).
