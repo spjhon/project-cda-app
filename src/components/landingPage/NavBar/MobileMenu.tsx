@@ -19,7 +19,7 @@ import Image from "next/image"; // 🔑 Importamos el componente de Next.js
 
 import LogoDark from "../../../../public/logo_dark_transparente_resize_cropped.png"
 import LogoLight from "../../../../public/logo_light_transparente_resize_cropped.png"
-import { ModeToggle } from "./mode-toggle"
+
 
 
 interface MobileMenuProps {
@@ -48,7 +48,7 @@ export function MobileMenu({routes}: MobileMenuProps) {
           <DrawerHeader>
             <DrawerTitle></DrawerTitle>
             <Link
-            prefetch={true}
+            
               rel="noreferrer noopener"
               href="/"
               className="flex items-center justify-center"
@@ -80,7 +80,7 @@ export function MobileMenu({routes}: MobileMenuProps) {
               {routes.map((route: RouteProps, i) => (
                 <DrawerClose asChild key={i}>
                 <Link
-                prefetch={true}
+               
                   rel="noreferrer noopener"
                   href={route.href}
                 

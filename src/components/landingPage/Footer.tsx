@@ -9,7 +9,7 @@ export function Footer() {
   const navigation = [
     { name: "Soluciones", href: "#soluciones", external: false },
     { name: "Planes y Tarifas", href: "#pricing", external: false },
-    { name: "Conócenos", href: "https://cda-app.com/about", external: true, prefetch: true },
+    { name: "Conócenos", href: "https://cda-app.com/about", external: true },
     { name: "Visita Nuestra DEMO", href: "https://demo.cda-app.com/auth/login", external: true },
   ];
 
@@ -22,7 +22,7 @@ export function Footer() {
         <div className="flex flex-col max-w-md">
           <div className="w-fit">
             <Link
-              prefetch={true}
+             
               rel="noreferrer noopener"
               href="/"
               className="flex items-center"
@@ -76,7 +76,7 @@ export function Footer() {
                 <Link
                   key={index}
                   href={item.href}
-                  prefetch={item.prefetch}
+                  
                   className="text-sm text-muted-foreground hover:text-primary transition-colors py-1"
                 >
                   {item.name}

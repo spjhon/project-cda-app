@@ -1899,7 +1899,7 @@ export default function DemoLandingPage({
     {/* COLUMNA 1: LOGO E INFO DEL CDA DEMO */}
     <div className="flex flex-col max-w-md space-y-4">
       <div className="w-fit">
-        <Link prefetch={true} href="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Image
             src={demoLogo}
             alt="Logo Oficial CDA Demo"

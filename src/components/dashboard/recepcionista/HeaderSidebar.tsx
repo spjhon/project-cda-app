@@ -55,7 +55,7 @@ return (
                     ) : (
                       <Link 
                         href={item.href} 
-                        prefetch={true}
+                        
                         className="text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {item.title}

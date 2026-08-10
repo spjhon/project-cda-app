@@ -145,7 +145,7 @@ export default function DashboardPageComponent() {
               };
 
               return (
-                <Link href={config.path} key={role} prefetch={true}>
+                <Link href={config.path} key={role} >
                   <Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50 cursor-pointer">
                     <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">

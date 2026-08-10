@@ -527,7 +527,7 @@ export default function FullmotosLandingPage({
       <header className="bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-0 sticky border-b top-0 z-40 ">
         <div className="container flex flex-row justify-between items-center mx-auto px-3 relative h-15 md:h-20">
           <Link
-            prefetch={true}
+           
             rel="noreferrer noopener"
             href="/"
             className="ml-2 flex items-center"
