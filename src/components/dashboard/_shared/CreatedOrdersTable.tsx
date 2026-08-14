@@ -520,9 +520,6 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
 
 
-
-console.log("ROL REGISTRADO: ", rol)
-
   
 
   return (

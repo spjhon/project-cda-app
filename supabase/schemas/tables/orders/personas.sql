@@ -23,38 +23,47 @@ END $$;
 -- ==========================================
 
 CREATE TABLE IF NOT EXISTS public.personas (
-    -- Identificador único global.
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
-    -- Para que los clientes de un CDA no se mezclen con otros.
-    tenant_id           UUID NOT NULL,
-    
-    -- cedula_ciudadania, nit, nn, pasaporte, etc. (Fundamental para facturación).
-    tipo_documento      document_type_enum NOT NULL,
-    
-    -- La cédula o NIT (Indexado para búsqueda rápida).
-    numero_documento    VARCHAR NOT NULL,
-    
-    -- Nombre o Razón Social.
-    nombre_completo     TEXT NOT NULL,
-    
-    -- Celular de contacto.
-    telefono            VARCHAR,
-    
-    -- Para envío del PDF de la orden o resultados.
-    correo              VARCHAR,
-    
-    -- Dirección de residencia o notificación.
-    direccion           TEXT,
+  -- Identificador único global.
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    -- Registro de creación en sistema.
-    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Registro de última edición.
-    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    -- Para anulación o borrado lógico.
-    deleted_at          TIMESTAMPTZ
+  -- Para que los clientes de un CDA no se mezclen con otros.
+  tenant_id           UUID NOT NULL,
+
+  -- cedula_ciudadania, nit, nn, pasaporte, etc. (Fundamental para facturación).
+  tipo_documento      document_type_enum NOT NULL,
+
+  -- La cédula o NIT (Indexado para búsqueda rápida).
+  numero_documento    VARCHAR NOT NULL,
+
+  -- Nombre o Razón Social.
+  nombre_completo     TEXT NOT NULL,
+
+  -- Celular de contacto.
+  telefono            VARCHAR,
+
+  -- Para envío del PDF de la orden o resultados.
+  correo              VARCHAR,
+
+  -- Dirección de residencia o notificación.
+  direccion           TEXT,
+
+  -- Actividad económica declarada por la persona.
+  actividad_economica TEXT NULL,
+
+  -- Origen de los fondos declarado por la persona.
+  origen_fondos       TEXT NULL,
+
+  -- Indica si la persona es una Persona Expuesta Públicamente (PEP).
+  es_persona_publicamente_expuesta BOOLEAN DEFAULT false,
+
+  -- Registro de creación en sistema.
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Registro de última edición.
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Para anulación o borrado lógico.
+  deleted_at          TIMESTAMPTZ
 );
 
 -- ==========================================

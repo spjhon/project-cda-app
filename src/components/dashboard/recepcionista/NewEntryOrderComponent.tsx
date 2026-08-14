@@ -129,6 +129,12 @@ export function getInitialOrderFormData(
       telefono: "",
       correo: "",
       direccion: "",
+       actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
+      
     },
     owner_data: {
       id: null,
@@ -138,8 +144,14 @@ export function getInitialOrderFormData(
       telefono: "",
       correo: "",
       direccion: "",
+       actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
     },
     is_owner_same_as_customer: false,
+    
   };
 }
 
@@ -154,6 +166,33 @@ export default function NewEntryOrderComponent() {
   const activeTemplates = templateTableData?.query.data?.filter((t) => t.is_active) || [];
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+
+
+const { tenantModules = []  } = PermissionsContextReceived?.PermissionsContextValue ?? {};
+
+
+
+
+const activeModules = tenantModules
+  .filter((module) => module.is_active && module.is_enabled)
+  .map((module) => module.code);
+
+
+/**
+ 
+const hasSarlaft = activeModules.includes("sarlaft");
+
+{activeModules.includes("sarlaft") && (
+  <SarlaftSection />
+)}
+
+
+if (activeModules.includes("sarlaft")) {
+  // Ejecutar validaciones SARLAFT
+}
+
+ */
 
 
 
@@ -248,6 +287,11 @@ export default function NewEntryOrderComponent() {
       telefono: "",
       correo: "",
       direccion: "",
+       actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
     },
     owner_data: {
       id: null,
@@ -257,8 +301,15 @@ export default function NewEntryOrderComponent() {
       telefono: "",
       correo: "",
       direccion: "",
+       actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
     },
     is_owner_same_as_customer: false, // Switch maestro
+    
+      
   });
 
   //console.log(formData)
@@ -369,7 +420,7 @@ export default function NewEntryOrderComponent() {
       };
 
       // Enviamos el payload filtrado a la Server Action
-      const { data, error } = await createOrderAction(payloadToSubmit);
+      const { data, error } = await createOrderAction(payloadToSubmit, activeModules);
 
       if (error || !data) {
         console.log("Error del createOrderAction", error)
@@ -461,6 +512,11 @@ export default function NewEntryOrderComponent() {
             telefono: "",
             correo: "",
             direccion: "",
+             actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
           },
           owner_data: {
             id: null,
@@ -470,8 +526,21 @@ export default function NewEntryOrderComponent() {
             telefono: "",
             correo: "",
             direccion: "",
+             actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
           },
           is_owner_same_as_customer: false,
+           actividad_economica_cliente: "",
+      origen_fondos_cliente: "",
+      es_cliente_persona_publicamente_expuesta: false,
+      resultado_consulta_sarlaft_cliente_desfavorable: false, 
+      actividad_economica_propietario: "",
+      origen_fondos_propietario: "",
+      es_propietario_persona_publicamente_expuesta: false,
+      resultado_consulta_sarlaft_propietario_desfavorable: false,
         }));
 
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS

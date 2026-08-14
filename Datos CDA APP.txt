@@ -50,7 +50,7 @@ PENDIENTES
 - que haya donde decir si es escuter o no
 - el sistema de anulado de las ordenes de entrada puede que no este funcionando bien
 - hacer la separacion entre efectivo y targeta cuando se pagan con las dos al mismo tiempo
-- 
+- hacer una forma de registrar soat cuando no viene con revicion
 
 
 MAS COSITAS QUE FALTAN

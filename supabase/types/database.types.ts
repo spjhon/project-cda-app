@@ -351,6 +351,36 @@ export type Database = {
           },
         ]
       }
+      modules: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_condition_results: {
         Row: {
           created_at: string
@@ -657,39 +687,48 @@ export type Database = {
       }
       personas: {
         Row: {
+          actividad_economica: string | null
           correo: string | null
           created_at: string
           deleted_at: string | null
           direccion: string | null
+          es_persona_publicamente_expuesta: boolean | null
           id: string
           nombre_completo: string
           numero_documento: string
+          origen_fondos: string | null
           telefono: string | null
           tenant_id: string
           tipo_documento: Database["public"]["Enums"]["document_type_enum"]
           updated_at: string
         }
         Insert: {
+          actividad_economica?: string | null
           correo?: string | null
           created_at?: string
           deleted_at?: string | null
           direccion?: string | null
+          es_persona_publicamente_expuesta?: boolean | null
           id?: string
           nombre_completo: string
           numero_documento: string
+          origen_fondos?: string | null
           telefono?: string | null
           tenant_id: string
           tipo_documento: Database["public"]["Enums"]["document_type_enum"]
           updated_at?: string
         }
         Update: {
+          actividad_economica?: string | null
           correo?: string | null
           created_at?: string
           deleted_at?: string | null
           direccion?: string | null
+          es_persona_publicamente_expuesta?: boolean | null
           id?: string
           nombre_completo?: string
           numero_documento?: string
+          origen_fondos?: string | null
           telefono?: string | null
           tenant_id?: string
           tipo_documento?: Database["public"]["Enums"]["document_type_enum"]
@@ -698,6 +737,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "personas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sarlaft_module: {
+        Row: {
+          actividad_economica_snapshot: string
+          created_at: string
+          deleted_at: string | null
+          entry_order_id: string
+          es_persona_publicamente_expuesta_snapshot: boolean
+          id: string
+          nombre_completo_snapshot: string
+          numero_documento_snapshot: string
+          origen_fondos_snapshot: string
+          person_type: string
+          placa_snapshot: string
+          tenant_id: string
+          tipo_documento_snapshot: string
+          updated_at: string
+        }
+        Insert: {
+          actividad_economica_snapshot: string
+          created_at?: string
+          deleted_at?: string | null
+          entry_order_id: string
+          es_persona_publicamente_expuesta_snapshot: boolean
+          id?: string
+          nombre_completo_snapshot: string
+          numero_documento_snapshot: string
+          origen_fondos_snapshot: string
+          person_type: string
+          placa_snapshot: string
+          tenant_id: string
+          tipo_documento_snapshot: string
+          updated_at?: string
+        }
+        Update: {
+          actividad_economica_snapshot?: string
+          created_at?: string
+          deleted_at?: string | null
+          entry_order_id?: string
+          es_persona_publicamente_expuesta_snapshot?: boolean
+          id?: string
+          nombre_completo_snapshot?: string
+          numero_documento_snapshot?: string
+          origen_fondos_snapshot?: string
+          person_type?: string
+          placa_snapshot?: string
+          tenant_id?: string
+          tipo_documento_snapshot?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sarlaft_entry_order_id_fkey"
+            columns: ["entry_order_id"]
+            isOneToOne: false
+            referencedRelation: "entry_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sarlaft_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -821,6 +926,48 @@ export type Database = {
             foreignKeyName: "tenant_credits_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_modules: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          module_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          module_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          module_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_modules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
@@ -1033,6 +1180,18 @@ export type Database = {
       }
       create_full_order: { Args: { p_data: Json }; Returns: string }
       create_full_order_template: { Args: { p_data: Json }; Returns: string }
+      create_sarlaft_evidence: {
+        Args: {
+          p_customer_actividad_economica: string
+          p_customer_es_persona_publicamente_expuesta: boolean
+          p_customer_origen_fondos: string
+          p_entry_order_id: string
+          p_owner_actividad_economica: string
+          p_owner_es_persona_publicamente_expuesta: boolean
+          p_owner_origen_fondos: string
+        }
+        Returns: Json
+      }
       fetch_admin_analitics: {
         Args: never
         Returns: {
@@ -1199,6 +1358,24 @@ export type Database = {
           version: number
         }[]
       }
+      fetch_sarlaft_evidence_by_entry_order_id: {
+        Args: { p_entry_order_id: string }
+        Returns: {
+          actividad_economica_snapshot: string
+          cliente_firma_url: string
+          created_at: string
+          entry_order_id: string
+          es_persona_publicamente_expuesta_snapshot: boolean
+          id: string
+          nombre_completo_snapshot: string
+          numero_documento_snapshot: string
+          origen_fondos_snapshot: string
+          person_type: string
+          placa_snapshot: string
+          tenant_id: string
+          tipo_documento_snapshot: string
+        }[]
+      }
       fetch_service_requirements_list: {
         Args: {
           p_fecha_desde?: string
@@ -1297,6 +1474,7 @@ export type Database = {
           p_director_tecnico_nombre_snapshot: string
           p_director_tecnico_numero_documento_snapshot: string
           p_director_tecnico_tipo_documento_snapshot: string
+          p_es_reinspeccion?: boolean
           p_order_id: string
           p_resultado_revision: string
         }

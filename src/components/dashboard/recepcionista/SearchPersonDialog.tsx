@@ -47,6 +47,12 @@ interface SearchPersonDialogProps {
       telefono?: string;
       correo?: string;
       direccion?: string;
+      actividad_economica?: string;
+      origen_fondos?: string;
+      es_persona_publicamente_expuesta?: boolean;
+      se_hizo_la_consulta?: boolean;
+      resultado_consulta_sarlaf_desfavorable?: boolean;
+
     };
   }) => void;
 }
@@ -127,7 +133,7 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
       // y 'tenantId' (el ID del tenant actual en tu estado/contexto).
       const { data: persona, error } = await supabaseBrowser
         .from('personas')
-        .select('nombre_completo, telefono, correo, direccion')
+        .select('nombre_completo, telefono, correo, direccion, actividad_economica, origen_fondos, es_persona_publicamente_expuesta')
         .eq('tenant_id', tenantID)
         .eq('tipo_documento', documentType)
         .eq('numero_documento', documentNumber)
@@ -149,6 +155,11 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
             telefono: persona.telefono || "",
             correo: persona.correo || "",
             direccion: persona.direccion || "",
+            actividad_economica: persona.actividad_economica || "",
+      origen_fondos: persona.origen_fondos || "",
+      es_persona_publicamente_expuesta: persona.es_persona_publicamente_expuesta || false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
           },
         });
       } else {
@@ -163,6 +174,11 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
             telefono: "",
             correo: "",
             direccion: "",
+             actividad_economica: "",
+      origen_fondos: "",
+      es_persona_publicamente_expuesta: false,
+      se_hizo_la_consulta: false,
+      resultado_consulta_sarlaf_desfavorable: false,
           },
         });
       }

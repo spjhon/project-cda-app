@@ -1,11 +1,40 @@
-import React from "react";
-import { User, UserCheck } from "lucide-react";
+"use client";
+
+import React, { useContext, useState } from "react";
+import {
+  AlertTriangle,
+  Loader2,
+  SearchCheck,
+  ShieldCheck,
+  User,
+  UserCheck,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 import { SearchPersonDialog } from "./SearchPersonDialog";
+import { Switch } from "@/components/ui/switch";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field";
+import { useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 // Opciones de identificación según tu lista
 export const ID_DOCUMENT_OPTIONS = [
@@ -27,11 +56,50 @@ interface PersonSectionProps {
   hayPlaca: boolean;
 }
 
-export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlaca }: PersonSectionProps) => {
+type SarlaftResult = {
+  personType: "customer" | "owner";
+  seHizoLaConsulta: boolean;
+  coincidencia: boolean;
+  mensaje: string;
+};
+
+export const PersonSection = ({
+  formData,
+  setFormData,
+  selectedTemplate,
+  hayPlaca,
+}: PersonSectionProps) => {
+
+
+
+
+const PermissionsContextReceived = useContext(PermissionsContext);
+
+const { tenantModules = []  } = PermissionsContextReceived?.PermissionsContextValue ?? {};
+
+
+const activeModules = tenantModules
+  .filter((module) => module.is_active && module.is_enabled)
+  .map((module) => module.code);
+
+
+
+
+
+
+
+  const [sarlaftResult, setSarlaftResult] = useState<SarlaftResult | null>(
+    null,
+  );
+
+  const [showSarlaftDialog, setShowSarlaftDialog] = useState(false);
 
   // Manejador para el Cliente (con lógica de espejo manual)
-  const handleCustomerChange = (field: string, value: string) => {
-    const formattedValue = field === "nombre_completo" ? value.toUpperCase() : value;
+  const handleCustomerChange = (field: string, value: string | boolean) => {
+    const formattedValue =
+      field === "nombre_completo" && typeof value === "string"
+        ? value.toUpperCase()
+        : value;
 
     setFormData((prev: ZodFullFormDataType) => {
       const newCustomerData = {
@@ -50,12 +118,18 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
   };
 
   // Manejador para el Dueño
-  const handleOwnerChange = (field: string, value: string) => {
-    const formattedValue = field === "nombre_completo" ? value.toUpperCase() : value;
+  const handleOwnerChange = (field: string, value: string | boolean) => {
+    const formattedValue =
+      field === "nombre_completo" && typeof value === "string"
+        ? value.toUpperCase()
+        : value;
 
     setFormData((prev: ZodFullFormDataType) => ({
       ...prev,
-      owner_data: { ...prev.owner_data, [field]: formattedValue },
+      owner_data: {
+        ...prev.owner_data,
+        [field]: formattedValue,
+      },
     }));
   };
 
@@ -63,14 +137,14 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
   const toggleSameOwner = () => {
     setFormData((prev: ZodFullFormDataType) => {
       const newState = !prev.is_owner_same_as_customer;
-      
+
       return {
         ...prev,
         is_owner_same_as_customer: newState,
-        // Si newState es true, clona el cliente. 
+        // Si newState es true, clona el cliente.
         // Si es false, vacía los campos del propietario.
-        owner_data: newState 
-          ? { ...prev.customer_data } 
+        owner_data: newState
+          ? { ...prev.customer_data }
           : {
               id: null,
               tipo_documento: "cedula_ciudadania",
@@ -79,10 +153,170 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
               telefono: "",
               correo: "",
               direccion: "",
+              actividad_economica: "",
+              origen_fondos: "",
+              es_persona_publicamente_expuesta: false,
+              se_hizo_la_consulta: false,
+              resultado_consulta_sarlaf_desfavorable: false,
             },
       };
     });
   };
+
+  const sarlaftMutation = useMutation({
+    mutationFn: async (personType: "customer" | "owner") => {
+      // ============================================================
+      // 1. OBTENER DATOS SEGÚN EL TIPO DE PERSONA
+      // ============================================================
+
+      const numeroDocumento =
+        personType === "customer"
+          ? formData.customer_data.numero_documento
+          : formData.owner_data.numero_documento;
+
+      const nombreCompleto =
+        personType === "customer"
+          ? formData.customer_data.nombre_completo
+          : formData.owner_data.nombre_completo;
+
+      // ============================================================
+      // 2. VALIDACIÓN PREVIA
+      // ============================================================
+
+      if (!numeroDocumento?.trim() || !nombreCompleto?.trim()) {
+        throw new Error(
+          personType === "customer"
+            ? "Debe ingresar el número de documento y el nombre completo del cliente antes de realizar la consulta SARLAFT."
+            : "Debe ingresar el número de documento y el nombre completo del propietario antes de realizar la consulta SARLAFT.",
+        );
+      }
+
+      // ============================================================
+      // 3. SIMULACIÓN DE CONSULTA API
+      // ============================================================
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // SIMULACIÓN DE RESPUESTA DE LA API
+      const apiResult = {
+        coincidencia: false,
+        mensaje: "No se encontraron coincidencias.",
+      };
+
+      return {
+        personType,
+        seHizoLaConsulta: true,
+        ...apiResult,
+      };
+    },
+
+    // ==============================================================
+    // 4. CONSULTA COMPLETADA CORRECTAMENTE
+    // ==============================================================
+
+    onSuccess: (result) => {
+  setFormData((prev: ZodFullFormDataType) => {
+    // ============================================================
+    // CASO 1: SE CONSULTÓ EL CLIENTE
+    // ============================================================
+
+    if (result.personType === "customer") {
+      return {
+        ...prev,
+
+        customer_data: {
+          ...prev.customer_data,
+          se_hizo_la_consulta: true,
+          resultado_consulta_sarlaf_desfavorable:
+            result.coincidencia,
+        },
+
+        // Si cliente = propietario, ambos representan
+        // a la misma persona y la consulta aplica para ambos.
+        owner_data: prev.is_owner_same_as_customer
+          ? {
+              ...prev.owner_data,
+              se_hizo_la_consulta: true,
+              resultado_consulta_sarlaf_desfavorable:
+                result.coincidencia,
+            }
+          : prev.owner_data,
+      };
+    }
+
+    // ============================================================
+    // CASO 2: SE CONSULTÓ EL PROPIETARIO
+    // ============================================================
+
+    return {
+      ...prev,
+
+      owner_data: {
+        ...prev.owner_data,
+        se_hizo_la_consulta: true,
+        resultado_consulta_sarlaf_desfavorable:
+          result.coincidencia,
+      },
+
+      // Si cliente = propietario, también actualizamos el cliente.
+      customer_data: prev.is_owner_same_as_customer
+        ? {
+            ...prev.customer_data,
+            se_hizo_la_consulta: true,
+            resultado_consulta_sarlaf_desfavorable:
+              result.coincidencia,
+          }
+        : prev.customer_data,
+    };
+  });
+
+  // ============================================================
+  // RESULTADO PARA EL ALERT DIALOG
+  // ============================================================
+
+  setSarlaftResult({
+    personType: result.personType,
+    coincidencia: result.coincidencia,
+    seHizoLaConsulta: true,
+    mensaje: result.mensaje,
+  });
+
+  setShowSarlaftDialog(true);
+},
+
+    // ==============================================================
+    // 5. VALIDACIÓN FALLIDA O ERROR DE LA CONSULTA
+    // ==============================================================
+
+    onError: (error, personType) => {
+      console.error("Error consultando SARLAFT:", error);
+
+      // IMPORTANTE:
+      // NO modificamos formData.
+      //
+      // Por lo tanto:
+      // - se_hizo_la_consulta permanece como estaba.
+      // - resultado_consulta_sarlaf_desfavorable permanece como estaba.
+      //
+      // Esto es importante porque una validación fallida NO significa
+      // que la persona haya sido consultada.
+
+      setSarlaftResult({
+        personType,
+        seHizoLaConsulta: false,
+        coincidencia: false,
+        mensaje:
+          error instanceof Error
+            ? error.message
+            : "No fue posible completar la consulta SARLAFT.",
+      });
+
+      setShowSarlaftDialog(true);
+    },
+  });
+
+  const isValidationError = sarlaftResult?.seHizoLaConsulta === false;
+  const hasCoincidence = sarlaftResult?.coincidencia === true;
 
   return (
     <fieldset
@@ -106,8 +340,8 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
             checked={formData.is_owner_same_as_customer}
             onCheckedChange={toggleSameOwner}
             className={`h-5 w-5 ${
-              formData.is_owner_same_as_customer 
-                ? "border-background data-[state=checked]:bg-background data-[state=checked]:text-primary" 
+              formData.is_owner_same_as_customer
+                ? "border-background data-[state=checked]:bg-background data-[state=checked]:text-primary"
                 : "border-input"
             }`}
           />
@@ -129,19 +363,20 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
               </span>
             </div>
             <div className="bg-background border border-border rounded-2xl p-6 space-y-5 shadow-xs">
-
               <div className="flex gap-2">
                 {/* DISPLAY DOCUMENTO */}
                 <div className="flex-1 h-11 rounded-md border border-border bg-muted/40 px-4 flex items-center overflow-hidden">
                   <div className="flex flex-col leading-tight overflow-hidden">
                     <span className="text-[10px] uppercase font-bold text-muted-foreground truncate">
                       {ID_DOCUMENT_OPTIONS.find(
-                        (d) => d.value === formData.customer_data.tipo_documento
+                        (d) =>
+                          d.value === formData.customer_data.tipo_documento,
                       )?.label || "Tipo documento"}
                     </span>
 
                     <span className="text-sm font-semibold text-foreground truncate">
-                      {formData.customer_data.numero_documento || "Sin documento"}
+                      {formData.customer_data.numero_documento ||
+                        "Sin documento"}
                     </span>
                   </div>
                 </div>
@@ -150,7 +385,9 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                 <div className="flex-1">
                   <SearchPersonDialog
                     currentDocumentType={formData.customer_data.tipo_documento}
-                    currentDocumentNumber={formData.customer_data.numero_documento}
+                    currentDocumentNumber={
+                      formData.customer_data.numero_documento
+                    }
                     onUpdate={(data) => {
                       setFormData((prev) => {
                         const updatedCustomerData = {
@@ -244,6 +481,239 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                   }
                 />
               </div>
+
+
+
+              {/**JSX DEL SARLAFT DE AQUI PARA ABAJO */}
+
+              {activeModules.includes("sarlaft") && (
+ <>
+ 
+ 
+
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold text-muted-foreground uppercase">
+                  Actividad Económica Cliente
+                </Label>
+                <Input
+                  
+                  className="h-11 bg-background"
+                  placeholder="Enfermero Profesional"
+                  value={formData.customer_data.actividad_economica}
+                  onChange={(e) =>
+                    handleCustomerChange("actividad_economica", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold text-muted-foreground uppercase">
+                  Origen Fondos Cliente
+                </Label>
+                <Input
+                  
+                  className="h-11 bg-background"
+                  placeholder="Salario"
+                  value={formData.customer_data.origen_fondos}
+                  onChange={(e) =>
+                    handleCustomerChange("origen_fondos", e.target.value)
+                  }
+                />
+              </div>
+
+              <FieldLabel
+                htmlFor="pep-switch"
+                className={`rounded-xl border-2 px-5 py-4 cursor-pointer transition-all ${
+                  formData.customer_data.es_persona_publicamente_expuesta
+                    ? "border-destructive bg-destructive/10"
+                    : "border-emerald-500/30 bg-emerald-500/10"
+                }`}
+              >
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <FieldTitle
+                      className={
+                        formData.customer_data.es_persona_publicamente_expuesta
+                          ? "text-destructive"
+                          : "text-emerald-600"
+                      }
+                    >
+                      Persona Públicamente Expuesta (PEP)
+                    </FieldTitle>
+
+                    <FieldDescription>
+                      {formData.customer_data.es_persona_publicamente_expuesta
+                        ? "La persona ha sido identificada como públicamente expuesta."
+                        : "La persona no está identificada como públicamente expuesta."}
+                    </FieldDescription>
+                  </FieldContent>
+
+                  <Switch
+                    id="pep-switch"
+                    checked={
+                      formData.customer_data.es_persona_publicamente_expuesta
+                    }
+                    onCheckedChange={(checked) =>
+                      handleCustomerChange(
+                        "es_persona_publicamente_expuesta",
+                        checked,
+                      )
+                    }
+                    className="
+                      data-[state=checked]:bg-destructive
+                      data-[state=unchecked]:bg-emerald-500
+                    "
+                  />
+                </Field>
+              </FieldLabel>
+
+              <Button
+                type="button"
+                size="lg"
+                disabled={sarlaftMutation.isPending}
+                onClick={() => sarlaftMutation.mutate("customer")}
+                className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70"
+              >
+                {sarlaftMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Consultando listas...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="h-5 w-5" />
+                    Consultar SARLAFT y Listas Restrictivas
+                  </>
+                )}
+              </Button>
+
+              <AlertDialog
+                open={showSarlaftDialog}
+                onOpenChange={setShowSarlaftDialog}
+              >
+                <AlertDialogContent
+                  className={
+                    isValidationError
+                      ? "border-2 border-amber-500"
+                      : hasCoincidence
+                        ? "border-2 border-destructive"
+                        : "border-2 border-emerald-500"
+                  }
+                >
+                  <AlertDialogHeader>
+                    <AlertDialogTitle
+                      className={`flex items-center gap-3 text-xl font-black ${
+                        isValidationError
+                          ? "text-amber-600"
+                          : hasCoincidence
+                            ? "text-destructive"
+                            : "text-emerald-600"
+                      }`}
+                    >
+                      {isValidationError ? (
+                        <AlertTriangle className="h-7 w-7" />
+                      ) : hasCoincidence ? (
+                        <AlertTriangle className="h-7 w-7" />
+                      ) : (
+                        <SearchCheck className="h-7 w-7" />
+                      )}
+
+                      {isValidationError
+                        ? "Datos incompletos"
+                        : hasCoincidence
+                          ? "Consulta SARLAFT desfavorable"
+                          : "Consulta SARLAFT favorable"}
+                    </AlertDialogTitle>
+
+                    <AlertDialogDescription className="text-base leading-relaxed">
+                      {isValidationError ? (
+                        <>
+                          Para realizar la consulta SARLAFT del{" "}
+                          <strong>
+                            {sarlaftResult?.personType === "customer"
+                              ? "cliente"
+                              : "propietario"}
+                          </strong>
+                          , debe ingresar primero el{" "}
+                          <strong>nombre completo</strong> y el{" "}
+                          <strong>número de documento</strong>.
+                          <br />
+                          <br />
+                          <span className="font-semibold text-amber-600">
+                            Complete los datos requeridos antes de realizar la
+                            consulta.
+                          </span>
+                        </>
+                      ) : hasCoincidence ? (
+                        <>
+                          Se encontraron{" "}
+                          <strong className="text-destructive">
+                            coincidencias
+                          </strong>{" "}
+                          en las listas consultadas para el{" "}
+                          <strong>
+                            {sarlaftResult?.personType === "customer"
+                              ? "cliente"
+                              : "propietario"}
+                          </strong>
+                          .
+                          <br />
+                          <br />
+                          <span className="font-semibold">
+                            No es posible continuar con el procedimiento de
+                            Revisión Técnico-Mecánica (RTM) hasta realizar la
+                            revisión correspondiente.
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          La consulta realizada para el{" "}
+                          <strong>
+                            {sarlaftResult?.personType === "customer"
+                              ? "cliente"
+                              : "propietario"}
+                          </strong>{" "}
+                          no encontró coincidencias en las listas SARLAFT y
+                          listas restrictivas.
+                          <br />
+                          <br />
+                          <span className="font-semibold text-emerald-600">
+                            Puede continuar con el procedimiento de Revisión
+                            Técnico-Mecánica (RTM).
+                          </span>
+                        </>
+                      )}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={() => setShowSarlaftDialog(false)}
+                      className={
+                        isValidationError
+                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          : hasCoincidence
+                            ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            : "bg-emerald-600 text-white hover:bg-emerald-700"
+                      }
+                    >
+                      {isValidationError
+                        ? "Entendido"
+                        : hasCoincidence
+                          ? "Cerrar"
+                          : "Continuar con el procedimiento"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+ 
+ 
+ </>
+
+
+              )}
+
+
             </div>
           </div>
 
@@ -266,8 +736,8 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
             >
               <div
                 className={`bg-background border-2 rounded-2xl p-6 space-y-5 shadow-xs transition-all ${
-                  formData.is_owner_same_as_customer 
-                    ? "border-muted/40" 
+                  formData.is_owner_same_as_customer
+                    ? "border-muted/40"
                     : "border-emerald-500/20 bg-emerald-500/5"
                 }`}
               >
@@ -288,12 +758,14 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                       <div className="flex flex-col leading-tight overflow-hidden">
                         <span className="text-[10px] uppercase font-bold text-muted-foreground truncate">
                           {ID_DOCUMENT_OPTIONS.find(
-                            (d) => d.value === formData.owner_data.tipo_documento
+                            (d) =>
+                              d.value === formData.owner_data.tipo_documento,
                           )?.label || "Tipo documento"}
                         </span>
 
                         <span className="text-sm font-semibold text-foreground truncate">
-                          {formData.owner_data.numero_documento || "Sin documento"}
+                          {formData.owner_data.numero_documento ||
+                            "Sin documento"}
                         </span>
                       </div>
                     </div>
@@ -303,7 +775,9 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                       <SearchPersonDialog
                         disabled={formData.is_owner_same_as_customer}
                         currentDocumentType={formData.owner_data.tipo_documento}
-                        currentDocumentNumber={formData.owner_data.numero_documento}
+                        currentDocumentNumber={
+                          formData.owner_data.numero_documento
+                        }
                         onUpdate={(data) => {
                           setFormData((prev) => ({
                             ...prev,
@@ -322,7 +796,8 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                   {/* MENSAJE CUANDO ESTÁ SINCRONIZADO */}
                   {formData.is_owner_same_as_customer && (
                     <p className="text-[11px] text-muted-foreground font-medium px-1">
-                      El propietario utiliza automáticamente la información del cliente.
+                      El propietario utiliza automáticamente la información del
+                      cliente.
                     </p>
                   )}
                 </div>
@@ -349,6 +824,7 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                       Teléfono Propietario
                     </Label>
                     <Input
+                    required
                       disabled={formData.is_owner_same_as_customer}
                       className="h-11 bg-background"
                       placeholder="Ej: 3101234567"
@@ -363,6 +839,7 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                       Correo Propietario
                     </Label>
                     <Input
+                    required
                       disabled={formData.is_owner_same_as_customer}
                       className="h-11 bg-background"
                       placeholder="ejemplo@correo.com"
@@ -379,6 +856,7 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                     Dirección Propietario
                   </Label>
                   <Input
+                  required
                     disabled={formData.is_owner_same_as_customer}
                     className="h-11 bg-background"
                     placeholder="Ej: Calle 10 # 20-30"
@@ -388,6 +866,46 @@ export const PersonSection = ({ formData, setFormData, selectedTemplate, hayPlac
                     }
                   />
                 </div>
+
+                {/**SARLAFT SECCION DEL PROPIETARIO */}
+
+                {activeModules.includes("sarlaft") && (
+ <>
+ 
+ 
+                
+               
+
+                <Button
+                  type="button"
+                  size="lg"
+                  disabled={
+                    formData.is_owner_same_as_customer ||
+                    sarlaftMutation.isPending
+                  }
+                  onClick={() => sarlaftMutation.mutate("owner")}
+                  className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50"
+                >
+                  {sarlaftMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Consultando listas...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-5 w-5" />
+                      Consultar SARLAFT y Listas Restrictivas
+                    </>
+                  )}
+                </Button>
+ 
+ </>
+
+
+
+
+)}
+
               </div>
             </div>
           </div>

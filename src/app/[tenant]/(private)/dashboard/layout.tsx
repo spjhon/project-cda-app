@@ -15,6 +15,7 @@ import {
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 import { fetchTenantCredits, TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
 import { connection } from "next/server";
+import { fetchTenantModules, TenantModule } from "@/lib/server-actions/fetch_tenant_modules";
 
 
 interface DashboardLayout {
@@ -208,6 +209,31 @@ const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
 
 
 
+const ModulesDataPromise: Promise<TenantModule[]> = (async () => {
+  // Esperamos a que el tenant se resuelva para obtener su ID
+  const { tenant } = await params;
+  const tenantResult = await fetchTenantData(tenant);
+
+  if (!tenantResult?.data?.id || tenantResult.error) {
+    redirect(`/error?type=tenant_fail`);
+  }
+
+  if (!tenantResult?.data?.id) {
+    redirect(`/error?type=Error trallendo los modulos`);
+  }
+
+  // Ahora que tenemos el ID, llamamos los módulos asignados al tenant
+  const { data, error } = await fetchTenantModules(
+    tenantResult.data.id,
+  );
+
+  if (!data || error) {
+    redirect(`/error?type=Error trallendo los modulos` + error);
+  }
+
+  return data;
+})();
+
 
 
 
@@ -225,6 +251,7 @@ const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
           tenantPromise={tenantPromise}
           userPromise={userPromise}
           RolesDataPromise={RolesDataPromise}
+          ModulesDataPromise={ModulesDataPromise}
         >
           <EntryOrdersLoaderContext
             entryOrdersTableDataPromise={entryOrdersTableDataPromise}

@@ -2,6 +2,7 @@
 
 import { UserContextData } from "@/app/[tenant]/(private)/dashboard/layout";
 import { TenantFetchResult } from "@/lib/server-actions/fetch_tenant_domain_cached";
+import { TenantModule } from "@/lib/server-actions/fetch_tenant_modules";
 import { createContext, ReactNode, use } from "react";
 
 interface RolesContextType {
@@ -9,6 +10,7 @@ interface RolesContextType {
     tenantObject: TenantFetchResult["data"] | undefined;
     user: UserContextData;
     RolesArray: string[];
+    tenantModules: TenantModule[]
   };
 }
 
@@ -16,7 +18,7 @@ interface PermissionsLoaderContextProps {
   tenantPromise: Promise<TenantFetchResult>;
   userPromise: Promise<UserContextData>;
   RolesDataPromise: Promise<string[]>;
-
+ModulesDataPromise: Promise<TenantModule[]>;
   children: ReactNode;
 }
 
@@ -32,17 +34,19 @@ export default function PermissionsLoaderContext({
   tenantPromise,
   userPromise,
   RolesDataPromise,
-
+ModulesDataPromise,
   children,
 }: PermissionsLoaderContextProps) {
   const RolesData = use(RolesDataPromise);
   const user = use(userPromise);
   const tenantData = use(tenantPromise);
+  const tenantModules = use(ModulesDataPromise);
 
   const PermissionsContextValue = {
     tenantObject: tenantData?.data,
     user: user,
     RolesArray: RolesData,
+    tenantModules
   };
 
   return (

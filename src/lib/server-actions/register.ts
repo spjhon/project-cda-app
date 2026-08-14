@@ -30,7 +30,7 @@ export async function registerUserAction(tenant: string, formData: FormData) {
 
 
  
-  console.log(role);
+  
 
 
 

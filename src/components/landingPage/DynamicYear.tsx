@@ -1,10 +1,9 @@
-import { cookies } from "next/headers"; // O import { headers } from "next/headers";
+"use client"
 
-export default async function DynamicYear() {
-  // Al invocar cookies() o headers(), Next.js marca el componente como dinámico.
-  // Esto "desbloquea" el acceso a new Date() sin errores.
-  await cookies(); 
-  
+
+
+export default function DynamicYear() {
+
   const year = new Date().getFullYear();
   
   return <span>{year}</span>;

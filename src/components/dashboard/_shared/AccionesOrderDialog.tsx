@@ -10,10 +10,10 @@ import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
 import CancelOrder from "./CancelOrder";
-import { UseMutateFunction } from "@tanstack/react-query";
 import AccionesOrderOfficeDialog from "../oficina/AccionesOrderOfficeDialog";
 import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrderDirectorTecnicoDialog";
 import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
+import SarlaftViewPDF from "./pdfs/SarlaftViewPDF";
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
@@ -66,6 +66,7 @@ export default function AccionesOrderDialog({
               <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
                 <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
                 <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+                <SarlaftViewPDF orderId={orden.id}></SarlaftViewPDF>
               </div>
             </div>
 

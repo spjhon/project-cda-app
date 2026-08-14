@@ -99,50 +99,50 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     vehiculo_es_extranjero_snapshot             BOOLEAN NOT NULL,
 
 
-    -- ==========================================
-    -- SNAPSHOT DEL PROPIETARIO
-    -- ==========================================
+   -- ==========================================
+-- SNAPSHOT DEL PROPIETARIO
+-- ==========================================
 
-    -- Tipo de documento del propietario.
-    propietario_tipo_documento_snapshot         TEXT NOT NULL,
+-- Tipo de documento del propietario.
+propietario_tipo_documento_snapshot         TEXT NOT NULL,
 
-    -- Número de documento del propietario.
-    propietario_numero_documento_snapshot       VARCHAR NOT NULL,
+-- Número de documento del propietario.
+propietario_numero_documento_snapshot       VARCHAR NOT NULL,
 
-    -- Nombre completo del propietario.
-    propietario_nombre_snapshot                 TEXT NOT NULL,
+-- Nombre completo del propietario.
+propietario_nombre_snapshot                 TEXT NOT NULL,
 
-    -- Teléfono del propietario.
-    propietario_telefono_snapshot               VARCHAR,
+-- Teléfono del propietario.
+propietario_telefono_snapshot               VARCHAR,
 
-    -- Correo electrónico del propietario.
-    propietario_email_snapshot                  TEXT,
+-- Correo electrónico del propietario.
+propietario_email_snapshot                  TEXT,
 
-    -- Dirección registrada.
-    propietario_direccion_snapshot              TEXT,
+-- Dirección registrada.
+propietario_direccion_snapshot              TEXT,
 
 
-    -- ==========================================
-    -- SNAPSHOT DEL CLIENTE
-    -- ==========================================
+-- ==========================================
+-- SNAPSHOT DEL CLIENTE
+-- ==========================================
 
-    -- Tipo de documento de quien presenta el vehículo.
-    cliente_tipo_documento_snapshot             TEXT NOT NULL,
+-- Tipo de documento de quien presenta el vehículo.
+cliente_tipo_documento_snapshot             TEXT NOT NULL,
 
-    -- Número de documento.
-    cliente_numero_documento_snapshot           VARCHAR NOT NULL,
+-- Número de documento.
+cliente_numero_documento_snapshot           VARCHAR NOT NULL,
 
-    -- Nombre completo.
-    cliente_nombre_snapshot                     TEXT NOT NULL,
+-- Nombre completo.
+cliente_nombre_snapshot                     TEXT NOT NULL,
 
-    -- Teléfono de contacto.
-    cliente_telefono_snapshot                   VARCHAR,
+-- Teléfono de contacto.
+cliente_telefono_snapshot                   VARCHAR,
 
-    -- Correo electrónico.
-    cliente_email_snapshot                      TEXT,
+-- Correo electrónico.
+cliente_email_snapshot                      TEXT,
 
-    -- Dirección registrada.
-    cliente_direccion_snapshot                  TEXT,
+-- Dirección registrada.
+cliente_direccion_snapshot                  TEXT,
 
 
     -- ==========================================

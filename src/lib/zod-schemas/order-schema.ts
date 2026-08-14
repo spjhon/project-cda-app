@@ -129,6 +129,19 @@ export const PersonFormSchema = z.object({
   correo: z.email("Correo inválido").or(z.literal("")),
 
   direccion: z.string(),
+   /* ---------------------------
+     SARLAFT / INFORMACIÓN ADICIONAL
+  ---------------------------- */
+
+  actividad_economica: z.string(),
+
+  origen_fondos: z.string(),
+
+  es_persona_publicamente_expuesta: z.boolean(),
+
+  se_hizo_la_consulta: z.boolean(),
+
+  resultado_consulta_sarlaf_desfavorable: z.boolean(),
 });
 
 /* =========================================================
@@ -326,6 +339,10 @@ export const ZodFullFormDataSchema = z.object({
 
   is_owner_same_as_customer: z.boolean(),
 
+ 
+
+  
+
   /* ---------------------------
      LLANTAS
   ---------------------------- */
@@ -358,6 +375,8 @@ export type ConditionResponse = (typeof ConditionResponseEnum)[number];
 export type TirePressureEntry = z.infer<typeof TirePressureEntrySchema>;
 
 export type TirePosition = (typeof TirePositionEnum)[number];
+
+export type PersonaType = z.infer<typeof PersonFormSchema>;
 
 export type ServiceType = (typeof ServiceTypeEnum)[number];
 
