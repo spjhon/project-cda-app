@@ -105,7 +105,6 @@ export default function DirectorTecnicoOrderForm({
 
 
 
-
 // Mutación TanStack Query para devolver el estado a 'en_prueba'
 const revertToEnPruebaMutation = useMutation({
   mutationFn: async () => {
@@ -116,6 +115,7 @@ const revertToEnPruebaMutation = useMutation({
       .from("entry_orders")
       .update({ 
         estado_orden: "en_prueba",
+        resultado_revision: null, // 👈 Se resetea el resultado a null
         updated_at: new Date().toISOString()
       })
       .eq("id", orden.id)
@@ -128,6 +128,8 @@ const revertToEnPruebaMutation = useMutation({
     return data;
   },
   onSuccess: () => {
+    
+
     // Invalidamos las queries necesarias para refrescar la UI en tiempo real
     queryClient.invalidateQueries({ queryKey: ["entry-orders"] });
   },
@@ -141,8 +143,6 @@ const revertToEnPruebaMutation = useMutation({
 const handleRevertToEnPrueba = () => {
   revertToEnPruebaMutation.mutate();
 };
-
-
 
 
 
@@ -498,7 +498,7 @@ return (
     </div>
 
     {/* Botón mejorado para devolver el estado */}
-   <Button
+   {orden.estado_orden === "finalizada" && <Button
   type="button"
   onClick={handleRevertToEnPrueba}
   disabled={revertToEnPruebaMutation.isPending}
@@ -515,7 +515,7 @@ return (
       <span>Devolver a estado EN PRUEBA</span>
     </>
   )}
-</Button>
+</Button>}
   </div>
 ) : (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
