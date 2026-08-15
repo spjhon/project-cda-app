@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import DirectorTecnicoOrderForm from "./DirectorTecnicoOrderForm";
-import { UseMutateFunction } from "@tanstack/react-query";
+
 
 interface AccionesOrderDirectorTecnicoDialogProps {
   orden: EntryOrderListItem;

@@ -14,6 +14,7 @@ import AccionesOrderOfficeDialog from "../oficina/AccionesOrderOfficeDialog";
 import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrderDirectorTecnicoDialog";
 import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 import SarlaftViewPDF from "./pdfs/SarlaftViewPDF";
+import SarlaftDownloadPDF from "./pdfs/SarlaftDownloadPDF";
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;
@@ -63,10 +64,11 @@ export default function AccionesOrderDialog({
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Documentación PDF
               </span>
-              <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
+              <div className="flex flex-wrap items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
                 <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
                 <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
                 <SarlaftViewPDF orderId={orden.id}></SarlaftViewPDF>
+                <SarlaftDownloadPDF orderId={orden.id}></SarlaftDownloadPDF>
               </div>
             </div>
 

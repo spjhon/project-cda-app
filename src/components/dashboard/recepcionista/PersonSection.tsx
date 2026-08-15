@@ -425,6 +425,7 @@ const activeModules = tenantModules
                   Nombre Completo / Razón Social
                 </Label>
                 <Input
+                  disabled={!formData.customer_data.numero_documento}
                   required
                   className="h-11 bg-background"
                   placeholder="NOMBRE COMPLETO DEL CLIENTE"
@@ -441,6 +442,7 @@ const activeModules = tenantModules
                     Teléfono de contacto
                   </Label>
                   <Input
+                  disabled={!formData.customer_data.numero_documento}
                     required
                     className="h-11 bg-background"
                     placeholder="Ej: 3101234567"
@@ -455,6 +457,7 @@ const activeModules = tenantModules
                     Correo Electrónico
                   </Label>
                   <Input
+                  disabled={!formData.customer_data.numero_documento}
                     required
                     className="h-11 bg-background"
                     type="email"
@@ -472,6 +475,7 @@ const activeModules = tenantModules
                   Dirección de Residencia
                 </Label>
                 <Input
+                disabled={!formData.customer_data.numero_documento}
                   required
                   className="h-11 bg-background"
                   placeholder="Ej: Calle 10 # 20-30"
@@ -496,7 +500,7 @@ const activeModules = tenantModules
                   Actividad Económica Cliente
                 </Label>
                 <Input
-                  
+                  disabled={!formData.customer_data.numero_documento}
                   className="h-11 bg-background"
                   placeholder="Enfermero Profesional"
                   value={formData.customer_data.actividad_economica}
@@ -511,7 +515,7 @@ const activeModules = tenantModules
                   Origen Fondos Cliente
                 </Label>
                 <Input
-                  
+                  disabled={!formData.customer_data.numero_documento}
                   className="h-11 bg-background"
                   placeholder="Salario"
                   value={formData.customer_data.origen_fondos}
@@ -522,6 +526,7 @@ const activeModules = tenantModules
               </div>
 
               <FieldLabel
+              
                 htmlFor="pep-switch"
                 className={`rounded-xl border-2 px-5 py-4 cursor-pointer transition-all ${
                   formData.customer_data.es_persona_publicamente_expuesta
@@ -549,6 +554,7 @@ const activeModules = tenantModules
                   </FieldContent>
 
                   <Switch
+                  disabled={!formData.customer_data.numero_documento}
                     id="pep-switch"
                     checked={
                       formData.customer_data.es_persona_publicamente_expuesta
@@ -568,9 +574,10 @@ const activeModules = tenantModules
               </FieldLabel>
 
               <Button
+              
                 type="button"
                 size="lg"
-                disabled={sarlaftMutation.isPending}
+                disabled={sarlaftMutation.isPending || !formData.customer_data.numero_documento}
                 onClick={() => sarlaftMutation.mutate("customer")}
                 className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70"
               >
@@ -807,8 +814,9 @@ const activeModules = tenantModules
                     Nombre del Propietario
                   </Label>
                   <Input
+                 
                     required
-                    disabled={formData.is_owner_same_as_customer}
+                    disabled={formData.is_owner_same_as_customer || !formData.owner_data.numero_documento}
                     className="h-11 bg-background"
                     placeholder="SEGÚN TARJETA DE PROPIEDAD"
                     value={formData.owner_data.nombre_completo}
@@ -825,7 +833,7 @@ const activeModules = tenantModules
                     </Label>
                     <Input
                     required
-                      disabled={formData.is_owner_same_as_customer}
+                      disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
                       className="h-11 bg-background"
                       placeholder="Ej: 3101234567"
                       value={formData.owner_data.telefono}
@@ -840,7 +848,7 @@ const activeModules = tenantModules
                     </Label>
                     <Input
                     required
-                      disabled={formData.is_owner_same_as_customer}
+                      disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
                       className="h-11 bg-background"
                       placeholder="ejemplo@correo.com"
                       value={formData.owner_data.correo}
@@ -857,7 +865,7 @@ const activeModules = tenantModules
                   </Label>
                   <Input
                   required
-                    disabled={formData.is_owner_same_as_customer}
+                    disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
                     className="h-11 bg-background"
                     placeholder="Ej: Calle 10 # 20-30"
                     value={formData.owner_data.direccion}
@@ -877,11 +885,12 @@ const activeModules = tenantModules
                
 
                 <Button
+                
                   type="button"
                   size="lg"
                   disabled={
                     formData.is_owner_same_as_customer ||
-                    sarlaftMutation.isPending
+                    sarlaftMutation.isPending  || !formData.owner_data.numero_documento
                   }
                   onClick={() => sarlaftMutation.mutate("owner")}
                   className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50"

@@ -11,14 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ShieldCheck, ShieldAlert, FileSearch, Ban } from "lucide-react";
+import { Loader2, ShieldCheck, ShieldAlert, FileSearch, Ban, Undo2 } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
 import { $ZodIssue } from "zod/v4/core";
 
 import { ZodErrorDialog } from "../recepcionista/ZodErrorDialog";
-import {useQueryClient } from "@tanstack/react-query";
+import {useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertDirectorTecnicoData } from "@/lib/server-actions/insert_director_tecnico_data";
 import CancelOrder from "../_shared/CancelOrder";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
@@ -99,6 +99,57 @@ export default function DirectorTecnicoOrderForm({
   const handleSelectChange = (value: "aprobado" | "rechazado") => {
     setFormData((prev) => ({ ...prev, resultado_revision: value }));
   };
+
+
+
+
+
+
+
+// Mutación TanStack Query para devolver el estado a 'en_prueba'
+const revertToEnPruebaMutation = useMutation({
+  mutationFn: async () => {
+    const supabase = createSupabaseBrowserClient();
+    
+    // Actualizamos el estado de la orden en la tabla entry_orders
+    const { data, error } = await supabase
+      .from("entry_orders")
+      .update({ 
+        estado_orden: "en_prueba",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", orden.id)
+      .select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  },
+  onSuccess: () => {
+    // Invalidamos las queries necesarias para refrescar la UI en tiempo real
+    queryClient.invalidateQueries({ queryKey: ["entry-orders"] });
+  },
+  onError: (err: Error) => {
+    setServerError(`Error al revertir el estado de la orden: ${err.message}`);
+    setShowErrorDialog(true);
+  },
+});
+
+// Handler para ejecutar al hacer clic en el botón
+const handleRevertToEnPrueba = () => {
+  revertToEnPruebaMutation.mutate();
+};
+
+
+
+
+
+
+
+
+
 
 
 
@@ -435,19 +486,38 @@ return (
           : "bg-muted/30 border-border"
       }`}
     >
-      {orden.estado_orden !== "en_prueba" ? (
-        <div className="flex items-center gap-2 text-xs font-semibold text-destructive bg-destructive/10 px-4 py-2.5 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none text-center">
-          <Ban className="h-4 w-4 shrink-0" />
-          <span>
-            {orden.estado_orden === "anulada" &&
-              "Esta orden ya fue anulada"}
-            {orden.estado_orden === "finalizada" &&
-              "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
-            {orden.estado_orden === "abierta" &&
-              "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
-          </span>
-        </div>
-      ) : (
+     {orden.estado_orden !== "en_prueba" ? (
+  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full p-3 bg-destructive/10 border border-destructive/20 rounded-xl shadow-xs">
+    <div className="flex items-center gap-2 text-xs font-semibold text-destructive select-none">
+      <Ban className="h-4 w-4 shrink-0" />
+      <span>
+        {orden.estado_orden === "anulada" && "Esta orden ya fue anulada"}
+        {orden.estado_orden === "finalizada" && "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
+        {orden.estado_orden === "abierta" && "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
+      </span>
+    </div>
+
+    {/* Botón mejorado para devolver el estado */}
+   <Button
+  type="button"
+  onClick={handleRevertToEnPrueba}
+  disabled={revertToEnPruebaMutation.isPending}
+  className="w-full sm:w-auto min-w-52.5 justify-center shrink-0 h-9 px-3.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 font-semibold text-xs transition-all gap-2 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed"
+>
+  {revertToEnPruebaMutation.isPending ? (
+    <>
+      <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+      <span>Devolviendo a EN PRUEBA...</span>
+    </>
+  ) : (
+    <>
+      <Undo2 className="h-4 w-4 shrink-0" />
+      <span>Devolver a estado EN PRUEBA</span>
+    </>
+  )}
+</Button>
+  </div>
+) : (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
 
           <div className="w-full sm:w-auto order-2 sm:order-1">

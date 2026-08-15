@@ -84,7 +84,7 @@ export function useFetchSarlaftEvidence({
         throw new Error(error.message);
       }
 
-      console.log("📦 Evidencias SARLAFT obtenidas:", data);
+    
 
       if (!data || data.length === 0) {
         throw new Error(

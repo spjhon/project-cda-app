@@ -695,6 +695,12 @@ function VerificationSection({
 
       <View style={styles.sectionBody}>
         <VerificationItem>
+          Consultó lista OFAC
+        </VerificationItem>
+        <VerificationItem>
+          Consultó lista ONU
+        </VerificationItem>
+        <VerificationItem>
           Consultó listas
         </VerificationItem>
 
