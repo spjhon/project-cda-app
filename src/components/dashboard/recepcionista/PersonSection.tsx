@@ -364,7 +364,7 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
 
          const UNlink = document.createElement("a");
 
-        UNlink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+        UNlink.href = `data:image/jpeg;base64,${result.screenshotUN}`;
 
         const partsUN = new Intl.DateTimeFormat("es-CO", {
           timeZone: "America/Bogota",
@@ -401,7 +401,7 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
 
         const UNlink = document.createElement("a");
 
-        UNlink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+        UNlink.href = `data:image/jpeg;base64,${result.screenshotUN}`;
 
         const partsUN = new Intl.DateTimeFormat("es-CO", {
           timeZone: "America/Bogota",
