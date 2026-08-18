@@ -48,12 +48,8 @@ export default function RuntScraperModal({
 
   // Campos locales del formulario del RUNT
   // Estados locales independientes
-  const [tipoDocumento, setTipoDocumento] = useState(
-    formData.owner_data.tipo_documento || "",
-  );
-  const [numeroDocumento, setNumeroDocumento] = useState(
-    formData.owner_data.numero_documento || "",
-  );
+  const [tipoDocumento, setTipoDocumento] = useState( formData.owner_data.tipo_documento || "" );
+  const [numeroDocumento, setNumeroDocumento] = useState( formData.owner_data.numero_documento || "", );
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaImage, setCaptchaImage] = useState<string | null>(null);
 
@@ -96,6 +92,14 @@ export default function RuntScraperModal({
     },
   });
 
+
+
+
+
+
+
+
+
   // 2. TANSTACK MUTATION: Enviar la solución del captcha y datos del RUNT
   const solveRuntMutation = useMutation({
     mutationFn: async (payload: {
@@ -114,9 +118,15 @@ export default function RuntScraperModal({
           body: JSON.stringify(payload),
         },
       );
-      if (!response.ok)
-        throw new Error("Error procesando los datos en el RUNT");
+
+
+
+      if (!response.ok) { throw new Error("Error procesando los datos en el RUNT")};
+
+
       return response.json();
+
+
     },
     onSuccess: (data) => {
       if (data.success) {
@@ -187,6 +197,14 @@ export default function RuntScraperModal({
       console.error("Error en la mutación:", error);
     },
   });
+
+
+
+
+
+
+
+
 
   // Manejador del cambio de estado del modal
   const handleOpenChange = (open: boolean) => {

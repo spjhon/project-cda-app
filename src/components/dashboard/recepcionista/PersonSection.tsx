@@ -63,30 +63,34 @@ type SarlaftResult = {
   mensaje: string;
 };
 
+type OFACResult = {
+  program: string | null;
+  list: string | null;
+  score: string | null;
+};
+
+type APIResponse = {
+  success: boolean;
+  coincidencia: boolean;
+  message: string;
+  resultado: OFACResult | null;
+  screenshot: string;
+};
+
 export const PersonSection = ({
   formData,
   setFormData,
   selectedTemplate,
   hayPlaca,
 }: PersonSectionProps) => {
+  const PermissionsContextReceived = useContext(PermissionsContext);
 
+  const { tenantModules = [] } =
+    PermissionsContextReceived?.PermissionsContextValue ?? {};
 
-
-
-const PermissionsContextReceived = useContext(PermissionsContext);
-
-const { tenantModules = []  } = PermissionsContextReceived?.PermissionsContextValue ?? {};
-
-
-const activeModules = tenantModules
-  .filter((module) => module.is_active && module.is_enabled)
-  .map((module) => module.code);
-
-
-
-
-
-
+  const activeModules = tenantModules
+    .filter((module) => module.is_active && module.is_enabled)
+    .map((module) => module.code);
 
   const [sarlaftResult, setSarlaftResult] = useState<SarlaftResult | null>(
     null,
@@ -163,6 +167,16 @@ const activeModules = tenantModules
     });
   };
 
+
+
+
+
+
+
+
+
+
+  
   const sarlaftMutation = useMutation({
     mutationFn: async (personType: "customer" | "owner") => {
       // ============================================================
@@ -195,18 +209,70 @@ const activeModules = tenantModules
       // 3. SIMULACIÓN DE CONSULTA API
       // ============================================================
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // SIMULACIÓN DE RESPUESTA DE LA API
-      const apiResult = {
-        coincidencia: false,
-        mensaje: "No se encontraron coincidencias.",
+      const payload = {
+        numeroDocumento,
+        nombreCompleto,
       };
+
+      const OFACresponse = await fetch(
+        "https://runt-api.cda-app.com/api/scraper/sarlaft/ofac/init",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!OFACresponse.ok) {
+        throw new Error(`Error HTTP: ${OFACresponse.status}`);
+      }
+
+      const dataOFAC: APIResponse = await OFACresponse.json();
+
+      console.log("Respuesta del scraper OFAC:", dataOFAC);
+
+
+
+
+   const UNresponse = await fetch(
+        "https://runt-api.cda-app.com/api/scraper/sarlaft/un/init",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!UNresponse.ok) {
+        throw new Error(`Error HTTP: ${UNresponse.status}`);
+      }
+
+      const dataUN: APIResponse = await UNresponse.json();
+
+      console.log("Respuesta del scraper UN:", dataUN);
+
+
+      let seEncontroAlgunaCoincidencia = false;
+      let success = true;
+const mensaje = `${dataOFAC.message} ${dataUN.message}`;
+  
+      if (dataOFAC.coincidencia === true || dataUN.coincidencia === true){
+        seEncontroAlgunaCoincidencia = true;
+        success = false;
+      }
+
+
+
 
       return {
         personType,
         seHizoLaConsulta: true,
-        ...apiResult,
+        success: success,
+        coincidencia: seEncontroAlgunaCoincidencia,
+        mensaje: mensaje,
+        resultado: dataOFAC.resultado,
+        screenshotOFAC: dataOFAC.screenshot,
+        screenshotUN: dataUN.screenshot
       };
     },
 
@@ -215,74 +281,155 @@ const activeModules = tenantModules
     // ==============================================================
 
     onSuccess: (result) => {
-  setFormData((prev: ZodFullFormDataType) => {
-    // ============================================================
-    // CASO 1: SE CONSULTÓ EL CLIENTE
-    // ============================================================
 
-    if (result.personType === "customer") {
-      return {
-        ...prev,
 
-        customer_data: {
-          ...prev.customer_data,
-          se_hizo_la_consulta: true,
-          resultado_consulta_sarlaf_desfavorable:
-            result.coincidencia,
-        },
 
-        // Si cliente = propietario, ambos representan
-        // a la misma persona y la consulta aplica para ambos.
-        owner_data: prev.is_owner_same_as_customer
-          ? {
-              ...prev.owner_data,
+      setFormData((prev: ZodFullFormDataType) => {
+        // ============================================================
+        // CASO 1: SE CONSULTÓ EL CLIENTE
+        // ============================================================
+
+        if (result.personType === "customer") {
+          return {
+            ...prev,
+
+            customer_data: {
+              ...prev.customer_data,
               se_hizo_la_consulta: true,
-              resultado_consulta_sarlaf_desfavorable:
-                result.coincidencia,
-            }
-          : prev.owner_data,
-      };
-    }
+              resultado_consulta_sarlaf_desfavorable: result.coincidencia,
+            },
 
-    // ============================================================
-    // CASO 2: SE CONSULTÓ EL PROPIETARIO
-    // ============================================================
+            // Si cliente = propietario, ambos representan
+            // a la misma persona y la consulta aplica para ambos.
+            owner_data: prev.is_owner_same_as_customer
+              ? {
+                  ...prev.owner_data,
+                  se_hizo_la_consulta: true,
+                  resultado_consulta_sarlaf_desfavorable: result.coincidencia,
+                }
+              : prev.owner_data,
+          };
+        }
 
-    return {
-      ...prev,
+        // ============================================================
+        // CASO 2: SE CONSULTÓ EL PROPIETARIO
+        // ============================================================
 
-      owner_data: {
-        ...prev.owner_data,
-        se_hizo_la_consulta: true,
-        resultado_consulta_sarlaf_desfavorable:
-          result.coincidencia,
-      },
+        return {
+          ...prev,
 
-      // Si cliente = propietario, también actualizamos el cliente.
-      customer_data: prev.is_owner_same_as_customer
-        ? {
-            ...prev.customer_data,
+          owner_data: {
+            ...prev.owner_data,
             se_hizo_la_consulta: true,
-            resultado_consulta_sarlaf_desfavorable:
-              result.coincidencia,
-          }
-        : prev.customer_data,
-    };
-  });
+            resultado_consulta_sarlaf_desfavorable: result.coincidencia,
+          },
 
-  // ============================================================
-  // RESULTADO PARA EL ALERT DIALOG
-  // ============================================================
+          // Si cliente = propietario, también actualizamos el cliente.
+          customer_data: prev.is_owner_same_as_customer
+            ? {
+                ...prev.customer_data,
+                se_hizo_la_consulta: true,
+                resultado_consulta_sarlaf_desfavorable: result.coincidencia,
+              }
+            : prev.customer_data,
+        };
+      });
 
-  setSarlaftResult({
-    personType: result.personType,
-    coincidencia: result.coincidencia,
-    seHizoLaConsulta: true,
-    mensaje: result.mensaje,
-  });
 
-  setShowSarlaftDialog(true);
-},
+
+
+
+      if (result.personType === "customer") {
+
+
+
+
+        const OFAClink = document.createElement("a");
+
+        OFAClink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+
+        const partsOFAC = new Intl.DateTimeFormat("es-CO", {
+          timeZone: "America/Bogota",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date());
+
+        const formattedDateOFAC = `${partsOFAC.find((p) => p.type === "year")?.value}-${partsOFAC.find((p) => p.type === "month")?.value}-${partsOFAC.find((p) => p.type === "day")?.value}`;
+
+        OFAClink.download = `${formattedDateOFAC}-${formData.vehicle.placa}-Evidencia_Sarlaft_OFAC_cliente.jpg`;
+
+        OFAClink.click();
+
+
+         const UNlink = document.createElement("a");
+
+        UNlink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+
+        const partsUN = new Intl.DateTimeFormat("es-CO", {
+          timeZone: "America/Bogota",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date());
+
+        const formattedDateUN = `${partsUN.find((p) => p.type === "year")?.value}-${partsUN.find((p) => p.type === "month")?.value}-${partsUN.find((p) => p.type === "day")?.value}`;
+
+        UNlink.download = `${formattedDateUN}-${formData.vehicle.placa}-Evidencia_Sarlaft_NacionesUnidas_cliente.jpg`;
+
+        UNlink.click();
+
+
+        
+      } else if (result.personType === "owner") {
+        const OFAClink = document.createElement("a");
+
+        OFAClink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+
+        const parts = new Intl.DateTimeFormat("es-CO", {
+          timeZone: "America/Bogota",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date());
+
+        const formattedDate = `${parts.find((p) => p.type === "year")?.value}-${parts.find((p) => p.type === "month")?.value}-${parts.find((p) => p.type === "day")?.value}`;
+
+        OFAClink.download = `${formattedDate}-${formData.vehicle.placa}-Evidencia_Sarlaft_OFAC_propietario.jpg`;
+
+        OFAClink.click();
+
+        const UNlink = document.createElement("a");
+
+        UNlink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
+
+        const partsUN = new Intl.DateTimeFormat("es-CO", {
+          timeZone: "America/Bogota",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).formatToParts(new Date());
+
+        const formattedDateUN = `${partsUN.find((p) => p.type === "year")?.value}-${partsUN.find((p) => p.type === "month")?.value}-${partsUN.find((p) => p.type === "day")?.value}`;
+
+        UNlink.download = `${formattedDateUN}-${formData.vehicle.placa}-Evidencia_Sarlaft_NacionesUnidas_propietario.jpg`;
+
+        UNlink.click();
+      }
+
+      // ============================================================
+      // RESULTADO PARA EL ALERT DIALOG
+      // ============================================================
+
+      setSarlaftResult({
+        personType: result.personType,
+        coincidencia: result.coincidencia,
+        seHizoLaConsulta: true,
+        mensaje: result.mensaje,
+      });
+
+      setShowSarlaftDialog(true);
+    },
 
     // ==============================================================
     // 5. VALIDACIÓN FALLIDA O ERROR DE LA CONSULTA
@@ -314,6 +461,25 @@ const activeModules = tenantModules
       setShowSarlaftDialog(true);
     },
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const isValidationError = sarlaftResult?.seHizoLaConsulta === false;
   const hasCoincidence = sarlaftResult?.coincidencia === true;
@@ -442,7 +608,7 @@ const activeModules = tenantModules
                     Teléfono de contacto
                   </Label>
                   <Input
-                  disabled={!formData.customer_data.numero_documento}
+                    disabled={!formData.customer_data.numero_documento}
                     required
                     className="h-11 bg-background"
                     placeholder="Ej: 3101234567"
@@ -457,7 +623,7 @@ const activeModules = tenantModules
                     Correo Electrónico
                   </Label>
                   <Input
-                  disabled={!formData.customer_data.numero_documento}
+                    disabled={!formData.customer_data.numero_documento}
                     required
                     className="h-11 bg-background"
                     type="email"
@@ -475,7 +641,7 @@ const activeModules = tenantModules
                   Dirección de Residencia
                 </Label>
                 <Input
-                disabled={!formData.customer_data.numero_documento}
+                  disabled={!formData.customer_data.numero_documento}
                   required
                   className="h-11 bg-background"
                   placeholder="Ej: Calle 10 # 20-30"
@@ -486,241 +652,237 @@ const activeModules = tenantModules
                 />
               </div>
 
-
-
               {/**JSX DEL SARLAFT DE AQUI PARA ABAJO */}
 
               {activeModules.includes("sarlaft") && (
- <>
- 
- 
-
-              <div className="space-y-2">
-                <Label className="text-[11px] font-bold text-muted-foreground uppercase">
-                  Actividad Económica Cliente
-                </Label>
-                <Input
-                  disabled={!formData.customer_data.numero_documento}
-                  className="h-11 bg-background"
-                  placeholder="Enfermero Profesional"
-                  value={formData.customer_data.actividad_economica}
-                  onChange={(e) =>
-                    handleCustomerChange("actividad_economica", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[11px] font-bold text-muted-foreground uppercase">
-                  Origen Fondos Cliente
-                </Label>
-                <Input
-                  disabled={!formData.customer_data.numero_documento}
-                  className="h-11 bg-background"
-                  placeholder="Salario"
-                  value={formData.customer_data.origen_fondos}
-                  onChange={(e) =>
-                    handleCustomerChange("origen_fondos", e.target.value)
-                  }
-                />
-              </div>
-
-              <FieldLabel
-              
-                htmlFor="pep-switch"
-                className={`rounded-xl border-2 px-5 py-4 cursor-pointer transition-all ${
-                  formData.customer_data.es_persona_publicamente_expuesta
-                    ? "border-destructive bg-destructive/10"
-                    : "border-emerald-500/30 bg-emerald-500/10"
-                }`}
-              >
-                <Field orientation="horizontal">
-                  <FieldContent>
-                    <FieldTitle
-                      className={
-                        formData.customer_data.es_persona_publicamente_expuesta
-                          ? "text-destructive"
-                          : "text-emerald-600"
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase">
+                      Actividad Económica Cliente
+                    </Label>
+                    <Input
+                      disabled={!formData.customer_data.numero_documento}
+                      className="h-11 bg-background"
+                      placeholder="Enfermero Profesional"
+                      value={formData.customer_data.actividad_economica}
+                      onChange={(e) =>
+                        handleCustomerChange(
+                          "actividad_economica",
+                          e.target.value,
+                        )
                       }
-                    >
-                      Persona Públicamente Expuesta (PEP)
-                    </FieldTitle>
+                    />
+                  </div>
 
-                    <FieldDescription>
-                      {formData.customer_data.es_persona_publicamente_expuesta
-                        ? "La persona ha sido identificada como públicamente expuesta."
-                        : "La persona no está identificada como públicamente expuesta."}
-                    </FieldDescription>
-                  </FieldContent>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-muted-foreground uppercase">
+                      Origen Fondos Cliente
+                    </Label>
+                    <Input
+                      disabled={!formData.customer_data.numero_documento}
+                      className="h-11 bg-background"
+                      placeholder="Salario"
+                      value={formData.customer_data.origen_fondos}
+                      onChange={(e) =>
+                        handleCustomerChange("origen_fondos", e.target.value)
+                      }
+                    />
+                  </div>
 
-                  <Switch
-                  disabled={!formData.customer_data.numero_documento}
-                    id="pep-switch"
-                    checked={
+                  <FieldLabel
+                    htmlFor="pep-switch"
+                    className={`rounded-xl border-2 px-5 py-4 cursor-pointer transition-all ${
                       formData.customer_data.es_persona_publicamente_expuesta
-                    }
-                    onCheckedChange={(checked) =>
-                      handleCustomerChange(
-                        "es_persona_publicamente_expuesta",
-                        checked,
-                      )
-                    }
-                    className="
+                        ? "border-destructive bg-destructive/10"
+                        : "border-emerald-500/30 bg-emerald-500/10"
+                    }`}
+                  >
+                    <Field orientation="horizontal">
+                      <FieldContent>
+                        <FieldTitle
+                          className={
+                            formData.customer_data
+                              .es_persona_publicamente_expuesta
+                              ? "text-destructive"
+                              : "text-emerald-600"
+                          }
+                        >
+                          Persona Públicamente Expuesta (PEP)
+                        </FieldTitle>
+
+                        <FieldDescription>
+                          {formData.customer_data
+                            .es_persona_publicamente_expuesta
+                            ? "La persona ha sido identificada como públicamente expuesta."
+                            : "La persona no está identificada como públicamente expuesta."}
+                        </FieldDescription>
+                      </FieldContent>
+
+                      <Switch
+                        disabled={!formData.customer_data.numero_documento}
+                        id="pep-switch"
+                        checked={
+                          formData.customer_data
+                            .es_persona_publicamente_expuesta
+                        }
+                        onCheckedChange={(checked) =>
+                          handleCustomerChange(
+                            "es_persona_publicamente_expuesta",
+                            checked,
+                          )
+                        }
+                        className="
                       data-[state=checked]:bg-destructive
                       data-[state=unchecked]:bg-emerald-500
                     "
-                  />
-                </Field>
-              </FieldLabel>
+                      />
+                    </Field>
+                  </FieldLabel>
 
-              <Button
-              
-                type="button"
-                size="lg"
-                disabled={sarlaftMutation.isPending || !formData.customer_data.numero_documento}
-                onClick={() => sarlaftMutation.mutate("customer")}
-                className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70"
-              >
-                {sarlaftMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Consultando listas...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-5 w-5" />
-                    Consultar SARLAFT y Listas Restrictivas
-                  </>
-                )}
-              </Button>
+                  <Button
+                    type="button"
+                    size="lg"
+                    disabled={
+                      sarlaftMutation.isPending ||
+                      !formData.customer_data.numero_documento
+                    }
+                    onClick={() => sarlaftMutation.mutate("customer")}
+                    className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70"
+                  >
+                    {sarlaftMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Consultando listas...
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="h-5 w-5" />
+                        Consultar SARLAFT y Listas Restrictivas
+                      </>
+                    )}
+                  </Button>
 
-              <AlertDialog
-                open={showSarlaftDialog}
-                onOpenChange={setShowSarlaftDialog}
-              >
-                <AlertDialogContent
-                  className={
-                    isValidationError
-                      ? "border-2 border-amber-500"
-                      : hasCoincidence
-                        ? "border-2 border-destructive"
-                        : "border-2 border-emerald-500"
-                  }
-                >
-                  <AlertDialogHeader>
-                    <AlertDialogTitle
-                      className={`flex items-center gap-3 text-xl font-black ${
-                        isValidationError
-                          ? "text-amber-600"
-                          : hasCoincidence
-                            ? "text-destructive"
-                            : "text-emerald-600"
-                      }`}
-                    >
-                      {isValidationError ? (
-                        <AlertTriangle className="h-7 w-7" />
-                      ) : hasCoincidence ? (
-                        <AlertTriangle className="h-7 w-7" />
-                      ) : (
-                        <SearchCheck className="h-7 w-7" />
-                      )}
-
-                      {isValidationError
-                        ? "Datos incompletos"
-                        : hasCoincidence
-                          ? "Consulta SARLAFT desfavorable"
-                          : "Consulta SARLAFT favorable"}
-                    </AlertDialogTitle>
-
-                    <AlertDialogDescription className="text-base leading-relaxed">
-                      {isValidationError ? (
-                        <>
-                          Para realizar la consulta SARLAFT del{" "}
-                          <strong>
-                            {sarlaftResult?.personType === "customer"
-                              ? "cliente"
-                              : "propietario"}
-                          </strong>
-                          , debe ingresar primero el{" "}
-                          <strong>nombre completo</strong> y el{" "}
-                          <strong>número de documento</strong>.
-                          <br />
-                          <br />
-                          <span className="font-semibold text-amber-600">
-                            Complete los datos requeridos antes de realizar la
-                            consulta.
-                          </span>
-                        </>
-                      ) : hasCoincidence ? (
-                        <>
-                          Se encontraron{" "}
-                          <strong className="text-destructive">
-                            coincidencias
-                          </strong>{" "}
-                          en las listas consultadas para el{" "}
-                          <strong>
-                            {sarlaftResult?.personType === "customer"
-                              ? "cliente"
-                              : "propietario"}
-                          </strong>
-                          .
-                          <br />
-                          <br />
-                          <span className="font-semibold">
-                            No es posible continuar con el procedimiento de
-                            Revisión Técnico-Mecánica (RTM) hasta realizar la
-                            revisión correspondiente.
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          La consulta realizada para el{" "}
-                          <strong>
-                            {sarlaftResult?.personType === "customer"
-                              ? "cliente"
-                              : "propietario"}
-                          </strong>{" "}
-                          no encontró coincidencias en las listas SARLAFT y
-                          listas restrictivas.
-                          <br />
-                          <br />
-                          <span className="font-semibold text-emerald-600">
-                            Puede continuar con el procedimiento de Revisión
-                            Técnico-Mecánica (RTM).
-                          </span>
-                        </>
-                      )}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <AlertDialogFooter>
-                    <AlertDialogAction
-                      onClick={() => setShowSarlaftDialog(false)}
+                  <AlertDialog
+                    open={showSarlaftDialog}
+                    onOpenChange={setShowSarlaftDialog}
+                  >
+                    <AlertDialogContent
                       className={
                         isValidationError
-                          ? "bg-amber-500 text-white hover:bg-amber-600"
+                          ? "border-2 border-amber-500"
                           : hasCoincidence
-                            ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            : "bg-emerald-600 text-white hover:bg-emerald-700"
+                            ? "border-2 border-destructive"
+                            : "border-2 border-emerald-500"
                       }
                     >
-                      {isValidationError
-                        ? "Entendido"
-                        : hasCoincidence
-                          ? "Cerrar"
-                          : "Continuar con el procedimiento"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
- 
- 
- </>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle
+                          className={`flex items-center gap-3 text-xl font-black ${
+                            isValidationError
+                              ? "text-amber-600"
+                              : hasCoincidence
+                                ? "text-destructive"
+                                : "text-emerald-600"
+                          }`}
+                        >
+                          {isValidationError ? (
+                            <AlertTriangle className="h-7 w-7" />
+                          ) : hasCoincidence ? (
+                            <AlertTriangle className="h-7 w-7" />
+                          ) : (
+                            <SearchCheck className="h-7 w-7" />
+                          )}
 
+                          {isValidationError
+                            ? "Datos incompletos"
+                            : hasCoincidence
+                              ? "Consulta SARLAFT desfavorable"
+                              : "Consulta SARLAFT favorable"}
+                        </AlertDialogTitle>
 
+                        <AlertDialogDescription className="text-base leading-relaxed">
+                          {isValidationError ? (
+                            <>
+                              Para realizar la consulta SARLAFT del{" "}
+                              <strong>
+                                {sarlaftResult?.personType === "customer"
+                                  ? "cliente"
+                                  : "propietario"}
+                              </strong>
+                              , debe ingresar primero el{" "}
+                              <strong>nombre completo</strong> y el{" "}
+                              <strong>número de documento</strong>.
+                              <br />
+                              <br />
+                              <span className="font-semibold text-amber-600">
+                                Complete los datos requeridos antes de realizar
+                                la consulta.
+                              </span>
+                            </>
+                          ) : hasCoincidence ? (
+                            <>
+                              Se encontraron{" "}
+                              <strong className="text-destructive">
+                                coincidencias
+                              </strong>{" "}
+                              en las listas consultadas para el{" "}
+                              <strong>
+                                {sarlaftResult?.personType === "customer"
+                                  ? "cliente"
+                                  : "propietario"}
+                              </strong>
+                              .
+                              <br />
+                              <br />
+                              <span className="font-semibold">
+                                No es posible continuar con el procedimiento de
+                                Revisión Técnico-Mecánica (RTM) hasta realizar
+                                la revisión correspondiente.
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              La consulta realizada para el{" "}
+                              <strong>
+                                {sarlaftResult?.personType === "customer"
+                                  ? "cliente"
+                                  : "propietario"}
+                              </strong>{" "}
+                              no encontró coincidencias en las listas SARLAFT y
+                              listas restrictivas.
+                              <br />
+                              <br />
+                              <span className="font-semibold text-emerald-600">
+                                Puede continuar con el procedimiento de Revisión
+                                Técnico-Mecánica (RTM).
+                              </span>
+                            </>
+                          )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <AlertDialogFooter>
+                        <AlertDialogAction
+                          onClick={() => setShowSarlaftDialog(false)}
+                          className={
+                            isValidationError
+                              ? "bg-amber-500 text-white hover:bg-amber-600"
+                              : hasCoincidence
+                                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                : "bg-emerald-600 text-white hover:bg-emerald-700"
+                          }
+                        >
+                          {isValidationError
+                            ? "Entendido"
+                            : hasCoincidence
+                              ? "Cerrar"
+                              : "Continuar con el procedimiento"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               )}
-
-
             </div>
           </div>
 
@@ -814,9 +976,11 @@ const activeModules = tenantModules
                     Nombre del Propietario
                   </Label>
                   <Input
-                 
                     required
-                    disabled={formData.is_owner_same_as_customer || !formData.owner_data.numero_documento}
+                    disabled={
+                      formData.is_owner_same_as_customer ||
+                      !formData.owner_data.numero_documento
+                    }
                     className="h-11 bg-background"
                     placeholder="SEGÚN TARJETA DE PROPIEDAD"
                     value={formData.owner_data.nombre_completo}
@@ -832,8 +996,11 @@ const activeModules = tenantModules
                       Teléfono Propietario
                     </Label>
                     <Input
-                    required
-                      disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
+                      required
+                      disabled={
+                        formData.is_owner_same_as_customer ||
+                        !formData.owner_data.numero_documento
+                      }
                       className="h-11 bg-background"
                       placeholder="Ej: 3101234567"
                       value={formData.owner_data.telefono}
@@ -847,8 +1014,11 @@ const activeModules = tenantModules
                       Correo Propietario
                     </Label>
                     <Input
-                    required
-                      disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
+                      required
+                      disabled={
+                        formData.is_owner_same_as_customer ||
+                        !formData.owner_data.numero_documento
+                      }
                       className="h-11 bg-background"
                       placeholder="ejemplo@correo.com"
                       value={formData.owner_data.correo}
@@ -864,8 +1034,11 @@ const activeModules = tenantModules
                     Dirección Propietario
                   </Label>
                   <Input
-                  required
-                    disabled={formData.is_owner_same_as_customer  || !formData.owner_data.numero_documento}
+                    required
+                    disabled={
+                      formData.is_owner_same_as_customer ||
+                      !formData.owner_data.numero_documento
+                    }
                     className="h-11 bg-background"
                     placeholder="Ej: Calle 10 # 20-30"
                     value={formData.owner_data.direccion}
@@ -878,43 +1051,32 @@ const activeModules = tenantModules
                 {/**SARLAFT SECCION DEL PROPIETARIO */}
 
                 {activeModules.includes("sarlaft") && (
- <>
- 
- 
-                
-               
-
-                <Button
-                
-                  type="button"
-                  size="lg"
-                  disabled={
-                    formData.is_owner_same_as_customer ||
-                    sarlaftMutation.isPending  || !formData.owner_data.numero_documento
-                  }
-                  onClick={() => sarlaftMutation.mutate("owner")}
-                  className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50"
-                >
-                  {sarlaftMutation.isPending ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Consultando listas...
-                    </>
-                  ) : (
-                    <>
-                      <ShieldCheck className="h-5 w-5" />
-                      Consultar SARLAFT y Listas Restrictivas
-                    </>
-                  )}
-                </Button>
- 
- </>
-
-
-
-
-)}
-
+                  <>
+                    <Button
+                      type="button"
+                      size="lg"
+                      disabled={
+                        formData.is_owner_same_as_customer ||
+                        sarlaftMutation.isPending ||
+                        !formData.owner_data.numero_documento
+                      }
+                      onClick={() => sarlaftMutation.mutate("owner")}
+                      className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50"
+                    >
+                      {sarlaftMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Consultando listas...
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="h-5 w-5" />
+                          Consultar SARLAFT y Listas Restrictivas
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
