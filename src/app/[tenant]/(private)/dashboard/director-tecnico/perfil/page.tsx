@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import SarlaftMasivo from "@/components/dashboard/admin/SarlaftMasivo";
 
 
 
@@ -451,6 +452,8 @@ const handleSubmitFirma = async () => {
                 <CheckCircle2 className={`size-4 ${isUpdating ? "animate-spin" : "animate-pulse"}`} />
     {isUpdating ? "Guardando..." : "Registrar Firma"}
               </Button>
+
+              <SarlaftMasivo></SarlaftMasivo>
       </Card>
 
 

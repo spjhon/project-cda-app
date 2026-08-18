@@ -22,6 +22,7 @@
     "embla-carousel-react": "^8.6.0",
     "exceljs": "^4.4.0",
     "input-otp": "^1.4.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^1.27.0",
     "motion": "^12.42.2",
     "next": "16.3.0",
@@ -59,7 +60,6 @@
     },
     "onlyBuiltDependencies": [
       "unrs-resolver"
-      
     ]
   }
 }
