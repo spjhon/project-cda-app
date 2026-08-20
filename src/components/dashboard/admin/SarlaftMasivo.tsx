@@ -53,6 +53,7 @@ type ResultadoSarlaftMasivo = {
     fecha: string;
     placa: string;
     nombreCompleto: string;
+    numeroDocumento: string;
     consultaExitosa: boolean;
     coincidencia: boolean;
     screenshot: string | null;
@@ -161,10 +162,7 @@ const sarlaftMasivoMutation = useMutation<
 
     const dataOFAC = await responseOFAC.json();
 
-    console.log(
-      "✅ Respuesta completa OFAC masivo:",
-      dataOFAC,
-    );
+   
 
 
     // ========================================================
@@ -190,11 +188,7 @@ const sarlaftMasivoMutation = useMutation<
 
     const dataUN = await responseUN.json();
 
-    console.log(
-      "✅ Respuesta completa Naciones Unidas masivo:",
-      dataUN,
-    );
-
+    
 
     // ========================================================
     // 3. DEVOLVER AMBAS RESPUESTAS
@@ -212,10 +206,7 @@ const sarlaftMasivoMutation = useMutation<
   // ==========================================================
 
   onSuccess: async (data) => {
-  console.log(
-    "📦 RESULTADO FINAL SARLAFT MASIVO",
-    data,
-  );
+ 
 
   
   // ============================================================
@@ -241,7 +232,7 @@ const sarlaftMasivoMutation = useMutation<
   // AGREGAR SCREENSHOTS DE OFAC
   // ============================================================
 
-  data.ofac.resultados.forEach((item, index) => {
+  data.ofac.resultados.forEach((item) => {
     // Si la consulta falló, no existe screenshot.
     if (!item.screenshot) {
       return;
@@ -255,9 +246,9 @@ const sarlaftMasivoMutation = useMutation<
     const fecha = item.fecha;
     const placa = sanitizeFileName(item.placa);
     const nombre = sanitizeFileName(item.nombreCompleto);
+    const numeroDocumento = item.numeroDocumento;
 
-    const fileName =
-      `${fecha}-${placa}-Evidencia_Sarlaft_OFAC_${nombre}_${index + 1}.jpg`;
+    const fileName = `${fecha}-${placa}-Evidencia_Sarlaft_OFAC_${nombre}_${numeroDocumento}.jpg`;
 
     zip.file(
       `OFAC/${fileName}`,
@@ -272,7 +263,7 @@ const sarlaftMasivoMutation = useMutation<
   // AGREGAR SCREENSHOTS DE NACIONES UNIDAS
   // ============================================================
 
-  data.un.resultados.forEach((item, index) => {
+  data.un.resultados.forEach((item) => {
     // Si la consulta falló, no existe screenshot.
     if (!item.screenshot) {
       return;
@@ -283,9 +274,9 @@ const sarlaftMasivoMutation = useMutation<
     const fecha = item.fecha;
     const placa = sanitizeFileName(item.placa);
     const nombre = sanitizeFileName(item.nombreCompleto);
+    const numeroDocumento = item.numeroDocumento
 
-    const fileName =
-      `${fecha}-${placa}-Evidencia_Sarlaft_ONU_${nombre}_${index + 1}.jpg`;
+    const fileName = `${fecha}-${placa}-Evidencia_Sarlaft_ONU_${nombre}_${numeroDocumento}.jpg`;
 
     zip.file(
       `Naciones_Unidas/${fileName}`,
@@ -537,10 +528,10 @@ const sarlaftMasivoMutation = useMutation<
 
         // O si solo quieres la parte de la fecha ("YYYY/MM/DD") de forma segura:
         const fecha = rawValue instanceof Date 
-          ? rawValue.toISOString().split('T')[0].replace(/-/g, '/')
+          ? rawValue.toISOString().split('T')[0]
           : String(rawValue || '').trim();
 
-        console.log("fecha extraida de excel: ", fecha)
+       
 
         const placa = row.getCell(2).value;
 
@@ -602,6 +593,8 @@ const sarlaftMasivoMutation = useMutation<
       // MOSTRAR RESULTADO EN CONSOLA
       // ========================================================
 
+
+      /** 
       // Nombre del archivo que cargó el usuario.
       console.log(
         "📄 Archivo:",
@@ -624,7 +617,7 @@ const sarlaftMasivoMutation = useMutation<
         "👥 Registros:",
         personas
       );
-
+*/
       // ======================================================
       // ENVIAR LOS REGISTROS AL SERVIDOR
       // ======================================================
