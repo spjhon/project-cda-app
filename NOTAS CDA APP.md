@@ -1,0 +1,234 @@
+# PENDIENTES Y NOTAS PARA CDAPP
+
+## ROLES DE LA APP
+
+ADMIN: es el super administrador, tiene su propia ruta /admin
+GERENTE
+RECEPCIONISTA
+AUXILIAR ADMINISTRATIVA
+DIRECTOR TECNICO
+
+## CLI Commands I Use Frequently
+
+Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts` o `pnpx supabase gen types typescript --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > supabase/types/database.types.ts`
+
+Make full local system schema backup: `pnpx supabase db dump --local > backup_completo.sql` o `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > backup_schema.sql`
+backup solo de la data: `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" --use-copy --data-only -x "storage.buckets_vectors" -x "storage.vector_indexes" > backup_data.sql`
+restore de la data despues del reset: `docker exec -i supabase_db_project-cda-app psql -U postgres -d postgres < backup_data.sql`
+restaurar data en la nube: `pnpx supabase db execute --db-url "postgresql://postgres:TU_CONTRASEÑA_REAL@db.lyktizihszlbmzzjrqye.supabase.co:5432/postgres" --file backup_data.sql`
+
+To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzjrqye`
+
+actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
+ver que falta por actualizar: `pnpm update --interactive --latest`, este permite no solo ver sino tambien instalar
+tambien ver que falta por actualizar: `pnpm outdated`
+Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest typescript@latest`
+otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/supabase-js@latest`
+
+## PENDIENTES
+
+- ajustar rls para verificar si es activo o no para protección y en el login
+- ajustar en los respectivos layouts si el rol es o no es, se puede meter en el raw app metadata para que lo lea los claims
+- el gerente puede crear ingeniero, y el ingeniero puede crear auxiliar y recepcionista.
+- reenviar magic link y otp,
+- vincular o desvincular a un usuario de un tenant, registro desde otro tenant, debe de estar desvinculado primero.
+- validar usuario en el DAL con redireccionamiento a auth/login y que tales.
+- ojo que las rutas de los perfiles no estan protegidas, si un usuario autenticado cambia de perfil al cambiar la url
+- las funciones de fetch e insercion no estan protegidas, ni las rpc, no las de tankstack ni las server actions ni las esparcias del js para usuario autenticados pero con malas intenciones
+- los anulados dan error al hacer el fetch de los datos
+- en cuanto al dinero recaudado hay que tener en cuenta que pueden haber varios tipos de pagos para la misma rtm
+- si se compro soat hoy que eso se vea en el sistema la nueva fecha y reemplace la vieja
+- recordar el extrude text para los estilos
+- ojo, los route handlers son públicos por naturaleza.
+- si va a colocar realtime, tener en cuenta cuando haya desconexión sin cerrar pestaña, si vuelve la conexión que los datos sean llamados otra vez.
+- recordar que a la tabla de las placas agregarles los filtros para datos de un solo numero de consulta, para la analitica es:
+  - las tablas de las tortas para las categorias de: combustible, tipo de vehiculo, torta especial entre motos 2 y 4 tiempos
+  - en las tablas de barra va, en uno solo total rtm, total preventiva, total peritaje, en otro los reprobados (solo de rtm por ahora) y el soat
+- hacer un cron job para eliminar todas las sessiones a la media noche
+- cuadrar que los reprobados tambien tienen numero de rtm
+- que haya donde decir si es escuter o no
+- el sistema de anulado de las ordenes de entrada puede que no este funcionando bien
+- hacer la separacion entre efectivo y targeta cuando se pagan con las dos al mismo tiempo
+- cuadrar boton de creacion de plantilla
+- en la reinspeccion no esta arrastando el soat
+- en chrome se ve las barras en las graficas del admin, mientras que en firefox no
+- en las quejas cuando se envia una nueva queja y se tiene abierto el detalles, se cambia al detalles de la mas reciente (lo mismo que paso con las ordenes de entrada y los dialog)
+
+## FEATURES QUE FALTAN
+
+- administracion de reprobados
+- manejo y registro de usuarios en diferentes escalas, que el gerente cree director tecnico y el director tecnico cree los demas
+- avisos por email por ahora (recordatorios de los 15 dias y los anuales)
+- estadisticas de dinero recogido (se puede separa entre todo, solo rtm, solo preventiva, solo peritaje)
+- hacer una forma de registrar soat cuando no viene con revicion
+
+## FEATURES PARA TRABAJAR DURANTE EL TESTEO
+
+- envio y comunicacion por wassap
+- de pronto inventario de todo el cda
+- mejor manejo de los anulados
+- de pronto notificaciones
+- seccion de reservas
+- seccion de quejas y sugerencias
+- sistema kanban
+
+## MODULOS A FUTURO
+
+- EQUIPOS
+- PERSONAL
+- SGC
+- GERENCIAL
+- QUEJAS Y APELACIONES MAS COMPLETO
+- PROVEEDORES y COMPRAS
+
+## SECCIONES DE LA ORDEN DE ENTRADA
+
+- Encabezado y versionado del SGC (sistema de gestión de la calidad) y logotipo
+- Logo (imagen pequeña de bits)
+- código documento (por ejemplo F-RT-001)
+- fecha documento
+- versión
+- paginas
+
+### Datos del informe
+
+- fecha
+- consecutivo
+- tipo de servicio (revisión técnico mecánica y de emisiones contaminantes colombiana o revisión preventiva)
+- Primera vez o reinspeccion por rechazo
+
+### Identificación del vehiculo
+
+- Placa (texto)
+- Marca (texto)
+- Modelo (numerico)
+- Linea (texto)
+- Cilindrada (numerico)
+- Extranjero (si o no)
+- Color (texto)
+- Kilometraje (numerico o un string que diga no funcional)
+- Clase (automóvil, bus, buseta, camión, camioneta, campero, microbús, tractocamión, volqueta, motocicleta, maquinaria agrícola, maquinaria industrial, semirremolque, motocarro, remolque, sin clase, mototriciclo, cuadrimoto, ciclomotor, tricimoto, cuadriciclo, maquinaria de construcción o minera, tricimobil)
+- Servicio (Particular, enseñanza, oficial, publico, diplomático, especial)
+- Combustible (gasolina, gas natural vehicular, diesel, gas-gasolina, hibrido, eléctrico, etanol, biodisel, hidrogeno)
+- Licencia de transito (si o no)
+- numero de pasajeros (numerico)
+- Blindado (si o no)
+- fecha de vencimiento del soat (tipo fecha)
+- tipo de vehiculo (Liviano, Pesado, Motocicleta 4t, motocicleta 2t, Motocarro 4t, motocarro 2t)
+- numero de pasajeros
+  - Exclusivo para motos
+    - es scooter (si o no)
+  - Expclusivo para vehículos a gas
+    - fecha vencimiento certificado (fecha type)
+
+### Presiones de las llantas y de repuesto
+
+- Presión de inflado adecuada? (si o no)
+
+### Condiciones del vehiculo para la prueba
+
+- Alarma desactivada (si o no o no aplica)
+- Estado de limpieza adecuado en interior, exterior e inferior? (si o no)
+- Descargado (si o no)
+- Enciende al menos una luz (si o no)
+- Posee tapa de combustible y esta en buen estado (si o no)
+- Esta sin tapacubos (si o no)
+- Combustible suficiente para la prueba (si o no)
+- se han cumplido todas las condiciones? (si o no)
+- vehiculo sin copas o tapacubos (si o no)
+- La confrontación de los datos: Placa – Marca – Clase de vehículo – servicio – color con la vehículo, es correcta. (si o no)
+- Vehículo sin elementos de valor (no se responde por elementos dejados). (si o no)
+- La(s) placa(s) existe(n) y son legible(s) (no se permite acta del trámite de duplicado) Nota: si el vehículo cuenta con el denuncio por perdida se puede realizar el proceso de RTM (si o no)
+
+- El sistema de escape no trae accesorios que no permitan el ingreso de la sonda
+- El vehículo no tiene una solicitud vigente de otro CDA en el RUNT para realizar la RTMyEC (3 días hábiles)
+
+- Exclusivo para motos con disco de freno
+  - Se puede verificar la mirilla del liquido de frenos (si o no o no aplica)
+- Exclusivo para motos scooter
+  - Tiene el sosporte central funcional (si o no)
+- Exclusivo para vehículos
+  - Los depósitos de los niveles como el líquido de frenos, son visibles en vehículos (si o no)
+  - Retirar candados o seguros de la batería, puertas y compuertas, y de la cabina basculante para asegurarse que se
+tenga acceso al mismo o para poder brindar las condiciones necesarias para realizar la inspección. ( si o no)
+  - Se abre el capo y el baul del vehiculo. (si o no)
+  - 4x4 desactivada si es posible (si o no o no aplica)
+  - Carpa trasera levantada. (si o no o no aplica)
+  - Tapas o tapones de aceite accesibles. (si o no)
+  - Tapas o tapones de combustible accesibles. Nota: sistema Easy full no tiene tapa de combustible (si o no)
+  - Acceso al motor o cubierta levantada (si o no)
+  - Control de tracción desactivado (OFF). (si o no o no aplica)
+  - Eje abatible abajo en contacto con el suelo (si o no o no aplica)
+  - Exclusivo para vehículos tipo campero
+    - En vehículos tipo campero: se retira el protector, seguro o forro de la llanta de repuesto. En vehículos tipo sedán/coupe
+se retira el protector de la llanta de repuesto (la que está ubicada en el baúl) para que este accesible a los inspectores
+durante la RMTyEC (si o no)
+  - Se retira seguros del filtro del aire, asegurarse que se tenga acceso al mismo.
+  - Se verifico el acceso a los cinturones de seguridad delanteros y traseros.
+  - Se retiró los amarres, cintas y otros elementos de sujeción no originales de fábrica (si aplica). Se retiró forros, fundas y
+demás elementos que protejan parte del vehículo. Se retiraron los protectores o tapas de las exploradoras.
+  - Se identifica los botones/ pulsadores/ mecanismos/ dispositivos para accionar los diferentes elementos del vehículo
+(luces, capo, baúl, volcó, licuadora, otros) cuando no son originales de fábrica (si o no)
+- Exclusivo para vehículos tipo taxi
+  - Se debe confirmar que el taxímetro está funcionando para realizar la RTMyEC. (SI APLICA TAXIMETRO AL CDA) Nota:
+en caso con vehículos con taxímetro satelital elegir en la aplicación no aplica (si o no o no aplica)
+  - El vehículo cuenta con la carrocería
+- Exclusivo para vehículos pesados
+  - El vehículo llanta sencilla supera los 3500 kg de peso bruto vehicular? (cuando aplique).
+  - El vehículo con blindaje supera los 3500 kg en vacío? (cuando aplique)
+- Exclusivo para vehículos diesel
+  - Bayoneta de aceite accesible.
+- Exclusivo para vehículos tipo gas-gasolina
+  - Vehículos con conversión a gas (GNV) está en modo gasolina. Nota: se debe validar que vehículo quede funcionado
+solo a gasolina (si o no)
+
+- Exclusivo para vehículos tipo electico o hibridos
+  - Carga mínima para la prueba de 50%
+  - En vehículos híbridos en modo taller o mantenimiento
+
+- el vehiculo posee la preparación necesaria para el proceso de revicion técnico mecánica? (si o no)
+
+### Observacionies del estado del vehiculo
+
+- Datos Propietario
+- Nombre
+- cedula de la tarjeta de propiedad
+- teléfono
+
+### Datos Cliente
+
+- Nombre
+- Cedula
+- teléfono
+- correo
+- firma
+
+### Condiciones Contractuales
+
+- Colocar la frase que obliga la ONAC a realizar
+- Aceptaciones y firma
+- Datos del funcionario que realiza la orden de entrada
+- Nombre
+- cedula
+- firma
+
+luego mas adelante en secretaria
+
+- Confrontación de los datos en el RUNT
+- Información de generación de la RTM (Pin, precio)
+
+luego al final con el dt
+
+- Firma de entrega al cliente
+- Anexar documentos al informe, FUR y certificado
+- Marcar la prueba como completa y terminada
+
+SECCIONES DE LA NORMA DONDE HAY INFORMACION
+
+NTC 5385 - sección 4.20: Sobre los documentos que se necesita
+NTC 5375 - sección 5: Presentación y documentos que se pide
+
+PROTECCION DE FUNCIONES Y RUTAS POR APARTE
+MANEJO DE ERRORES
+DIAGRAMADO DE MINI FLUJOS
+TESTS

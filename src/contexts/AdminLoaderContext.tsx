@@ -76,8 +76,7 @@ export default function ReceptionistLoaderContext({
   const pathname = usePathname();
 
   const permissionscontextRecived = useContext(PermissionsContext);
-  const tenantId =
-    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const supabaseBrowser = createSupabaseBrowserClient();
 
@@ -189,6 +188,8 @@ export default function ReceptionistLoaderContext({
   const { data: analyticsDataDiary } = useQuery({
     queryKey: ["admin_analytics_diary", rol], // La key asegura que no se mezcle caché si cambias de rol
     queryFn: async () => {
+
+      console.log("Pidiendo datos a analyticsDataDiary")
       // Llamada directa al RPC
       const { data, error } = await supabaseBrowser.rpc(
         "fetch_admin_analitics_diary",

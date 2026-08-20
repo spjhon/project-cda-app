@@ -217,16 +217,7 @@ const sarlaftMasivoMutation = useMutation<
     data,
   );
 
-  console.log(
-    "🟦 OFAC:",
-    data.ofac,
-  );
-
-  console.log(
-    "🟩 NACIONES UNIDAS:",
-    data.un,
-  );
-
+  
   // ============================================================
   // CREAR ZIP
   // ============================================================
@@ -257,24 +248,11 @@ const sarlaftMasivoMutation = useMutation<
     }
 
 
-const formatDateForFileName = (value: string) => {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return sanitizeFileName(value);
-  }
-
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-};
 
 
 
-    const fecha = formatDateForFileName(item.fecha);
+
+    const fecha = item.fecha;
     const placa = sanitizeFileName(item.placa);
     const nombre = sanitizeFileName(item.nombreCompleto);
 
@@ -300,23 +278,9 @@ const formatDateForFileName = (value: string) => {
       return;
     }
 
-    
-const formatDateForFileName = (value: string) => {
-  const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return sanitizeFileName(value);
-  }
 
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-};
-
-    const fecha = formatDateForFileName(item.fecha);
+    const fecha = item.fecha;
     const placa = sanitizeFileName(item.placa);
     const nombre = sanitizeFileName(item.nombreCompleto);
 
@@ -568,7 +532,15 @@ const formatDateForFileName = (value: string) => {
         //
         // .value obtiene el contenido de la celda.
 
-        const fecha = row.getCell(1).value;
+       const rawValue = row.getCell(1).value;
+
+
+        // O si solo quieres la parte de la fecha ("YYYY/MM/DD") de forma segura:
+        const fecha = rawValue instanceof Date 
+          ? rawValue.toISOString().split('T')[0].replace(/-/g, '/')
+          : String(rawValue || '').trim();
+
+        console.log("fecha extraida de excel: ", fecha)
 
         const placa = row.getCell(2).value;
 
@@ -613,7 +585,7 @@ const formatDateForFileName = (value: string) => {
           // Convertimos el valor de la celda a string
           // y eliminamos espacios sobrantes al principio
           // y al final.
-          fecha: String(fecha).trim(),
+          fecha: fecha,
 
           placa: String(placa).trim(),
 

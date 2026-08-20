@@ -1,9 +1,5 @@
 "use client";
 
-import { Activity, Info, Calendar as CalendarIcon, Check } from "lucide-react";
-import { format, subDays, subMonths } from "date-fns";
-import { es } from "date-fns/locale";
-import { DateRange } from "react-day-picker";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 
 
@@ -11,7 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
+ 
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -25,18 +21,13 @@ import {
 } from "@/components/ui/chart"
 
 
-// Componentes de Shadcn UI
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useMemo, useState } from "react";
+
+import { useMemo} from "react";
 import {DayChartItem, MonthChartItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
 import { CompleteDataRTMType } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
+import { Activity, Info } from "lucide-react";
+import DynamicYear from "@/components/landingPage/DynamicYear";
+import DynamicMonth from "./DynamicMonth";
 //import { useSidebar } from "@/components/ui/sidebar";
 
 
@@ -97,7 +88,7 @@ export function ChartBarMonthInteractive({chartMonthData, isPorcentaje}: ChartBa
 
       <CardHeader className="flex flex-col items-stretch border-b p-0! sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 sm:py-0!">
-          <CardTitle className="py-2 font-bold">Historico Del Mes de Julio - 2026</CardTitle>
+          <CardTitle className="py-2 font-bold">Historico Del Mes de <DynamicMonth></DynamicMonth> - 2026</CardTitle>
           <CardDescription>
             Muestra el total de RTMs sin contar reinspecciones, solo RTMs por primera vez.
           </CardDescription>
@@ -149,17 +140,17 @@ export function ChartBarMonthInteractive({chartMonthData, isPorcentaje}: ChartBa
                   className="w-37.5"
                   nameKey="total"
                   labelFormatter={(value) => {
-        // 1. Obtenemos el nombre del mes actual en Colombia (ej: "julio")
-        const mesActualRaw = new Date().toLocaleString("es-CO", { 
-          timeZone: "America/Bogota", 
-          month: "long" 
-        });
-        
-        // 2. Capitalizamos el mes (ej: "Julio")
-        const mesFormateado = mesActualRaw.charAt(0).toUpperCase() + mesActualRaw.slice(1);
-        
-        // 3. Retornamos el mes junto al número del día que trae la barra (value)
-        return `${mesFormateado} ${value}`;
+                  // 1. Obtenemos el nombre del mes actual en Colombia (ej: "julio")
+                  const mesActualRaw = new Date().toLocaleString("es-CO", { 
+                    timeZone: "America/Bogota", 
+                    month: "long" 
+                  });
+                  
+                  // 2. Capitalizamos el mes (ej: "Julio")
+                  const mesFormateado = mesActualRaw.charAt(0).toUpperCase() + mesActualRaw.slice(1);
+                  
+                  // 3. Retornamos el mes junto al número del día que trae la barra (value)
+                  return `${mesFormateado} ${value}`;
       }}
                 />
               }
@@ -242,7 +233,7 @@ export function ChartBarYearInteractive({chartYearData, isPorcentaje}: ChartBarY
 
       <CardHeader className="flex flex-col items-stretch border-b p-0! sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pt-4 pb-3 sm:py-0!">
-          <CardTitle className="py-2 font-bold">Historico del año 2026</CardTitle>
+          <CardTitle className="py-2 font-bold">Historico del año <DynamicYear></DynamicYear></CardTitle>
           <CardDescription>
             Muestra el total de RTMs sin contar reinspecciones, solo RTMs por primera vez durante todo el año.
           </CardDescription>
@@ -418,84 +409,7 @@ export default function AnaliticaPorCantidad({
   descripcion,
   datos,
 }: AnaliticaPorCantidadProps) {
-  // 🌟 Estado confirmado global/padre
-  const [date, setDate] = useState<DateRange | undefined>(undefined);
-
-  // 🌟 Estado borrador (aísla la interacción dentro del popover)
-  const [localDate, setLocalDate] = useState<DateRange | undefined>(date);
-  const [isOpen, setIsOpen] = useState(false);
-
-  // 🌟 Meses visibles para el Calendario Doble
-  const defaultFromMonth = subMonths(new Date(), 1);
-  const defaultToMonth = new Date();
-
-  const [fromMonth, setFromMonth] = useState<Date>(
-    date?.from || defaultFromMonth
-  );
-  const [toMonth, setToMonth] = useState<Date>(
-    date?.to || defaultToMonth
-  );
-
-  // Sincronizar borrador y meses al abrir el Popover
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (open) {
-      const initialFrom = date?.from || subMonths(new Date(), 1);
-      const initialTo = date?.to || new Date();
-
-      setLocalDate(date || { from: initialFrom, to: initialTo });
-      setFromMonth(initialFrom);
-      setToMonth(initialTo);
-    }
-  };
-
-  // Presets rápidos
-  const presets = [
-    { label: "Hoy", getRange: () => ({ from: new Date(), to: new Date() }) },
-    {
-      label: "Ayer",
-      getRange: () => {
-        const temp = subDays(new Date(), 1);
-        return { from: temp, to: temp };
-      },
-    },
-    {
-      label: "Últimos 7 días",
-      getRange: () => ({ from: subDays(new Date(), 6), to: new Date() }),
-    },
-    {
-      label: "Último Mes",
-      getRange: () => ({ from: subMonths(new Date(), 1), to: new Date() }),
-    },
-  ];
-
-  // Controladores de selección independiente
-  const handleSelectFrom = (selectedDay: Date | undefined) => {
-    setLocalDate((prev) => {
-      if (selectedDay && prev?.to && selectedDay > prev.to) {
-        return { from: selectedDay, to: undefined };
-      }
-      return { from: selectedDay, to: prev?.to };
-    });
-  };
-
-  const handleSelectTo = (selectedDay: Date | undefined) => {
-    setLocalDate((prev) => {
-      if (selectedDay && prev?.from && selectedDay < prev.from) {
-        return { from: prev?.from, to: undefined };
-      }
-      return { from: prev?.from, to: selectedDay };
-    });
-  };
-
-  // Confirmar el rango seleccionado
-  const handleApply = () => {
-    setDate(localDate);
-    setIsOpen(false);
-  };
-
-  const valorRangoEspecial =
-    date?.from && date?.to ? 0 : "Seleccione rango";
+ 
 
   const isPorcentaje = titulo === "Tasa de Rechazo";
 
@@ -590,138 +504,7 @@ export default function AnaliticaPorCantidad({
           isPorcentaje={isPorcentaje}
         />
 
-        {/* Cuadro especial acoplado al seleccionador de rango */}
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <CuadroMetrica
-            isPorcentaje={isPorcentaje}
-            label="Por Rango"
-            valor={valorRangoEspecial}
-            esPrimario={typeof valorRangoEspecial === "number"}
-          />
-
-          <div className="flex flex-col flex-wrap gap-2 min-w-60">
-            <div className="flex flex-col">
-              <h4 className="text-sm font-semibold text-muted-800">
-                Filtrar por Fechas
-              </h4>
-              <p className="text-xs text-muted-400">
-                Rango personalizado de análisis
-              </p>
-            </div>
-
-            {/* Selector de Fechas (Doble Calendario + Presets) */}
-            <Popover open={isOpen} onOpenChange={handleOpenChange}>
-              <PopoverTrigger
-                render={
-                  <Button
-                    id="date"
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal border-slate-300 bg-background h-9 shadow-sm hover:bg-muted hover:text-muted-foreground",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-500" />
-                    {date?.from ? (
-                      date.to ? (
-                        <>
-                          {format(date.from, "dd LLL, yyyy", { locale: es })}{" "}
-                          - {format(date.to, "dd LLL, yyyy", { locale: es })}
-                        </>
-                      ) : (
-                        format(date.from, "dd LLL, yyyy", { locale: es })
-                      )
-                    ) : (
-                      <span>Elegir periodo</span>
-                    )}
-                  </Button>
-                }
-              />
-              <PopoverContent
-                className="w-auto p-0 border-none shadow-xl"
-                align="start"
-              >
-                <Card className="w-fit border-border bg-card" size="sm">
-                  <CardContent className="p-3 flex flex-col md:flex-row gap-4 divide-y md:divide-y-0 md:divide-x divide-border">
-                    {/* CALENDARIO DESDE */}
-                    <div className="flex flex-col gap-1 pt-2 md:pt-0">
-                      <span className="text-xs font-semibold text-muted-foreground px-2">
-                        Desde:
-                      </span>
-                      <Calendar
-                        locale={es}
-                        autoFocus
-                        mode="single"
-                        selected={localDate?.from}
-                        onSelect={handleSelectFrom}
-                        month={fromMonth}
-                        onMonthChange={setFromMonth}
-                        numberOfMonths={1}
-                        className="rounded-lg"
-                        captionLayout="dropdown"
-                        showOutsideDays={false}
-                      />
-                    </div>
-
-                    {/* CALENDARIO HASTA */}
-                    <div className="flex flex-col gap-1 pt-2 md:pt-0 md:pl-4">
-                      <span className="text-xs font-semibold text-muted-foreground px-2">
-                        Hasta:
-                      </span>
-                      <Calendar
-                        locale={es}
-                        mode="single"
-                        selected={localDate?.to}
-                        onSelect={handleSelectTo}
-                        month={toMonth}
-                        onMonthChange={setToMonth}
-                        numberOfMonths={1}
-                        className="rounded-lg"
-                        captionLayout="dropdown"
-                        showOutsideDays={false}
-                        disabled={
-                          localDate?.from
-                            ? { before: localDate.from }
-                            : undefined
-                        }
-                      />
-                    </div>
-                  </CardContent>
-
-                  <CardFooter className="flex flex-col gap-3 border-t border-border p-3 bg-muted/30">
-                    <div className="flex flex-wrap gap-2 w-full">
-                      {presets.map((preset) => (
-                        <Button
-                          key={preset.label}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 min-w-25 text-xs font-medium bg-background border-border shadow-sm hover:bg-muted"
-                          onClick={() => {
-                            const newRange = preset.getRange();
-                            setLocalDate(newRange);
-                            if (newRange.from) setFromMonth(newRange.from);
-                            if (newRange.to) setToMonth(newRange.to);
-                          }}
-                        >
-                          {preset.label}
-                        </Button>
-                      ))}
-                    </div>
-
-                    <Button
-                      className="w-full text-xs font-semibold h-9 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
-                      onClick={handleApply}
-                      disabled={!localDate?.from || !localDate?.to}
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                      Aplicar Rango
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+       
       </div>
 
       {/* ESPACIO PARA LAS GRÁFICAS */}

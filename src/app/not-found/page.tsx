@@ -5,13 +5,13 @@ export default function PageNotFound() {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>404</h1>
-      <h2 style={styles.subtitle}>YUKA</h2>
+      <h2 style={styles.subtitle}>PÁGINA O RUTA NO ENCONTRADA</h2>
       <p style={styles.text}>
         Lo sentimos, el subdominio al que intentas acceder no existe o no está registrado en nuestro sistema.
       </p>
       <Link 
       
-      href="http://127.0.0.1:3000" style={styles.button}>
+      href="https://www.cda-app.com/" style={styles.button}>
         Volver al inicio
       </Link>
     </div>

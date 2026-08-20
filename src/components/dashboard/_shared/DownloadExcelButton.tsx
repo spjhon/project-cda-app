@@ -13,8 +13,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 export function ExportExcelButton() {
   const context = useContext(EntryOrdersContext);
   const dateRange = context?.entryOrdersTableData?.query?.dateRange;
-  const totalAdescargar =
-    context?.entryOrdersTableData?.query?.entryOrdersData?.[0]?.total_count;
+  const totalAdescargar = context?.entryOrdersTableData?.query?.entryOrdersData?.[0]?.total_count;
 
   const exportMutation = useMutation({
     mutationFn: async () => {

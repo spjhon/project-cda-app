@@ -93,6 +93,14 @@ export default async function AdminDashboardLayout({
 await connection();
 
 
+
+
+
+
+
+
+
+
   const adminAnalyticsPromise: Promise<AdminAnalyticsData> = (async () => {
     const supabase = await createSupabaseServerClient();
 
@@ -144,6 +152,12 @@ await connection();
 
 
 
+
+
+
+
+
+
   
   const adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData> =
     (async () => {
@@ -178,6 +192,12 @@ await connection();
 
 
 
+
+
+
+
+
+
   const initialPQAFPromise: Promise<PQAFListItem[]> = (async () => {
     const { tenant } = await params;
     const tenantId = (await fetchTenantData(tenant)).data?.id;
@@ -189,8 +209,7 @@ await connection();
 
     const supabaseServer = await createSupabaseServerClient();
 
-    const { data, error } = await supabaseServer.rpc(
-      "fetch_service_requirements_list",
+    const { data, error } = await supabaseServer.rpc("fetch_service_requirements_list",
       {
         p_tenant_id: tenantId,
         p_limit: 5, // Rows per page inicial
@@ -214,6 +233,13 @@ await connection();
 
     return (data || []) as unknown as PQAFListItem[];
   })();
+
+
+
+
+
+
+
 
 
 

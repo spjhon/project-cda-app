@@ -263,7 +263,7 @@ const  currentTemplate = contextRecivedDirectorTecnico?.DirectorTecnicoContextVa
       ...formData,
       signatures: [
         ...formData.signatures,
-        { a_quien_representa: "otros", label_firma: "", declarations: [] },
+        { a_quien_representa: "Cliente", label_firma: "", declarations: [] },
       ],
     });
   };
