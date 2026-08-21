@@ -1,52 +1,41 @@
-# 📄 License
+# MIT License with Commons Clause
 
-| | |
-| :--- | :--- |
-| **License Type** | **Source-Available (Commons Clause)** |
-| **Commercial Use** | ❌ Restricted without commercial agreement |
-| **Competing Services** | 🚫 Prohibited |
-| **View & Modify Code** | ✅ Permitted |
-| **Personal/Educational Use** | ✅ Permitted |
-| **OSI-Approved Open Source** | ❌ No |
+Copyright (c) 2026 Juan Camilo Patiño
 
----
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, subject to the following conditions:
 
-## 📢 **Important Notice**
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-> **This source code is made publicly available for viewing, learning, and educational purposes only.**
->
-> **Commercial use, offering competing services, or any use that derives substantial value from the software's functionality is strictly prohibited without a separate commercial agreement.**
+However, the Software and any derivative works thereof may not be used for any
+commercial purpose, including but not limited to:
 
----
+- Selling the Software or any product/service whose primary value derives from it
+- Offering competing services (SaaS, hosting, consulting, or any other form of service)
+- Operating a business or commercial activity that substantially relies on the functionality of the Software
 
-## 🔒 License Terms
+Commercial use of the Software requires a separate commercial license agreement
+with the copyright holder. Please contact spjhon@gmail.com for inquiries.
 
-This project is licensed under the **Commons Clause License Condition v1.0** applied on top of a permissive base license.
+This restriction does not apply to:
 
-**You MAY:**
+- Personal, academic, or educational use
+- Non-commercial research and development
+- Viewing, studying, and modifying the code for non-commercial purposes
 
-- View, study, and modify the source code
-- Use the software for personal, academic, or research purposes
-- Fork and experiment with the code for non-commercial purposes
-
-**You MAY NOT:**
-
-- **Sell** the software or any product/service whose primary value derives from it.
-- Offer competing services (SaaS, hosting, or consulting) based on this software.
-- Use the software for any commercial purpose without a separate commercial agreement from the licensor.
-
-**Why this license?**
-
-This approach balances transparency for the developer community with protecting the intellectual property and business model of the private company behind the project. While the code remains visible for recruiters and students to evaluate, it prevents competitors from using the work to create commercial alternatives without permission.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
-## 📧 Commercial Licensing
-
-For commercial use, competing service offerings, or any use not covered by this license, please contact:
-
-**Email:** [spjhon@gmail.com](mailto:spjhon@gmail.com)
-
----
-
-*⚠️ This license is not OSI-approved open source. It is a source-available license designed to protect commercial interests while maintaining code transparency.
+Commercial Licensing:
+For commercial use inquiries, please contact: spjhon@gmail.com

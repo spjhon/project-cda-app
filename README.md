@@ -1,6 +1,6 @@
 # cdApp - Multi-tenant Colombian CDA (Centro de Diagnóstico Automotor - Automotive Diagnostic Center) admin tool
 
-**#cdApp** is a sophisticated, production-grade multi-tenant administration platform specifically engineered for Colombian Automotive Diagnostic Centers (CDAs). Built as a complete operational system, it manages the entire workflow of a diagnostic center—from initial vehicle intake and diagnostics to final diagnostic, technical reports, and customer management, all while maintaining strict data isolation between different tenant organizations. The application leverages a modern, edge-ready architecture with Next.js 16 and Supabase to deliver real-time collaboration, role-based access control, and a seamless user experience that adapts to the unique regulatory and operational requirements of the Colombian automotive industry.
+**cdApp** is a sophisticated, production-grade multi-tenant administration platform specifically engineered for Colombian Automotive Diagnostic Centers (CDAs). Built as a complete operational system, it manages the entire workflow of a diagnostic center—from initial vehicle intake and diagnostics to final diagnostic, technical reports, and customer management, all while maintaining strict data isolation between different tenant organizations. The application leverages a modern, edge-ready architecture with Next.js 16 and Supabase to deliver real-time collaboration, role-based access control, and a seamless user experience that adapts to the unique regulatory and operational requirements of the Colombian automotive industry.
 
 Developed to demonstrate mastery of complex, real-world software engineering challenges, #cdApp showcases a robust implementation of domain-driven design within a multi-tenant ecosystem. The system handles critical business logic such as automated diagnostic report generation (RTM), digital signature capture, technician assignment with availability tracking, and dynamic PDF report creation using **@react-pdf/renderer**. By combining cutting-edge frontend technologies with a scalable backend infrastructure—including PostgreSQL partitioning, Row Level Security (RLS) for tenant isolation, and Supabase Realtime for instant updates—this project exemplifies how to build, deploy, and maintain a secure, high-performance enterprise application ready for the demands of a modern automotive service network.
 
@@ -33,9 +33,9 @@ Developed to demonstrate mastery of complex, real-world software engineering cha
 
 ---
 
-![Screenshot 001]("../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111658.png")
-![Screenshot 002]("../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111744.png")
-![Screenshot 003]("../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20112334.png")
+![Screenshot 001](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111658.png)
+![Screenshot 002](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111744.png)
+![Screenshot 003](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20112334.png)
 
 ---
 
@@ -152,6 +152,7 @@ These are the specific **business functionalities** the system provides:
 
 ## DataBase Schema
 
+```mermaid
 erDiagram
     %% ==========================================
     %% Core Multi-tenant Entities
@@ -529,6 +530,7 @@ erDiagram
     entry_orders ||--o{ entry_order_tire_pressures : "Has (1:N)"
     entry_orders ||--o{ sarlaft_module : "Has (1:1)"
     entry_orders ||--o{ entry_orders : "Reinspeccion (1:1)" 
+```
 
 ### 🔑 Key Design Points
 
