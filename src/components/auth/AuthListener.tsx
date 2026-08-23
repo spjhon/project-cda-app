@@ -58,7 +58,8 @@ export default function AuthListener({children}: Readonly<{ children: React.Reac
       // Redirige a la página de login del tenant.
       if (event === "SIGNED_OUT") {
         console.log("El useEffect dice que el usuario esta singed out")
-        window.location.href = '/auth/login';
+         router.push(`/auth/login`);
+         
         
       }
       setIsReady(true)

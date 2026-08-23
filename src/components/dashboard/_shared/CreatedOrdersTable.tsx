@@ -37,6 +37,9 @@ import {
   Car,
   Truck,
   Bike,
+  Zap,
+  Gauge,
+  ShieldAlert,
 } from "lucide-react";
 
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
@@ -68,16 +71,48 @@ const columnHelper = createColumnHelper<EntryOrderListItem>();
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
 // ==========================================
 
+
 const VEHICLE_TYPE_MAP: Record<
   string,
   { label: string; icon: React.ComponentType<{ className?: string }> }
 > = {
-  liviano: { label: "Automóvil (Liviano)", icon: Car },
-  pesado: { label: "Camión / Bus (Pesado)", icon: Truck },
-  motocicleta_4t: { label: "Motocicleta 4T", icon: Bike },
-  motocicleta_2t: { label: "Motocicleta 2T", icon: Bike },
-  motocarro_4t: { label: "Motocarro 4T", icon: Bike },
-  motocarro_2t: { label: "Motocarro 2T", icon: Bike },
+  // CARROS Y PESADOS
+  liviano: { 
+    label: "Liviano", 
+    icon: Car 
+  },
+  pesado: { 
+    label: "Pesado", 
+    icon: Truck 
+  },
+
+  // MOTOCICLETAS (2 Ruedas)
+  motocicleta_4t: { 
+    label: "Moto 4T", 
+    icon: Bike 
+  },
+  motocicleta_2t: { 
+    label: "Moto 2T", 
+    icon: Bike 
+  },
+  motocicleta_electrica: { 
+    label: "Moto Eléctrica", 
+    icon: Zap 
+  },
+
+  // MOTOCARROS (3 Ruedas)
+  motocarro_4t: { 
+    label: "Moto-Carro 4T", 
+    icon: Gauge 
+  },
+  motocarro_2t: { 
+    label: "Moto-Carro 2T", 
+    icon: ShieldAlert 
+  },
+  motocarro_diesel: { 
+    label: "Moto-Carro Diésel", 
+    icon: Truck 
+  },
 };
 
 const SERVICE_TYPE_MAP: Record<string, string> = {

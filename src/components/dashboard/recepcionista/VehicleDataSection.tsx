@@ -79,10 +79,10 @@ const VEHICLE_TYPE_ITEMS = [
   { label: "Pesado", value: "pesado" },
   { label: "Moto 4T", value: "motocicleta_4t" },
   { label: "Moto 2T", value: "motocicleta_2t" },
-  { label: "Moto Electrica", value: "motocicleta_electrica" },
-  { label: "Motocarro 4T", value: "motocarro_4t" },
-  { label: "Motocarro 2T", value: "motocarro_2t" },
-  { label: "Motocarro Diesel", value: "motocarro_diesel" },
+  { label: "Moto Eléctrica", value: "motocicleta_electrica" },
+  { label: "Moto-Carro 4T", value: "motocarro_4t" },
+  { label: "Moto-Carro 2T", value: "motocarro_2t" },
+  { label: "Moto-Carro Diesel", value: "motocarro_diesel" },
 ];
 
 export interface VehicleDataSectionProps {

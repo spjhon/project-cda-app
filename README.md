@@ -33,9 +33,9 @@ Developed to demonstrate mastery of complex, real-world software engineering cha
 
 ---
 
-![Screenshot 001](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111658.png)
-![Screenshot 002](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111744.png)
-![Screenshot 003](../../public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20112334.png)
+![Screenshot 001](./public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111658.png)
+![Screenshot 002](./public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20111744.png)
+![Screenshot 003](./public/README%20screenshots/Captura%20de%20pantalla%202026-08-21%20112334.png)
 
 ---
 

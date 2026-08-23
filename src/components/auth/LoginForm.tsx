@@ -90,7 +90,7 @@ export const LoginForm = ({
        
         router.push(`/dashboard`);
         
-
+        setIsLoading(false);
 
       } catch (error: unknown) {
         
