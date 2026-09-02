@@ -206,7 +206,7 @@ export default function CreatedOrdersTable() {
 
   const rol =
     contextRecivedReceptionist?.ReceptionistContextValue.rol ||
-    OficinaContextRecived?.OficinaContextValue.rol ||
+    OficinaContextRecived?.rol ||
     DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol ||
     AdminContextRecived?.AdminContextValue.rol;
 

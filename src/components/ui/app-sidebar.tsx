@@ -79,6 +79,13 @@ const NavOficina: NavItem[] = [
     href: "/dashboard/oficina",
     icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
   },
+
+  {
+    title: "Configuración Precios", // 🔥 NUEVO MÓDULO
+    description: "Precios y Tarifas",
+    href: "/dashboard/oficina/precios",
+    icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
   
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO

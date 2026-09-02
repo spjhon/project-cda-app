@@ -35,14 +35,15 @@ export interface UserContextData {
 }
 
 
-export const instant = false
 
-export default async function DashboardLayout({ children, params }: DashboardLayout) {
 
-await connection();
+export default function DashboardLayout({ children, params }: DashboardLayout) {
+
+
 
 
   const tenantPromise = (async () => {
+   
     const { tenant } = await params;
     return fetchTenantData(tenant);
   })();
@@ -52,6 +53,7 @@ await connection();
 
 
   const userPromise: Promise<UserContextData> = (async () => {
+    await connection();
     const supabase = await createSupabaseServerClient();
 
     // 1. Obtenemos la sesión/claims de autenticación
@@ -102,6 +104,7 @@ await connection();
 
 
   const RolesDataPromise: Promise<string[]> = (async () => {
+    await connection();
     // Esperamos a que el tenant se resuelva para obtener su ID
     const { tenant } = await params;
     const tenantResult = await fetchTenantData(tenant);
@@ -131,6 +134,7 @@ await connection();
 
   const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
     (async () => {
+      await connection();
       const { tenant } = await params;
 
       // ==========================================
@@ -174,6 +178,7 @@ await connection();
 //PROMESA PARA LA CONSULTA DE LAS FUTAS
 
 const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
+  await connection();
   const { tenant } = await params;
 
   // ==========================================
@@ -210,6 +215,7 @@ const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
 
 
 const ModulesDataPromise: Promise<TenantModule[]> = (async () => {
+  await connection();
   // Esperamos a que el tenant se resuelva para obtener su ID
   const { tenant } = await params;
   const tenantResult = await fetchTenantData(tenant);

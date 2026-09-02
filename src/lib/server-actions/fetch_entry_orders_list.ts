@@ -64,7 +64,7 @@ export interface EntryOrderListItem {
   es_reinspeccion: boolean;
   kilometraje: string | null;
   soat_vencimiento_snapshot: string | null;
-  service_type: "RTM" | string;
+  service_type: string;
   vehiculo_tipo_snapshot: string;
   vehiculo_tipo_servicio_snapshot: string;
   estado_orden: string;

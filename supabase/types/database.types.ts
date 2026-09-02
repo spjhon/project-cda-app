@@ -351,6 +351,59 @@ export type Database = {
           },
         ]
       }
+      fee_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          fee_amount: number
+          id: string
+          is_active: boolean
+          iva_percentage: number
+          model_year_from: number | null
+          model_year_to: number | null
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          fee_amount: number
+          id?: string
+          is_active?: boolean
+          iva_percentage?: number
+          model_year_from?: number | null
+          model_year_to?: number | null
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          fee_amount?: number
+          id?: string
+          is_active?: boolean
+          iva_percentage?: number
+          model_year_from?: number | null
+          model_year_to?: number | null
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_types_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           code: string
@@ -1045,6 +1098,47 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_service_rate: {
+        Row: {
+          base_price: number
+          created_at: string
+          id: string
+          is_active: boolean
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          tenant_id: string
+          updated_at: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          tenant_id: string
+          updated_at?: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          service_type?: Database["public"]["Enums"]["service_type_enum"]
+          tenant_id?: string
+          updated_at?: string
+          vehicle_type?: Database["public"]["Enums"]["vehicle_type_enum"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_rate_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           blindaje: boolean
@@ -1191,6 +1285,17 @@ export type Database = {
           p_owner_origen_fondos: string
         }
         Returns: Json
+      }
+      fetch_active_vehicle_service_rates: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          base_price: number
+          created_at: string
+          id: string
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          tenant_id: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
+        }[]
       }
       fetch_admin_analitics: {
         Args: never
@@ -1339,6 +1444,23 @@ export type Database = {
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
         }[]
       }
+      fetch_fee_types: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          code: string
+          created_at: string
+          description: string
+          fee_amount: number
+          id: string
+          is_active: boolean
+          iva_percentage: number
+          model_year_from: number
+          model_year_to: number
+          name: string
+          tenant_id: string
+          updated_at: string
+        }[]
+      }
       fetch_orders_templates: {
         Args: { p_tenant_id: string }
         Returns: {
@@ -1366,6 +1488,7 @@ export type Database = {
           created_at: string
           entry_order_id: string
           es_persona_publicamente_expuesta_snapshot: boolean
+          funcionario_firma_base64_snapshot: string
           id: string
           nombre_completo_snapshot: string
           numero_documento_snapshot: string

@@ -53,6 +53,10 @@ otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/s
 - en la reinspeccion no esta arrastando el soat
 - en chrome se ve las barras en las graficas del admin, mientras que en firefox no
 - en las quejas cuando se envia una nueva queja y se tiene abierto el detalles, se cambia al detalles de la mas reciente (lo mismo que paso con las ordenes de entrada y los dialog)
+- OJO OJO, cuadrar toda la arquitectura de forma que se logre separar lo que va desde el server con promesas y lo que va solo manejado por tanstack para TODOS los fetch de la app y la distribucion de los suspence ya que esto va a ahorrar mucho en cup active fluid
+- organizar tanstack para mejor mandar todo el object y no hacer destructuracion de las propiedades del useQuery o el useMutation
+- el sistema de errores seria una carpeta compartida con los alert dialog utilizados
+- organizar las rutas del login para que dejen de ser 100% dinamicas y puedan ser trabajas entre componentes clientes y poder tener instan navigation
 
 ## FEATURES QUE FALTAN
 

@@ -81,16 +81,16 @@ export interface PQAFListItem {
 }
 
 
-export const instant = false;
 
-export default async function AdminDashboardLayout({
+
+export default function AdminDashboardLayout({
   children,
   params,
 }: AdminDashboardLayout) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
 
-await connection();
+
 
 
 
@@ -102,6 +102,7 @@ await connection();
 
 
   const adminAnalyticsPromise: Promise<AdminAnalyticsData> = (async () => {
+    await connection();
     const supabase = await createSupabaseServerClient();
 
     const { data, error } = await supabase.rpc("fetch_admin_analitics");
@@ -161,6 +162,7 @@ await connection();
   
   const adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData> =
     (async () => {
+       await connection();
       const supabase = await createSupabaseServerClient();
 
       const { data, error } = await supabase.rpc("fetch_admin_analitics_diary");
@@ -199,6 +201,7 @@ await connection();
 
 
   const initialPQAFPromise: Promise<PQAFListItem[]> = (async () => {
+     await connection();
     const { tenant } = await params;
     const tenantId = (await fetchTenantData(tenant)).data?.id;
 

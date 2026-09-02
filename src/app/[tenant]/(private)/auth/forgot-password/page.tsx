@@ -1,22 +1,18 @@
-
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { Suspense } from "react";
 
 
-
-/**
- * 
- * @param param0 The tenants.
- * @returns Only the recovery password form
- */
-export default async function ForgotPasswordPage({params}: {params: Promise<{ tenant: string }>}) {
-
-const { tenant } = await params;
-
+export default function ForgotPasswordPage({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
   return (
-    //2.
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <ForgotPasswordForm tenant={tenant} />
+        <Suspense fallback={<div className="h-64 w-full animate-pulse bg-zinc-100 rounded-lg" />}>
+          <ForgotPasswordForm paramsPromise={params} />
+        </Suspense>
       </div>
     </div>
   );

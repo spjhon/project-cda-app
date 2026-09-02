@@ -7,40 +7,30 @@ import { ReactNode } from "react";
 
 interface OficinaDashboardLayout {
   children: ReactNode;
-  
 }
 
-
-
-
-export const instant = false
 
 
 export default function OficinaDashboardLayout({
   children,
 }: OficinaDashboardLayout) {
   return (
-   
+    
     <OficinaLoaderContext rol={"oficina"}>
-    <SidebarProvider>
-          
-
-          <AppSidebar rol={"oficina"}/>
-
-          <SidebarInset className="md:m-0! ">
-            <HeaderSidebar></HeaderSidebar>
-            <main>
-              
-              {children}
-            
-            </main>
-          </SidebarInset>
-
-          
 
 
-        </SidebarProvider>
-        </OficinaLoaderContext>
-       
+      <SidebarProvider>
+        <AppSidebar rol={"oficina"} />
+
+        <SidebarInset className="md:m-0! ">
+          <HeaderSidebar></HeaderSidebar>
+          <main>{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+
+      
+    </OficinaLoaderContext>
+
+
   );
 }

@@ -19,19 +19,19 @@ interface DirectorTecnicoDashboardLayoutProps {
   params: Promise<{ tenant: string }>;
 }
 
-export const instant = false;
 
 export default async function DirectorTecnicoDashboardLayout({
   children,
   params,
 }: DirectorTecnicoDashboardLayoutProps) {
 
-await connection();
+
 
   
   // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
   const templateTabelDataPromise: Promise<OrderTemplate[] | null> =
     (async () => {
+      await connection();
       const { tenant } = await params;
       // Esperamos a que el tenant se resuelva para obtener su ID
       const tenantResult = await fetchTenantData(tenant);

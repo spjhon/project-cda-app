@@ -11,19 +11,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { use, useState } from "react";
 import { enviarEmailRecuperacionContrasena } from "@/lib/server-actions/emails";
 
 
 interface ForgotPasswordFormProps {
-  tenant: string;
+  paramsPromise: Promise<{ tenant: string }>;
 }
 
 
-export function ForgotPasswordForm({tenant}: ForgotPasswordFormProps ) {
+export function ForgotPasswordForm({paramsPromise}: ForgotPasswordFormProps ) {
 
 
-
+const { tenant } = use(paramsPromise);
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);

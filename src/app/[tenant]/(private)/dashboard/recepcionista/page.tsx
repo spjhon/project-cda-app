@@ -1,4 +1,4 @@
-export const instant = false
+
 
 import NewEntryOrderComponent from "@/components/dashboard/recepcionista/NewEntryOrderComponent";
 
