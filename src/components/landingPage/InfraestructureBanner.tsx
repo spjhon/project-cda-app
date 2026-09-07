@@ -37,7 +37,7 @@ export const InfraestructureBanner = () => {
     >
       <h2 className="text-3xl md:text-4xl font-bold ">
         Amplias{" "}
-        <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
+        <span className="bg-linear-to-b from-primary/60 to-primary text-transparent bg-clip-text">
           Instalaciones{" "}
         </span>
         Para ti y tu vehiculo
@@ -50,7 +50,7 @@ export const InfraestructureBanner = () => {
         {features.map(({ icon, title, description, url }: FeatureProps) => (
           <Card
             key={title}
-            className="bg-muted/50 w-[30rem] shadow-2xl"
+            className="bg-muted/50 w-120 shadow-2xl"
           >
             <CardHeader>
               <CardTitle className="grid gap-4 place-items-center">

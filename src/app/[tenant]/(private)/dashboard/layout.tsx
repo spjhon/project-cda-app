@@ -241,7 +241,21 @@ const ModulesDataPromise: Promise<TenantModule[]> = (async () => {
 })();
 
 
-
+/**
+ * 
+ * 
+ * 
+ * 
+ * No resuelvas las promesas dentro del Provider (use()). En su lugar, guarda las promesas 
+ * directamente en el Contexto y deja que cada subcomponente cliente haga el use() dentro de su propio <Suspense> local.
+ * esto en casos muy especificos, lo mejor depsues de estar dentro del login es hacer mutaciones y queries directo desde el cliente con un rpc caprichoso
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
 
 
   return (

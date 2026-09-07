@@ -70,3 +70,74 @@ Valores permitidos:
   - transferencia: Transferencias directas verificadas (Bancolombia, Nequi, Daviplata, etc.).
   - qr: Pagos mediante códigos QR de interoperabilidad bancaria.
 Este tipo es crítico para los cierres, arqueos de caja diarios y auditorías contables.';
+
+
+
+
+
+
+-- ============================================================
+-- ENUM: TIPO DE CLASE DEL VEHÍCULO
+-- ============================================================
+-- Valores correspondientes a los códigos internos utilizados
+-- por la aplicación en CLASE_OPTIONS.
+-- ============================================================
+
+CREATE TYPE public.vehicle_class_enum AS ENUM (
+    'automovil',
+    'bus',
+    'buseta',
+    'camion',
+    'camioneta',
+    'campero',
+    'microbus',
+    'tractocamion',
+    'motocicleta',
+    'motocarro',
+    'mototriciclo',
+    'cuatrimoto',
+    'remolque',
+    'semiremolque',
+    'volqueta',
+    'sin_clase',
+    'maquinaria_construccion_o_minera',
+    'ciclomotor',
+    'tricimoto',
+    'cuadriciclo'
+);
+
+-- ============================================================
+-- COMENTARIO DEL ENUM
+-- ============================================================
+
+COMMENT ON TYPE public.vehicle_class_enum IS
+'Enum que define las clases de vehículos utilizadas para la configuración de tarifas y la clasificación de vehículos.';
+
+
+
+
+-- ============================================================
+-- ENUM: TIPO DE COMBUSTIBLE DEL VEHÍCULO
+-- ============================================================
+-- Valores correspondientes a los códigos internos utilizados
+-- por la aplicación en FUEL_OPTIONS.
+-- ============================================================
+
+CREATE TYPE public.fuel_type_enum AS ENUM (
+    'gasolina',
+    'gas_natural_vehicular',
+    'diesel',
+    'gas_gasolina',
+    'hibrido',
+    'electrico',
+    'etanol',
+    'biodiesel',
+    'hidrogeno'
+);
+
+-- ============================================================
+-- COMENTARIO DEL ENUM
+-- ============================================================
+
+COMMENT ON TYPE public.fuel_type_enum IS
+'Enum que define los tipos de combustible utilizados para la configuración de tarifas y la clasificación de vehículos.';

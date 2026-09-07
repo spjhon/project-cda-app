@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.fetch_fee_types(UUID);

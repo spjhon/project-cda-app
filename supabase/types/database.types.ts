@@ -1286,6 +1286,15 @@ export type Database = {
         }
         Returns: Json
       }
+      create_vehicle_service_rate: {
+        Args: {
+          p_base_price_rtm: number
+          p_service_type: Database["public"]["Enums"]["service_type_enum"]
+          p_tenant_id: string
+          p_vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
+        }
+        Returns: string
+      }
       fetch_active_vehicle_service_rates: {
         Args: { p_tenant_id: string }
         Returns: {
@@ -1442,23 +1451,6 @@ export type Database = {
           total_count: number
           vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
-        }[]
-      }
-      fetch_fee_types: {
-        Args: { p_tenant_id: string }
-        Returns: {
-          code: string
-          created_at: string
-          description: string
-          fee_amount: number
-          id: string
-          is_active: boolean
-          iva_percentage: number
-          model_year_from: number
-          model_year_to: number
-          name: string
-          tenant_id: string
-          updated_at: string
         }[]
       }
       fetch_orders_templates: {
@@ -1661,6 +1653,16 @@ export type Database = {
         | "registro_civil"
         | "carnet_diplomatico"
         | "ti2"
+      fuel_type_enum:
+        | "gasolina"
+        | "gas_natural_vehicular"
+        | "diesel"
+        | "gas_gasolina"
+        | "hibrido"
+        | "electrico"
+        | "etanol"
+        | "biodiesel"
+        | "hidrogeno"
       office_payment_type_enum:
         | "efectivo"
         | "tarjeta_debito"
@@ -1676,6 +1678,27 @@ export type Database = {
         | "recepcionista"
         | "aux_administrativo"
         | "director_tecnico"
+      vehicle_class_enum:
+        | "automovil"
+        | "bus"
+        | "buseta"
+        | "camion"
+        | "camioneta"
+        | "campero"
+        | "microbus"
+        | "tractocamion"
+        | "motocicleta"
+        | "motocarro"
+        | "mototriciclo"
+        | "cuatrimoto"
+        | "remolque"
+        | "semiremolque"
+        | "volqueta"
+        | "sin_clase"
+        | "maquinaria_construccion_o_minera"
+        | "ciclomotor"
+        | "tricimoto"
+        | "cuadriciclo"
       vehicle_service_type_enum:
         | "particular"
         | "enseñanza"
@@ -1834,6 +1857,17 @@ export const Constants = {
         "carnet_diplomatico",
         "ti2",
       ],
+      fuel_type_enum: [
+        "gasolina",
+        "gas_natural_vehicular",
+        "diesel",
+        "gas_gasolina",
+        "hibrido",
+        "electrico",
+        "etanol",
+        "biodiesel",
+        "hidrogeno",
+      ],
       office_payment_type_enum: [
         "efectivo",
         "tarjeta_debito",
@@ -1850,6 +1884,28 @@ export const Constants = {
         "recepcionista",
         "aux_administrativo",
         "director_tecnico",
+      ],
+      vehicle_class_enum: [
+        "automovil",
+        "bus",
+        "buseta",
+        "camion",
+        "camioneta",
+        "campero",
+        "microbus",
+        "tractocamion",
+        "motocicleta",
+        "motocarro",
+        "mototriciclo",
+        "cuatrimoto",
+        "remolque",
+        "semiremolque",
+        "volqueta",
+        "sin_clase",
+        "maquinaria_construccion_o_minera",
+        "ciclomotor",
+        "tricimoto",
+        "cuadriciclo",
       ],
       vehicle_service_type_enum: [
         "particular",

@@ -20,7 +20,7 @@ interface DirectorTecnicoDashboardLayoutProps {
 }
 
 
-export default async function DirectorTecnicoDashboardLayout({
+export default function DirectorTecnicoDashboardLayout({
   children,
   params,
 }: DirectorTecnicoDashboardLayoutProps) {

@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo } from "react"
+import { useContext, useMemo } from "react"
 
-import { useOficina, VehicleRate } from "@/contexts/OficinaLoaderContext"
+
 
 
 
@@ -37,6 +37,10 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext"
+import { useVehicleRates, VehicleRate } from "@/lib/client-actions/fetch_rates"
+import { AddRateDialog } from "./AddRate"
+
 
 // ==========================================
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
@@ -69,13 +73,28 @@ const SERVICE_TYPE_MAP: Record<string, string> = {
 const columnHelper = createColumnHelper<VehicleRate>()
 
 export default function RatesTable() {
-  const {
-    rates,
-    isLoadingRates,
-    errorRates,
-    refetchRates,
-    isFetchingRates,
-  } = useOficina()
+  
+
+
+  // 🔥 Obtener tenantId del PermissionsContext (que viene del server)
+    const permissionsContextRecived = useContext(PermissionsContext)
+    const tenantId = permissionsContextRecived?.PermissionsContextValue.tenantObject?.id
+
+
+
+
+
+const {
+  data: rates = [],
+  isLoading: isLoadingRates,
+  isFetching: isFetchingRates,
+  error: errorRates,
+  refetch: refetchRates,
+} = useVehicleRates({
+  tenantId,
+})
+
+
 
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS
@@ -277,7 +296,7 @@ export default function RatesTable() {
       )
     }
 
-    if (isFetchingRates || isLoadingRates) {
+    if ( isFetchingRates || isLoadingRates) {
       return (
         <Badge
           variant="default"
@@ -285,7 +304,7 @@ export default function RatesTable() {
         >
           <Loader2 className="h-3.5 w-4 animate-spin" />
 
-          {isLoadingRates
+          { isLoadingRates
             ? "Cargando..."
             : "Actualizando..."}
         </Badge>
@@ -327,21 +346,23 @@ export default function RatesTable() {
           {renderStatusBadge()}
 
           {/* Botón de refrescar */}
+          
           <Button
             variant="outline"
             size="sm"
             onClick={() => refetchRates()}
-            disabled={isLoadingRates}
+            
             className="h-9"
           >
             <Loader2
               className={`h-4 w-4 mr-2 ${
-                isLoadingRates ? "animate-spin" : ""
+                ( isLoadingRates || isFetchingRates) ? "animate-spin" : ""
               }`}
             />
 
             Refrescar
           </Button>
+         
         </div>
       </div>
 
@@ -350,12 +371,7 @@ export default function RatesTable() {
           ========================================== */}
 
       <div className="flex justify-end">
-        <Button
-          type="button"
-          onClick={() => {}}
-        >
-          Agregar tarifa
-        </Button>
+        <AddRateDialog></AddRateDialog>
       </div>
 
       {/* ==========================================

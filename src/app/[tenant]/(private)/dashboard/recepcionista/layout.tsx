@@ -26,17 +26,18 @@ interface ReceptionistDashboardLayoutProps {
 
 
 
-export default async function ReceptionistDashboardLayout({children, params}: ReceptionistDashboardLayoutProps) {
+export default function ReceptionistDashboardLayout({children, params}: ReceptionistDashboardLayoutProps) {
   //la idea es crear aca las promesas y pasarlo al contex del dashboarddatalayer y que se comience a procesar desde aqui, pero que la promesa se espere en el cliente.
 
 
 
-await connection();
+
 
 
 
 // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
   const templateTabelDataPromise: Promise<OrderTemplate[] | null> = (async () => {
+    await connection();
     const { tenant } = await params;
     // Esperamos a que el tenant se resuelva para obtener su ID
     const tenantResult = await fetchTenantData(tenant);

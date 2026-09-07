@@ -1,8 +1,18 @@
 -- ============================================================
-OJO QUE NO ESTA MIGRADO
+-- TABLA: rate_fee_components
 -- ============================================================
-
-
+-- Relaciona una tarifa de servicio vehicular con los fees
+-- que componen dicha tarifa.
+--
+-- Ejemplo:
+-- Una tarifa de RTM puede estar compuesta por:
+--   - Fee de servicio
+--   - Fee ANSV
+--   - Otro concepto adicional
+--
+-- La tabla pertenece al tenant y cada relación conecta:
+--   vehicle_service_rate → fee_types
+-- ============================================================
 
 
 -- ============================================================
@@ -24,47 +34,45 @@ CREATE TABLE public.rate_fee_components (
     -- Cada registro de fee_types representa una versión
     -- concreta del fee, con su propio monto y rango de
     -- años de modelo.
-    fee_type_id UUID NOT NULL,
+    fee_types_id UUID NOT NULL,
 
     -- Registro de creación.
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     -- Registro de última actualización.
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-    -- ========================================================
+ -- ========================================================
     -- CONSTRAINTS
     -- ========================================================
 
     -- El tenant debe existir.
-    CONSTRAINT rate_fee_components_tenant_id_fkey
+    ALTER TABLE public.rate_fee_components
+    ADD CONSTRAINT rate_fee_components_tenant_id_fkey
         FOREIGN KEY (tenant_id)
         REFERENCES public.tenants (id)
-        ON DELETE CASCADE,
+        ON DELETE CASCADE;
 
     -- La tarifa debe existir.
     --
-    -- RESTRICT evita eliminar una tarifa que tenga
-    -- componentes asociados.
-    CONSTRAINT rate_fee_components_vehicle_service_rate_id_fkey
-        FOREIGN KEY (vehicle_service_rate_id)
-        REFERENCES public.vehicle_service_rate (id)
-        ON DELETE RESTRICT,
+    -- Relación con vehicle_service_rate.
+    --Si eliminas una tarifa (vehicle_service_rate), sus relaciones en rate_fee_components desaparecen automáticamente.
+    ALTER TABLE public.rate_fee_components
+    ADD CONSTRAINT rate_fee_components_vehicle_service_rate_id_fkey
+    FOREIGN KEY (vehicle_service_rate_id)
+    REFERENCES public.vehicle_service_rate(id)
+    ON DELETE CASCADE;
 
     -- El fee debe existir.
     --
     -- RESTRICT evita eliminar un fee_type que esté
     -- siendo utilizado por una tarifa.
-    CONSTRAINT rate_fee_components_fee_type_id_fkey
-        FOREIGN KEY (fee_type_id)
+    ALTER TABLE public.rate_fee_components
+    ADD CONSTRAINT rate_fee_components_fee_type_id_fkey
+        FOREIGN KEY (fee_types_id)
         REFERENCES public.fee_types (id)
-        ON DELETE RESTRICT,
-
-    -- Un mismo fee no puede asignarse dos veces
-    -- a la misma tarifa.
-    CONSTRAINT rate_fee_components_rate_fee_type_unique
-        UNIQUE (vehicle_service_rate_id, fee_type_id)
-);
+        ON DELETE RESTRICT;
 
 
 -- ============================================================
@@ -83,7 +91,7 @@ ON public.rate_fee_components (vehicle_service_rate_id);
 
 -- Obtener todas las tarifas que utilizan un determinado fee.
 CREATE INDEX rate_fee_components_fee_type_id_idx
-ON public.rate_fee_components (fee_type_id);
+ON public.rate_fee_components (fee_types_id);
 
 
 -- ============================================================
@@ -106,7 +114,7 @@ COMMENT ON COLUMN public.rate_fee_components.vehicle_service_rate_id IS
 'Identificador de la tarifa de servicio a la que pertenece el fee.';
 
 
-COMMENT ON COLUMN public.rate_fee_components.fee_type_id IS
+COMMENT ON COLUMN public.rate_fee_components.fee_types_id IS
 'Identificador del fee específico asignado a la tarifa. El monto, código, rango de años y demás información se obtiene desde fee_types.';
 
 

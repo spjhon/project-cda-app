@@ -57,6 +57,7 @@ otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/s
 - organizar tanstack para mejor mandar todo el object y no hacer destructuracion de las propiedades del useQuery o el useMutation
 - el sistema de errores seria una carpeta compartida con los alert dialog utilizados
 - organizar las rutas del login para que dejen de ser 100% dinamicas y puedan ser trabajas entre componentes clientes y poder tener instan navigation
+- tener cuidado al cargar desde el context para no cargar todo de una sino que vaya cargandoa medida que se vaya navegando
 
 ## FEATURES QUE FALTAN
 

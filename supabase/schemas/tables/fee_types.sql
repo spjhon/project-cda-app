@@ -279,3 +279,24 @@ USING (
         SELECT public.get_my_tenants()
     )
 );
+
+-- ============================================================
+-- UPDATE
+-- Solo puede actualizar fees de los tenants
+-- a los que pertenece el usuario.
+-- ============================================================
+
+CREATE POLICY "update_fee_types_by_tenant"
+ON public.fee_types
+FOR UPDATE
+TO authenticated
+USING (
+    tenant_id IN (
+        SELECT public.get_my_tenants()
+    )
+)
+WITH CHECK (
+    tenant_id IN (
+        SELECT public.get_my_tenants()
+    )
+);

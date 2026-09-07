@@ -139,12 +139,7 @@ AS $$
     -- ========================================================
     -- ORDENAMIENTO
     -- ========================================================
-    -- 1. Primero los fees activos.
-    -- 2. Después orden alfabético por nombre.
-    -- 3. Finalmente, los más recientes primero.
-    ORDER BY
-        ft.is_active DESC,
-        ft.name,
-        ft.created_at DESC;
+    -- los mas recientes primero
+    ORDER BY ft.created_at DESC;
 
 $$;

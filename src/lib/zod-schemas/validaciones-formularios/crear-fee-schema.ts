@@ -19,15 +19,7 @@ export const createFeeSchema = z
       .trim()
       .min(1, "El nombre del fee es requerido"),
 
-    // ==========================================
-    // CÓDIGO
-    // ==========================================
-
-    code: z
-      .string("El código del fee debe ser un texto")
-      .trim()
-      .min(1, "El código del fee es requerido"),
-
+  
     // ==========================================
     // DESCRIPCIÓN
     // ==========================================
@@ -78,9 +70,7 @@ export const createFeeSchema = z
       .nullable(),
 
 
-  is_active: z.literal(false, {
-  error: "El fee debe crearse como inactivo",
-}),
+ 
 
   })
 
