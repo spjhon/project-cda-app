@@ -353,46 +353,43 @@ export type Database = {
       }
       fee_types: {
         Row: {
-          code: string
           created_at: string
           description: string | null
           fee_amount: number
           id: string
-          is_active: boolean
-          iva_percentage: number
-          model_year_from: number | null
-          model_year_to: number | null
+          iva_percentage: number | null
           name: string
           tenant_id: string
           updated_at: string
+          vehicle_age_from: number | null
+          vehicle_age_to: number | null
+          vehicle_service_rate_id: string
         }
         Insert: {
-          code: string
           created_at?: string
           description?: string | null
           fee_amount: number
           id?: string
-          is_active?: boolean
-          iva_percentage?: number
-          model_year_from?: number | null
-          model_year_to?: number | null
+          iva_percentage?: number | null
           name: string
           tenant_id: string
           updated_at?: string
+          vehicle_age_from?: number | null
+          vehicle_age_to?: number | null
+          vehicle_service_rate_id: string
         }
         Update: {
-          code?: string
           created_at?: string
           description?: string | null
           fee_amount?: number
           id?: string
-          is_active?: boolean
-          iva_percentage?: number
-          model_year_from?: number | null
-          model_year_to?: number | null
+          iva_percentage?: number | null
           name?: string
           tenant_id?: string
           updated_at?: string
+          vehicle_age_from?: number | null
+          vehicle_age_to?: number | null
+          vehicle_service_rate_id?: string
         }
         Relationships: [
           {
@@ -400,6 +397,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_types_vehicle_service_rate_id_fkey"
+            columns: ["vehicle_service_rate_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_service_rate"
             referencedColumns: ["id"]
           },
         ]
@@ -1104,6 +1108,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          iva_percentage: number | null
           service_type: Database["public"]["Enums"]["service_type_enum"]
           tenant_id: string
           updated_at: string
@@ -1114,6 +1119,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          iva_percentage?: number | null
           service_type: Database["public"]["Enums"]["service_type_enum"]
           tenant_id: string
           updated_at?: string
@@ -1124,6 +1130,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          iva_percentage?: number | null
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           tenant_id?: string
           updated_at?: string
@@ -1132,6 +1139,132 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vehicle_service_rate_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_service_rate_classes: {
+        Row: {
+          created_at: string
+          id: string
+          tenant_id: string
+          updated_at: string
+          vehicle_class: Database["public"]["Enums"]["vehicle_class_enum"]
+          vehicle_service_rate_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          vehicle_class: Database["public"]["Enums"]["vehicle_class_enum"]
+          vehicle_service_rate_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          vehicle_class?: Database["public"]["Enums"]["vehicle_class_enum"]
+          vehicle_service_rate_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_rate_classes_rate_id_fkey"
+            columns: ["vehicle_service_rate_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_service_rate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_service_rate_classes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_service_rate_fuels: {
+        Row: {
+          created_at: string
+          fuel_type: Database["public"]["Enums"]["fuel_type_enum"]
+          id: string
+          tenant_id: string
+          updated_at: string
+          vehicle_service_rate_id: string
+        }
+        Insert: {
+          created_at?: string
+          fuel_type: Database["public"]["Enums"]["fuel_type_enum"]
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          vehicle_service_rate_id: string
+        }
+        Update: {
+          created_at?: string
+          fuel_type?: Database["public"]["Enums"]["fuel_type_enum"]
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          vehicle_service_rate_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_rate_fuels_rate_id_fkey"
+            columns: ["vehicle_service_rate_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_service_rate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_service_rate_fuels_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_service_rate_service_types: {
+        Row: {
+          created_at: string
+          id: string
+          service_type: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          tenant_id: string
+          updated_at: string
+          vehicle_service_rate_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_type: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          tenant_id: string
+          updated_at?: string
+          vehicle_service_rate_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_type?: Database["public"]["Enums"]["vehicle_service_type_enum"]
+          tenant_id?: string
+          updated_at?: string
+          vehicle_service_rate_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_rate_service_types_rate_id_fkey"
+            columns: ["vehicle_service_rate_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_service_rate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_service_rate_service_types_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1289,22 +1422,16 @@ export type Database = {
       create_vehicle_service_rate: {
         Args: {
           p_base_price_rtm: number
+          p_classes?: Json
+          p_fees?: Json
+          p_fuels?: Json
+          p_iva_percentage: number
           p_service_type: Database["public"]["Enums"]["service_type_enum"]
+          p_service_types?: Json
           p_tenant_id: string
           p_vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
         }
         Returns: string
-      }
-      fetch_active_vehicle_service_rates: {
-        Args: { p_tenant_id: string }
-        Returns: {
-          base_price: number
-          created_at: string
-          id: string
-          service_type: Database["public"]["Enums"]["service_type_enum"]
-          tenant_id: string
-          vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
-        }[]
       }
       fetch_admin_analitics: {
         Args: never
@@ -1516,6 +1643,23 @@ export type Database = {
           tenant_id: string
           total_count: number
           updated_at: string
+        }[]
+      }
+      fetch_vehicle_service_rates: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          base_price: number
+          classes: Json
+          created_at: string
+          fees: Json
+          fuels: Json
+          id: string
+          is_active: boolean
+          iva_percentage: number
+          service_type: Database["public"]["Enums"]["service_type_enum"]
+          service_types: Json
+          tenant_id: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"]
         }[]
       }
       get_entry_orders_for_export: {
@@ -1730,12 +1874,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1759,11 +1903,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1784,11 +1928,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1809,11 +1953,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1826,11 +1970,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

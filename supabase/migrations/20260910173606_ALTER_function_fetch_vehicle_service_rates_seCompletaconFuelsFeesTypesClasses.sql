@@ -1,3 +1,7 @@
+DROP FUNCTION IF EXISTS public.fetch_active_vehicle_service_rates(
+    UUID
+);
+
 -- ============================================================
 -- RPC: OBTENER TODAS LAS TARIFAS DE SERVICIOS
 -- ============================================================

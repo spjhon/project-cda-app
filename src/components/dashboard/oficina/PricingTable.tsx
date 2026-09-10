@@ -1,10 +1,6 @@
 "use client"
 
-import { useContext, useMemo } from "react"
-
-
-
-
+import { useContext, useMemo, useState } from "react"
 
 import {
   createColumnHelper,
@@ -33,14 +29,28 @@ import {
   Gauge,
   ShieldAlert,
   Trash2,
+  Eye,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { PermissionsContext } from "@/contexts/PermissionsLoaderContext"
-import { useVehicleRates, VehicleRate } from "@/lib/client-actions/fetch_rates"
-import { AddRateDialog } from "./AddRate"
+import { Switch } from "@/components/ui/switch"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext"
+import {
+  useVehicleRates,
+  VehicleRate,
+} from "@/lib/client-actions/fetch_rates"
+
+import { AddRateDialog } from "./AddRate"
 
 // ==========================================
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
@@ -70,31 +80,341 @@ const SERVICE_TYPE_MAP: Record<string, string> = {
   otro: "Otro",
 }
 
+const FUEL_TYPE_MAP: Record<string, string> = {
+  gasolina: "Gasolina",
+  gas_natural_vehicular: "Gas Natural Vehicular",
+  diesel: "Diésel",
+  gas_gasolina: "Gas / Gasolina",
+  hibrido: "Híbrido",
+  electrico: "Eléctrico",
+  etanol: "Etanol",
+  biodiesel: "Biodiésel",
+  hidrogeno: "Hidrógeno",
+}
+
+const VEHICLE_CLASS_MAP: Record<string, string> = {
+  automovil: "Automóvil",
+  bus: "Bus",
+  buseta: "Buseta",
+  camion: "Camión",
+  camioneta: "Camioneta",
+  campero: "Campero",
+  microbus: "Microbús",
+  tractocamion: "Tractocamión",
+  motocicleta: "Motocicleta",
+  motocarro: "Motocarro",
+  mototriciclo: "Mototriciclo",
+  cuatrimoto: "Cuatrimoto",
+  remolque: "Remolque",
+  semiremolque: "Semirremolque",
+  volqueta: "Volqueta",
+  sin_clase: "Sin clase",
+  maquinaria_construccion_o_minera:
+    "Maquinaria de construcción o minera",
+  ciclomotor: "Ciclomotor",
+  tricimoto: "Tricimoto",
+  cuadriciclo: "Cuadriciclo",
+}
+
+const VEHICLE_SERVICE_TYPE_MAP: Record<string, string> = {
+  particular: "Particular",
+  enseñanza: "Enseñanza",
+  oficial: "Oficial",
+  publico: "Público",
+  diplomático: "Diplomático",
+  especial: "Especial",
+}
+
 const columnHelper = createColumnHelper<VehicleRate>()
 
+// ==========================================
+// DIALOG: COMBUSTIBLES
+// ==========================================
+
+function FuelsDialog({
+  rate,
+  open,
+  onOpenChange,
+}: {
+  rate: VehicleRate
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Combustibles</DialogTitle>
+          <DialogDescription>
+            Combustibles asociados a esta tarifa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-wrap gap-2 pt-2">
+          {rate.fuels.length > 0 ? (
+            rate.fuels.map((fuel) => (
+              <Badge key={fuel} variant="secondary">
+                {FUEL_TYPE_MAP[fuel] || fuel}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              No hay combustibles asociados.
+            </span>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ==========================================
+// DIALOG: CLASES
+// ==========================================
+
+function ClassesDialog({
+  rate,
+  open,
+  onOpenChange,
+}: {
+  rate: VehicleRate
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Clases de vehículo</DialogTitle>
+          <DialogDescription>
+            Clases de vehículo asociadas a esta tarifa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-wrap gap-2 pt-2">
+          {rate.classes.length > 0 ? (
+            rate.classes.map((vehicleClass) => (
+              <Badge
+                key={vehicleClass}
+                variant="secondary"
+              >
+                {VEHICLE_CLASS_MAP[vehicleClass] ||
+                  vehicleClass}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              No hay clases asociadas.
+            </span>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ==========================================
+// DIALOG: TIPO DE SERVICIO DEL VEHÍCULO
+// ==========================================
+
+function VehicleServiceTypesDialog({
+  rate,
+  open,
+  onOpenChange,
+}: {
+  rate: VehicleRate
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Tipo de servicio</DialogTitle>
+          <DialogDescription>
+            Tipos de servicio del vehículo asociados a
+            esta tarifa.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-wrap gap-2 pt-2">
+          {rate.service_types.length > 0 ? (
+            rate.service_types.map((serviceType) => (
+              <Badge
+                key={serviceType}
+                variant="secondary"
+              >
+                {VEHICLE_SERVICE_TYPE_MAP[
+                  serviceType
+                ] || serviceType}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              No hay tipos de servicio asociados.
+            </span>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ==========================================
+// DIALOG: FEES
+// ==========================================
+
+function FeesDialog({
+  rate,
+  open,
+  onOpenChange,
+}: {
+  rate: VehicleRate
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tarifas adicionales</DialogTitle>
+          <DialogDescription>
+            Tarifas asociadas a este tipo de servicio y
+            sus condiciones.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-2">
+          {rate.fees.length > 0 ? (
+            rate.fees.map((fee) => (
+              <div
+                key={fee.id}
+                className="rounded-xl border border-border bg-muted/20 p-4 space-y-3"
+              >
+                {/* Nombre */}
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-foreground">
+                      {fee.name}
+                    </p>
+
+                    {fee.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {fee.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <span className="font-bold text-primary whitespace-nowrap">
+                    $
+                    {fee.fee_amount.toLocaleString(
+                      "es-CO",
+                    )}
+                  </span>
+                </div>
+
+                {/* Información */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-border bg-background p-3">
+                    <p className="text-xs text-muted-foreground">
+                      IVA
+                    </p>
+
+                    <p className="text-sm font-medium mt-1">
+                      {fee.iva_percentage === null
+                        ? "Sin IVA"
+                        : `${fee.iva_percentage}%`}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-background p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Rango de edad
+                    </p>
+
+                    <p className="text-sm font-medium mt-1">
+                      {fee.vehicle_age_from !== null ||
+                      fee.vehicle_age_to !== null
+                        ? `${fee.vehicle_age_from ?? "Sin límite"} - ${
+                            fee.vehicle_age_to ?? "Sin límite"
+                          } años`
+                        : "Sin rango de edad"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No hay tarifas adicionales asociadas.
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ==========================================
+// TABLA
+// ==========================================
+
 export default function RatesTable() {
-  
+  // ==========================================
+  // TENANT
+  // ==========================================
 
+  const permissionsContextRecived = useContext(
+    PermissionsContext,
+  )
 
-  // 🔥 Obtener tenantId del PermissionsContext (que viene del server)
-    const permissionsContextRecived = useContext(PermissionsContext)
-    const tenantId = permissionsContextRecived?.PermissionsContextValue.tenantObject?.id
+  const tenantId =
+    permissionsContextRecived?.PermissionsContextValue
+      .tenantObject?.id
 
+  // ==========================================
+  // OBTENER RATES
+  // ==========================================
 
+  const {
+    data: rates = [],
+    isLoading: isLoadingRates,
+    isFetching: isFetchingRates,
+    error: errorRates,
+    refetch: refetchRates,
+  } = useVehicleRates({
+    tenantId,
+  })
 
+  // ==========================================
+  // PLACEHOLDER MUTATION: ESTADO ACTIVO
+  // ==========================================
 
+  const handleToggleActive = (rate: VehicleRate) => {
+    console.log(
+      "PLACEHOLDER: cambiar estado del rate",
+      rate.id,
+      !rate.is_active,
+    )
 
-const {
-  data: rates = [],
-  isLoading: isLoadingRates,
-  isFetching: isFetchingRates,
-  error: errorRates,
-  refetch: refetchRates,
-} = useVehicleRates({
-  tenantId,
-})
+    // TODO:
+    // Aquí irá la mutación para actualizar is_active.
+  }
 
+  // ==========================================
+  // PLACEHOLDER MUTATION: ELIMINAR
+  // ==========================================
 
+  const handleDeleteRate = (rate: VehicleRate) => {
+    console.log(
+      "PLACEHOLDER: eliminar rate",
+      rate.id,
+    )
+
+    // TODO:
+    // Aquí irá la mutación para eliminar/desactivar
+    // la tarifa.
+  }
 
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS
@@ -105,8 +425,10 @@ const {
       // ------------------------------------------
       // FECHA
       // ------------------------------------------
+
       columnHelper.accessor("created_at", {
         header: "Fecha",
+
         cell: (info) => {
           const date = new Date(info.getValue())
 
@@ -123,10 +445,13 @@ const {
       // ------------------------------------------
       // SERVICIO
       // ------------------------------------------
+
       columnHelper.accessor("service_type", {
         header: "Servicio",
+
         cell: (info) => {
           const value = info.getValue() as string
+
           const translatedLabel =
             SERVICE_TYPE_MAP[value] || value || "---"
 
@@ -141,8 +466,10 @@ const {
       // ------------------------------------------
       // TIPO DE VEHÍCULO
       // ------------------------------------------
+
       columnHelper.accessor("vehicle_type", {
         header: "Tipo de Vehículo",
+
         cell: (info) => {
           const value = info.getValue() as string
 
@@ -170,8 +497,10 @@ const {
       // ------------------------------------------
       // PRECIO BASE
       // ------------------------------------------
+
       columnHelper.accessor("base_price", {
         header: "Precio Base",
+
         cell: (info) => {
           const price = info.getValue() as number
 
@@ -184,94 +513,183 @@ const {
       }),
 
       // ------------------------------------------
-      // COBRA IVA
-      // ------------------------------------------
-      columnHelper.display({
-        id: "charges_vat",
-        header: "¿Cobra IVA?",
-        cell: () => (
-          <Badge
-            variant="outline"
-            className="font-medium"
-          >
-            Sí
-          </Badge>
-        ),
-      }),
-
-      // ------------------------------------------
       // % IVA
       // ------------------------------------------
-      columnHelper.display({
-        id: "vat_percentage",
+
+      columnHelper.accessor("iva_percentage", {
         header: "% IVA",
-        cell: () => (
-          <span className="text-sm font-medium">
-            0%
-          </span>
-        ),
+
+        cell: (info) => {
+          const iva = info.getValue()
+
+          if (iva === null) {
+            return (
+              <Badge
+                variant="outline"
+                className="text-xs"
+              >
+                Sin IVA
+              </Badge>
+            )
+          }
+
+          return (
+            <span className="text-sm font-medium whitespace-nowrap">
+              {iva}%
+            </span>
+          )
+        },
       }),
 
       // ------------------------------------------
-      // TARIFAS
+      // COMBUSTIBLES
       // ------------------------------------------
+
+      columnHelper.display({
+        id: "fuels",
+
+        header: "Combustibles",
+
+        cell: ({ row }) => {
+          const rate = row.original
+
+          return (
+            <FuelsCell rate={rate} />
+          )
+        },
+      }),
+
+      // ------------------------------------------
+      // CLASES
+      // ------------------------------------------
+
+      columnHelper.display({
+        id: "classes",
+
+        header: "Clases",
+
+        cell: ({ row }) => {
+          const rate = row.original
+
+          return (
+            <ClassesCell rate={rate} />
+          )
+        },
+      }),
+
+      // ------------------------------------------
+      // TIPO DE SERVICIO DEL VEHÍCULO
+      // ------------------------------------------
+
+      columnHelper.display({
+        id: "service_types",
+
+        header: "Tipo servicio vehículo",
+
+        cell: ({ row }) => {
+          const rate = row.original
+
+          return (
+            <VehicleServiceTypesCell rate={rate} />
+          )
+        },
+      }),
+
+      // ------------------------------------------
+      // FEES
+      // ------------------------------------------
+
       columnHelper.display({
         id: "fees",
-        header: "Tarifas",
-        cell: () => (
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm text-foreground whitespace-nowrap">
-              $10.000
-            </span>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8"
-              onClick={() => {}}
-            >
-              Ver tarifas
-            </Button>
-          </div>
-        ),
+        header: "Tarifas",
+
+        cell: ({ row }) => {
+          const rate = row.original
+
+          return (
+            <FeesCell rate={rate} />
+          )
+        },
       }),
 
       // ------------------------------------------
-      // TOTAL
+      // ESTADO
       // ------------------------------------------
-      columnHelper.display({
-        id: "total",
-        header: "Total",
-        cell: () => (
-          <span className="font-bold text-primary text-sm whitespace-nowrap">
-            $0
-          </span>
-        ),
+
+      columnHelper.accessor("is_active", {
+        header: "Estado",
+
+        cell: (info) => {
+          const rate = info.row.original
+          const isActive = info.getValue()
+
+          return (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isActive}
+                onCheckedChange={() =>
+                  handleToggleActive(rate)
+                }
+                aria-label={
+                  isActive
+                    ? "Desactivar tarifa"
+                    : "Activar tarifa"
+                }
+              />
+
+              <Badge
+                variant={
+                  isActive
+                    ? "default"
+                    : "secondary"
+                }
+                className="whitespace-nowrap"
+              >
+                {isActive
+                  ? "Activa"
+                  : "Desactivada"}
+              </Badge>
+            </div>
+          )
+        },
       }),
 
       // ------------------------------------------
       // ACCIONES
       // ------------------------------------------
+
       columnHelper.display({
         id: "actions",
+
         header: "",
-        cell: () => (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => {}}
-            title="Eliminar tarifa"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        ),
+
+        cell: ({ row }) => {
+          const rate = row.original
+
+          return (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() =>
+                handleDeleteRate(rate)
+              }
+              title="Eliminar tarifa"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )
+        },
       }),
     ],
     [],
   )
+
+  // ==========================================
+  // TABLA TANSTACK
+  // ==========================================
 
   const table = useReactTable({
     data: rates || [],
@@ -280,7 +698,7 @@ const {
   })
 
   // ==========================================
-  // RENDERIZADO DEL BADGE DE ESTADO
+  // STATUS BADGE
   // ==========================================
 
   const renderStatusBadge = () => {
@@ -296,7 +714,10 @@ const {
       )
     }
 
-    if ( isFetchingRates || isLoadingRates) {
+    if (
+      isFetchingRates ||
+      isLoadingRates
+    ) {
       return (
         <Badge
           variant="default"
@@ -304,7 +725,7 @@ const {
         >
           <Loader2 className="h-3.5 w-4 animate-spin" />
 
-          { isLoadingRates
+          {isLoadingRates
             ? "Cargando..."
             : "Actualizando..."}
         </Badge>
@@ -317,6 +738,7 @@ const {
         className="gap-1.5 px-3 py-1 w-35 shadow-sm min-w-35 justify-center border-emerald-500 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800"
       >
         <CheckCircle2 className="h-3.5 w-4" />
+
         Datos Actualizados
       </Badge>
     )
@@ -328,7 +750,6 @@ const {
 
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm">
-
       {/* ==========================================
           SECCIÓN SUPERIOR
           ========================================== */}
@@ -341,28 +762,27 @@ const {
         </div>
 
         <div className="flex items-center gap-3">
-
-          {/* Badge de estado */}
           {renderStatusBadge()}
 
-          {/* Botón de refrescar */}
-          
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetchRates()}
-            
+            onClick={() =>
+              refetchRates()
+            }
             className="h-9"
           >
             <Loader2
               className={`h-4 w-4 mr-2 ${
-                ( isLoadingRates || isFetchingRates) ? "animate-spin" : ""
+                isLoadingRates ||
+                isFetchingRates
+                  ? "animate-spin"
+                  : ""
               }`}
             />
 
             Refrescar
           </Button>
-         
         </div>
       </div>
 
@@ -371,7 +791,7 @@ const {
           ========================================== */}
 
       <div className="flex justify-end">
-        <AddRateDialog></AddRateDialog>
+        <AddRateDialog />
       </div>
 
       {/* ==========================================
@@ -381,31 +801,38 @@ const {
       <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50 border-b border-border">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="hover:bg-transparent"
-              >
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="font-semibold text-foreground h-11 whitespace-nowrap"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            {table
+              .getHeaderGroups()
+              .map((headerGroup) => (
+                <TableRow
+                  key={headerGroup.id}
+                  className="hover:bg-transparent"
+                >
+                  {headerGroup.headers.map(
+                    (header) => (
+                      <TableHead
+                        key={header.id}
+                        className="font-semibold text-foreground h-11 whitespace-nowrap"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header
+                                .column
+                                .columnDef
+                                .header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    ),
+                  )}
+                </TableRow>
+              ))}
           </TableHeader>
 
           <TableBody>
-
             {/* Primera carga */}
+
             {isLoadingRates ? (
               <TableRow>
                 <TableCell
@@ -421,10 +848,9 @@ const {
                   </div>
                 </TableCell>
               </TableRow>
-
-            ) : isFetchingRates && !isLoadingRates ? (
-
+            ) : isFetchingRates ? (
               /* Refetch en segundo plano */
+
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -439,10 +865,9 @@ const {
                   </div>
                 </TableCell>
               </TableRow>
-
             ) : errorRates ? (
-
               /* Error */
+
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -458,52 +883,189 @@ const {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => refetchRates()}
+                      onClick={() =>
+                        refetchRates()
+                      }
                     >
                       Reintentar
                     </Button>
                   </div>
                 </TableCell>
               </TableRow>
-
             ) : table.getRowModel().rows.length ? (
-
               /* Datos cargados */
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="hover:bg-muted/50 border-b border-border transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="py-3"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
 
+              table
+                .getRowModel()
+                .rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="hover:bg-muted/50 border-b border-border transition-colors"
+                  >
+                    {row
+                      .getVisibleCells()
+                      .map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className="py-3"
+                        >
+                          {flexRender(
+                            cell.column.columnDef
+                              .cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                  </TableRow>
+                ))
             ) : (
-
               /* Sin datos */
+
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="text-center py-12 text-muted-foreground font-medium"
                 >
-                  No se encontraron tarifas configuradas
+                  No se encontraron tarifas
+                  configuradas
                 </TableCell>
               </TableRow>
             )}
-
           </TableBody>
         </Table>
       </div>
     </div>
+  )
+}
+
+// ============================================================
+// CELDA: COMBUSTIBLES
+// ============================================================
+
+function FuelsCell({
+  rate,
+}: {
+  rate: VehicleRate
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 gap-2"
+        onClick={() => setOpen(true)}
+      >
+        <Eye className="h-3.5 w-3.5" />
+        Ver ({rate.fuels.length})
+      </Button>
+
+      <FuelsDialog
+        rate={rate}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  )
+}
+
+// ============================================================
+// CELDA: CLASES
+// ============================================================
+
+function ClassesCell({
+  rate,
+}: {
+  rate: VehicleRate
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 gap-2"
+        onClick={() => setOpen(true)}
+      >
+        <Eye className="h-3.5 w-3.5" />
+        Ver ({rate.classes.length})
+      </Button>
+
+      <ClassesDialog
+        rate={rate}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  )
+}
+
+// ============================================================
+// CELDA: TIPOS DE SERVICIO
+// ============================================================
+
+function VehicleServiceTypesCell({
+  rate,
+}: {
+  rate: VehicleRate
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 gap-2"
+        onClick={() => setOpen(true)}
+      >
+        <Eye className="h-3.5 w-3.5" />
+        Ver ({rate.service_types.length})
+      </Button>
+
+      <VehicleServiceTypesDialog
+        rate={rate}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
+  )
+}
+
+// ============================================================
+// CELDA: FEES
+// ============================================================
+
+function FeesCell({
+  rate,
+}: {
+  rate: VehicleRate
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 gap-2"
+        onClick={() => setOpen(true)}
+      >
+        <Eye className="h-3.5 w-3.5" />
+        Ver ({rate.fees.length})
+      </Button>
+
+      <FeesDialog
+        rate={rate}
+        open={open}
+        onOpenChange={setOpen}
+      />
+    </>
   )
 }

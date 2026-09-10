@@ -1,21 +1,28 @@
+
 "use client"
 
 import { useMutation } from "@tanstack/react-query";
 
-import { Database } from "../../../supabase/types/database.types";
-
 import { createSupabaseBrowserClient } from "../supabase/client";
 
-import { ServiceType } from "../zod-schemas/order-schema";
+import {
+  CreateVehicleServiceRateInput,
+  createVehicleServiceRateSchema,
+} from "../zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
 
-import { createVehicleServiceRateSchema } from "../zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
+import { Database } from "../../../supabase/types/database.types";
 
 // ============================================================
 // TIPOS
 // ============================================================
 
-type VehicleType =
-  Database["public"]["Enums"]["vehicle_type_enum"];
+type CreateVehicleServiceRateRpcArgs =
+  Omit<
+    Database["public"]["Functions"]["create_vehicle_service_rate"]["Args"],
+    "p_iva_percentage"
+  > & {
+    p_iva_percentage: number | null;
+  };
 
 // ============================================================
 // HOOK
@@ -23,12 +30,8 @@ type VehicleType =
 
 export function useCreateVehicleServiceRate() {
   return useMutation({
-    mutationFn: async (rate: {
-      tenant_id: string;
-      vehicle_type: VehicleType;
-      base_price_rtm: string;
-      service_type: ServiceType;
-    }) => {
+
+    mutationFn: async (rate: CreateVehicleServiceRateInput) => {
 
       // ========================================================
       // VALIDAR DATOS
@@ -36,11 +39,11 @@ export function useCreateVehicleServiceRate() {
 
       const result = createVehicleServiceRateSchema.safeParse(rate);
 
-    if (!result.success) {
-  throw new Error(
-    result.error.issues.map((issue) => issue.message).join("\n")
-  );
-}
+      if (!result.success) {
+        throw new Error(
+          result.error.issues.map((issue) => issue.message).join("\n")
+        );
+      }
 
       // ========================================================
       // CLIENTE SUPABASE
@@ -49,17 +52,26 @@ export function useCreateVehicleServiceRate() {
       const supabaseBrowser = createSupabaseBrowserClient();
 
       // ========================================================
-      // CREAR RATE PRINCIPAL
-      // ========================================================
+// CREAR RATE PRINCIPAL
+// ========================================================
+
+const rpcArgs: CreateVehicleServiceRateRpcArgs = {
+  p_tenant_id: rate.tenant_id,
+  p_vehicle_type: rate.vehicle_type,
+  p_base_price_rtm: Number(rate.base_price_rtm),
+  p_iva_percentage: rate.iva_percentage,
+  p_service_type: rate.service_type,
+
+  p_fuels: rate.fuels,
+  p_classes: rate.classes,
+  p_service_types: rate.service_types,
+
+  p_fees: rate.fees,
+};
 
       const { data, error } = await supabaseBrowser.rpc(
         "create_vehicle_service_rate",
-        {
-          p_tenant_id: rate.tenant_id,
-          p_vehicle_type: rate.vehicle_type,
-          p_base_price_rtm: Number(rate.base_price_rtm),
-          p_service_type: rate.service_type,
-        }
+        rpcArgs as Database["public"]["Functions"]["create_vehicle_service_rate"]["Args"]
       );
 
       // ========================================================
@@ -86,5 +98,6 @@ export function useCreateVehicleServiceRate() {
 
       return data;
     },
+
   });
 }

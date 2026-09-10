@@ -18,9 +18,11 @@ CREATE TABLE public.vehicle_service_rate (
     -- Tipo de servicio al que corresponde la tarifa.
     service_type public.service_type_enum NOT NULL,
 
+    iva_percentage NUMERIC(5,2);
+
     -- Indica si la tarifa está actualmente disponible
     -- para ser utilizada en nuevas órdenes.
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- Registro de creación.
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -38,7 +40,16 @@ CREATE TABLE public.vehicle_service_rate (
         ON DELETE CASCADE,
 
     CONSTRAINT vehicle_service_rate_base_price_check
-        CHECK (base_price >= 0)
+        CHECK (base_price >= 0),
+
+        ADD CONSTRAINT vehicle_service_rate_iva_percentage_check
+        CHECK (
+            iva_percentage IS NULL
+            OR (
+                iva_percentage >= 0
+                AND iva_percentage <= 100
+            )
+        );
 
 );
 

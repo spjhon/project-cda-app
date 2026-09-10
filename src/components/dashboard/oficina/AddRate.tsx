@@ -44,6 +44,7 @@ import { Database } from "../../../../supabase/types/database.types";
 import FeesTable from "./FeesTable";
 import { useCreateVehicleServiceRate } from "@/lib/client-actions/create_vehicle_service_rate";
 import { createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
+import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
 
 // -----------------------------------------------------------------------------
 // OPCIONES
@@ -151,14 +152,7 @@ const RATE_SERVICE_TYPES: {
 // TIPOS
 // -----------------------------------------------------------------------------
 
-export interface RateFeeFormState {
-  name: string;
-  description: string;
-  fee_amount: string;
-  iva_percentage: string;
-  model_year_from: string;
-  model_year_to: string;
-}
+
 
 interface RateFormState {
   tenant_id: string;
@@ -170,7 +164,7 @@ interface RateFormState {
   service_types: VehicleServiceType[];
   base_price_rtm: string;
   iva_percentage: string;
-  fees: RateFeeFormState[];
+  fees: CreateFeeInput[];
 }
 
 interface MultiSelectOption<T extends string> {
@@ -332,6 +326,7 @@ export function AddRateDialog() {
   });
 
 
+
  const createVehicleServiceRateMutation = useCreateVehicleServiceRate()
 
 
@@ -366,35 +361,41 @@ export function AddRateDialog() {
 
 const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault();
+  event.stopPropagation();
 
-  // ========================================================
-  // DATOS DEL FORMULARIO
-  // ========================================================
+// ========================================================
+// DATOS DEL FORMULARIO
+// ========================================================
 
-  const data = {
-    tenant_id: form.tenant_id,
-    name: form.name.trim(),
-    service_type: form.service_type,
-    vehicle_type: form.vehicle_type,
-    fuels: form.fuels,
-    classes: form.classes,
-    service_types: form.service_types,
-    base_price_rtm:
-      form.base_price_rtm === ""
-        ? undefined
-        : Number(form.base_price_rtm),
-    iva_percentage:
-      form.iva_percentage === ""
-        ? undefined
-        : Number(form.iva_percentage),
-    fees: form.fees,
-  };
+const data = {
+  tenant_id: form.tenant_id,
+  name: form.name.trim(),
+  service_type: form.service_type,
+  vehicle_type: form.vehicle_type,
+  fuels: form.fuels,
+  classes: form.classes,
+  service_types: form.service_types,
+
+  base_price_rtm:
+    form.base_price_rtm === ""
+      ? null
+      : Number(form.base_price_rtm),
+
+  iva_percentage:
+    form.iva_percentage === ""
+      ? null
+      : Number(form.iva_percentage),
+
+  fees: form.fees,
+};
 
   // ========================================================
   // VALIDAR DATOS CON ZOD
   // ========================================================
 
   const result = createVehicleServiceRateSchema.safeParse(data);
+
+ 
 
   if (!result.success) {
     setErrors(
@@ -408,28 +409,38 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     return;
   }
 
-  // ========================================================
-  // CREAR RATE PRINCIPAL
-  // ========================================================
+// ========================================================
+// CREAR RATE PRINCIPAL
+// ========================================================
 
-  createVehicleServiceRateMutation.mutate(
-    {
-      tenant_id: result.data.tenant_id,
-      vehicle_type: result.data.vehicle_type,
-      base_price_rtm: result.data.base_price_rtm.toString(),
-      service_type: result.data.service_type,
+createVehicleServiceRateMutation.mutate(
+  {
+    tenant_id: result.data.tenant_id,
+    vehicle_type: result.data.vehicle_type,
+    base_price_rtm: result.data.base_price_rtm,
+    iva_percentage: result.data.iva_percentage,
+    service_type: result.data.service_type,
+
+    fuels: result.data.fuels,
+    classes: result.data.classes,
+    service_types: result.data.service_types,
+
+    fees: result.data.fees,
+  },
+  {
+    onSuccess: () => {
+      setSuccessMessages("La tarifa fue creada correctamente.");
+      setIsSuccessOpen(true);
     },
-    {
-      onSuccess: (rateId) => {
-        console.log("Rate creado:", rateId);
-      },
+    onError: (error) => {
+      setErrors(error.message);
+      setIsErrorOpen(true);
+    },
+  }
+);
 
-      onError: (error) => {
-        setErrors(error.message);
-        setIsErrorOpen(true);
-      },
-    }
-  );
+
+
 };
 
 
@@ -622,7 +633,7 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
                 <Input
                   id="iva_percentage"
                   type="number"
-                  min="0"
+                  min="1"
                   max="100"
                   step="0.01"
                   value={form.iva_percentage}

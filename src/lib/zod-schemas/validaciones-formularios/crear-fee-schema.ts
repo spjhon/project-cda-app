@@ -1,4 +1,3 @@
-
 import { z } from "zod"
 
 // ==========================================
@@ -19,7 +18,6 @@ export const createFeeSchema = z
       .trim()
       .min(1, "El nombre del fee es requerido"),
 
-  
     // ==========================================
     // DESCRIPCIÓN
     // ==========================================
@@ -44,64 +42,61 @@ export const createFeeSchema = z
 
     iva_percentage: z
       .number("El IVA debe ser un número")
-      .min(0, "El IVA no puede ser negativo")
-      .max(100, "El IVA no puede ser superior al 100%"),
+      .min(1, "El IVA no puede ser negativo o 0")
+      .max(100, "El IVA no puede ser superior al 100%")
+      .nullable(),
 
     // ==========================================
-    // AÑO MODELO DESDE
+    // ANTIGÜEDAD DEL VEHÍCULO DESDE
     // ==========================================
 
-    model_year_from: z
-      .number("El año inicial debe ser un número")
-      .int("El año inicial debe ser un número entero")
-      .min(1900, "El año inicial mínimo permitido es 1900")
+    vehicle_age_from: z
+      .number("La antigüedad inicial debe ser un número")
+      .int("La antigüedad inicial debe ser un número entero")
+      .min(0, "La antigüedad inicial no puede ser negativa")
       .optional()
       .nullable(),
 
     // ==========================================
-    // AÑO MODELO HASTA
+    // ANTIGÜEDAD DEL VEHÍCULO HASTA
     // ==========================================
 
-    model_year_to: z
-      .number("El año final debe ser un número")
-      .int("El año final debe ser un número entero")
-      .min(1900, "El año final mínimo permitido es 1900")
+    vehicle_age_to: z
+      .number("La antigüedad final debe ser un número")
+      .int("La antigüedad final debe ser un número entero")
+      .min(0, "La antigüedad final no puede ser negativa")
       .optional()
       .nullable(),
-
-
- 
-
   })
 
   // ==========================================
-  // VALIDAR RANGO DE AÑOS
+  // VALIDAR RANGO DE ANTIGÜEDAD
   // ==========================================
 
   .refine(
     (data) => {
 
-      // Si alguno de los dos años no existe,
+      // Si alguno de los dos límites no existe,
       // no hay nada que comparar.
 
       if (
-        data.model_year_from === null ||
-        data.model_year_from === undefined ||
-        data.model_year_to === null ||
-        data.model_year_to === undefined
+        data.vehicle_age_from === null ||
+        data.vehicle_age_from === undefined ||
+        data.vehicle_age_to === null ||
+        data.vehicle_age_to === undefined
       ) {
         return true
       }
 
-      // El año inicial no puede ser superior
-      // al año final.
+      // La antigüedad inicial no puede ser superior
+      // a la antigüedad final.
 
-      return data.model_year_from <= data.model_year_to
+      return data.vehicle_age_from <= data.vehicle_age_to
     },
     {
       message:
-        "El año inicial no puede ser superior al año final",
-      path: ["model_year_to"],
+        "La antigüedad inicial no puede ser superior a la antigüedad final",
+      path: ["vehicle_age_to"],
     }
   )
 

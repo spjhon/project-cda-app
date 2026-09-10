@@ -19,25 +19,26 @@ import {
 } from "@/components/ui/table";
 
 import { Trash2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+
 import AddFeeDialog from "./AddFee";
-import { RateFeeFormState } from "./AddRate";
 
-
+import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
 
 // -----------------------------------------------------------------------------
 // CONFIGURACIÓN DE COLUMNAS
 // -----------------------------------------------------------------------------
 
-const columnHelper = createColumnHelper<RateFeeFormState>();
+const columnHelper = createColumnHelper<CreateFeeInput>();
 
 // -----------------------------------------------------------------------------
 // PROPS
 // -----------------------------------------------------------------------------
 
 interface FeesTableProps {
-  fees: RateFeeFormState[];
-  onFeesChange: (fees: RateFeeFormState[]) => void;
+  fees: CreateFeeInput[];
+  onFeesChange: (fees: CreateFeeInput[]) => void;
 }
 
 // -----------------------------------------------------------------------------
@@ -70,8 +71,6 @@ export default function FeesTable({
           );
         },
       }),
-
-    
 
       // -----------------------------------------------------------------------
       // DESCRIPCIÓN
@@ -127,24 +126,24 @@ export default function FeesTable({
       }),
 
       // -----------------------------------------------------------------------
-      // AÑOS DEL MODELO
+      // EDAD DEL VEHÍCULO
       // -----------------------------------------------------------------------
 
       columnHelper.display({
-        id: "model_year_range",
-        header: "Años modelo",
+        id: "vehicle_age_range",
+        header: "Edad vehículo",
         cell: ({ row }) => {
-          const from = row.original.model_year_from;
-          const to = row.original.model_year_to;
+          const from = row.original.vehicle_age_from;
+          const to = row.original.vehicle_age_to;
 
-          let label = "Todos los años";
+          let label = "Todas las edades";
 
-          if (from !== "" && to !== "") {
-            label = `${from} - ${to}`;
-          } else if (from !== "") {
-            label = `${from} en adelante`;
-          } else if (to !== "") {
-            label = `Hasta ${to}`;
+          if (from !== null && from !== undefined && to !== null && to !== undefined) {
+            label = `${from} - ${to} años`;
+          } else if (from !== null && from !== undefined) {
+            label = `${from} años en adelante`;
+          } else if (to !== null && to !== undefined) {
+            label = `Hasta ${to} años`;
           }
 
           return (
@@ -155,31 +154,30 @@ export default function FeesTable({
         },
       }),
 
-
       // -----------------------------------------------------------------------
       // ACCIONES
       // -----------------------------------------------------------------------
 
       columnHelper.display({
-  id: "actions",
-  header: "",
-  cell: ({ row }) => (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-      onClick={() => {
-        onFeesChange(
-          fees.filter((_, index) => index !== row.index)
-        );
-      }}
-      title="Eliminar fee"
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  ),
-}),
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => {
+              onFeesChange(
+                fees.filter((_, index) => index !== row.index)
+              );
+            }}
+            title="Eliminar fee"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        ),
+      }),
     ],
     [fees, onFeesChange]
   );
@@ -194,15 +192,12 @@ export default function FeesTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  
-
   // ===========================================================================
   // RENDER
   // ===========================================================================
 
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm">
-      
 
       {/* =====================================================================
           ACCIONES DE LA TABLA
@@ -222,6 +217,7 @@ export default function FeesTable({
 
       <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background overflow-x-auto">
         <Table>
+
           {/* ===================================================================
               HEADER
           ==================================================================== */}
@@ -284,6 +280,7 @@ export default function FeesTable({
               </TableRow>
             )}
           </TableBody>
+
         </Table>
       </div>
     </div>

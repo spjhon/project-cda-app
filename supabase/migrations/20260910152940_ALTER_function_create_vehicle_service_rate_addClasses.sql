@@ -1,3 +1,14 @@
+
+DROP FUNCTION IF EXISTS public.create_vehicle_service_rate(
+    UUID,
+    public.vehicle_type_enum,
+    NUMERIC,
+    NUMERIC,
+    public.service_type_enum,
+    JSONB,
+    JSONB
+);
+
 -- ============================================================
 -- RPC: CREAR TARIFA DE SERVICIO
 -- ============================================================
@@ -6,7 +17,6 @@
 --   - vehicle_service_rate
 --   - vehicle_service_rate_fuels asociados a la tarifa
 --   - vehicle_service_rate_classes asociados a la tarifa
---   - vehicle_service_rate_service_types asociados a la tarifa
 --   - fee_types asociados a la tarifa
 --
 -- IVA:
@@ -16,9 +26,24 @@
 --   - fee_types.iva_percentage
 --       → IVA individual de cada fee
 --
--- Los fuels, classes, service_types y fees llegan como
--- arreglos JSONB.
+-- Los fuels, classes y fees llegan como arreglos JSONB.
 -- ============================================================
+
+
+-- ============================================================
+-- ELIMINAR FIRMA ANTERIOR
+-- ============================================================
+
+DROP FUNCTION IF EXISTS public.create_vehicle_service_rate(
+    UUID,
+    public.vehicle_type_enum,
+    NUMERIC,
+    NUMERIC,
+    public.service_type_enum,
+    JSONB,
+    JSONB
+);
+
 
 -- ============================================================
 -- CREAR NUEVA FUNCIÓN
@@ -32,16 +57,22 @@ CREATE OR REPLACE FUNCTION public.create_vehicle_service_rate(
     p_service_type public.service_type_enum,
     p_fuels JSONB DEFAULT '[]'::JSONB,
     p_classes JSONB DEFAULT '[]'::JSONB,
-    p_service_types JSONB DEFAULT '[]'::JSONB,
     p_fees JSONB DEFAULT '[]'::JSONB
 )
+
 RETURNS UUID
+
 LANGUAGE plpgsql
+
 SECURITY INVOKER
+
 SET search_path = public
+
 AS $$
+
 DECLARE
     v_rate_id UUID;
+
 BEGIN
 
     -- ========================================================
@@ -99,22 +130,6 @@ BEGIN
 
 
     -- ========================================================
-    -- INSERTAR SERVICE TYPES ASOCIADOS A LA TARIFA
-    -- ========================================================
-
-    INSERT INTO public.vehicle_service_rate_service_types (
-        tenant_id,
-        vehicle_service_rate_id,
-        service_type
-    )
-    SELECT
-        p_tenant_id,
-        v_rate_id,
-        service_type::public.vehicle_service_type_enum
-    FROM jsonb_array_elements_text(p_service_types) AS service_type;
-
-
-    -- ========================================================
     -- INSERTAR FEES ASOCIADOS A LA TARIFA
     -- ========================================================
 
@@ -125,8 +140,8 @@ BEGIN
         description,
         fee_amount,
         iva_percentage,
-        vehicle_age_from,
-        vehicle_age_to
+        model_year_from,
+        model_year_to
     )
     SELECT
         p_tenant_id,
@@ -139,14 +154,14 @@ BEGIN
         -- IVA DEL FEE
         -- ====================================================
 
-        NULLIF(fee->>'iva_percentage', '')::NUMERIC(5,2),
+        (fee->>'iva_percentage')::NUMERIC(5,2),
 
         -- ====================================================
-        -- EDAD DEL VEHÍCULO
+        -- RANGO DE AÑOS DEL VEHÍCULO
         -- ====================================================
 
-        NULLIF(fee->>'vehicle_age_from', '')::INTEGER,
-        NULLIF(fee->>'vehicle_age_to', '')::INTEGER
+        NULLIF(fee->>'model_year_from', '')::INTEGER,
+        NULLIF(fee->>'model_year_to', '')::INTEGER
 
     FROM jsonb_array_elements(p_fees) AS fee;
 
@@ -158,4 +173,5 @@ BEGIN
     RETURN v_rate_id;
 
 END;
+
 $$;

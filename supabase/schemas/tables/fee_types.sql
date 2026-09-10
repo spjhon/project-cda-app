@@ -9,14 +9,11 @@ CREATE TABLE public.fee_types (
     -- Tenant propietario de la configuración del fee.
     tenant_id UUID NOT NULL,
 
+    vehicle_service_rate_id UUID NOT NULL
+
     -- Nombre visible del fee.
     -- Ej: "ANSV", "SICOV", "Recaudo"
     name TEXT NOT NULL,
-
-    -- Código interno que identifica el tipo de fee.
-    -- Puede repetirse entre diferentes configuraciones/versiones.
-    -- Ej: "ANSV", "SICOV", "RECAUDO"
-    code TEXT NOT NULL,
 
     -- Descripción opcional del fee.
     description TEXT,
@@ -26,19 +23,16 @@ CREATE TABLE public.fee_types (
 
     -- Porcentaje de IVA aplicable al fee.
 -- Ej: 19.00 = 19%, 0.00 = sin IVA.
-iva_percentage NUMERIC(5,2) NOT NULL DEFAULT 0,
+iva_percentage NUMERIC(5,2),
 
-    -- Año inicial del modelo del vehículo al que aplica.
-    -- NULL = aplica para cualquier año.
+  
     model_year_from INTEGER,
+    vehicle_age_from INTEGER,
 
-    -- Año final del modelo del vehículo al que aplica.
-    -- NULL = aplica para cualquier año.
-    model_year_to INTEGER,
 
-    -- Indica si esta configuración está disponible
-    -- para ser asignada a nuevas tarifas.
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    vehicle_age_to INTEGER,
+
 
     -- Registro de creación.
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -50,6 +44,13 @@ iva_percentage NUMERIC(5,2) NOT NULL DEFAULT 0,
     -- CONSTRAINTS
     -- ========================================================
 
+ALTER TABLE public.fee_types
+ADD CONSTRAINT fee_types_vehicle_service_rate_id_fkey
+FOREIGN KEY (vehicle_service_rate_id)
+REFERENCES public.vehicle_service_rate (id)
+ON DELETE CASCADE;
+
+
     CONSTRAINT fee_types_tenant_id_fkey
         FOREIGN KEY (tenant_id)
         REFERENCES public.tenants (id)
@@ -59,41 +60,43 @@ iva_percentage NUMERIC(5,2) NOT NULL DEFAULT 0,
     CONSTRAINT fee_types_name_check
         CHECK (length(trim(name)) > 0),
 
-    -- El código no puede estar vacío.
-    CONSTRAINT fee_types_code_check
-        CHECK (length(trim(code)) > 0),
-
     -- El valor del fee no puede ser negativo.
     CONSTRAINT fee_types_fee_amount_check
         CHECK (fee_amount >= 0),
 
-    -- Los años, cuando existen, deben ser válidos.
-    CONSTRAINT fee_types_model_year_from_check
-        CHECK (
-            model_year_from IS NULL
-            OR model_year_from >= 1900
-        ),
 
-    CONSTRAINT fee_types_model_year_to_check
-        CHECK (
-            model_year_to IS NULL
-            OR model_year_to >= 1900
-        ),
+ALTER TABLE public.fee_types
+ADD CONSTRAINT fee_types_vehicle_age_from_check
+CHECK (
+    vehicle_age_from IS NULL
+    OR vehicle_age_from >= 0
+);
 
-    -- Si existen ambos años, el inicial no puede ser
-    -- posterior al final.
-    CONSTRAINT fee_types_model_year_range_check
-        CHECK (
-            model_year_from IS NULL
-            OR model_year_to IS NULL
-            OR model_year_from <= model_year_to
-        ),
+ALTER TABLE public.fee_types
+ADD CONSTRAINT fee_types_vehicle_age_to_check
+CHECK (
+    vehicle_age_to IS NULL
+    OR vehicle_age_to >= 0
+);
+
+ALTER TABLE public.fee_types
+ADD CONSTRAINT fee_types_vehicle_age_range_check
+CHECK (
+    vehicle_age_from IS NULL
+    OR vehicle_age_to IS NULL
+    OR vehicle_age_from <= vehicle_age_to
+);
+
+
 
         CONSTRAINT fee_types_iva_percentage_check
-    CHECK (
-        iva_percentage >= 0
-        AND iva_percentage <= 100
-    )
+     CHECK (
+            iva_percentage IS NULL
+            OR (
+                iva_percentage >= 0
+                AND iva_percentage <= 100
+            )
+        );
 );
 
 
@@ -101,37 +104,22 @@ iva_percentage NUMERIC(5,2) NOT NULL DEFAULT 0,
 -- 2. ÍNDICES ESTRATÉGICOS
 -- ============================================================
 
--- Búsqueda de configuraciones de fees por tenant.
+-- Búsqueda de fees por tenant.
 CREATE INDEX fee_types_tenant_id_idx
 ON public.fee_types (tenant_id);
 
 
--- Búsqueda de configuraciones activas por tenant.
-CREATE INDEX fee_types_tenant_active_idx
+-- Búsqueda de fees asociados a un rate específico.
+CREATE INDEX fee_types_vehicle_service_rate_id_idx
+ON public.fee_types (vehicle_service_rate_id);
+
+
+CREATE INDEX fee_types_vehicle_age_idx
 ON public.fee_types (
-    tenant_id,
-    is_active
+    vehicle_service_rate_id,
+    vehicle_age_from,
+    vehicle_age_to
 );
-
-
--- Búsqueda por tenant y código del fee.
--- Ej: encontrar todas las configuraciones SICOV
--- de un determinado tenant.
-CREATE INDEX fee_types_tenant_code_idx
-ON public.fee_types (
-    tenant_id,
-    code
-);
-
-
--- Búsqueda de configuraciones por rango de años.
-CREATE INDEX fee_types_model_year_idx
-ON public.fee_types (
-    tenant_id,
-    model_year_from,
-    model_year_to
-);
-
 
 -- ============================================================
 -- 3. RESTRICCIÓN DE DUPLICADOS
@@ -174,10 +162,6 @@ COMMENT ON COLUMN public.fee_types.name IS
 'Nombre visible del fee. Ej: ANSV, SICOV, Recaudo.';
 
 
-COMMENT ON COLUMN public.fee_types.code IS
-'Código interno que identifica el tipo de fee. Puede repetirse para representar diferentes configuraciones históricas del mismo fee.';
-
-
 COMMENT ON COLUMN public.fee_types.description IS
 'Descripción opcional de la configuración del fee.';
 
@@ -186,16 +170,11 @@ COMMENT ON COLUMN public.fee_types.fee_amount IS
 'Valor monetario de la configuración del fee.';
 
 
-COMMENT ON COLUMN public.fee_types.model_year_from IS
-'Año inicial del modelo del vehículo al que aplica el fee. NULL indica que no existe límite inferior.';
+COMMENT ON COLUMN public.fee_types.vehicle_age_from IS
+'Años mínimos de antigüedad del vehículo a los que aplica el fee. NULL indica que no existe límite inferior.';
 
-
-COMMENT ON COLUMN public.fee_types.model_year_to IS
-'Año final del modelo del vehículo al que aplica el fee. NULL indica que no existe límite superior.';
-
-
-COMMENT ON COLUMN public.fee_types.is_active IS
-'Indica si esta configuración del fee está actualmente disponible para ser asignada a nuevas tarifas.';
+COMMENT ON COLUMN public.fee_types.vehicle_age_to IS
+'Años máximos de antigüedad del vehículo a los que aplica el fee. NULL indica que no existe límite superior.';
 
 
 COMMENT ON COLUMN public.fee_types.created_at IS

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useContext, useState } from "react";
@@ -25,10 +26,12 @@ import { Plus } from "lucide-react";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog";
+import { GenericSuccessDialog } from "@/components/feedbackDialogs/GenericSuccessDialog";
 
-import { createFeeSchema } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
-
-import { RateFeeFormState } from "./AddRate";
+import {
+  CreateFeeInput,
+  createFeeSchema,
+} from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
 
 // ==========================================
 // TIPO DEL FORMULARIO
@@ -37,12 +40,11 @@ import { RateFeeFormState } from "./AddRate";
 interface FeeFormState {
   tenant_id: string;
   name: string;
-  code: string;
   description: string;
   fee_amount: string;
   iva_percentage: string;
-  model_year_from: string;
-  model_year_to: string;
+  vehicle_age_from: string;
+  vehicle_age_to: string;
 }
 
 // ==========================================
@@ -50,17 +52,20 @@ interface FeeFormState {
 // ==========================================
 
 interface AddFeeDialogProps {
-  onFeeCreated: (fee: RateFeeFormState) => void;
+  onFeeCreated: (fee: CreateFeeInput) => void;
 }
 
 // ==========================================
 // COMPONENTE
 // ==========================================
 
-export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
+export default function AddFeeDialog({
+  onFeeCreated,
+}: AddFeeDialogProps) {
   const contextReceived = useContext(PermissionsContext);
 
-  const tenantId = contextReceived?.PermissionsContextValue?.tenantObject?.id;
+  const tenantId =
+    contextReceived?.PermissionsContextValue?.tenantObject?.id;
 
   // ==========================================
   // ESTADO INICIAL
@@ -69,29 +74,40 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
   const INITIAL_FORM: FeeFormState = {
     tenant_id: tenantId ?? "",
     name: "",
-    code: "",
     description: "",
     fee_amount: "",
     iva_percentage: "",
-    model_year_from: "",
-    model_year_to: "",
+    vehicle_age_from: "",
+    vehicle_age_to: "",
   };
 
-  const [form, setForm] = useState<FeeFormState>(INITIAL_FORM);
+  const [form, setForm] =
+    useState<FeeFormState>(INITIAL_FORM);
 
   // ==========================================
   // ESTADO DEL ERROR
   // ==========================================
 
   const [isErrorOpen, setIsErrorOpen] = useState(false);
+  const [errors, setErrors] =
+    useState<string | string[] | null>(null);
 
-  const [errors, setErrors] = useState<string | string[] | null>(null);
+  // ==========================================
+  // ESTADO DEL ÉXITO
+  // ==========================================
+
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successMessages, setSuccessMessages] =
+    useState<string | null>(null);
 
   // ==========================================
   // ACTUALIZAR CAMPO
   // ==========================================
 
-  const handleChange = (field: keyof FeeFormState, value: string | number) => {
+  const handleChange = (
+    field: keyof FeeFormState,
+    value: string | number
+  ) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -102,8 +118,11 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
   // SUBMIT
   // ==========================================
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
+    event.stopPropagation();
 
     // ==========================================
     // PREPARAR DATOS
@@ -112,14 +131,27 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
     const data = {
       tenant_id: form.tenant_id,
       name: form.name.trim(),
-      code: form.code.trim(),
       description: form.description.trim() || undefined,
-      fee_amount: Number(form.fee_amount),
-      iva_percentage: Number(form.iva_percentage),
-      model_year_from:
-        form.model_year_from === "" ? null : Number(form.model_year_from),
-      model_year_to:
-        form.model_year_to === "" ? null : Number(form.model_year_to),
+
+      fee_amount:
+        form.fee_amount === ""
+          ? null
+          : Number(form.fee_amount),
+
+      iva_percentage:
+        (form.iva_percentage === "" || form.iva_percentage === "0")
+          ? null
+          : Number(form.iva_percentage),
+
+      vehicle_age_from:
+        form.vehicle_age_from === ""
+          ? null
+          : Number(form.vehicle_age_from),
+
+      vehicle_age_to:
+        form.vehicle_age_to === ""
+          ? null
+          : Number(form.vehicle_age_to),
     };
 
     // ==========================================
@@ -133,7 +165,9 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
     // ==========================================
 
     if (!result.success) {
-      const messages = result.error.issues.map((issue) => issue.message);
+      const messages = result.error.issues.map(
+        (issue) => issue.message
+      );
 
       setErrors(messages);
       setIsErrorOpen(true);
@@ -145,21 +179,29 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
     // CREAR FEE LOCAL
     // ==========================================
 
-    const newFee: RateFeeFormState = {
+    const newFee: CreateFeeInput = {
+      tenant_id: result.data.tenant_id,
       name: result.data.name,
-
       description: result.data.description ?? "",
-      fee_amount: String(result.data.fee_amount),
-      iva_percentage: String(result.data.iva_percentage),
-      model_year_from:
-        result.data.model_year_from === null
-          ? ""
-          : String(result.data.model_year_from),
-      model_year_to:
-        result.data.model_year_to === null
-          ? ""
-          : String(result.data.model_year_to),
+      fee_amount: result.data.fee_amount,
+      iva_percentage: result.data.iva_percentage,
+
+      vehicle_age_from:
+        result.data.vehicle_age_from ?? null,
+
+      vehicle_age_to:
+        result.data.vehicle_age_to ?? null,
     };
+
+    // ==========================================
+    // MENSAJE DE ÉXITO
+    // ==========================================
+
+    setSuccessMessages(
+      "El fee fue agregado correctamente."
+    );
+
+    setIsSuccessOpen(true);
 
     // ==========================================
     // SINCRONIZAR CON EL STATE DEL PADRE
@@ -204,6 +246,18 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
       />
 
       {/* ==========================================
+          SUCCESS
+          ========================================== */}
+
+      <GenericSuccessDialog
+        isOpen={isSuccessOpen}
+        setIsOpen={setIsSuccessOpen}
+        headerText="Fee Creado"
+        descriptionText="El fee fue creado correctamente."
+        messages={successMessages}
+      />
+
+      {/* ==========================================
           DIALOG
           ========================================== */}
 
@@ -228,11 +282,14 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Agregar fee</DialogTitle>
+              <DialogTitle>
+                Agregar fee
+              </DialogTitle>
 
               <DialogDescription>
-                Agrega un fee al rate actual. El fee se mantendrá en el
-                formulario hasta que se registre el rate.
+                Agrega un fee al rate actual. El fee se
+                mantendrá en el formulario hasta que se
+                registre el rate.
               </DialogDescription>
             </DialogHeader>
 
@@ -241,40 +298,49 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
                 ======================================== */}
 
             <FieldGroup className="mt-6">
+
               {/* ========================================
-                  NOMBRE + CÓDIGO
+                  NOMBRE
                   ======================================== */}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field>
-                  <Label htmlFor="fee-name">Nombre</Label>
+              <Field>
+                <Label htmlFor="fee-name">
+                  Nombre
+                </Label>
 
-                  <Input
-                    id="fee-name"
-                    name="name"
-                    value={form.name}
-                    onChange={(event) =>
-                      handleChange("name", event.target.value)
-                    }
-                    placeholder="Ej. Tarifa ambiental"
-                    required
-                  />
-                </Field>
-              </div>
+                <Input
+                  id="fee-name"
+                  name="name"
+                  value={form.name}
+                  onChange={(event) =>
+                    handleChange(
+                      "name",
+                      event.target.value
+                    )
+                  }
+                  placeholder="Ej. SICOV"
+                  required
+                />
+              </Field>
 
               {/* ========================================
                   DESCRIPCIÓN
                   ======================================== */}
 
               <Field>
-                <Label htmlFor="fee-description">Descripción</Label>
+                <Label htmlFor="fee-description">
+                  Descripción
+                </Label>
 
                 <Textarea
                   id="fee-description"
                   name="description"
                   value={form.description}
                   onChange={(event) =>
-                    handleChange("description", event.target.value)
+                    handleChange(
+                      "description",
+                      event.target.value
+                    )
                   }
                   placeholder="Describe el fee..."
                   rows={3}
@@ -287,7 +353,9 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field>
-                  <Label htmlFor="fee-amount">Valor del fee</Label>
+                  <Label htmlFor="fee-amount">
+                    Valor del fee
+                  </Label>
 
                   <Input
                     id="fee-amount"
@@ -297,7 +365,10 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
                     step="0.01"
                     value={form.fee_amount}
                     onChange={(event) =>
-                      handleChange("fee_amount", event.target.value)
+                      handleChange(
+                        "fee_amount",
+                        event.target.value
+                      )
                     }
                     placeholder="0"
                     required
@@ -305,7 +376,9 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
                 </Field>
 
                 <Field>
-                  <Label htmlFor="fee-iva">IVA (%)</Label>
+                  <Label htmlFor="fee-iva">
+                    IVA (%)
+                  </Label>
 
                   <Input
                     id="fee-iva"
@@ -317,7 +390,10 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
                     value={form.iva_percentage}
                     placeholder="0"
                     onChange={(event) =>
-                      handleChange("iva_percentage", event.target.value)
+                      handleChange(
+                        "iva_percentage",
+                        event.target.value
+                      )
                     }
                   />
 
@@ -328,52 +404,79 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
               </div>
 
               {/* ========================================
-                  RANGO DE AÑOS
+                  RANGO DE EDAD DEL VEHÍCULO
                   ======================================== */}
 
               <div className="space-y-3">
                 <div>
-                  <Label>Rango de años del vehículo</Label>
+                  <Label>
+                    Rango de edad del vehículo
+                  </Label>
 
                   <p className="text-xs text-muted-foreground mt-1">
-                    Déjalo vacío si el fee aplica para cualquier año.
+                    Indica la antigüedad del vehículo en años.
+                    Déjalo vacío si el fee aplica para cualquier
+                    antigüedad.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                  {/* ========================================
+                      EDAD DESDE
+                      ======================================== */}
+
                   <Field>
-                    <Label htmlFor="model-year-from">Desde</Label>
+                    <Label htmlFor="vehicle-age-from">
+                      Desde
+                    </Label>
 
                     <Input
-                      id="model-year-from"
-                      name="model_year_from"
+                      id="vehicle-age-from"
+                      name="vehicle_age_from"
                       type="number"
-                      min="1900"
-                      value={form.model_year_from}
+                      min="0"
+                      step="1"
+                      value={form.vehicle_age_from}
                       onChange={(event) =>
-                        handleChange("model_year_from", event.target.value)
+                        handleChange(
+                          "vehicle_age_from",
+                          event.target.value
+                        )
                       }
-                      placeholder="Ej. 2010"
+                      placeholder="Ej. 0"
                     />
                   </Field>
 
+                  {/* ========================================
+                      EDAD HASTA
+                      ======================================== */}
+
                   <Field>
-                    <Label htmlFor="model-year-to">Hasta</Label>
+                    <Label htmlFor="vehicle-age-to">
+                      Hasta
+                    </Label>
 
                     <Input
-                      id="model-year-to"
-                      name="model_year_to"
+                      id="vehicle-age-to"
+                      name="vehicle_age_to"
                       type="number"
-                      min="1900"
-                      value={form.model_year_to}
+                      min="0"
+                      step="1"
+                      value={form.vehicle_age_to}
                       onChange={(event) =>
-                        handleChange("model_year_to", event.target.value)
+                        handleChange(
+                          "vehicle_age_to",
+                          event.target.value
+                        )
                       }
-                      placeholder="Ej. 2026"
+                      placeholder="Ej. 2"
                     />
                   </Field>
+
                 </div>
               </div>
+
             </FieldGroup>
 
             {/* ==========================================
@@ -381,15 +484,23 @@ export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
                 ========================================== */}
 
             <DialogFooter className="mt-6">
+
               <DialogClose
                 render={
-                  <Button type="button" variant="outline" onClick={resetForm}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={resetForm}
+                  >
                     Cancelar
                   </Button>
                 }
               />
 
-              <Button type="submit">Agregar fee</Button>
+              <Button type="submit">
+                Agregar fee
+              </Button>
+
             </DialogFooter>
           </form>
         </DialogContent>
