@@ -34,10 +34,8 @@ import {
 } from "@/components/ui/popover";
 
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Button } from "@/components/ui/button";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
-
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog";
 import { GenericSuccessDialog } from "@/components/feedbackDialogs/GenericSuccessDialog";
 import { Database } from "../../../../supabase/types/database.types";
@@ -431,6 +429,7 @@ createVehicleServiceRateMutation.mutate(
     onSuccess: () => {
       setSuccessMessages("La tarifa fue creada correctamente.");
       setIsSuccessOpen(true);
+       setIsOpen(false);
     },
     onError: (error) => {
       setErrors(error.message);

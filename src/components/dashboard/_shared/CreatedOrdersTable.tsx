@@ -455,6 +455,19 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
   },
 }),
 
+columnHelper.accessor("oficina_consecutivo_factura", {
+  header: "Consecutivo factura",
+  cell: (info) => {
+    const consecutivo = info.getValue();
+
+    return (
+      <span className="font-medium">
+        {consecutivo || "—"}
+      </span>
+    );
+  },
+}),
+
       columnHelper.accessor("es_reinspeccion", {
         header: "Tipo Inspección",
         cell: ({ row }) => {
