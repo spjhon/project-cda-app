@@ -1,3 +1,25 @@
+DROP FUNCTION IF EXISTS public.update_office_order_data(
+    uuid,
+    character varying,
+    numeric,
+    character varying,
+    text,
+    boolean
+);
+
+DROP FUNCTION IF EXISTS public.update_office_order_data(
+    uuid,
+    character varying,
+    numeric,
+    character varying,
+    text,
+    boolean,
+    character varying
+);
+
+
+
+
 CREATE OR REPLACE FUNCTION public.update_office_order_data(
     p_order_id uuid,
     p_pin character varying,

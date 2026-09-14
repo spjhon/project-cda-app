@@ -11,7 +11,8 @@ import {
 import { FileText } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OfficeOrderForm from "./OfficeOrderForm";
-import { UseMutateFunction } from "@tanstack/react-query";
+
+
 
 interface AccionesOrderOfficeDialogProps {
   orden: EntryOrderListItem;
@@ -30,6 +31,11 @@ export default function AccionesOrderOfficeDialog({
   open,
   onOpenChange,
 }: AccionesOrderOfficeDialogProps) {
+
+  
+
+
+  
   // 🌟 Control 1: Validación estricta perimetral de roles
   if (!rol) {
     console.log("Acción denegada: El rol actual es undefined");

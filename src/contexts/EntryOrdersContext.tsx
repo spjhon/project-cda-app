@@ -96,6 +96,13 @@ export interface EntryOrdersLoaderContextType {
   };
 }
 
+
+
+
+
+
+
+
 export const EntryOrdersContext =
   createContext<EntryOrdersLoaderContextType | null>(null);
 
@@ -129,13 +136,9 @@ export default function EntryOrdersLoaderContext({
 
   const permissionscontextRecived = useContext(PermissionsContext);
 
-  const tenantId =
-    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const entryOrdersTableData = use(entryOrdersTableDataPromise);
-
-
-
   const tenantCredits = use(tenantCreditsPromise);
 
   

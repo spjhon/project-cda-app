@@ -157,9 +157,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
       // ==========================================
       const ordersResult = await fetchEntryOrders({
         tenantId: tenantResult.data.id,
-
         limit: 50,
-
         offset: 0,
       });
 

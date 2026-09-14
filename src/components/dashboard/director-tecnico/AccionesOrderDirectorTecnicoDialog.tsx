@@ -8,25 +8,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  FileText, 
-  Receipt, 
-  ShieldCheck, 
-  ShieldAlert, 
+import {
+  FileText,
+  Receipt,
+  ShieldCheck,
+  ShieldAlert,
   CreditCard,
   Phone,
   Mail,
-  MapPin
+  MapPin,
 } from "lucide-react";
 import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import DirectorTecnicoOrderForm from "./DirectorTecnicoOrderForm";
-
 
 interface AccionesOrderDirectorTecnicoDialogProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
   rol: string | undefined;
- 
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -35,7 +33,6 @@ export default function AccionesOrderDirectorTecnicoDialog({
   orden,
   tenantId,
   rol,
-  
   open,
   onOpenChange,
 }: AccionesOrderDirectorTecnicoDialogProps) {
@@ -53,16 +50,13 @@ export default function AccionesOrderDirectorTecnicoDialog({
   // Formateador de moneda colombiana (COP)
   const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return "$0";
+
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
     }).format(value);
   };
-
-  // Evaluar si el método de pago requirió tarjeta para mostrar el voucher
-  const esPagoTarjeta =
-    orden.oficina_tipo_pago === "tarjeta_debito" || orden.oficina_tipo_pago === "tarjeta_credito";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,7 +68,8 @@ export default function AccionesOrderDirectorTecnicoDialog({
           </DialogTitle>
 
           <DialogDescription className="text-muted-foreground text-sm mt-1 max-w-md text-center">
-            Módulo de revisión técnica y control de calidad ISO 17020 para la validez del servicio.
+            Módulo de revisión técnica y control de calidad ISO 17020 para la
+            validez del servicio.
           </DialogDescription>
         </DialogHeader>
 
@@ -87,21 +82,24 @@ export default function AccionesOrderDirectorTecnicoDialog({
               <div className="flex flex-wrap justify-between items-center border-b border-border pb-3 mb-4 gap-2">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
+
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Ficha Técnica de Entrada
                   </span>
                 </div>
+
                 <div className="flex gap-2">
                   <span className="text-xs font-black bg-primary text-primary-foreground px-3 py-1 rounded-md tracking-widest uppercase shadow-sm">
                     {orden.placa || "S.P"}
                   </span>
+
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                       orden.estado_orden === "anulada"
                         ? "bg-destructive/10 text-destructive border-destructive/20"
                         : orden.estado_orden === "en_prueba"
-                        ? "bg-primary/10 text-primary border-primary/20"
-                        : "bg-muted text-foreground border-border"
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "bg-muted text-foreground border-border"
                     }`}
                   >
                     {orden.estado_orden?.toUpperCase()}
@@ -111,31 +109,41 @@ export default function AccionesOrderDirectorTecnicoDialog({
 
               {/* Grid Informativo Principal */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-xs">
-                
                 {/* PROPIETARIO */}
                 <div className="space-y-1 bg-background/50 p-3 rounded-lg border border-border/60">
                   <span className="text-muted-foreground block font-bold text-[11px] uppercase tracking-wider border-b border-border/40 pb-1">
                     Propietario
                   </span>
+
                   <span className="text-foreground font-bold block truncate text-sm">
                     {orden.propietario_nombre || "N/A"}
                   </span>
+
                   <span className="text-[10px] text-muted-foreground block truncate">
-                    {orden.propietario_tipo_documento?.toUpperCase()}: {orden.propietario_documento || "N/A"}
+                    {orden.propietario_tipo_documento?.toUpperCase()}:{" "}
+                    {orden.propietario_documento || "N/A"}
                   </span>
 
                   <div className="pt-1.5 space-y-1 text-[11px]">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0 text-emerald-600" />
-                      <span className="truncate">{orden.propietario_telefono || "Sin teléfono"}</span>
+                      <span className="truncate">
+                        {orden.propietario_telefono || "Sin teléfono"}
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Mail className="h-3 w-3 shrink-0 text-amber-600" />
-                      <span className="truncate">{orden.propietario_email || "Sin correo"}</span>
+                      <span className="truncate">
+                        {orden.propietario_email || "Sin correo"}
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <MapPin className="h-3 w-3 shrink-0 text-sky-600" />
-                      <span className="truncate">{orden.propietario_direccion || "Sin dirección"}</span>
+                      <span className="truncate">
+                        {orden.propietario_direccion || "Sin dirección"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -145,25 +153,36 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   <span className="text-muted-foreground block font-bold text-[11px] uppercase tracking-wider border-b border-border/40 pb-1">
                     Cliente / Conductor
                   </span>
+
                   <span className="text-foreground font-bold block truncate text-sm">
                     {orden.cliente_nombre || "N/A"}
                   </span>
+
                   <span className="text-[10px] text-muted-foreground block truncate">
-                    {orden.cliente_tipo_documento?.toUpperCase()}: {orden.cliente_documento || "N/A"}
+                    {orden.cliente_tipo_documento?.toUpperCase()}:{" "}
+                    {orden.cliente_documento || "N/A"}
                   </span>
 
                   <div className="pt-1.5 space-y-1 text-[11px]">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Phone className="h-3 w-3 shrink-0 text-emerald-600" />
-                      <span className="truncate">{orden.cliente_telefono || "Sin teléfono"}</span>
+                      <span className="truncate">
+                        {orden.cliente_telefono || "Sin teléfono"}
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Mail className="h-3 w-3 shrink-0 text-amber-600" />
-                      <span className="truncate">{orden.cliente_email || "Sin correo"}</span>
+                      <span className="truncate">
+                        {orden.cliente_email || "Sin correo"}
+                      </span>
                     </div>
+
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <MapPin className="h-3 w-3 shrink-0 text-sky-600" />
-                      <span className="truncate">{orden.cliente_direccion || "Sin dirección"}</span>
+                      <span className="truncate">
+                        {orden.cliente_direccion || "Sin dirección"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -173,8 +192,10 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Línea del Vehículo
                   </span>
+
                   <span className="text-foreground font-semibold block truncate mt-0.5">
-                    {orden.marca?.toUpperCase()} - {orden.linea?.toUpperCase() || "N/A"}
+                    {orden.marca?.toUpperCase()} -{" "}
+                    {orden.linea?.toUpperCase() || "N/A"}
                   </span>
                 </div>
 
@@ -182,6 +203,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Servicio Solicitado
                   </span>
+
                   <span className="inline-flex items-center mt-0.5 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 uppercase border border-amber-200 w-fit">
                     {orden.service_type || "RTM"}
                   </span>
@@ -191,12 +213,17 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     ¿Es Reinspección?
                   </span>
+
                   <span
                     className={`font-semibold block mt-0.5 ${
-                      orden.es_reinspeccion ? "text-orange-600" : "text-muted-foreground"
+                      orden.es_reinspeccion
+                        ? "text-orange-600"
+                        : "text-muted-foreground"
                     }`}
                   >
-                    {orden.es_reinspeccion ? "SÍ (Segunda Entrada)" : "NO (Primera Vez)"}
+                    {orden.es_reinspeccion
+                      ? "SÍ (Segunda Entrada)"
+                      : "NO (Primera Vez)"}
                   </span>
                 </div>
 
@@ -204,6 +231,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Kilometraje
                   </span>
+
                   <span className="text-foreground font-semibold block mt-0.5">
                     {orden.kilometraje || "0"} Km
                   </span>
@@ -215,6 +243,7 @@ export default function AccionesOrderDirectorTecnicoDialog({
             <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20">
               <div className="flex items-center gap-2 border-b border-emerald-100 pb-3 mb-4">
                 <Receipt className="h-4 w-4 text-emerald-600" />
+
                 <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                   Datos de Recaudo y Liquidación de Oficina
                 </span>
@@ -222,61 +251,107 @@ export default function AccionesOrderDirectorTecnicoDialog({
 
               {/* Grid Informativo de la Oficina */}
               <div className="grid grid-cols-2 gap-y-4 gap-x-4 text-xs mb-1">
+                {/* CONSECUTIVO FACTURA */}
                 <div>
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Consecutivo Factura
                   </span>
+
                   <span className="text-foreground font-bold block bg-background px-2.5 py-1 rounded border border-border w-fit font-mono mt-0.5">
                     {orden.oficina_consecutivo_factura || "SIN ASIGNAR"}
                   </span>
                 </div>
 
+                {/* PIN RUNT */}
                 <div>
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     PIN del RUNT
                   </span>
+
                   <span className="text-foreground font-mono font-semibold block mt-1 tracking-wider truncate">
                     {orden.oficina_pin || "N/A"}
                   </span>
                 </div>
 
+                {/* VALOR RECAUDADO */}
                 <div>
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     Valor Recaudado
                   </span>
+
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold block text-sm mt-0.5">
-                    {formatCurrency(orden.oficina_pago)}
+                    {formatCurrency(orden.rate_price_snapshot)}
                   </span>
                 </div>
 
+                {/* PAGOS */}
                 <div>
                   <span className="text-muted-foreground block font-medium mb-0.5">
-                    Método de Pago
+                    Pagos Registrados
                   </span>
-                  <span className="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-muted text-foreground border border-border uppercase w-fit">
-                    {orden.oficina_tipo_pago || "No registrado"}
+
+                  <span className="text-foreground font-bold block mt-1">
+                    {orden.payments.length}
+                    {orden.payments.length === 1 ? " pago" : " pagos"}
                   </span>
                 </div>
 
-                {/* N° DE APROBACIÓN VOUCHER */}
-                {esPagoTarjeta && (
-                  <div className="col-span-2 bg-background/60 p-2.5 rounded-lg border border-emerald-200/50 flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <div>
-                      <span className="text-muted-foreground block text-[10px] font-medium leading-none mb-1">
-                        N° Aprobación Datáfono
-                      </span>
-                      <span className="text-foreground font-mono font-bold tracking-wider text-xs">
-                        {orden.oficina_num_aprobacion || "PENDIENTE"}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                {/* DETALLE DE PAGOS */}
+                <div className="col-span-2 space-y-2">
+                  <span className="text-muted-foreground block font-medium mb-0.5">
+                    Detalle de Pagos
+                  </span>
 
+                  {orden.payments.length === 0 ? (
+                    <div className="bg-background/60 p-2.5 rounded-lg border border-border text-muted-foreground text-[11px]">
+                      No hay pagos registrados.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {orden.payments.map((payment) => (
+                        <div
+                          key={payment.id}
+                          className="bg-background/60 p-2.5 rounded-lg border border-border flex items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {payment.payment_method === "tarjeta_debito" ||
+                            payment.payment_method === "tarjeta_credito" ? (
+                              <CreditCard className="h-4 w-4 text-emerald-600 shrink-0" />
+                            ) : (
+                              <Receipt className="h-4 w-4 text-emerald-600 shrink-0" />
+                            )}
+
+                            <div className="min-w-0">
+                              <span className="text-foreground font-semibold text-xs block uppercase">
+                                {payment.payment_method?.replaceAll(
+                                  "_",
+                                  " ",
+                                ) || "Sin método"}
+                              </span>
+
+                              {payment.num_comprobante && (
+                                <span className="text-muted-foreground font-mono text-[10px] block">
+                                  Comprobante: {payment.num_comprobante}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs whitespace-nowrap">
+                            {formatCurrency(payment.monto_bruto)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* SOAT */}
                 <div className="col-span-2">
                   <span className="text-muted-foreground block font-medium mb-0.5">
                     ¿Se compró SOAT también?
                   </span>
+
                   {orden.se_compro_soat ? (
                     <span className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase w-fit">
                       <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
@@ -298,7 +373,6 @@ export default function AccionesOrderDirectorTecnicoDialog({
             <DirectorTecnicoOrderForm
               orden={orden}
               tenantId={tenantId}
-              
             />
           </div>
         </div>

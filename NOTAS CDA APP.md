@@ -58,6 +58,7 @@ otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/s
 - el sistema de errores seria una carpeta compartida con los alert dialog utilizados
 - organizar las rutas del login para que dejen de ser 100% dinamicas y puedan ser trabajas entre componentes clientes y poder tener instan navigation
 - tener cuidado al cargar desde el context para no cargar todo de una sino que vaya cargandoa medida que se vaya navegando
+- agregar que se vea el consecutivo de la factura en la tabla
 
 ## FEATURES QUE FALTAN
 

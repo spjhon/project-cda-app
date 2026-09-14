@@ -34,6 +34,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      entry_order_payments: {
+        Row: {
+          created_at: string
+          entry_order_id: string
+          id: string
+          monto_bruto: number
+          num_comprobante: string | null
+          payment_method: Database["public"]["Enums"]["office_payment_type_enum"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entry_order_id: string
+          id?: string
+          monto_bruto: number
+          num_comprobante?: string | null
+          payment_method: Database["public"]["Enums"]["office_payment_type_enum"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entry_order_id?: string
+          id?: string
+          monto_bruto?: number
+          num_comprobante?: string | null
+          payment_method?: Database["public"]["Enums"]["office_payment_type_enum"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_order_payments_entry_order_id_fkey"
+            columns: ["entry_order_id"]
+            isOneToOne: false
+            referencedRelation: "entry_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_order_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entry_order_tire_pressures: {
         Row: {
           created_at: string
@@ -137,12 +185,14 @@ export type Database = {
           propietario_numero_documento_snapshot: string
           propietario_telefono_snapshot: string | null
           propietario_tipo_documento_snapshot: string
+          rate_price_snapshot: number | null
           resultado_revision: string | null
           se_compro_soat: boolean
           service_type: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot: string | null
           tenant_id: string
           updated_at: string
+          vehicle_service_rate_id: string | null
           vehiculo_blindaje_snapshot: boolean
           vehiculo_capacidad_pasajeros_snapshot: number
           vehiculo_cilindrada_snapshot: number
@@ -207,12 +257,14 @@ export type Database = {
           propietario_numero_documento_snapshot: string
           propietario_telefono_snapshot?: string | null
           propietario_tipo_documento_snapshot: string
+          rate_price_snapshot?: number | null
           resultado_revision?: string | null
           se_compro_soat?: boolean
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id: string
           updated_at?: string
+          vehicle_service_rate_id?: string | null
           vehiculo_blindaje_snapshot: boolean
           vehiculo_capacidad_pasajeros_snapshot: number
           vehiculo_cilindrada_snapshot: number
@@ -277,12 +329,14 @@ export type Database = {
           propietario_numero_documento_snapshot?: string
           propietario_telefono_snapshot?: string | null
           propietario_tipo_documento_snapshot?: string
+          rate_price_snapshot?: number | null
           resultado_revision?: string | null
           se_compro_soat?: boolean
           service_type?: Database["public"]["Enums"]["service_type_enum"]
           soat_vencimiento_snapshot?: string | null
           tenant_id?: string
           updated_at?: string
+          vehicle_service_rate_id?: string | null
           vehiculo_blindaje_snapshot?: boolean
           vehiculo_capacidad_pasajeros_snapshot?: number
           vehiculo_cilindrada_snapshot?: number
@@ -340,6 +394,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_orders_vehicle_service_rate_id_fkey"
+            columns: ["vehicle_service_rate_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_service_rate"
             referencedColumns: ["id"]
           },
           {
@@ -1559,10 +1620,8 @@ export type Database = {
           linea: string
           marca: string
           oficina_consecutivo_factura: string
-          oficina_num_aprobacion: string
-          oficina_pago: number
           oficina_pin: string
-          oficina_tipo_pago: Database["public"]["Enums"]["office_payment_type_enum"]
+          payments: Json
           placa: string
           presiones_llantas: Json
           propietario_direccion: string
@@ -1571,6 +1630,7 @@ export type Database = {
           propietario_nombre: string
           propietario_telefono: string
           propietario_tipo_documento: string
+          rate_price_snapshot: number
           resultado_revision: string
           se_compro_soat: boolean
           service_type: Database["public"]["Enums"]["service_type_enum"]
@@ -1578,6 +1638,15 @@ export type Database = {
           total_count: number
           vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"]
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"]
+        }[]
+      }
+      fetch_order_rate: {
+        Args: { p_order_id: string }
+        Returns: {
+          base_price: number
+          fees: Json
+          iva_percentage: number
+          rate_id: string
         }[]
       }
       fetch_orders_templates: {
@@ -1739,30 +1808,18 @@ export type Database = {
         }
         Returns: Json
       }
-      update_office_order_data:
-        | {
-            Args: {
-              p_consecutivo_factura: string
-              p_order_id: string
-              p_pago: number
-              p_pin: string
-              p_se_compro_soat: boolean
-              p_tipo_pago: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_consecutivo_factura: string
-              p_num_aprobacion?: string
-              p_order_id: string
-              p_pago: number
-              p_pin: string
-              p_se_compro_soat: boolean
-              p_tipo_pago: string
-            }
-            Returns: string
-          }
+      update_office_order_data: {
+        Args: {
+          p_consecutivo_factura: string
+          p_order_id: string
+          p_payments: Json
+          p_pin: string
+          p_rate_price_snapshot: number
+          p_se_compro_soat: boolean
+          p_vehicle_service_rate_id: string
+        }
+        Returns: string
+      }
       update_tenant_credits: {
         Args: {
           p_certificados_delta?: number

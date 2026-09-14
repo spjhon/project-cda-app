@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { Database } from "../../../supabase/types/database.types";
 
 // ======================================================
 // Tipos de una fila devuelta por fetch_entry_orders_list
@@ -11,7 +12,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export interface TirePressureDetail {
   id: string;
   eje: number;
-  posicion: 
+  posicion:
     | "izquierda"
     | "derecha"
     | "centro"
@@ -20,23 +21,25 @@ export interface TirePressureDetail {
     | "repuesto";
   presion_encontrada: number | null;
   presion_ajustada: number | null;
+
 }
 
+// ======================================================
+// Tipo de pagos de una orden
+// ======================================================
+
+export interface EntryOrderPaymentDetail {
+  id: string;
+  payment_method: Database["public"]["Enums"]["office_payment_type_enum"] | null;
+  monto_bruto: number;
+  num_comprobante: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type OfficePaymentType = Database["public"]["Enums"]["office_payment_type_enum"];
 
 
-export type OfficePaymentType = 
-  | 'efectivo' 
-  | 'tarjeta_debito' 
-  | 'tarjeta_credito' 
-  | 'sistecredito' 
-  | 'addi' 
-  | 'transferencia' 
-  | 'qr';
-
-
-
-
-  
 export interface EntryOrderListItem {
   id: string;
   placa: string;
@@ -48,17 +51,17 @@ export interface EntryOrderListItem {
   propietario_nombre: string;
   propietario_documento: string;
   propietario_tipo_documento: string;
-  propietario_telefono: string | null;  // 🌟 NUEVO
-  propietario_email: string | null;     // 🌟 NUEVO
-  propietario_direccion: string | null; // 🌟 NUEVO
+  propietario_telefono: string | null;
+  propietario_email: string | null;
+  propietario_direccion: string | null;
 
   // Datos del Cliente (Snapshots)
   cliente_nombre: string;
   cliente_documento: string;
   cliente_tipo_documento: string;
-  cliente_telefono: string | null;      // 🌟 NUEVO
-  cliente_email: string | null;         // 🌟 NUEVO
-  cliente_direccion: string | null;     // 🌟 NUEVO
+  cliente_telefono: string | null;
+  cliente_email: string | null;
+  cliente_direccion: string | null;
 
   // Datos Operativos del Vehículo
   es_reinspeccion: boolean;
@@ -71,20 +74,22 @@ export interface EntryOrderListItem {
 
   // Información de Oficina
   oficina_pin: string | null;
-  oficina_pago: number | null;
   oficina_consecutivo_factura: string | null;
-  oficina_tipo_pago: OfficePaymentType | null;
-  oficina_num_aprobacion: string | null;
-
   se_compro_soat: boolean;
+  rate_price_snapshot: number | null;
+
+  // Resultado de la inspección
   resultado_revision: string | null;
 
   // Consecutivos de cierre técnico (ISO 17020)
   consecutivo_fur: string | null;
   consecutivo_rtm: string | null;
 
-  // 🌟 NUEVO: Presiones de Llantas (agrupadas como JSONB)
+  // Presiones de Llantas
   presiones_llantas: TirePressureDetail[];
+
+  // Pagos de la orden
+  payments: EntryOrderPaymentDetail[];
 
   // Metadata de paginación
   total_count: number;
@@ -95,16 +100,12 @@ export interface EntryOrderListItem {
 
 export interface FetchEntryOrdersParams {
   tenantId: string;
-
   limit?: number;
   offset?: number;
-
   placa?: string;
   estado?: "abierta" | "anulada" | "en_prueba" | "finalizada" | undefined;
-
   fechaDesde?: string;
   fechaHasta?: string;
-
   clienteDocumento?: string;
   propietarioDocumento?: string;
 }
@@ -145,7 +146,7 @@ export const fetchEntryOrders = cache(
     clienteDocumento = undefined,
     propietarioDocumento = undefined,
   }: FetchEntryOrdersParams): Promise<EntryOrdersFetchResult> => {
-    
+
     try {
       if (!tenantId) {
         return {
@@ -155,9 +156,6 @@ export const fetchEntryOrders = cache(
       }
 
       const supabase = await createSupabaseServerClient();
-
-
-    
 
       const { data, error } = await supabase.rpc("fetch_entry_orders_list",
         {
@@ -175,25 +173,24 @@ export const fetchEntryOrders = cache(
 
       if (error) {
         console.error(`❌ RPC Error (fetch_entry_orders_list):`, error.message);
-
         return {
           data: null,
           error: error.message,
         };
       }
 
-      
 
       return {
         data: (data as unknown as EntryOrderListItem[]) || [],
         error: null,
       };
 
-
     } catch (e) {
       return {
         data: null,
-        error: e instanceof Error? e.message : "Error desconocido al extraer órdenes"
+        error: e instanceof Error
+          ? e.message
+          : "Error desconocido al extraer órdenes"
       };
     }
   }

@@ -17,21 +17,7 @@ export const officeOrderSchema = z.object({
     .trim()
     .min(1, { message: "El consecutivo de la factura es obligatorio" }),
 
-  // Control numérico estricto para evitar desbordar el NUMERIC(12,2) de Postgres
-  oficina_pago: z
-    .number("Debe ingresar un número válido")
-    .min(1, { message: "El valor recaudado debe ser mayor a $0" })
-    .max(9999999999.99, { message: "El valor excede el límite permitido" }),
 
-  // Valida contra los valores exactos de tu Enum de la base de datos
-  oficina_tipo_pago: z.enum(TipoPagoEnum, { message: "Seleccione un método de pago válido"}),
-
-  // 🌟 CAMPO ADICIONAL: Opcional por defecto, pero se limpia con trim
-  oficina_num_aprobacion: z
-    .string()
-    .trim()
-    .optional()
-    .or(z.literal("")),
 
   // Booleano simple para el Switch del SOAT
   se_compro_soat: z.boolean({

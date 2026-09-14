@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
+import { format, subDays, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   Table,

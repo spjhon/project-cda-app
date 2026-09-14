@@ -1,3 +1,20 @@
+DROP FUNCTION IF EXISTS public.fetch_entry_orders_list(
+    UUID,
+    INTEGER,
+    INTEGER,
+    TEXT,
+    public.order_status_enum,
+    DATE,
+    DATE,
+    TEXT,
+    TEXT,
+    TEXT,
+    TEXT,
+    BOOLEAN,
+    TEXT,
+    TEXT
+);
+
 CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_tenant_id UUID,
     p_limit INTEGER DEFAULT 20,
@@ -7,13 +24,14 @@ CREATE OR REPLACE FUNCTION public.fetch_entry_orders_list(
     p_fecha_desde DATE DEFAULT CURRENT_DATE,
     p_fecha_hasta DATE DEFAULT CURRENT_DATE,
     p_cliente_documento TEXT DEFAULT NULL,
-    p_propietario_documento TEXT DEFAULT NULL,
+    p_propietario_documento TEXT DEFAULT NULL, 
     p_order_by_column TEXT DEFAULT 'fecha',
     p_order_by_direction TEXT DEFAULT 'DESC',
     p_show_deleted BOOLEAN DEFAULT FALSE,
     p_search_column TEXT DEFAULT NULL,
     p_search_term TEXT DEFAULT NULL
 )
+
 RETURNS TABLE (
     id UUID,
     placa TEXT,
@@ -40,9 +58,11 @@ RETURNS TABLE (
     vehiculo_tipo_servicio_snapshot public.vehicle_service_type_enum,
     estado_orden public.order_status_enum,
     oficina_pin CHARACTER VARYING,
+    oficina_pago NUMERIC(12,2),
     oficina_consecutivo_factura CHARACTER VARYING,
+    oficina_tipo_pago public.office_payment_type_enum,
+    oficina_num_aprobacion CHARACTER VARYING,
     se_compro_soat BOOLEAN,
-    rate_price_snapshot NUMERIC(12, 2),
     resultado_revision TEXT,
     consecutivo_fur CHARACTER VARYING,
     consecutivo_rtm CHARACTER VARYING,
@@ -50,11 +70,15 @@ RETURNS TABLE (
     payments JSONB,
     total_count BIGINT
 )
+
 LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public
+
 AS $$
+
 BEGIN
+
     RETURN QUERY EXECUTE format('
         SELECT
             o.id,
@@ -62,18 +86,21 @@ BEGIN
             o.fecha,
             o.vehiculo_marca_snapshot::TEXT AS marca,
             o.vehiculo_linea_snapshot::TEXT AS linea,
+
             o.propietario_nombre_snapshot AS propietario_nombre,
             o.propietario_numero_documento_snapshot::TEXT AS propietario_documento,
             o.propietario_tipo_documento_snapshot::TEXT AS propietario_tipo_documento,
             o.propietario_telefono_snapshot::TEXT AS propietario_telefono,
             o.propietario_email_snapshot AS propietario_email,
             o.propietario_direccion_snapshot AS propietario_direccion,
+
             o.cliente_nombre_snapshot AS cliente_nombre,
             o.cliente_numero_documento_snapshot::TEXT AS cliente_documento,
             o.cliente_tipo_documento_snapshot::TEXT AS cliente_tipo_documento,
             o.cliente_telefono_snapshot::TEXT AS cliente_telefono,
             o.cliente_email_snapshot AS cliente_email,
             o.cliente_direccion_snapshot AS cliente_direccion,
+
             o.es_reinspeccion,
             o.kilometraje,
             o.soat_vencimiento_snapshot,
@@ -82,12 +109,18 @@ BEGIN
             o.vehiculo_tipo_servicio_snapshot,
             o.estado_orden,
 
-            -- DATOS DE OFICINA
+            -- 🌟 INICIO BLOQUE REINSPECCIÓN
             CASE
                 WHEN o.es_reinspeccion = TRUE
                 THEN old_o.oficina_pin
                 ELSE o.oficina_pin
             END AS oficina_pin,
+
+            CASE
+                WHEN o.es_reinspeccion = TRUE
+                THEN old_o.oficina_pago
+                ELSE o.oficina_pago
+            END AS oficina_pago,
 
             CASE
                 WHEN o.es_reinspeccion = TRUE
@@ -97,28 +130,34 @@ BEGIN
 
             CASE
                 WHEN o.es_reinspeccion = TRUE
+                THEN old_o.oficina_tipo_pago
+                ELSE o.oficina_tipo_pago
+            END AS oficina_tipo_pago,
+
+            CASE
+                WHEN o.es_reinspeccion = TRUE
+                THEN old_o.oficina_num_aprobacion
+                ELSE o.oficina_num_aprobacion
+            END AS oficina_num_aprobacion,
+
+            CASE
+                WHEN o.es_reinspeccion = TRUE
                 THEN old_o.se_compro_soat
                 ELSE o.se_compro_soat
             END AS se_compro_soat,
-
-            -- PRECIO DEL RATE UTILIZADO
-            CASE
-                WHEN o.es_reinspeccion = TRUE
-                THEN old_o.rate_price_snapshot
-                ELSE o.rate_price_snapshot
-            END AS rate_price_snapshot,
+            -- 🌟 FIN BLOQUE REINSPECCIÓN
 
             o.resultado_revision,
             o.consecutivo_fur,
             o.consecutivo_rtm,
 
-            -- PRESIONES DE LLANTAS
+            -- 🌟 PRESIONES DE LLANTAS
             COALESCE(
                 tp.presiones,
                 ''[]''::jsonb
             ) AS presiones_llantas,
 
-            -- PAGOS DE LA ORDEN
+            -- 🌟 PAGOS DE LA ORDEN
             COALESCE(
                 ep.payments,
                 ''[]''::jsonb
@@ -128,13 +167,13 @@ BEGIN
 
         FROM public.entry_orders o
 
-        -- CONEXIÓN CON LA ORDEN VIEJA PARA REINSPECCIÓN
+        -- 🌟 CONEXIÓN CON LA ORDEN VIEJA PARA REINSPECCIÓN
         LEFT JOIN public.entry_orders old_o
             ON o.id_reprobado = old_o.id
 
-        -- AGRUPAR PRESIONES DE LLANTAS
+        -- 🌟 SUBCONSULTA PARA AGRUPAR LAS PRESIONES DE LLANTAS
         LEFT JOIN (
-            SELECT
+            SELECT 
                 entry_order_id,
                 jsonb_agg(
                     jsonb_build_object(
@@ -152,18 +191,16 @@ BEGIN
         ) tp
             ON tp.entry_order_id = o.id
 
-        -- AGRUPAR PAGOS
+        -- 🌟 SUBCONSULTA PARA AGRUPAR LOS PAGOS
         LEFT JOIN (
             SELECT
                 entry_order_id,
                 jsonb_agg(
                     jsonb_build_object(
                         ''id'', id,
-                        ''payment_method'', payment_method,
-                        ''monto_bruto'', monto_bruto,
-                        ''num_comprobante'', num_comprobante,
-                        ''created_at'', created_at,
-                        ''updated_at'', updated_at
+                        ''paymentMethod'', payment_method,
+                        ''amount'', monto_bruto,
+                        ''receiptNumber'', num_comprobante
                     )
                     ORDER BY created_at ASC
                 ) AS payments
@@ -173,6 +210,7 @@ BEGIN
             ON ep.entry_order_id = o.id
 
         WHERE
+
             -- AISLAMIENTO MULTI-TENANT
             o.tenant_id = $1
 
@@ -245,22 +283,25 @@ BEGIN
             )
 
         ORDER BY o.%I %s
+
         LIMIT $8 OFFSET $9
 
     ', p_order_by_column, p_order_by_direction)
 
-    USING
-        p_tenant_id,
-        p_placa,
-        p_estado,
-        p_fecha_desde,
-        p_fecha_hasta,
-        p_cliente_documento,
-        p_propietario_documento,
-        p_limit,
-        p_offset,
-        p_show_deleted,
-        p_search_column,
-        p_search_term;
+    USING 
+        p_tenant_id,             -- $1
+        p_placa,                 -- $2
+        p_estado,                -- $3
+        p_fecha_desde,           -- $4
+        p_fecha_hasta,           -- $5
+        p_cliente_documento,     -- $6
+        p_propietario_documento,-- $7
+        p_limit,                 -- $8
+        p_offset,                -- $9
+        p_show_deleted,          -- $10
+        p_search_column,         -- $11
+        p_search_term;           -- $12
+
 END;
+
 $$;

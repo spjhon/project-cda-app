@@ -368,16 +368,21 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
       columnHelper.accessor("fecha", {
         header: "Fecha y Hora",
         cell: (info) => {
-          const date = new Date(info.getValue());
+          const date = new Date(info.getValue())
+
+          const formattedDate = date
+            .toLocaleString("es-CO", {
+              dateStyle: "short",
+              timeStyle: "short",
+              hour12: true,
+            })
+            .replace(/\u00A0/g, " ")
+
           return (
             <span className="font-semibold text-foreground tracking-tight">
-              {date.toLocaleString("es-CO", {
-                dateStyle: "short",
-                timeStyle: "short",
-                hour12: true,
-              })}
+              {formattedDate}
             </span>
-          );
+          )
         },
       }),
 

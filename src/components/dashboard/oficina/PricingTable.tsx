@@ -51,6 +51,9 @@ import {
 } from "@/lib/client-actions/fetch_rates"
 
 import { AddRateDialog } from "./AddRate"
+import { useUpdateVehicleRateActive } from "@/lib/client-actions/update_vehicle_service_rate_is_active"
+import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog"
+import { DeleteRateDialog } from "./DeleteRateDialog"
 
 // ==========================================
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
@@ -372,6 +375,13 @@ export default function RatesTable() {
     permissionsContextRecived?.PermissionsContextValue
       .tenantObject?.id
 
+  const updateVehicleRateActiveMutation = useUpdateVehicleRateActive()
+
+ 
+
+  const [errors, setErrors] = useState<string | null>(null);
+  const [isErrorOpen, setIsErrorOpen] = useState(false);
+
   // ==========================================
   // OBTENER RATES
   // ==========================================
@@ -390,16 +400,24 @@ export default function RatesTable() {
   // PLACEHOLDER MUTATION: ESTADO ACTIVO
   // ==========================================
 
-  const handleToggleActive = (rate: VehicleRate) => {
-    console.log(
-      "PLACEHOLDER: cambiar estado del rate",
-      rate.id,
-      !rate.is_active,
-    )
+const handleToggleActive = (rate: VehicleRate) => {
 
-    // TODO:
-    // Aquí irá la mutación para actualizar is_active.
-  }
+  
+
+  updateVehicleRateActiveMutation.mutate(
+    {
+      id: rate.id,
+      is_active: !rate.is_active,
+    },
+    {
+      
+      onError: (error) => {
+        setErrors(error.message)
+        setIsErrorOpen(true)
+      },
+    }
+  )
+}
 
   // ==========================================
   // PLACEHOLDER MUTATION: ELIMINAR
@@ -617,74 +635,58 @@ export default function RatesTable() {
       // ESTADO
       // ------------------------------------------
 
-      columnHelper.accessor("is_active", {
-        header: "Estado",
+columnHelper.accessor("is_active", {
+  header: "Estado",
+  cell: (info) => {
+    const rate = info.row.original
+    const isActive = info.getValue()
 
-        cell: (info) => {
-          const rate = info.row.original
-          const isActive = info.getValue()
+    return (
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={isActive}
+          onCheckedChange={() => handleToggleActive(rate)}
+          disabled={isFetchingRates || isLoadingRates}
+          aria-label={
+            isActive
+              ? "Desactivar tarifa"
+              : "Activar tarifa"
+          }
+        />
 
-          return (
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={isActive}
-                onCheckedChange={() =>
-                  handleToggleActive(rate)
-                }
-                aria-label={
-                  isActive
-                    ? "Desactivar tarifa"
-                    : "Activar tarifa"
-                }
-              />
-
-              <Badge
-                variant={
-                  isActive
-                    ? "default"
-                    : "secondary"
-                }
-                className="whitespace-nowrap"
-              >
-                {isActive
-                  ? "Activa"
-                  : "Desactivada"}
-              </Badge>
-            </div>
-          )
-        },
-      }),
+        <Badge
+          variant={isActive ? "default" : "secondary"}
+          className="w-24 justify-center whitespace-nowrap"
+        >
+          {isActive ? "Activa" : "Desactivada"}
+        </Badge>
+      </div>
+    )
+  },
+}),
 
       // ------------------------------------------
-      // ACCIONES
-      // ------------------------------------------
+// ACCIONES
+// ------------------------------------------
 
-      columnHelper.display({
-        id: "actions",
+columnHelper.display({
+  id: "actions",
+  header: "",
+  cell: ({ row }) => {
+    const rate = row.original
 
-        header: "",
+    return (
+      <RateActionsCell
+        rate={rate}
+        onDelete={handleDeleteRate}
+      />
+    )
+  },
+}),
 
-        cell: ({ row }) => {
-          const rate = row.original
 
-          return (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() =>
-                handleDeleteRate(rate)
-              }
-              title="Eliminar tarifa"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )
-        },
-      }),
     ],
-    [],
+    [isFetchingRates, isLoadingRates],
   )
 
   // ==========================================
@@ -749,6 +751,14 @@ export default function RatesTable() {
   // ==========================================
 
   return (
+    <>
+    <GenericErrorDialog
+            isOpen={isErrorOpen}
+            setIsOpen={setIsErrorOpen}
+            headerText="Error al crear rate"
+            descriptionText="No fue posible crear el rate."
+            errors={errors}
+          />
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm">
       {/* ==========================================
           SECCIÓN SUPERIOR
@@ -848,23 +858,6 @@ export default function RatesTable() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : isFetchingRates ? (
-              /* Refetch en segundo plano */
-
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-12"
-                >
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-
-                    <span className="font-medium">
-                      Actualizando tarifas...
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
             ) : errorRates ? (
               /* Error */
 
@@ -935,6 +928,7 @@ export default function RatesTable() {
         </Table>
       </div>
     </div>
+    </>
   )
 }
 
@@ -1065,6 +1059,42 @@ function FeesCell({
         rate={rate}
         open={open}
         onOpenChange={setOpen}
+      />
+    </>
+  )
+}
+
+
+// ==========================================
+// ACCIONES DE LA FILA
+// ==========================================
+
+function RateActionsCell({
+  rate,
+  onDelete,
+}: {
+  rate: VehicleRate
+  onDelete: (rate: VehicleRate) => void
+}) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+        onClick={() => setIsDeleteDialogOpen(true)}
+        title="Eliminar tarifa"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+
+      <DeleteRateDialog
+        rate={rate}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
       />
     </>
   )

@@ -90,12 +90,18 @@ export function useVehicleRates({
   enabled = true,
 }: UseVehicleRatesParams) {
   return useQuery<VehicleRate[], Error>({
+
+    
     queryKey: ["vehicle-rates", tenantId],
 
     queryFn: async () => {
+
+      
       if (!tenantId) {
         throw new Error("No se encontró el ID del tenant")
       }
+
+      //await new Promise((resolve) => setTimeout(resolve, 5000));
 
       const supabase = createSupabaseBrowserClient()
 

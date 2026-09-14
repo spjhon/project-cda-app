@@ -219,6 +219,13 @@ cliente_direccion_snapshot                  TEXT,
     consecutivo_fur character varying,
     consecutivo_rtm character varying,
 
+    -- ==========================================
+    -- LOS RATES
+    -- ==========================================
+
+    vehicle_service_rate_id uuid NULL,
+
+    rate_price_snapshot numeric(12, 2) NULL;
 
     -- ==========================================
     -- CONTROL DE REINSPECCIONES (Flujo de Rechazados)
@@ -291,6 +298,11 @@ WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL);
 CREATE UNIQUE INDEX entry_orders_tenant_oficina_pin_no_reinspeccion_idx 
 ON public.entry_orders (tenant_id, oficina_pin)
 WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL);
+
+CREATE INDEX entry_orders_vehicle_service_rate_id_idx
+ON public.entry_orders (vehicle_service_rate_id);
+
+
 -- ==========================================
 -- 4. COMENTARIOS
 -- ==========================================
@@ -312,7 +324,11 @@ COMMENT ON COLUMN public.entry_orders.director_tecnico_numero_documento_snapshot
 COMMENT ON COLUMN public.entry_orders.director_tecnico_nombre_snapshot IS 'Snapshot del nombre completo del Director Técnico que firma el cierre.';
 COMMENT ON COLUMN public.entry_orders.director_tecnico_firma_base64_snapshot IS 'Snapshot en formato Base64 de la firma digitalizada del Director Técnico (Auditoría ISO 17020).';
 
+COMMENT ON COLUMN public.entry_orders.vehicle_service_rate_id IS
+  'Identificador de la tarifa de servicio utilizada para la orden de entrada.';
 
+COMMENT ON COLUMN public.entry_orders.rate_price_snapshot IS
+  'Valor total de la tarifa calculado y almacenado al momento de crear la orden de entrada.';
 -- ==========================================
 -- 5. CONSTRAINTS (Unicidad)
 -- ==========================================
