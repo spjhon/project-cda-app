@@ -2,19 +2,22 @@
 
 import {
   officeOrderSchema,
-  OfficeOrderInput,
+ 
 } from "@/lib/zod-schemas/oficinaInfo-schema";
 
 import { createSupabaseBrowserClient } from "../supabase/client";
 import { EntryOrderPaymentDetail } from "../server-actions/fetch_entry_orders_list";
+import { Database } from "../../../supabase/types/database.types";
+import { OfficeFormState } from "@/components/dashboard/oficina/OfficeOrderForm";
 
 
 interface UpdateOfficeOrderArgs {
   orderId: string;
-  formData: OfficeOrderInput;
+  formData: OfficeFormState;
   payments: EntryOrderPaymentDetail[];
   vehicleServiceRateId: string;
   ratePriceSnapshot: number;
+  service_type: Database["public"]["Enums"]["service_type_enum"];
 }
 
 export async function insertOficinaData({
@@ -23,6 +26,7 @@ export async function insertOficinaData({
   payments,
   vehicleServiceRateId,
   ratePriceSnapshot,
+  service_type
 }: UpdateOfficeOrderArgs) {
   if (!orderId || orderId === "") {
     return {
@@ -31,14 +35,14 @@ export async function insertOficinaData({
     };
   }
 
-  if (formData.oficina_consecutivo_factura.trim() === "") {
+  if (formData.oficina_consecutivo_factura.trim() === "" ) {
     return {
       data: null,
       error: "Error: No hay consecutivo de factura",
     };
   }
 
-  if (formData.oficina_pin.trim() === "") {
+  if (formData.oficina_pin.trim() === "" && service_type === "RTM") {
     return {
       data: null,
       error: "Error: No se ha registrado un pin",
@@ -89,7 +93,10 @@ export async function insertOficinaData({
   }
 
   // Validación estricta con Zod
-  const validatedFields = officeOrderSchema.safeParse(formData);
+  const validatedFields = officeOrderSchema.safeParse({
+  ...formData,
+  service_type,
+});
 
   if (!validatedFields.success) {
     return {
@@ -105,7 +112,7 @@ export async function insertOficinaData({
   const { data: officeUpdatedData, error } =
     await supabaseBrowser.rpc("update_office_order_data", {
       p_order_id: orderId,
-      p_pin: validatedFields.data.oficina_pin,
+      p_pin: formData.oficina_pin,
       p_consecutivo_factura:
         validatedFields.data.oficina_consecutivo_factura,
       p_se_compro_soat:

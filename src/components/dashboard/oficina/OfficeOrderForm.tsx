@@ -97,7 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     return;
   }
 
-  if (formData.oficina_pin.trim() === "") {
+  if (formData.oficina_pin.trim() === "" && orden.service_type === "RTM") {
     alert("No se ha ingresado un pin");
     setIsSubmitting(false);
     return;
@@ -131,6 +131,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       payments: payments,
       vehicleServiceRateId: orderRate.rateId,
       ratePriceSnapshot: orderRate.totalPrice,
+      service_type: orden.service_type
     });
 
     if (error || !data) {
@@ -199,7 +200,8 @@ const handleSubmit = async (e: React.FormEvent) => {
               disabled={
                 orden.estado_orden === "finalizada" ||
                 orden.estado_orden === "anulada" ||
-                orden.es_reinspeccion
+                orden.es_reinspeccion ||
+                orden.service_type !== "RTM"
               }
             />
           </div>

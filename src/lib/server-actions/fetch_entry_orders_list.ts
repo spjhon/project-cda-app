@@ -67,9 +67,9 @@ export interface EntryOrderListItem {
   es_reinspeccion: boolean;
   kilometraje: string | null;
   soat_vencimiento_snapshot: string | null;
-  service_type: string;
-  vehiculo_tipo_snapshot: string;
-  vehiculo_tipo_servicio_snapshot: string;
+  service_type: Database["public"]["Enums"]["service_type_enum"];
+  vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"];
+vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"];
   estado_orden: string;
 
   // Información de Oficina

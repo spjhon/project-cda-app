@@ -5,11 +5,7 @@ const TipoPagoEnum = ["efectivo", "tarjeta_debito", "tarjeta_credito", "sistecre
 
 
 export const officeOrderSchema = z.object({
-  // Valida que el PIN no esté vacío y limpia espacios fantasmas
-  oficina_pin: z
-    .string()
-    .trim()
-    .min(1, { message: "El PIN de operación es obligatorio" }),
+  
 
   // Coacciona y valida el consecutivo de la factura
   oficina_consecutivo_factura: z

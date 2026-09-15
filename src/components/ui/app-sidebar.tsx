@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ClipboardList, FilePenLine, FileStack, LayoutDashboard, LucideIcon, PlusCircle, UserCog} from "lucide-react";
+import { CircleDollarSign, ClipboardList, FilePenLine, FileStack, LayoutDashboard, LucideIcon, PlusCircle, UserCog} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -110,6 +110,13 @@ const NavAdmin: NavItem[] = [
     description: "Estadísticas sobre las ordenes de entrada",
     href: "/dashboard/admin/analitica",
     icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
+  },
+
+  {
+    title: "Analítica Contable", // 🔥 NUEVO MÓDULO
+    description: "Estadísticas contables del CDA",
+    href: "/dashboard/admin/analitica-contable",
+    icon: CircleDollarSign , // Queda impecable con el contenedor dinámico del sidebar
   },
 
   {
