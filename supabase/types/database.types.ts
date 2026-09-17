@@ -171,12 +171,7 @@ export type Database = {
           kilometraje: string | null
           observaciones: string | null
           oficina_consecutivo_factura: string | null
-          oficina_num_aprobacion: string | null
-          oficina_pago: number | null
           oficina_pin: string | null
-          oficina_tipo_pago:
-            | Database["public"]["Enums"]["office_payment_type_enum"]
-            | null
           plantilla_id: string
           propietario_direccion_snapshot: string | null
           propietario_email_snapshot: string | null
@@ -243,12 +238,7 @@ export type Database = {
           kilometraje?: string | null
           observaciones?: string | null
           oficina_consecutivo_factura?: string | null
-          oficina_num_aprobacion?: string | null
-          oficina_pago?: number | null
           oficina_pin?: string | null
-          oficina_tipo_pago?:
-            | Database["public"]["Enums"]["office_payment_type_enum"]
-            | null
           plantilla_id: string
           propietario_direccion_snapshot?: string | null
           propietario_email_snapshot?: string | null
@@ -315,12 +305,7 @@ export type Database = {
           kilometraje?: string | null
           observaciones?: string | null
           oficina_consecutivo_factura?: string | null
-          oficina_num_aprobacion?: string | null
-          oficina_pago?: number | null
           oficina_pin?: string | null
-          oficina_tipo_pago?:
-            | Database["public"]["Enums"]["office_payment_type_enum"]
-            | null
           plantilla_id?: string
           propietario_direccion_snapshot?: string | null
           propietario_email_snapshot?: string | null
@@ -1495,18 +1480,18 @@ export type Database = {
         Returns: string
       }
       fetch_admin_analitics: {
-        Args: never
+        Args: { p_ano_solicitado: number; p_mes_solicitado: number }
         Returns: {
-          chart_anio_actual: Json
-          chart_mes_actual: Json
+          chart_anio: Json
+          chart_mes: Json
           chart_rechazado_anio: Json
           chart_rechazado_mes: Json
           total_rechazado_anio: number
           total_rechazado_ayer: number
           total_rechazado_mes: number
-          total_rtm_anio_actual: number
+          total_rtm_anio: number
           total_rtm_ayer: number
-          total_rtm_mes_actual: number
+          total_rtm_mes: number
         }[]
       }
       fetch_admin_analitics_diary: {

@@ -28,8 +28,9 @@ GROUP BY
     eop.tenant_id,
     eo.service_type,
     eo.vehiculo_tipo_snapshot,
-    eop.payment_method;
+    eop.payment_method
 
+ORDER BY fecha DESC;
 
 CREATE UNIQUE INDEX idx_mv_recaudos_diarios
 ON public.mv_recaudos_diarios (

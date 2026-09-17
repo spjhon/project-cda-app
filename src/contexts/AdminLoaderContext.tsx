@@ -1,77 +1,252 @@
 "use client";
 
-import {
-  AdminAnalyticsData,
-  AdminAnalyticsDiaryData,
-  PQAFListItem,
-} from "@/app/[tenant]/(private)/dashboard/admin/layout";
+
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { createContext, ReactNode, use, useContext, useState } from "react";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
+// ============================================================================
+// ANALYTICS DIARIOS
+// Datos del RPC: fetch_admin_analitics_diary
+// ============================================================================
 
-interface AdminLoaderContext {
-  children: ReactNode;
-  rol: string;
-  adminAnalyticsPromise: Promise<AdminAnalyticsData>;
-  adminAnalyticsDiaryPromise: Promise<AdminAnalyticsDiaryData>;
-  initialPQAFPromise: Promise<PQAFListItem[]>;
+export interface AdminAnalyticsDiaryData {
+  // Cantidad de RTM realizadas hoy
+  total_rtm_hoy: number;
+  // Cantidad de RTM rechazadas hoy
+  total_rtm_rechazados_hoy: number;
 }
+
+// ============================================================================
+// ESTRUCTURAS BASE PARA LOS GRÁFICOS
+// ============================================================================
+
+// Elemento utilizado en gráficos agrupados por día.
+// Ejemplo: { dia: "01", total: 15 }
+export interface DayChartItem {
+  // Día del mes en formato "01", "02", "03", etc.
+  dia: string;
+
+  // Cantidad correspondiente a ese día
+  total?: number;
+}
+
+// Elemento utilizado en gráficos agrupados por mes.
+// Ejemplo: { mes: "Enero", total: 120 }
+export interface MonthChartItem {
+  // Nombre del mes
+  mes: string;
+
+  // Cantidad correspondiente a ese mes
+  total?: number;
+}
+
+// ============================================================================
+// ANALYTICS HISTÓRICOS
+// Datos del RPC: fetch_admin_analitics
+// ============================================================================
+
+export interface AdminAnalyticsData {
+  // --------------------------------------------------------------------------
+  // Totales generales de RTM
+  // --------------------------------------------------------------------------
+
+  // Total de RTM realizadas ayer
+  total_rtm_ayer: number;
+
+  // Total de RTM realizadas durante el mes actual
+  total_rtm_mes: number;
+
+  // Total de RTM realizadas durante el año actual
+  total_rtm_anio: number;
+
+  // --------------------------------------------------------------------------
+  // Totales de RTM rechazadas
+  // --------------------------------------------------------------------------
+
+  // Total de RTM rechazadas ayer
+  total_rechazado_ayer: number;
+
+  // Total de RTM rechazadas durante el mes actual
+  total_rechazado_mes: number;
+
+  // Total de RTM rechazadas durante el año actual
+  total_rechazado_anio: number;
+
+  // --------------------------------------------------------------------------
+  // Datos para gráficos
+  // --------------------------------------------------------------------------
+
+  // RTM realizadas por día del mes solicitado
+  chart_mes: DayChartItem[];
+
+  // RTM realizadas por mes del año solicitado
+  chart_anio: MonthChartItem[];
+
+  // RTM rechazadas por día del mes solicitado
+  chart_rechazado_mes: DayChartItem[];
+
+  // RTM rechazadas por mes del año solicitado
+  chart_rechazado_anio: MonthChartItem[];
+}
+
+// ============================================================================
+// PQAF
+// Elemento individual de la lista de Peticiones, Quejas, Apelaciones
+// y Felicitaciones.
+// ============================================================================
+
+export interface PQAFListItem {
+  id: string;
+  tenant_id: string;
+
+  // Información del remitente
+  sender_name: string;
+  sender_email: string;
+  sender_phone: string;
+
+  // Información relacionada con el vehículo
+  placa: string;
+
+  // Descripción de la solicitud
+  description: string;
+
+  // Tipo de requerimiento
+  requirement_type:
+    | "peticion"
+    | "queja"
+    | "apelacion"
+    | "felicitacion";
+
+  // Estado actual del requerimiento
+  status:
+    | "pendiente"
+    | "en_revision"
+    | "resuelto"
+    | "nueva_revision"
+    | "finalizado";
+
+  // Fechas de creación y actualización
+  created_at: string;
+  updated_at: string | null;
+
+  // Cantidad total de registros encontrados por el RPC
+  total_count: number;
+}
+
+// ============================================================================
+// CONTEXT
+// Estructura completa de datos y funcionalidades expuestas por el Context
+// ============================================================================
 
 export interface AdminContextType {
   AdminContextValue: {
+    // ------------------------------------------------------------------------
+    // Información general
+    // ------------------------------------------------------------------------
+
+    // Rol del usuario dentro del módulo
     rol: string;
-    analyticsData: AdminAnalyticsData;
-    analyticsDataDiary: AdminAnalyticsDiaryData;
+
+    // ------------------------------------------------------------------------
+    // Analytics
+    // ------------------------------------------------------------------------
+
+    // Datos de analytics diarios.
+    // Puede ser undefined mientras la consulta inicial todavía está cargando.
+    analyticsDataDiary: AdminAnalyticsDiaryData | undefined;
+
+    // Query completa de TanStack Query para los analytics históricos.
+    // Contiene data, estados, errores, refetch, etc.
+    analyticsQuery: UseQueryResult<AdminAnalyticsData, Error>;
+
+    // ------------------------------------------------------------------------
+    // PQAF
+    // ------------------------------------------------------------------------
 
     PQAFQuery: {
-      PQAFData: PQAFListItem[] | null;
+      // Datos obtenidos de la consulta
+      PQAFData: PQAFListItem[];
+
+      // Estado de carga/actualización
       isFetchingPQAF: boolean;
       isPQAFError: boolean;
       PQAFError: Error | null;
-      refetchPQAF: () => void;
       isPQAFSuccess: boolean;
 
+      // Permite volver a ejecutar manualmente la consulta
+      refetchPQAF: () => void;
+
+      // ----------------------------------------------------------------------
       // Ordenamiento
+      // ----------------------------------------------------------------------
+
       orderByColumn: string;
       setOrderByColumn: (column: string) => void;
+
       orderByDirection: "ASC" | "DESC";
       setOrderByDirection: (direction: "ASC" | "DESC") => void;
 
-      // Rango de Fechas
+      // ----------------------------------------------------------------------
+      // Rango de fechas
+      // ----------------------------------------------------------------------
+
       dateRange: DateRange | undefined;
       setDateRange: (range: DateRange | undefined) => void;
 
-      // Búsqueda Avanzada
+      // ----------------------------------------------------------------------
+      // Búsqueda avanzada
+      // ----------------------------------------------------------------------
+
       searchColumn: string;
       setSearchColumn: (column: string) => void;
+
       searchTerm: string;
       setSearchTerm: (term: string) => void;
 
+      // ----------------------------------------------------------------------
       // Paginación
+      // ----------------------------------------------------------------------
+
       page: number;
       setPage: (page: number) => void;
+
       rowsPerPage: number;
       setRowsPerPage: (rows: number) => void;
     };
   };
 }
 
+
+
+
+
 export const AdminContext = createContext<AdminContextType | null>(null);
+
+
+
+
+
+
+
+
+
+interface AdminLoaderContext {
+  children: ReactNode;
+  rol: string;
+}
 
 export default function ReceptionistLoaderContext({
   rol,
   children,
-  adminAnalyticsPromise,
-  adminAnalyticsDiaryPromise,
-  initialPQAFPromise,
 }: AdminLoaderContext) {
-  const analyticsData = use(adminAnalyticsPromise);
-  const initialAnalyticsDataDiary = use(adminAnalyticsDiaryPromise);
-  const initialPQAFData = use(initialPQAFPromise);
+
+  
+ 
+
 
   const pathname = usePathname();
 
@@ -169,11 +344,59 @@ export default function ReceptionistLoaderContext({
       // Casteas al tipo de lista de tu interfaz correspondiente (ej. PQAFListItem[])
       return (data as PQAFListItem[]) || [];
     },
-    initialData: initialPQAFData,
+    
     staleTime: 0,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
   });
+
+
+
+
+
+
+
+
+
+
+
+
+const analyticsQuery = useQuery({
+  queryKey: ["admin_analytics", rol, 8, 2026],
+
+  queryFn: async () => {
+    console.log("Pidiendo analytics de agosto de 2026");
+
+    const { data, error } = await supabaseBrowser.rpc(
+      "fetch_admin_analitics",
+      {
+        p_mes_solicitado: 8,
+        p_ano_solicitado: 2026,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "Error al extraer métricas e históricos con gráficos:",
+        error.message,
+      );
+
+      throw new Error(error.message);
+    }
+
+    if (data && data.length > 0) {
+      return data[0] as unknown as AdminAnalyticsData;
+    }
+
+    throw new Error(
+      "El RPC no devolvió datos de analytics.",
+    );
+  },
+
+  staleTime: Infinity,
+  refetchOnWindowFocus: false,
+});
+
 
 
 
@@ -204,8 +427,7 @@ export default function ReceptionistLoaderContext({
       // Si tu función devuelve una sola fila con los datos consolidados, extraemos el índice 0.
       return data?.[0] as AdminAnalyticsDiaryData;
     },
-    // Le inyectamos la data del servidor para que haya CERO tiempo de carga inicial
-    initialData: initialAnalyticsDataDiary,
+    
     // Tiempo en milisegundos para volver a consultar (ej: 15000 = 15 segundos)
     refetchInterval: 15000,
     // Refresca si el administrador cambia de pestaña y vuelve
@@ -218,10 +440,10 @@ export default function ReceptionistLoaderContext({
 
   const AdminContextValue = {
     rol: rol,
-    analyticsData: analyticsData,
+    analyticsQuery: analyticsQuery,
     analyticsDataDiary: analyticsDataDiary,
     PQAFQuery: {
-      PQAFData,
+      PQAFData: PQAFData || [],
       isFetchingPQAF,
       isPQAFError,
       PQAFError,

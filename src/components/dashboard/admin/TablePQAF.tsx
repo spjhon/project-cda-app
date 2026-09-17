@@ -57,8 +57,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
-import { AdminContext } from "@/contexts/AdminLoaderContext";
-import { PQAFListItem } from "@/app/[tenant]/(private)/dashboard/admin/layout";
+import { AdminContext, PQAFListItem } from "@/contexts/AdminLoaderContext";
 import DetallesPQAFDialog from "./DetallesPQAFDialog";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
