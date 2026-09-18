@@ -365,26 +365,27 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
         },
       }),
 
-      columnHelper.accessor("fecha", {
-        header: "Fecha y Hora",
-        cell: (info) => {
-          const date = new Date(info.getValue())
+   columnHelper.accessor("fecha", {
+  header: "Fecha y Hora",
+  cell: (info) => {
+    const date = new Date(info.getValue());
 
-          const formattedDate = date
-            .toLocaleString("es-CO", {
-              dateStyle: "short",
-              timeStyle: "short",
-              hour12: true,
-            })
-            .replace(/\u00A0/g, " ")
+    const formattedDate = date
+      .toLocaleString("es-CO", {
+        timeZone: "America/Bogota",
+        dateStyle: "short",
+        timeStyle: "short",
+        hour12: true,
+      })
+      .replace(/\u00A0/g, " ");
 
-          return (
-            <span className="font-semibold text-foreground tracking-tight">
-              {formattedDate}
-            </span>
-          )
-        },
-      }),
+    return (
+      <span className="font-semibold text-foreground tracking-tight">
+        {formattedDate}
+      </span>
+    );
+  },
+}),
 
       columnHelper.accessor("marca", {
         header: "Marca",
