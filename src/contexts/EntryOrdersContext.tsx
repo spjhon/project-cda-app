@@ -119,17 +119,31 @@ export default function EntryOrdersLoaderContext({
     "DESC",
   );
   const [showDeleted, setShowDeleted] = useState<boolean>(false);
-  // 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
-const hoyColombia = new Date(
-  new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Bogota",
-  }).format(new Date()),
-);
 
-const [dateRange, setDateRange] = useState<DateRange | undefined>({
-  from: hoyColombia,
-  to: hoyColombia,
-});
+
+
+  // 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
+
+
+const hoyColombia = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Bogota",
+}).format(new Date());
+
+const hoy = new Date(`${hoyColombia}T12:00:00`);
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: hoy,
+    to: hoy,
+  });
+
+
+
+
+
+
+
+
+
   // 🌟 NUEVOS ESTADOS: Inicializados con fallbacks seguros para el CDA
   const [searchColumn, setSearchColumn] = useState<string>("placa"); // Por defecto busca por Placa
   const [searchTerm, setSearchTerm] = useState<string>("");

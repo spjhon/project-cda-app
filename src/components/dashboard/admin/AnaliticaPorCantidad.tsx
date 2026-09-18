@@ -133,7 +133,7 @@ export default function AnaliticaPorCantidad({
 
       {/* ESPACIO PARA LAS GRÁFICAS */}
       <div className="mt-6 flex flex-row flex-wrap gap-6">
-        <div className="overflow-scroll">
+        <div className="overflow-auto">
           <LazyChartOnScroll>
           <ChartBarMonthInteractive
             chartMonthData={datosSeparados.chartMonthData}
@@ -142,7 +142,7 @@ export default function AnaliticaPorCantidad({
           </LazyChartOnScroll>
         </div>
 
-        <div className="overflow-scroll">
+        <div className="overflow-auto">
           <LazyChartOnScroll>
           <ChartBarYearInteractive
             chartYearData={datosSeparados.chartYearData}

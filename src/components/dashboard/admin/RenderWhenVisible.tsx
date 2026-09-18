@@ -1,18 +1,18 @@
 import { useInView } from "react-intersection-observer";
 
-export function LazyChartOnScroll({ children }: { children: React.ReactNode }) {
+export function LazyChartOnScroll({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { ref, inView } = useInView({
-    triggerOnce: true, // Solo dispara la primera vez que se ve al regresar
-    rootMargin: "100px 0px", // Comienza a cargar 100px antes de llegar
+    triggerOnce: true,
+    rootMargin: "100px 0px",
   });
 
   return (
-    <div ref={ref} className="min-h-75 w-full">
-      {inView ? (
-        children
-      ) : (
-        <div className="" />
-      )}
+    <div ref={ref}>
+      {inView && children}
     </div>
   );
 }
