@@ -24,6 +24,7 @@ export function CuadroMetrica({
   const adminContextReceived = useContext(AdminContext);
 
   const analyticsQuery = adminContextReceived?.AdminContextValue.analyticsQuery;
+  const analyticsQueryDiary = adminContextReceived?.AdminContextValue.analyticsQueryDiary;
 
   return (
     <div
@@ -55,7 +56,7 @@ export function CuadroMetrica({
             : "1px 1px 2px rgba(0,0,0,0.5), -1px -1px 1px rgba(255,255,255,0.25)",
         }}
       >
-        {analyticsQuery?.isLoading ? (
+        {analyticsQuery?.isLoading || analyticsQueryDiary?.isLoading ? (
           <span className="inline-block w-8 h-8 border-4 border-muted-300 border-t-blue-600 rounded-full animate-spin" />
         ) : (
           <>

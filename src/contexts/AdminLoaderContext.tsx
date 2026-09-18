@@ -155,7 +155,7 @@ export interface AdminContextType {
 
     // Datos de analytics diarios.
     // Puede ser undefined mientras la consulta inicial todavía está cargando.
-    analyticsDataDiary: AdminAnalyticsDiaryData | undefined;
+    analyticsQueryDiary: UseQueryResult<AdminAnalyticsDiaryData, Error>;
 
     // Query completa de TanStack Query para los analytics históricos.
     // Contiene data, estados, errores, refetch, etc.
@@ -439,7 +439,7 @@ const analyticsQuery = useQuery({
 
 useEffect(() => {
   analyticsQuery.refetch();
-}, [mesSeleccionado, anoSeleccionado]);
+}, [mesSeleccionado, anoSeleccionado, analyticsQuery]);
 
 
 
@@ -447,7 +447,7 @@ useEffect(() => {
 
 
 
-  const { data: analyticsDataDiary } = useQuery({
+  const analyticsQueryDiary = useQuery({
     queryKey: ["admin_analytics_diary", rol], // La key asegura que no se mezcle caché si cambias de rol
     queryFn: async () => {
 
@@ -481,7 +481,7 @@ useEffect(() => {
   const AdminContextValue = {
     rol: rol,
     analyticsQuery: analyticsQuery,
-    analyticsDataDiary: analyticsDataDiary,
+    analyticsQueryDiary: analyticsQueryDiary,
       mesSeleccionado,
       setMesSeleccionado,
       anoSeleccionado,

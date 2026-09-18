@@ -38,8 +38,7 @@ export default function AnaliticaPage() {
   }
 
   const analyticsQuery = adminContextReceived.AdminContextValue.analyticsQuery;
-  const analyticsDataDiary =
-    adminContextReceived.AdminContextValue.analyticsDataDiary;
+  const {data: analyticsDataDiary} = adminContextReceived.AdminContextValue.analyticsQueryDiary;
 
   const ahora = new Date();
 

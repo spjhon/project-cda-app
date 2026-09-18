@@ -11,7 +11,7 @@ export function LazyChartOnScroll({ children }: { children: React.ReactNode }) {
       {inView ? (
         children
       ) : (
-        <div className="h-75 w-full animate-pulse bg-muted/20 rounded-lg" />
+        <div className="" />
       )}
     </div>
   );

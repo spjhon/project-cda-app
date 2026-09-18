@@ -120,10 +120,16 @@ export default function EntryOrdersLoaderContext({
   );
   const [showDeleted, setShowDeleted] = useState<boolean>(false);
   // 🌟 Inicializado por defecto: Desde el primero de este mes hasta el último día de este mes
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  });
+const hoyColombia = new Date(
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+  }).format(new Date()),
+);
+
+const [dateRange, setDateRange] = useState<DateRange | undefined>({
+  from: hoyColombia,
+  to: hoyColombia,
+});
   // 🌟 NUEVOS ESTADOS: Inicializados con fallbacks seguros para el CDA
   const [searchColumn, setSearchColumn] = useState<string>("placa"); // Por defecto busca por Placa
   const [searchTerm, setSearchTerm] = useState<string>("");
