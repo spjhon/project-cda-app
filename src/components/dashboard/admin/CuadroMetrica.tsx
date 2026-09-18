@@ -23,8 +23,7 @@ export function CuadroMetrica({
 }: CuadroMetricaProps) {
   const adminContextReceived = useContext(AdminContext);
 
-  const analyticsQuery =
-    adminContextReceived?.AdminContextValue.analyticsQuery;
+  const analyticsQuery = adminContextReceived?.AdminContextValue.analyticsQuery;
 
   return (
     <div

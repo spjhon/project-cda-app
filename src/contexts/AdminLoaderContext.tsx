@@ -3,7 +3,7 @@
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
@@ -27,21 +27,19 @@ export interface AdminAnalyticsDiaryData {
 // Elemento utilizado en gráficos agrupados por día.
 // Ejemplo: { dia: "01", total: 15 }
 export interface DayChartItem {
-  // Día del mes en formato "01", "02", "03", etc.
   dia: string;
-
-  // Cantidad correspondiente a ese día
-  total?: number;
+  mes: number;
+  ano: number;
+  total: number;
 }
 
 // Elemento utilizado en gráficos agrupados por mes.
 // Ejemplo: { mes: "Enero", total: 120 }
 export interface MonthChartItem {
-  // Nombre del mes
   mes: string;
-
-  // Cantidad correspondiente a ese mes
-  total?: number;
+  numero_mes: number;
+  ano: number;
+  total: number;
 }
 
 // ============================================================================
@@ -163,6 +161,16 @@ export interface AdminContextType {
     // Contiene data, estados, errores, refetch, etc.
     analyticsQuery: UseQueryResult<AdminAnalyticsData, Error>;
 
+        // ------------------------------------------------------------------------
+    // Selector de mes y año para analytics
+    // ------------------------------------------------------------------------
+
+    mesSeleccionado: number;
+    setMesSeleccionado: (mes: number) => void;
+
+    anoSeleccionado: number;
+    setAnoSeleccionado: (ano: number) => void;
+
     // ------------------------------------------------------------------------
     // PQAF
     // ------------------------------------------------------------------------
@@ -217,6 +225,9 @@ export interface AdminContextType {
       rowsPerPage: number;
       setRowsPerPage: (rows: number) => void;
     };
+
+    
+
   };
 }
 
@@ -245,7 +256,7 @@ export default function ReceptionistLoaderContext({
 }: AdminLoaderContext) {
 
   
- 
+
 
 
   const pathname = usePathname();
@@ -275,6 +286,31 @@ export default function ReceptionistLoaderContext({
 
 
 
+//--------------------------------------------
+  //STATES DEL MES Y AÑO A BUSCAR
+  //--------------------------------------------
+
+const ahora = new Date();
+
+const mesActual = Number(
+  ahora.toLocaleString("en-US", {
+    timeZone: "America/Bogota",
+    month: "numeric",
+  })
+);
+
+const anoActual = Number(
+  ahora.toLocaleString("en-US", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+  })
+);
+
+const [mesSeleccionado, setMesSeleccionado] = useState(mesActual);
+const [anoSeleccionado, setAnoSeleccionado] = useState(anoActual);
+
+
+
 
   //--------------------------------------------
   //TANSTAK QUERY PARA LOS PQAF
@@ -289,10 +325,12 @@ export default function ReceptionistLoaderContext({
     refetch: refetchPQAF,
     isSuccess: isPQAFSuccess,
   } = useQuery({
+
+    enabled: pathname === "/dashboard/admin/pqaf",
     queryKey: [
       "pqaf",
       "list",
-      pathname,
+      
       orderByColumn,
       orderByDirection,
       dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
@@ -358,20 +396,22 @@ export default function ReceptionistLoaderContext({
 
 
 
-
-
-
 const analyticsQuery = useQuery({
-  queryKey: ["admin_analytics", rol, 8, 2026],
+  queryKey: [
+    "admin_analytics",
+    rol,
+  ],
 
   queryFn: async () => {
-    console.log("Pidiendo analytics de agosto de 2026");
+    console.log(
+      `Pidiendo analytics de ${mesSeleccionado}/${anoSeleccionado}`,
+    );
 
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_analitics",
       {
-        p_mes_solicitado: 8,
-        p_ano_solicitado: 2026,
+        p_mes_solicitado: mesSeleccionado,
+        p_ano_solicitado: anoSeleccionado,
       },
     );
 
@@ -388,19 +428,18 @@ const analyticsQuery = useQuery({
       return data[0] as unknown as AdminAnalyticsData;
     }
 
-    throw new Error(
-      "El RPC no devolvió datos de analytics.",
-    );
+    throw new Error("El RPC no devolvió datos de analytics.");
   },
 
   staleTime: Infinity,
   refetchOnWindowFocus: false,
+  enabled: pathname === "/dashboard/admin/analitica",
 });
 
 
-
-
-
+useEffect(() => {
+  analyticsQuery.refetch();
+}, [mesSeleccionado, anoSeleccionado]);
 
 
 
@@ -432,6 +471,7 @@ const analyticsQuery = useQuery({
     refetchInterval: 15000,
     // Refresca si el administrador cambia de pestaña y vuelve
     refetchOnWindowFocus: true,
+    enabled: pathname === "/dashboard/admin/analitica",
   });
 
 
@@ -442,6 +482,10 @@ const analyticsQuery = useQuery({
     rol: rol,
     analyticsQuery: analyticsQuery,
     analyticsDataDiary: analyticsDataDiary,
+      mesSeleccionado,
+      setMesSeleccionado,
+      anoSeleccionado,
+      setAnoSeleccionado,
     PQAFQuery: {
       PQAFData: PQAFData || [],
       isFetchingPQAF,

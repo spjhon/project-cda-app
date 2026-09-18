@@ -1,24 +1,41 @@
 import { useMemo } from "react";;
-import { CompleteDataRTMType } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
 import { Activity, Info } from "lucide-react";
+import dynamic from "next/dynamic";
 
-import { ChartBarMonthInteractive } from "./ChartBarMonthInteractive";
+
+
 import { CuadroMetrica } from "./CuadroMetrica";
-import { ChartBarYearInteractive } from "./ChartBarYearInteractive";
 import { DayChartItem, MonthChartItem } from "@/contexts/AdminLoaderContext";
+import { LazyChartOnScroll } from "./RenderWhenVisible";
+import { usePathname } from "next/navigation";
+import { CompleteDataRTM } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
 //import { useSidebar } from "@/components/ui/sidebar";
 
 interface AnaliticaPorCantidadProps {
   titulo: string;
   descripcion: string;
-  datos: CompleteDataRTMType | undefined;
+  datos: CompleteDataRTM;
 }
+
+// Lazy load Chart component
+const ChartBarMonthInteractive = dynamic(() => import("./ChartBarMonthInteractive"), {
+  ssr: false,
+});
+
+// Lazy load Chart component
+const ChartBarYearInteractive = dynamic(() => import("./ChartBarYearInteractive"), {
+  ssr: false,
+});
 
 export default function AnaliticaPorCantidad({
   titulo,
   descripcion,
   datos,
 }: AnaliticaPorCantidadProps) {
+
+  
+  const pathname = usePathname();
+
   const isPorcentaje = titulo === "Tasa de Rechazo";
 
   // Mapeo dinámico de datos estructurados según el tipo de métrica
@@ -71,7 +88,8 @@ export default function AnaliticaPorCantidad({
   }, [titulo, datos]);
 
   return (
-    <div className="flex flex-col gap-6 pl-2 md:pl-4">
+    
+    <div className="flex flex-col gap-6 pl-2 md:pl-4" key={pathname}>{/* LA KEY ES PARA DESTRUIR EL COMPONENTE CADA VEZ QUE SE CAMBIA DE PAGE.TSX */}
       {/* Encabezado con Iconos */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
@@ -116,19 +134,24 @@ export default function AnaliticaPorCantidad({
       {/* ESPACIO PARA LAS GRÁFICAS */}
       <div className="mt-6 flex flex-row flex-wrap gap-6">
         <div className="overflow-scroll">
+          <LazyChartOnScroll>
           <ChartBarMonthInteractive
             chartMonthData={datosSeparados.chartMonthData}
             isPorcentaje={isPorcentaje}
           />
+          </LazyChartOnScroll>
         </div>
 
         <div className="overflow-scroll">
+          <LazyChartOnScroll>
           <ChartBarYearInteractive
             chartYearData={datosSeparados.chartYearData}
             isPorcentaje={isPorcentaje}
           />
+          </LazyChartOnScroll>
         </div>
       </div>
+
     </div>
   );
 }

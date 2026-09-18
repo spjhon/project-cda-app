@@ -51,7 +51,7 @@ const chartYearConfig = {
 
 
 
-export function ChartBarYearInteractive({chartYearData, isPorcentaje}: ChartBarYearInteractiveProps) {
+export default function ChartBarYearInteractive({chartYearData, isPorcentaje}: ChartBarYearInteractiveProps) {
 //const { state } = useSidebar()
    
 
