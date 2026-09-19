@@ -8,6 +8,7 @@ import { DateRange } from "react-day-picker";
 import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
+import { Database } from "../../supabase/types/database.types";
 // ============================================================================
 // ANALYTICS DIARIOS
 // Datos del RPC: fetch_admin_analitics_diary
@@ -135,6 +136,9 @@ export interface PQAFListItem {
   total_count: number;
 }
 
+
+export type ServiceTypeFilter = ServiceTypeEnum | null;
+
 // ============================================================================
 // CONTEXT
 // Estructura completa de datos y funcionalidades expuestas por el Context
@@ -160,16 +164,18 @@ export interface AdminContextType {
     // Query completa de TanStack Query para los analytics históricos.
     // Contiene data, estados, errores, refetch, etc.
     analyticsQuery: UseQueryResult<AdminAnalyticsData, Error>;
+// ------------------------------------------------------------------------
+// Selector de mes, año y servicio para analytics
+// ------------------------------------------------------------------------
 
-        // ------------------------------------------------------------------------
-    // Selector de mes y año para analytics
-    // ------------------------------------------------------------------------
+mesSeleccionado: number;
+setMesSeleccionado: (mes: number) => void;
 
-    mesSeleccionado: number;
-    setMesSeleccionado: (mes: number) => void;
+anoSeleccionado: number;
+setAnoSeleccionado: (ano: number) => void;
 
-    anoSeleccionado: number;
-    setAnoSeleccionado: (ano: number) => void;
+servicioTipoSeleccionado: ServiceTypeFilter;
+setServicioTipoSeleccionado: (servicio: ServiceTypeFilter) => void;
 
     // ------------------------------------------------------------------------
     // PQAF
@@ -232,7 +238,8 @@ export interface AdminContextType {
 }
 
 
-
+export type ServiceTypeEnum =
+  Database["public"]["Enums"]["service_type_enum"] | null;
 
 
 export const AdminContext = createContext<AdminContextType | null>(null);
@@ -306,9 +313,11 @@ const anoActual = Number(
   })
 );
 
+
+
 const [mesSeleccionado, setMesSeleccionado] = useState(mesActual);
 const [anoSeleccionado, setAnoSeleccionado] = useState(anoActual);
-
+const [servicioTipoSeleccionado, setServicioTipoSeleccionado] = useState<ServiceTypeEnum | null>("RTM");
 
 
 
@@ -412,6 +421,7 @@ const analyticsQuery = useQuery({
       {
         p_mes_solicitado: mesSeleccionado,
         p_ano_solicitado: anoSeleccionado,
+        p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
       },
     );
 
@@ -437,42 +447,61 @@ const analyticsQuery = useQuery({
 });
 
 
-useEffect(() => {
-  analyticsQuery.refetch();
-}, [mesSeleccionado, anoSeleccionado, analyticsQuery]);
 
 
 
 
 
+const analyticsQueryDiary = useQuery({
+  queryKey: [
+    "admin_analytics_diary",
+    rol,
+  ],
+  queryFn: async () => {
+    console.log(
+      `Pidiendo analytics diarios - servicio: ${
+        servicioTipoSeleccionado ?? "todos"
+      }`,
+    );
 
+    const { data, error } = await supabaseBrowser.rpc(
+      "fetch_admin_analitics_diary",
+      {
+        p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
+      },
+    );
 
-  const analyticsQueryDiary = useQuery({
-    queryKey: ["admin_analytics_diary", rol], // La key asegura que no se mezcle caché si cambias de rol
-    queryFn: async () => {
-
-      console.log("Pidiendo datos a analyticsDataDiary")
-      // Llamada directa al RPC
-      const { data, error } = await supabaseBrowser.rpc(
-        "fetch_admin_analitics_diary",
+    if (error) {
+      console.error(
+        "Error al extraer analytics diarios:",
+        error.message,
       );
+      throw new Error(error.message);
+    }
 
-      if (error) {
-        console.error("Error en polling de analytics:", error);
-        throw error;
-      }
+    if (data && data.length > 0) {
+      return data[0] as AdminAnalyticsDiaryData;
+    }
 
-      // Supabase suele devolver un array de los ROWS de Postgres.
-      // Si tu función devuelve una sola fila con los datos consolidados, extraemos el índice 0.
-      return data?.[0] as AdminAnalyticsDiaryData;
-    },
-    
-    // Tiempo en milisegundos para volver a consultar (ej: 15000 = 15 segundos)
-    refetchInterval: 15000,
-    // Refresca si el administrador cambia de pestaña y vuelve
-    refetchOnWindowFocus: true,
-    enabled: pathname === "/dashboard/admin/analitica",
-  });
+    throw new Error("El RPC diario no devolvió datos.");
+  },
+
+  refetchInterval: 15000,
+  staleTime: Infinity,
+  enabled: pathname === "/dashboard/admin/analitica",
+});
+
+useEffect(() => {
+  if (pathname !== "/dashboard/admin/analitica") {
+    return;
+  }
+  analyticsQuery.refetch();
+  analyticsQueryDiary.refetch();
+}, [
+  mesSeleccionado,
+  anoSeleccionado,
+  servicioTipoSeleccionado,
+]);
 
 
 
@@ -486,6 +515,8 @@ useEffect(() => {
       setMesSeleccionado,
       anoSeleccionado,
       setAnoSeleccionado,
+      servicioTipoSeleccionado,
+      setServicioTipoSeleccionado,
     PQAFQuery: {
       PQAFData: PQAFData || [],
       isFetchingPQAF,

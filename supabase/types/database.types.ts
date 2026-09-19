@@ -1480,7 +1480,11 @@ export type Database = {
         Returns: string
       }
       fetch_admin_analitics: {
-        Args: { p_ano_solicitado: number; p_mes_solicitado: number }
+        Args: {
+          p_ano_solicitado: number
+          p_mes_solicitado: number
+          p_servicio_tipo?: Database["public"]["Enums"]["service_type_enum"]
+        }
         Returns: {
           chart_anio: Json
           chart_mes: Json
@@ -1495,7 +1499,9 @@ export type Database = {
         }[]
       }
       fetch_admin_analitics_diary: {
-        Args: never
+        Args: {
+          p_servicio_tipo?: Database["public"]["Enums"]["service_type_enum"]
+        }
         Returns: {
           total_rtm_hoy: number
           total_rtm_rechazados_hoy: number

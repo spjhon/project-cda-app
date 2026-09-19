@@ -2,6 +2,15 @@
 
 import AnaliticaPorCantidad from "@/components/dashboard/admin/AnaliticaPorCantidad";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AdminAnalyticsData,
   AdminAnalyticsDiaryData,
   AdminContext,
@@ -37,8 +46,20 @@ export default function AnaliticaPage() {
     return null;
   }
 
-  const analyticsQuery = adminContextReceived.AdminContextValue.analyticsQuery;
-  const {data: analyticsDataDiary} = adminContextReceived.AdminContextValue.analyticsQueryDiary;
+  const {
+    analyticsQuery,
+    analyticsQueryDiary,
+    servicioTipoSeleccionado,
+    setServicioTipoSeleccionado,
+  } = adminContextReceived.AdminContextValue;
+
+  const { data: analyticsDataDiary } = analyticsQueryDiary;
+
+  const servicios = [
+    { label: "RTM", value: "RTM" },
+    { label: "Preventiva", value: "preventiva" },
+    { label: "Peritaje", value: "peritaje" },
+  ];
 
   const ahora = new Date();
 
@@ -269,6 +290,32 @@ export default function AnaliticaPage() {
           normativos (ISO 17020) en tiempo real.
         </p>
       </header>
+
+      <div className="w-full">
+        <Select
+          items={servicios}
+          value={servicioTipoSeleccionado}
+          onValueChange={(value) => {
+            setServicioTipoSeleccionado(value);
+          }}
+        >
+          <SelectTrigger className="h-16 w-full text-xl font-bold">
+            <SelectValue />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel className="text-base">Tipo de servicio</SelectLabel>
+
+              {servicios.map((servicio) => (
+                <SelectItem key={servicio.value} value={servicio.value}>
+                  {servicio.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* 🌟 AQUÍ IRÁ EL CONTENEDOR PRINCIPAL DE LOS GRÁFICOS EN EL SIGUIENTE PASO */}
       <div className="flex flex-col gap-6 w-full">

@@ -1,3 +1,5 @@
+DROP FUNCTION IF EXISTS public.fetch_admin_analitics(INTEGER, INTEGER);
+
 CREATE OR REPLACE FUNCTION public.fetch_admin_analitics(
     p_mes_solicitado INTEGER,
     p_ano_solicitado INTEGER,
@@ -19,7 +21,7 @@ RETURNS TABLE (
     chart_rechazado_anio JSON
 )
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE

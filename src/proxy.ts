@@ -13,6 +13,6 @@ export const config = {
      * - Archivos estáticos comunes (imágenes, fuentes, favicons, json, txt)
      * - Ataques de bots (.php, wp-, .env)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico|json)$|.*\\.php$|wp-.*|\\.env).*)",
+    "/((?!$|about$|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico|json)$|.*\\.php$|wp-.*|\\.env).*)",
   ],
 };

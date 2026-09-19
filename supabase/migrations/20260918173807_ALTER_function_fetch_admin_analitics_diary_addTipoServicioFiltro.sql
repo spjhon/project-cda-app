@@ -1,3 +1,6 @@
+DROP FUNCTION IF EXISTS public.fetch_admin_analitics_diary();
+
+
 
 
 -- =========================================================================

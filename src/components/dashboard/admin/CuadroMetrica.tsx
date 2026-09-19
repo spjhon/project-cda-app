@@ -26,6 +26,8 @@ export function CuadroMetrica({
   const analyticsQuery = adminContextReceived?.AdminContextValue.analyticsQuery;
   const analyticsQueryDiary = adminContextReceived?.AdminContextValue.analyticsQueryDiary;
 
+  
+
   return (
     <div
       className={`
