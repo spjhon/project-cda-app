@@ -1,3 +1,16 @@
+DROP FUNCTION IF EXISTS public.update_director_tecnico_order(
+    uuid,
+    text,
+    character varying,
+    character varying,
+    text,
+    character varying,
+    text,
+    text,
+    boolean
+);
+
+
 CREATE OR REPLACE FUNCTION public.update_director_tecnico_order(
     p_order_id uuid,
     p_resultado_revision text,

@@ -1443,6 +1443,10 @@ const textoContractual = orderData?.plantilla_texto_contractual || templateData?
     </View>
   );
 }
+
+
+
+
 // --------------------------------------------------
 // 8. FIRMA E INSPECTOR
 // --------------------------------------------------
@@ -1794,7 +1798,7 @@ function ComplementarySignaturesSection({
       id: sig.template_signature_id,
       representative_type: sig.representative_type,
       signature_label: sig.signature_label,
-      signature_url: sig.signature_url,
+      signature_url: sig.signature_path,
       declarations: sig.conditions.map((condition) => ({
         id: condition.condition_id,
         declaration_text: condition.declaration_text,

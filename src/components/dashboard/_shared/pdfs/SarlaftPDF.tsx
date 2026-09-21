@@ -31,7 +31,7 @@ const CheckMark = () => (
 // ============================================================
 
 interface SarlaftPDFProps {
-  evidenceData?: SarlaftEvidence[];
+  evidenceData?: SarlaftEvidence;
 }
 
 // ============================================================
@@ -714,9 +714,9 @@ function VerificationSection({
 
         <View style={styles.inspectorSignatureArea}>
           <View style={styles.inspectorSignatureSpace}>
-            {customerEvidence?.funcionario_firma_base64_snapshot ? (
+            {customerEvidence?.funcionario_firma_path ? (
               <Image
-                src={customerEvidence.funcionario_firma_base64_snapshot}
+                src={customerEvidence.funcionario_firma_path}
                 style={styles.inspectorSignatureImage}
               />
             ) : (
@@ -736,7 +736,6 @@ function VerificationSection({
     </View>
   );
 }
-
 // ============================================================
 // COMPONENTE PRINCIPAL
 // ============================================================
@@ -745,45 +744,23 @@ export default function SarlaftPDF({
   evidenceData,
 }: SarlaftPDFProps) {
   // ----------------------------------------------------------
-  // FALLBACK GENERAL
-  // ----------------------------------------------------------
-
-  const evidences = evidenceData ?? [];
-
-  // ----------------------------------------------------------
-  // IDENTIFICAR CLIENTE Y PROPIETARIO
-  // ----------------------------------------------------------
-
-  const customerEvidence = evidences.find(
-    (item) => item.person_type === "customer",
-  );
-
-  const ownerEvidence = evidences.find(
-    (item) => item.person_type === "owner",
-  );
-
-  // ----------------------------------------------------------
   // DATOS GENERALES
   // ----------------------------------------------------------
 
-  const createdAt =
-    customerEvidence?.created_at ??
-    ownerEvidence?.created_at ??
-    null;
+  const createdAt = evidenceData?.created_at ?? null;
 
-  const placa =
-    customerEvidence?.placa_snapshot ??
-    ownerEvidence?.placa_snapshot ??
-    null;
+  const placa = evidenceData?.placa_snapshot ?? null;
 
   // ----------------------------------------------------------
   // FIRMA DEL CLIENTE
-  // IMPORTANTE:
-  // El campo correcto es cliente_firma_url
+  // ----------------------------------------------------------
+  // El hook/RPC ahora trabaja con cliente_firma_path.
+  // Antes de llegar aquí, View/Download PDF reemplazan
+  // este valor por el Data URL de la imagen.
   // ----------------------------------------------------------
 
   const customerSignature =
-    customerEvidence?.cliente_firma_url ?? null;
+    evidenceData?.cliente_firma_path ?? null;
 
   // ----------------------------------------------------------
   // DOCUMENTO
@@ -824,7 +801,7 @@ export default function SarlaftPDF({
         ==================================================== */}
 
         <CustomerSection
-          evidence={customerEvidence}
+          evidence={evidenceData}
           createdAt={createdAt}
           placa={placa}
         />
@@ -834,7 +811,7 @@ export default function SarlaftPDF({
         ==================================================== */}
 
         <OwnerSection
-          evidence={ownerEvidence}
+          evidence={evidenceData}
         />
 
         {/* ====================================================
@@ -844,19 +821,20 @@ export default function SarlaftPDF({
         <DeclarationSection
           signature={customerSignature}
           customerName={
-            customerEvidence?.nombre_completo_snapshot
+            evidenceData?.nombre_completo_snapshot
           }
           customerDocument={
-            customerEvidence?.numero_documento_snapshot
+            evidenceData?.numero_documento_snapshot
           }
         />
 
         {/* ====================================================
             SECCIÓN 4
         ==================================================== */}
-<VerificationSection
-  customerEvidence={customerEvidence}
-/>
+
+        <VerificationSection
+          customerEvidence={evidenceData}
+        />
 
         {/* ====================================================
             FOOTER

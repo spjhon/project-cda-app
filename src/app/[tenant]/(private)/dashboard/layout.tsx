@@ -30,7 +30,7 @@ export interface UserContextData {
   id?: string; // Este es el UUID de la tabla service_users
   document_type?: string | null;
   document_number?: string | null;
-  signature_base64?: string | null;
+  signature_path?: string | null;
   is_active: boolean;
 }
 
@@ -71,7 +71,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
     // Ajusta 'auth_user_id' al nombre real de la columna que vincula con Auth
     const { data: serviceUserData, error: serviceError } = await supabase
       .from("service_users")
-      .select("id, document_type, document_number, signature_base64, is_active")
+      .select("id, document_type, document_number, is_active, signature_path")
       .eq("auth_user_id", authId)
       .single();
 
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
       id: serviceUserData?.id,
       document_type: serviceUserData?.document_type,
       document_number: serviceUserData?.document_number,
-      signature_base64: serviceUserData?.signature_base64,
+      signature_path: serviceUserData?.signature_path,
       is_active: serviceUserData?.is_active,
     };
   })();

@@ -151,6 +151,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           director_tecnico_firma_base64_snapshot: string | null
+          director_tecnico_firma_path_snapshot: string | null
           director_tecnico_nombre_snapshot: string | null
           director_tecnico_numero_documento_snapshot: string | null
           director_tecnico_tipo_documento_snapshot: string | null
@@ -158,7 +159,8 @@ export type Database = {
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
           fecha_limite_reinspeccion: string | null
-          funcionario_firma_base64_snapshot: string
+          funcionario_firma_base64_snapshot: string | null
+          funcionario_firma_path_snapshot: string | null
           funcionario_id: string
           funcionario_nombre_snapshot: string
           funcionario_numero_documento_snapshot: string
@@ -218,6 +220,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           director_tecnico_firma_base64_snapshot?: string | null
+          director_tecnico_firma_path_snapshot?: string | null
           director_tecnico_nombre_snapshot?: string | null
           director_tecnico_numero_documento_snapshot?: string | null
           director_tecnico_tipo_documento_snapshot?: string | null
@@ -225,7 +228,8 @@ export type Database = {
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
           fecha_limite_reinspeccion?: string | null
-          funcionario_firma_base64_snapshot: string
+          funcionario_firma_base64_snapshot?: string | null
+          funcionario_firma_path_snapshot?: string | null
           funcionario_id: string
           funcionario_nombre_snapshot: string
           funcionario_numero_documento_snapshot: string
@@ -285,6 +289,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           director_tecnico_firma_base64_snapshot?: string | null
+          director_tecnico_firma_path_snapshot?: string | null
           director_tecnico_nombre_snapshot?: string | null
           director_tecnico_numero_documento_snapshot?: string | null
           director_tecnico_tipo_documento_snapshot?: string | null
@@ -292,7 +297,8 @@ export type Database = {
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
           fecha_limite_reinspeccion?: string | null
-          funcionario_firma_base64_snapshot?: string
+          funcionario_firma_base64_snapshot?: string | null
+          funcionario_firma_path_snapshot?: string | null
           funcionario_id?: string
           funcionario_nombre_snapshot?: string
           funcionario_numero_documento_snapshot?: string
@@ -534,7 +540,8 @@ export type Database = {
           created_at: string
           entry_order_id: string
           id: string
-          signature_url: string
+          signature_path: string | null
+          signature_url: string | null
           template_signature_id: string
           tenant_id: string
         }
@@ -542,7 +549,8 @@ export type Database = {
           created_at?: string
           entry_order_id: string
           id?: string
-          signature_url: string
+          signature_path?: string | null
+          signature_url?: string | null
           template_signature_id: string
           tenant_id: string
         }
@@ -550,7 +558,8 @@ export type Database = {
           created_at?: string
           entry_order_id?: string
           id?: string
-          signature_url?: string
+          signature_path?: string | null
+          signature_url?: string | null
           template_signature_id?: string
           tenant_id?: string
         }
@@ -973,6 +982,7 @@ export type Database = {
           id: string
           is_active: boolean
           signature_base64: string | null
+          signature_path: string | null
           updated_at: string
         }
         Insert: {
@@ -984,6 +994,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           signature_base64?: string | null
+          signature_path?: string | null
           updated_at?: string
         }
         Update: {
@@ -995,6 +1006,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           signature_base64?: string | null
+          signature_path?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1663,11 +1675,11 @@ export type Database = {
         Args: { p_entry_order_id: string }
         Returns: {
           actividad_economica_snapshot: string
-          cliente_firma_url: string
+          cliente_firma_path: string
           created_at: string
           entry_order_id: string
           es_persona_publicamente_expuesta_snapshot: boolean
-          funcionario_firma_base64_snapshot: string
+          funcionario_firma_path: string
           id: string
           nombre_completo_snapshot: string
           numero_documento_snapshot: string
@@ -1789,7 +1801,7 @@ export type Database = {
         Args: {
           p_consecutivo_fur: string
           p_consecutivo_rtm: string
-          p_director_tecnico_firma_base64_snapshot: string
+          p_director_tecnico_firma_path_snapshot: string
           p_director_tecnico_nombre_snapshot: string
           p_director_tecnico_numero_documento_snapshot: string
           p_director_tecnico_tipo_documento_snapshot: string

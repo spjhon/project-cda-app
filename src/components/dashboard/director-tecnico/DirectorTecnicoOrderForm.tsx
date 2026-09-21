@@ -37,7 +37,8 @@ export interface DirectorTecnicoFormState {
   director_tecnico_tipo_documento_snapshot: string | null;
   director_tecnico_numero_documento_snapshot: string | null;
   director_tecnico_nombre_snapshot: string | null;
-  director_tecnico_firma_base64_snapshot: string | null;
+  director_tecnico_firma_path_snapshot: string | null;
+
 }
 
 interface DirectorTecnicoOrderFormProps {
@@ -78,8 +79,8 @@ export default function DirectorTecnicoOrderForm({
     director_tecnico_tipo_documento_snapshot: user?.document_type ?? null,
     director_tecnico_numero_documento_snapshot: user?.document_number ?? null,
     director_tecnico_nombre_snapshot: user?.name ?? null,
-    director_tecnico_firma_base64_snapshot: user?.signature_base64 ?? null
-
+    director_tecnico_firma_path_snapshot: user?.signature_path ?? null,
+  
   });
 
   // 🌟 CONTROL: Identificar si es un tipo de servicio que exime de certificado oficial RTM
@@ -212,7 +213,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Consultar si el director técnico tiene firma registrada
     const { data: directorData, error: directorError } = await supabase
       .from("service_users")
-      .select("id, full_name, signature_base64")
+      .select("id, full_name, signature_path")
       .eq("id", directorTecnicoAuthId)
       .eq("is_active", true)
       .single();
@@ -232,9 +233,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // Verificar que el campo signature_base64 exista Y tenga contenido
-    const tieneFirma = directorData.signature_base64 && 
-                        directorData.signature_base64.trim() !== "";
+    // Verificar que el campo signature_path exista Y tenga contenido
+    const tieneFirma = directorData.signature_path && 
+                        directorData.signature_path.trim() !== "";
 
     if (!tieneFirma) {
       setServerError(

@@ -26,17 +26,27 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
+
 
 export default function ReceptionistaPerfil() {
+  const queryClient = useQueryClient();
+
   const canvasRef = useRef<SignatureCanvasRef | null>(null);
   const contextRecived = useContext(PermissionsContext);
 
  
 const [isUpdating, setIsUpdating] = useState(false);
-const router = useRouter()
+
   const tenantData = contextRecived?.PermissionsContextValue.tenantObject;
   const user = contextRecived?.PermissionsContextValue.user;
+
+   const {
+      data: signatureUrl,
+      isLoading: isLoadingSignature,
+      isError: isErrorSignature,
+    } = useCreateImageLink(user?.signature_path);
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -68,62 +78,133 @@ const router = useRouter()
   });
 
 
-const handleSubmitFirma = async () => {
-  const canvas = canvasRef.current?.canvas;
+  const handleSubmitFirma = async () => {
+    const canvas = canvasRef.current?.canvas;
 
-  if (!canvas) {
-    alert("❌ Error: El área de dibujo no está lista o no se pudo inicializar.");
-    return;
-  }
+    if (!canvas) {
+      alert(
+        "❌ Error: El área de dibujo no está lista o no se pudo inicializar.",
+      );
+      return;
+    }
 
-  if (!user?.id) {
-    alert("❌ Error de autenticación: No se detectó una sesión activa de usuario.");
-    return;
-  }
+    if (!user?.id) {
+      alert(
+        "❌ Error de autenticación: No se detectó una sesión activa de usuario.",
+      );
+      return;
+    }
 
-  setIsUpdating(true);
+    setIsUpdating(true);
 
-  try {
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const ctx = tempCanvas.getContext("2d");
+    try {
+      // ============================================================
+      // 1. Crear canvas temporal con fondo blanco
+      // ============================================================
 
-    if (!ctx) throw new Error("No se pudo inicializar el contexto del canvas temporal.");
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const ctx = tempCanvas.getContext("2d");
 
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    ctx.drawImage(canvas, 0, 0);
+      if (!ctx)
+        throw new Error(
+          "No se pudo inicializar el contexto del canvas temporal.",
+        );
+      // Fondo blanco para la firma
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      // Copiar la firma dibujada
+      ctx.drawImage(canvas, 0, 0);
 
-    const base64 = tempCanvas.toDataURL("image/jpeg", 0.4);
+      // ============================================================
+      // 2. Convertir canvas directamente a Blob JPEG
+      //    Ya NO utilizamos Base64
+      // ============================================================
 
-    const supabaseBrowser = createSupabaseBrowserClient();
-    // Inyección en Supabase
-    const { error } = await supabaseBrowser
-      .from("service_users")
-      .update({signature_base64: base64})
-      .eq("id", user.id);
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        tempCanvas.toBlob(
+          (result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error("No se pudo convertir la firma a una imagen."));
+            }
+          },
+          "image/jpeg",
+          0.4,
+        );
+      });
+      // ============================================================
+      // 3. Crear cliente de Supabase
+      // ============================================================
+      const supabaseBrowser = createSupabaseBrowserClient();
+      // Inyección en Supabase
+      // ============================================================
+      // 4. Ruta de la firma dentro de Storage
+      //
+      //    Cada funcionario tiene una única firma.
+      //    Si vuelve a firmar, upsert reemplaza la anterior.
+      // ============================================================
 
-    if (error) throw error;
+      const signaturePath = `service_users/${user.id}/signature.jpeg`;
 
-    // Alerta de éxito nativa
-    alert("✅ Firma registrada con éxito para el cumplimiento de la norma ISO 17020.");
-    
-  } catch (error: unknown) {
-    console.error("Error al registrar la firma:", error);
-  
-  // Validamos si es una instancia real de Error de JavaScript / Supabase SDK
-  if (error instanceof Error) {
-    alert(`❌ Error al guardar: ${error.message}`);
-  } else {
-    // Fallback para errores genéricos o imprevistos
-    alert("❌ Error al guardar: Ocurrió un error crítico e inesperado al intentar almacenar la firma.");
-  }
-  } finally {
-    router.refresh()
-    setIsUpdating(false)
-  }
-};
+      // ============================================================
+      // 5. Subir la firma al bucket privado "signatures"
+      // ============================================================
+      console.log("id del user.id: ", user.id);
+      const { error: uploadError } = await supabaseBrowser.storage
+        .from("signatures")
+        .upload(signaturePath, blob, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.log("se activo el error DEL STORAGE");
+        throw uploadError;
+      }
+
+      // ============================================================
+      // 6. Guardar solamente la ruta en service_users
+      //
+     
+      // ============================================================
+
+      const { error: databaseError } = await supabaseBrowser
+        .from("service_users")
+        .update({
+          signature_path: signaturePath,
+        })
+        .eq("id", user.id);
+
+      if (databaseError) {
+        throw databaseError;
+      }
+
+      // Alerta de éxito nativa
+      alert(
+        "✅ Firma registrada con éxito para el cumplimiento de la norma ISO 17020.",
+      );
+    } catch (error: unknown) {
+      console.error("Error al registrar la firma:", error);
+
+      // Validamos si es una instancia real de Error de JavaScript / Supabase SDK
+      if (error instanceof Error) {
+        alert(`❌ Error al guardar: ${error.message}`);
+      } else {
+        // Fallback para errores genéricos o imprevistos
+        alert(
+          "❌ Error al guardar: Ocurrió un error crítico e inesperado al intentar almacenar la firma.",
+        );
+      }
+    } finally {
+      await queryClient.invalidateQueries({
+        queryKey: ["create-image-link"],
+      });
+      setIsUpdating(false);
+    }
+  };
 
 
   return (
@@ -407,29 +488,45 @@ const handleSubmitFirma = async () => {
               </div>
 
               {/* Mismas condiciones exactas de tamaño que tu Pad (max-w-110 y min-h-60) */}
-              <div className="max-w-110 w-full m-auto relative rounded-xl border border-border bg-white flex items-center justify-center shadow-xs min-h-60 select-none overflow-hidden">
-                {user?.signature_base64 ? (
-                  <div className="w-full max-w-100 h-50 flex items-center justify-center p-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={user.signature_base64} 
-                      alt="Firma actual del funcionario" 
-                      className="w-full h-full object-contain pointer-events-none mix-blend-multiply"
-                    />
+               {isLoadingSignature ? (
+                <div className="w-full max-w-100 h-50 flex items-center justify-center p-2">
+                  <p className="text-xs text-muted-foreground">
+                    Cargando firma...
+                  </p>
+                </div>
+              ) : isErrorSignature ? (
+                <div className="w-full max-w-100 h-50 flex flex-col items-center justify-center p-2 text-center">
+                  <p className="text-xs font-bold text-destructive">
+                    Error al cargar la firma
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    No fue posible obtener la imagen de la firma.
+                  </p>
+                </div>
+              ) : signatureUrl ? (
+                <div className="w-full max-w-100 h-50 flex items-center justify-center p-2">
+                  <img
+                    src={signatureUrl}
+                    alt="Firma actual del funcionario"
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                </div>
+              ) : (
+                <div className="w-full max-w-100 h-50 flex flex-col items-center justify-center p-2 space-y-1.5 text-center">
+                  <div className="inline-flex p-2.5 bg-muted rounded-full text-muted-foreground/50 mb-1">
+                    <PenTool className="size-4" />
                   </div>
-                ) : (
-                  /* Estado vacío si el recepcionista no ha firmado nunca */
-                  <div className="text-center p-4 space-y-1.5">
-                    <div className="inline-flex p-2.5 bg-muted rounded-full text-muted-foreground/50 mb-1">
-                      <PenTool className="size-4" />
-                    </div>
-                    <p className="text-xs font-bold text-foreground/80 uppercase tracking-tight">Sin Registro</p>
-                    <p className="text-[10px] text-muted-foreground/80 max-w-50 m-auto leading-normal">
-                      No se detecta firma guardada. Realiza un trazo a la izquierda.
-                    </p>
-                  </div>
-                )}
-              </div>
+
+                  <p className="text-xs font-bold text-foreground/80 uppercase tracking-tight">
+                    Sin Registro
+                  </p>
+
+                  <p className="text-[10px] text-muted-foreground/80 max-w-50 m-auto leading-normal">
+                    No se detecta firma guardada. Realiza un trazo a la
+                    izquierda.
+                  </p>
+                </div>
+              )}
 
               <p className="text-[10px] text-center text-muted-foreground/60 font-medium tracking-wide">
                 Esta es la representación digital que se incrustará bajo la norma ISO 17020.

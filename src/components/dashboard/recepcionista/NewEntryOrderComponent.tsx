@@ -323,7 +323,7 @@ if (activeModules.includes("sarlaft")) {
   const handleTemplateSelect = (id: string, checked: boolean) => {
     if (
       !PermissionsContextReceived?.PermissionsContextValue.user
-        ?.signature_base64
+        ?.signature_path
     ) {
       setServerError(
         "Error: El inspector no posee una firma registrada, por fa registralo la seccion del perfil",

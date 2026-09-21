@@ -161,6 +161,8 @@ cliente_direccion_snapshot                  TEXT,
     -- Firma digital utilizada para la recepción.
     funcionario_firma_base64_snapshot           TEXT NOT NULL,
 
+    funcionario_firma_path_snapshot             TEXT NULL,
+
 
     -- ==========================================
     -- SNAPSHOT DEL DIRECTOR TÉCNICO (Cierre)
@@ -177,6 +179,8 @@ cliente_direccion_snapshot                  TEXT,
 
     -- Firma digital utilizada para el cierre de la inspección.
     director_tecnico_firma_base64_snapshot      TEXT NULL,
+
+    director_tecnico_firma_path_snapshot        TEXT NULL;
 
 
     -- ==========================================
@@ -329,6 +333,12 @@ COMMENT ON COLUMN public.entry_orders.vehicle_service_rate_id IS
 
 COMMENT ON COLUMN public.entry_orders.rate_price_snapshot IS
   'Valor total de la tarifa calculado y almacenado al momento de crear la orden de entrada.';
+
+  COMMENT ON COLUMN public.entry_orders.funcionario_firma_path_snapshot IS
+'Ruta en Supabase Storage de la firma del funcionario utilizada como snapshot al crear la orden de entrada.';
+
+COMMENT ON COLUMN public.entry_orders.director_tecnico_firma_path_snapshot IS
+'Ruta en Supabase Storage de la firma del director técnico utilizada como snapshot en la orden de entrada.';
 -- ==========================================
 -- 5. CONSTRAINTS (Unicidad)
 -- ==========================================

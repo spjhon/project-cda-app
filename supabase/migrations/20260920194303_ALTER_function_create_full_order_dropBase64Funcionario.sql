@@ -26,7 +26,7 @@ DECLARE
     v_customer_json jsonb;
     v_owner_json jsonb;
     v_conditions_json jsonb;
-    
+    v_signatures_json jsonb;
 
     -- Variable de seguridad para verificar permisos en el tenant
     v_has_permission boolean;
@@ -43,7 +43,7 @@ BEGIN
     v_customer_json := p_data->'customer_data';
     v_owner_json := p_data->'owner_data';
     v_conditions_json := p_data->'condition_results';
-    
+    v_signatures_json := p_data->'signatures';
     
 
 
@@ -488,12 +488,25 @@ BEGIN
     -- =========================================================================
     -- PASO 7: PROCESO DETALLE - FIRMAS CAPTURADAS EN LA ORDEN (customer/owner signatures)
     -- =========================================================================
-    -- =========================================================================
--- PASO 7: FIRMAS CAPTURADAS EN LA ORDEN
--- =========================================================================
--- Las firmas ya no se almacenan desde este RPC.
--- El Base64 recibido desde el formulario será procesado posteriormente
--- por createOrderAction y almacenado en Supabase Storage.
+    DELETE FROM public.order_signatures 
+	WHERE entry_order_id = v_order_id;
+
+    INSERT INTO public.order_signatures (
+        tenant_id, 
+	entry_order_id, 
+	template_signature_id, 
+	signature_url
+    )
+    SELECT 
+        v_tenant_id, 
+	v_order_id, 
+	s.template_signature_id, 
+	s.signature_url
+
+    FROM jsonb_to_recordset(v_signatures_json) AS s(
+        template_signature_id uuid, 
+	signature_url text
+    );
 
     RETURN v_order_id;
 END;

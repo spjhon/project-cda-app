@@ -208,7 +208,7 @@ erDiagram
         text document_type
         text document_number "UNIQUE with document_type"
         boolean is_active
-        text signature_base64
+        text signature_path
         timestamptz created_at
         timestamptz updated_at
     }

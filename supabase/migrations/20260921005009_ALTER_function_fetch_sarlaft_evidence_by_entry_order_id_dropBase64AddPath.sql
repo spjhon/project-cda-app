@@ -1,3 +1,8 @@
+
+DROP FUNCTION IF EXISTS public.fetch_sarlaft_evidence_by_entry_order_id(
+    UUID
+);
+
 -- ============================================================ 
 -- RPC: Obtener evidencias SARLAFT de una orden de entrada
 -- incluyendo firma del cliente y firma del funcionario

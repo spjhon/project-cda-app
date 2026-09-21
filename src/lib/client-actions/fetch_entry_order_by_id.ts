@@ -31,7 +31,7 @@ export interface OrderSignatureDetail {
   template_signature_id: string;
   representative_type: string;
   signature_label: string;
-  signature_url: string;
+  signature_path: string | null;
   conditions: SignatureConditionDetail[];
 }
 

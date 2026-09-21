@@ -271,7 +271,14 @@ const contextRecived = useContext(PermissionsContext);
 
       <SidebarContent className="">
         <SidebarGroup>
-          <SidebarGroupLabel>Recepcionista</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-2 py-3">
+  <div className="flex items-center justify-between w-full px-3 py-2 rounded-lg font-semibold tracking-wide text-xs uppercase transition-all duration-200 border shadow-sm bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border-blue-500/20 text-blue-700 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 dark:border-blue-400/30 dark:text-blue-300">
+    <span>Rol Actual:</span>
+    <span className="font-bold underline decoration-blue-500/50 underline-offset-4">
+      {rol.replace("-", " ")}
+    </span>
+  </div>
+</SidebarGroupLabel>
 
           <SidebarGroupContent className="flex flex-col gap-2 px-2">
             <SidebarMenu>

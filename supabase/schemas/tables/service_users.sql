@@ -16,6 +16,7 @@ CREATE TABLE public.service_users (
     
     -- Firma Digitalizada en Base64
     signature_base64  TEXT,
+    signature_path    TEXT NULL;
 
     -- Estado Maestro
     is_active         BOOLEAN NOT NULL DEFAULT true,
@@ -81,7 +82,8 @@ COMMENT ON COLUMN public.service_users.is_active IS 'Control maestro: false revo
 COMMENT ON COLUMN public.service_users.document_type IS 'Tipos: cedula, cedula_extrangeria, pasaporte, nit, targeta_identidad';
 -- Comentario de auditoría técnica explicativo
 COMMENT ON COLUMN public.service_users.signature_base64 IS 'Snapshot de la firma del recepcionista codificada en Base64 (JPEG, calidad 0.4) para incrustación directa en PDFs.';
-
+COMMENT ON COLUMN public.service_users.signature_path IS
+'Ruta de la firma del usuario almacenada en el bucket privado de Supabase Storage.';
 
 -- Índice para búsqueda de texto (GIN)
 create extension if not exists pg_trgm;

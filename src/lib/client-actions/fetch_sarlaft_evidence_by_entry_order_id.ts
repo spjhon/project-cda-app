@@ -1,3 +1,5 @@
+"use client"
+
 import { useQuery } from "@tanstack/react-query";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -37,12 +39,12 @@ export interface SarlaftEvidence {
 
   // Primera firma registrada para la orden.
   // Corresponde a la firma del cliente.
-  cliente_firma_url: string | null;
+  cliente_firma_path: string | null;
 
   // Firma del funcionario / inspector.
   // Se obtiene del snapshot almacenado
   // directamente en entry_orders.
-  funcionario_firma_base64_snapshot: string | null;
+  funcionario_firma_path: string | null;
 }
 
 // ==========================================
@@ -62,12 +64,14 @@ export function useFetchSarlaftEvidence({
   orderId,
   readyToProcess,
 }: UseFetchSarlaftEvidenceParams) {
-  return useQuery<SarlaftEvidence[], Error>({
+  return useQuery<SarlaftEvidence, Error>({
     queryKey: ["sarlaft-evidence", orderId],
 
     queryFn: async () => {
       if (!orderId) {
-        return [];
+        throw new Error(
+          "No se proporcionó un ID de orden válido",
+        );
       }
 
       const supabase = createSupabaseBrowserClient();
@@ -80,11 +84,13 @@ export function useFetchSarlaftEvidence({
       );
 
       if (error) {
-        console.error("❌ Error en RPC SARLAFT:", error);
+        console.error(
+          "❌ Error en RPC SARLAFT:",
+          error,
+        );
+
         throw new Error(error.message);
       }
-
-    
 
       if (!data || data.length === 0) {
         throw new Error(
@@ -92,17 +98,21 @@ export function useFetchSarlaftEvidence({
         );
       }
 
-      const result = data as unknown as SarlaftEvidence[];
+      const result =
+        data as unknown as SarlaftEvidence[];
 
       console.log(
         "📦 Evidencias SARLAFT procesadas:",
         result.length,
       );
 
-      return result;
+      // La primera evidencia contiene las firmas
+      // correspondientes a la orden.
+      return result[0];
     },
 
-    enabled: !!orderId && readyToProcess,
+    enabled:
+      !!orderId && readyToProcess,
 
     retry: 1,
     refetchInterval: false,

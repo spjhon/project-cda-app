@@ -5,6 +5,6 @@ INSERT INTO public.tenant_modules (
 )
 VALUES (
     'aaaaaaaa-0000-0000-0000-000000000001',
-    '350e0866-76c7-43dc-a673-6b79981dfa0f',
+    '79e4d9f6-d650-478e-ac44-baa5d6f75673',
     true
 );
