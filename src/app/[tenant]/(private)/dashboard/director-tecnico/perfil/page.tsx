@@ -31,7 +31,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import SarlaftMasivo from "@/components/dashboard/admin/SarlaftMasivo";
 import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -599,7 +598,7 @@ await queryClient.invalidateQueries({
           {isUpdating ? "Guardando..." : "Registrar Firma"}
         </Button>
 
-        <SarlaftMasivo></SarlaftMasivo>
+        
       </Card>
     </div>
   );

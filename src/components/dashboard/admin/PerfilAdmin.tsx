@@ -26,9 +26,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MigrateServiceUserSignaturesButton } from "./botonMigracionSericeUser";
-import { MigrateEntryOrderSignaturesButton } from "./botonMigrateEntryOrderSignaturesButton";
-import { MigrateOrderSignaturesButton } from "./botonMigrateOrderSignaturesButton";
+
 
 
 
@@ -121,9 +119,7 @@ export default function PerfilAdmin() {
         {/* COLUMNA IZQUIERDA: DATOS PERSONALES */}
         <div className="lg:col-span-2 space-y-6">
           <div>
-      <MigrateServiceUserSignaturesButton />
-      <MigrateEntryOrderSignaturesButton />
-      <MigrateOrderSignaturesButton />
+      
     </div>
           <Card className="border-border/60 shadow-xs">
             <CardHeader className="pb-4">
