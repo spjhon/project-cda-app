@@ -343,7 +343,7 @@ for (const firma of validatedFields.data.signatures ?? []) {
         tenant_id: validatedFields.data.tenant_id,
         entry_order_id: orderCreatedData,
         template_signature_id: firma.template_signature_id,
-        signature_url: null,
+        
         signature_path: signaturePath,
       });
 

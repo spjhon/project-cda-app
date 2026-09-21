@@ -51,46 +51,45 @@ export default function RuntScraperModal({
   const [tipoDocumento, setTipoDocumento] = useState( formData.owner_data.tipo_documento || "" );
   const [numeroDocumento, setNumeroDocumento] = useState( formData.owner_data.numero_documento || "", );
   const [captchaValue, setCaptchaValue] = useState("");
-  const [captchaImage, setCaptchaImage] = useState<string | null>(null);
+ 
 
   const placa = formData?.vehicle?.placa || "";
 
   // 1. TANSTACK QUERY: Obtener el Captcha Inicial e ID de Sesión
   const {
-    data: captchaData,
-    isLoading: isLoadingCaptcha,
-    isFetching: isFetchingCaptcha,
-    isError: isErrorCaptcha,
-  } = useQuery({
-    queryKey: ["runtCaptcha", placa],
-    queryFn: async () => {
-      console.log(`🤖 Despertando scraper en casa para placa: ${placa}`);
-      const response = await fetch(
-        "https://runt-api.cda-app.com/api/scraper/init",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-      if (!response.ok) throw new Error("Error al conectar con el RUNT");
+  data: captchaData,
+  isLoading: isLoadingCaptcha,
+  isFetching: isFetchingCaptcha,
+  isError: isErrorCaptcha,
+} = useQuery({
+  queryKey: ["runtCaptcha", placa],
+  queryFn: async () => {
+    console.log(`🤖 Despertando scraper en casa para placa: ${placa}`);
 
-      return response.json(); // Retorna { success: true, sessionId, captchaBase64 }
-    },
-    enabled: isOpen && !!placa, // Solo se ejecuta si el modal está abierto y hay placa
-    staleTime: 0, // Queremos que siempre vaya por un captcha fresco al abrirse
-    refetchOnWindowFocus: false,
-    // Apenas el componente se desmonte o el 'enabled' pase a false,
-    // TanStack Query tirará el captcha viejo al camión de la basura inmediatamente.
-    gcTime: 0,
-    select: (data) => {
-      if (data?.success && data?.captcha) {
-        setCaptchaImage(data.captcha);
-      } else {
-        return;
-      }
-      return data;
-    },
-  });
+    const response = await fetch(
+      "https://runt-api.cda-app.com/api/scraper/init",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al conectar con el RUNT");
+    }
+
+    return response.json();
+  },
+  enabled: isOpen && !!placa,
+  staleTime: 0,
+  refetchOnWindowFocus: false,
+  gcTime: 0,
+});
+
+const captchaImage =
+  captchaData?.success && captchaData?.captcha
+    ? captchaData.captcha
+    : null;
 
 
 
@@ -204,20 +203,20 @@ export default function RuntScraperModal({
 
 
 
+const handleOpenChange = (open: boolean) => {
+  setIsOpen(open);
 
+  if (open) {
+    setNumeroDocumento(formData.owner_data.numero_documento || "");
+    setTipoDocumento(formData.owner_data.tipo_documento || "");
+  }
 
-  // Manejador del cambio de estado del modal
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (open) {
-      // Sincronizar el documento actual que esté en el formulario antes de abrir
-      setNumeroDocumento(formData.owner_data.numero_documento || "");
-      setTipoDocumento(formData.owner_data.tipo_documento || "");
-    }
-    if (!open) setCaptchaValue(""); // Limpiamos el input
-    setCaptchaImage(null);
-    solveRuntMutation.reset();
-  };
+  if (!open) {
+    setCaptchaValue("");
+  }
+
+  solveRuntMutation.reset();
+};
 
   const handleSubmitRunt = (e: React.FormEvent) => {
     e.preventDefault();

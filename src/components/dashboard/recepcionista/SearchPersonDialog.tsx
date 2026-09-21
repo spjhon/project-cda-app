@@ -28,11 +28,6 @@ import { ID_DOCUMENT_OPTIONS } from "./PersonSection";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
-
-
-
-
-
 interface SearchPersonDialogProps {
   currentDocumentType: TipoDocumentoType;
   currentDocumentNumber: string;
@@ -52,92 +47,73 @@ interface SearchPersonDialogProps {
       es_persona_publicamente_expuesta?: boolean;
       se_hizo_la_consulta?: boolean;
       resultado_consulta_sarlaf_desfavorable?: boolean;
-
     };
   }) => void;
 }
 
-
-
-
-
-
-
 type SearchState = "idle" | "loading" | "found" | "not_found";
 
-
-
-export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, onUpdate, disabled,}: SearchPersonDialogProps) => {
-
+export const SearchPersonDialog = ({
+  currentDocumentType,
+  currentDocumentNumber,
+  onUpdate,
+   disabled = false,
+}: SearchPersonDialogProps) => {
   const PermissionsContextReceived = useContext(PermissionsContext);
 
-  const tenantID = PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "";
-
-
-
-
+  const tenantID =
+    PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id || "";
 
   //state para el dialog
   const [open, setOpen] = useState(false);
 
-
   //state para el tipo de documento, si ya viene desde el front se deja ese, sino por defecto va con cedulas
-  const [documentType, setDocumentType] = useState<TipoDocumentoType>(currentDocumentType || "cedula_ciudadania");
+  const [documentType, setDocumentType] = useState<TipoDocumentoType>(
+    currentDocumentType || "cedula_ciudadania",
+  );
 
   //state para el numero de documento que viene del front, sino se deja vacio listo para llenar por el usuariio
-  const [documentNumber, setDocumentNumber] = useState(currentDocumentNumber || "");
-
+  const [documentNumber, setDocumentNumber] = useState(
+    currentDocumentNumber || "",
+  );
 
   //este es el state para el input de busqueda
-  const [searchState, setSearchState] =useState<SearchState>("idle");
+  const [searchState, setSearchState] = useState<SearchState>("idle");
 
   //y el meensaje de exito o fracado y se inicializa en vacio ya que no hay mensaje hasta que se haga alguna busqueda
   const [message, setMessage] = useState("");
 
+  const handleOpenChange = (value: boolean) => {
+    setOpen(value);
 
+    if (value) {
+      setDocumentType(currentDocumentType || "cedula_ciudadania");
+      setDocumentNumber(currentDocumentNumber || "");
 
-
-	const handleOpenChange = (value: boolean) => {
-		setOpen(value);
-
-		if (value) {
-			setDocumentType(currentDocumentType || "cedula_ciudadania");
-			setDocumentNumber(currentDocumentNumber || "");
-
-			setSearchState("idle");
-			setMessage("");
-		}
-	};
-
-
-
-
-
-
+      setSearchState("idle");
+      setMessage("");
+    }
+  };
 
   const handleSubmit = async () => {
-
     try {
-
-
       setSearchState("loading");
       setMessage("");
-
-      
-
 
       const supabaseBrowser = createSupabaseBrowserClient();
 
       // 1. Realizar la consulta a Supabase
-      // NOTA: Asegúrate de tener disponible 'supabase' (el cliente instanciado) 
+      // NOTA: Asegúrate de tener disponible 'supabase' (el cliente instanciado)
       // y 'tenantId' (el ID del tenant actual en tu estado/contexto).
       const { data: persona, error } = await supabaseBrowser
-        .from('personas')
-        .select('nombre_completo, telefono, correo, direccion, actividad_economica, origen_fondos, es_persona_publicamente_expuesta')
-        .eq('tenant_id', tenantID)
-        .eq('tipo_documento', documentType)
-        .eq('numero_documento', documentNumber)
-        .is('deleted_at', null) // Filtrar si usas soft-delete
+        .from("personas")
+        .select(
+          "nombre_completo, telefono, correo, direccion, actividad_economica, origen_fondos, es_persona_publicamente_expuesta",
+        )
+        .eq("tenant_id", tenantID)
+        .eq("tipo_documento", documentType)
+        .eq("numero_documento", documentNumber)
+        .is("deleted_at", null) // Filtrar si usas soft-delete
         .maybeSingle(); // Retorna el objeto directamente o null si no existe (evita lanzar error de rango)
 
       if (error) throw error;
@@ -156,15 +132,18 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
             correo: persona.correo || "",
             direccion: persona.direccion || "",
             actividad_economica: persona.actividad_economica || "",
-      origen_fondos: persona.origen_fondos || "",
-      es_persona_publicamente_expuesta: persona.es_persona_publicamente_expuesta || false,
-      se_hizo_la_consulta: false,
-      resultado_consulta_sarlaf_desfavorable: false,
+            origen_fondos: persona.origen_fondos || "",
+            es_persona_publicamente_expuesta:
+              persona.es_persona_publicamente_expuesta || false,
+            se_hizo_la_consulta: false,
+            resultado_consulta_sarlaf_desfavorable: false,
           },
         });
       } else {
         setSearchState("not_found");
-        setMessage("No se encontró información. Puedes continuar el registro manualmente.");
+        setMessage(
+          "No se encontró información. Puedes continuar el registro manualmente.",
+        );
 
         onUpdate({
           tipo_documento: documentType,
@@ -174,34 +153,23 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
             telefono: "",
             correo: "",
             direccion: "",
-             actividad_economica: "",
-      origen_fondos: "",
-      es_persona_publicamente_expuesta: false,
-      se_hizo_la_consulta: false,
-      resultado_consulta_sarlaf_desfavorable: false,
+            actividad_economica: "",
+            origen_fondos: "",
+            es_persona_publicamente_expuesta: false,
+            se_hizo_la_consulta: false,
+            resultado_consulta_sarlaf_desfavorable: false,
           },
         });
       }
-
-
-
     } catch (error) {
       console.log(error);
 
       setSearchState("not_found");
       setMessage("Ocurrió un error en la búsqueda.");
     }
-
-
   };
 
-
-
-
-
-
-
-	//apenas se le de al boton de aceptar despues de la consulta, se sierra el cuadro de dialogo, se quita el mensaje y se deja el search en idle
+  //apenas se le de al boton de aceptar despues de la consulta, se sierra el cuadro de dialogo, se quita el mensaje y se deja el search en idle
   const handleAccept = () => {
     setOpen(false);
 
@@ -209,154 +177,144 @@ export const SearchPersonDialog = ({currentDocumentType, currentDocumentNumber, 
     setMessage("");
   };
 
-
-return (
-  <Dialog open={open} onOpenChange={handleOpenChange}>
-    <DialogTrigger
-      render={
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          className="w-full h-11 flex items-center justify-center gap-2 font-semibold"
-        >
-          <Search className="h-4 w-4" />
-          <span>Buscar Persona</span>
-        </Button>
-      }
-    />
-
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>
-          Buscar Persona
-        </DialogTitle>
-
-        <DialogDescription>
-          Busca automáticamente información del cliente.
-        </DialogDescription>
-      </DialogHeader>
-
-      <div className="space-y-5 pt-2">
-        {/* CONTROLES SUPERIORES */}
-        {/**Actualiza un state local para ser enviado al state principal al hacer submit */}
-        <div className="space-y-2">
-          <Label className="text-[11px] font-bold uppercase text-muted-foreground">
-            Tipo Documento
-          </Label>
-
-          <Select
-            items={ID_DOCUMENT_OPTIONS}
-            value={documentType}
-            onValueChange={(v) =>
-              setDocumentType(v ? v : "cedula_ciudadania")
-            }
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            
+            className="w-full h-11 flex items-center justify-center gap-2 font-semibold"
           >
-            <SelectTrigger className="h-11">
-              <SelectValue placeholder="Seleccione tipo" />
-            </SelectTrigger>
+            <Search className="h-4 w-4" />
+            <span>Buscar Persona</span>
+          </Button>
+        }
+      />
 
-            <SelectContent alignItemWithTrigger={false}>
-              {ID_DOCUMENT_OPTIONS.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Buscar Persona</DialogTitle>
 
-        <div className="space-y-2">
-          <Label className="text-[11px] font-bold uppercase text-muted-foreground">
-            Número Documento
-          </Label>
+          <DialogDescription>
+            Busca automáticamente información del cliente.
+          </DialogDescription>
+        </DialogHeader>
 
-          <Input
-            className="h-11"
-            placeholder="Ej: 10203040"
-            value={documentNumber}
-            onChange={(e) =>
-              setDocumentNumber(e.target.value)
+        <div className="space-y-5 pt-2">
+          {/* CONTROLES SUPERIORES */}
+          {/**Actualiza un state local para ser enviado al state principal al hacer submit */}
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold uppercase text-muted-foreground">
+              Tipo Documento
+            </Label>
+
+            <Select
+              items={ID_DOCUMENT_OPTIONS}
+              value={documentType}
+              onValueChange={(v) =>
+                setDocumentType(v ? v : "cedula_ciudadania")
+              }
+            >
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Seleccione tipo" />
+              </SelectTrigger>
+
+              <SelectContent alignItemWithTrigger={false}>
+                {ID_DOCUMENT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[11px] font-bold uppercase text-muted-foreground">
+              Número Documento
+            </Label>
+
+            <Input
+              className="h-11"
+              placeholder="Ej: 10203040"
+              value={documentNumber}
+              onChange={(e) => setDocumentNumber(e.target.value)}
+            />
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={
+              searchState === "loading" || !documentType || !documentNumber
             }
-          />
-        </div>
+            className="w-full h-11"
+          >
+            {searchState === "loading" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Buscando...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" />
+                Buscar
+              </>
+            )}
+          </Button>
 
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={
-            searchState === "loading" ||
-            !documentType ||
-            !documentNumber
-          }
-          className="w-full h-11"
-        >
-          {searchState === "loading" ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Buscando...
-            </>
-          ) : (
-            <>
-              <Search className="h-4 w-4" />
-              Buscar
-            </>
+          {/* RESULTADO */}
+          {searchState !== "idle" && (
+            <div className="border border-border rounded-xl p-4 bg-muted space-y-4">
+              {/* 1. ESTADO: CARGANDO */}
+              {searchState === "loading" && (
+                <div className="flex items-center gap-3 text-sm text-muted-foreground py-2 justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span>Consultando información...</span>
+                </div>
+              )}
+
+              {/* 2. ESTADO: ÉXITO */}
+              {searchState === "found" && (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="h-5 w-5 shrink-0" />
+                    <span>{message}</span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={handleAccept}
+                    className="w-full"
+                  >
+                    Aceptar
+                  </Button>
+                </div>
+              )}
+
+              {/* 3. ESTADO: NO ENCONTRADO */}
+              {searchState === "not_found" && (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
+                    <XCircle className="h-5 w-5 shrink-0" />
+                    <span>{message}</span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={handleAccept}
+                    className="w-full"
+                  >
+                    Aceptar
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
-        </Button>
-
-        {/* RESULTADO */}
-        {searchState !== "idle" && (
-  <div className="border border-border rounded-xl p-4 bg-muted space-y-4">
-    {/* 1. ESTADO: CARGANDO */}
-    {searchState === "loading" && (
-      <div className="flex items-center gap-3 text-sm text-muted-foreground py-2 justify-center">
-        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-        <span>Consultando información...</span>
-      </div>
-    )}
-
-    {/* 2. ESTADO: ÉXITO */}
-    {searchState === "found" && (
-      <div className="space-y-4">
-        <div className="flex items-start gap-3 text-sm text-emerald-600 dark:text-emerald-400">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span>{message}</span>
         </div>
-
-        <Button
-          type="button"
-          onClick={handleAccept}
-          className="w-full"
-        >
-          Aceptar
-        </Button>
-      </div>
-    )}
-
-    {/* 3. ESTADO: NO ENCONTRADO */}
-    {searchState === "not_found" && (
-      <div className="space-y-4">
-        <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-400">
-          <XCircle className="h-5 w-5 shrink-0" />
-          <span>{message}</span>
-        </div>
-
-        <Button
-          type="button"
-          onClick={handleAccept}
-          className="w-full"
-        >
-          Aceptar
-        </Button>
-      </div>
-    )}
-  </div>
-)}
-      </div>
-    </DialogContent>
-  </Dialog>
-);
+      </DialogContent>
+    </Dialog>
+  );
 };

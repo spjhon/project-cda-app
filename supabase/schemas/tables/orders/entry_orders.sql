@@ -158,8 +158,7 @@ cliente_direccion_snapshot                  TEXT,
     -- Nombre completo.
     funcionario_nombre_snapshot                 TEXT NOT NULL,
 
-    -- Firma digital utilizada para la recepción.
-    funcionario_firma_base64_snapshot           TEXT NOT NULL,
+    
 
     funcionario_firma_path_snapshot             TEXT NULL,
 
@@ -177,8 +176,7 @@ cliente_direccion_snapshot                  TEXT,
     -- Nombre completo.
     director_tecnico_nombre_snapshot            TEXT NULL,
 
-    -- Firma digital utilizada para el cierre de la inspección.
-    director_tecnico_firma_base64_snapshot      TEXT NULL,
+   
 
     director_tecnico_firma_path_snapshot        TEXT NULL;
 
@@ -326,7 +324,6 @@ COMMENT ON COLUMN public.entry_orders.fecha_limite_reinspeccion IS 'Fecha máxim
 COMMENT ON COLUMN public.entry_orders.director_tecnico_tipo_documento_snapshot IS 'Snapshot del tipo de documento del Director Técnico que aprueba la orden.';
 COMMENT ON COLUMN public.entry_orders.director_tecnico_numero_documento_snapshot IS 'Snapshot del número de documento del Director Técnico que aprueba la orden.';
 COMMENT ON COLUMN public.entry_orders.director_tecnico_nombre_snapshot IS 'Snapshot del nombre completo del Director Técnico que firma el cierre.';
-COMMENT ON COLUMN public.entry_orders.director_tecnico_firma_base64_snapshot IS 'Snapshot en formato Base64 de la firma digitalizada del Director Técnico (Auditoría ISO 17020).';
 
 COMMENT ON COLUMN public.entry_orders.vehicle_service_rate_id IS
   'Identificador de la tarifa de servicio utilizada para la orden de entrada.';
@@ -464,6 +461,20 @@ WITH CHECK (
         SELECT tp.tenant_id 
         FROM public.tenant_permissions tp
         JOIN public.service_users su ON su.id = tp.service_user_id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+    )
+);
+
+CREATE POLICY "Users can delete entry orders from their allowed tenants"
+ON public.entry_orders
+FOR DELETE
+TO authenticated
+USING (
+    tenant_id IN (
+        SELECT tp.tenant_id
+        FROM public.tenant_permissions tp
+        JOIN public.service_users su
+            ON su.id = tp.service_user_id
         WHERE su.auth_user_id = (SELECT auth.uid())
     )
 );

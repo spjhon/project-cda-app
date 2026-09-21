@@ -4,10 +4,6 @@ CREATE TABLE IF NOT EXISTS public.order_signatures (
     entry_order_id          UUID NOT NULL,
     -- Referencia a qué rol de firma de la plantilla corresponde
     template_signature_id   UUID NOT NULL,
-    
-   
-    -- URL del archivo en Supabase Storage
-    signature_url           TEXT NULL,
 
     signature_path          TEXT NULL,
 
@@ -64,9 +60,6 @@ COMMENT ON COLUMN public.order_signatures.template_signature_id IS
 
 COMMENT ON COLUMN public.order_signatures.signature_path IS
 'Ruta en Supabase Storage de la firma capturada para esta orden de entrada.';
-
-COMMENT ON COLUMN public.order_signatures.signature_url IS
-'Firma en formato Base64. Campo temporal para migración de firmas existentes.';
 
 COMMENT ON COLUMN public.order_signatures.created_at IS
 'Fecha y hora en que se registró la firma de la orden.';

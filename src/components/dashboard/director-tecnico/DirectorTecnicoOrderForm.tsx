@@ -154,12 +154,6 @@ const handleRevertToEnPrueba = () => {
 
 
 
-
-
-
-
-
-
 // Validación local y envío de datos
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -171,87 +165,124 @@ const handleSubmit = async (e: React.FormEvent) => {
   // ============================================================
   // 1. VALIDACIONES INICIALES
   // ============================================================
+
   if (!formData.resultado_revision) {
-    setServerError("Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)");
+    setServerError(
+      "Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)",
+    );
     setShowErrorDialog(true);
     setIsSubmitting(false);
     return;
   }
 
   if (formData.consecutivo_fur.trim() === "") {
-    setServerError("El consecutivo del FUR es obligatorio para el cierre técnico");
+    setServerError(
+      "El consecutivo del FUR es obligatorio para el cierre técnico",
+    );
     setShowErrorDialog(true);
     setIsSubmitting(false);
     return;
   }
 
-  // 🌟 Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
-  if (!noAplicaRTM && formData.resultado_revision === "aprobado" && formData.consecutivo_rtm.trim() === "") {
-    setServerError("Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM");
+  // Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
+  if (
+    !noAplicaRTM &&
+    formData.resultado_revision === "aprobado" &&
+    formData.consecutivo_rtm.trim() === ""
+  ) {
+    setServerError(
+      "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
+    );
     setShowErrorDialog(true);
     setIsSubmitting(false);
     return;
   }
 
   // ============================================================
-  // 2. 🔍 VALIDACIÓN: Verificar si el director técnico tiene firma
+  // 2. VALIDACIÓN:
+  //    Verificar si el director técnico tiene firma
   // ============================================================
+
   try {
     const supabase = createSupabaseBrowserClient();
-    
+
     // Obtener el auth_user_id del director técnico actual
-    // Asumiendo que tienes el ID del director técnico en algún lado
-    const directorTecnicoAuthId = user?.id; // Ajusta según tu estructura
+    const directorTecnicoAuthId = user?.id;
 
     if (!directorTecnicoAuthId) {
-      setServerError("No se encontró el director técnico asignado a esta orden");
-      setShowErrorDialog(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Consultar si el director técnico tiene firma registrada
-    const { data: directorData, error: directorError } = await supabase
-      .from("service_users")
-      .select("id, full_name, signature_path")
-      .eq("id", directorTecnicoAuthId)
-      .eq("is_active", true)
-      .single();
-
-    if (directorError) {
-      console.error("Error consultando director técnico:", directorError);
-      setServerError("Error al verificar la información del director técnico");
-      setShowErrorDialog(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!directorData) {
-      setServerError("No se encontró un director técnico activo para esta orden");
-      setShowErrorDialog(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Verificar que el campo signature_path exista Y tenga contenido
-    const tieneFirma = directorData.signature_path && 
-                        directorData.signature_path.trim() !== "";
-
-    if (!tieneFirma) {
       setServerError(
-        `El director técnico ${directorData.full_name || "asignado"} no tiene una firma registrada.\n\n` +
-        "Por favor, registre su firma antes de realizar el cierre técnico."
+        "No se encontró el director técnico asignado a esta orden",
       );
       setShowErrorDialog(true);
       setIsSubmitting(false);
       return;
     }
 
-    console.log("✅ Director técnico verificado:", directorData.full_name, "con firma registrada");
+    // Consultar si el director técnico tiene firma registrada
+    const { data: directorData, error: directorError } =
+      await supabase
+        .from("service_users")
+        .select("id, full_name, signature_path")
+        .eq("id", directorTecnicoAuthId)
+        .eq("is_active", true)
+        .single();
 
+    if (directorError) {
+      console.error(
+        "Error consultando director técnico:",
+        directorError,
+      );
+
+      setServerError(
+        "Error al verificar la información del director técnico",
+      );
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!directorData) {
+      setServerError(
+        "No se encontró un director técnico activo para esta orden",
+      );
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verificar que el campo signature_path exista y tenga contenido
+    const tieneFirma =
+      directorData.signature_path &&
+      directorData.signature_path.trim() !== "";
+
+    if (!tieneFirma) {
+      setServerError(
+        `El director técnico ${
+          directorData.full_name || "asignado"
+        } no tiene una firma registrada.\n\n` +
+          "Por favor, registre su firma antes de realizar el cierre técnico.",
+      );
+
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    console.log(
+      "✅ Director técnico verificado:",
+      directorData.full_name,
+      "con firma registrada",
+    );
   } catch (error) {
-    console.error("Error en validación de firma:", error);
-    setServerError("Ocurrió un error al verificar la firma del director técnico");
+    console.error(
+      "Error en validación de firma:",
+      error,
+    );
+
+    setServerError(
+      "Ocurrió un error al verificar la firma del director técnico",
+    );
+
     setShowErrorDialog(true);
     setIsSubmitting(false);
     return;
@@ -261,21 +292,26 @@ const handleSubmit = async (e: React.FormEvent) => {
   // 3. CONTINUAR CON EL CIERRE TÉCNICO
   // ============================================================
 
-  // Aseguramos mandar data limpia al server action en caso de que no aplique RTM
+  // Aseguramos mandar data limpia al server action
+  // en caso de que no aplique RTM
   const payloadData = {
     ...formData,
-    consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
+    consecutivo_rtm: noAplicaRTM
+      ? ""
+      : formData.consecutivo_rtm,
   };
-  
- 
 
   try {
+    // ============================================================
     // 3.1 Insertar datos del director técnico
-    const { data, error } = await insertDirectorTecnicoData({
-      orderId: orden.id,
-      formData: payloadData,
-      serviceType: orden.service_type as ServiceType,
-    });
+    // ============================================================
+
+    const { data, error } =
+      await insertDirectorTecnicoData({
+        orderId: orden.id,
+        formData: payloadData,
+        serviceType: orden.service_type as ServiceType,
+      });
 
     if (error || !data) {
       setServerError(error);
@@ -283,67 +319,242 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // ✅ Ahora data tiene { id, message }
-    console.log("✅ Cierre técnico exitoso:", data.message);
-    console.log("📦 ID de la orden actualizada:", data.id);
-
-    alert(data.message);
-    queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
-
-    // 3.2 Obtener la orden actualizada para el PDF
-    const supabase = createSupabaseBrowserClient();
-    const { data: orderData, error: orderDataError } = await supabase.rpc(
-      "fetch_entry_order_by_id",
-      {
-        p_order_id: data.id, // ✅ Usamos el ID retornado por el RPC
-        p_tenant_id: PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id || "",
-      },
+    console.log(
+      "✅ Cierre técnico exitoso:",
+      data.message,
     );
 
-    const orderDataTyped = (orderData as unknown as FetchEntryOrderResult[])?.[0];
+    console.log(
+      "📦 ID de la orden actualizada:",
+      data.id,
+    );
+
+    alert(data.message);
+
+    queryClient.invalidateQueries({
+      queryKey: ["entry-orders", "list"],
+    });
+
+    // ============================================================
+    // 3.2 Obtener la orden actualizada para el PDF
+    // ============================================================
+
+    const supabase = createSupabaseBrowserClient();
+
+    const { data: orderData, error: orderDataError } =
+      await supabase.rpc(
+        "fetch_entry_order_by_id",
+        {
+          p_order_id: data.id,
+          p_tenant_id:
+            PermissioncontextRecived
+              ?.PermissionsContextValue
+              .tenantObject?.id || "",
+        },
+      );
+
+    const orderDataTyped =
+      (orderData as unknown as FetchEntryOrderResult[])?.[0];
 
     if (orderDataError || !orderDataTyped) {
-      console.error("Error en RPC:", orderDataError || "No se encontraron datos");
-      // No detenemos el flujo, solo mostramos el error en consola
+      console.error(
+        "Error en RPC:",
+        orderDataError || "No se encontraron datos",
+      );
     }
 
-   queryClient.invalidateQueries({
-        queryKey: ["tenant-credits", tenantId],
-      });
+    // ============================================================
+    // 3.3 Preparar firmas para OrderPDF
+    // ============================================================
 
-    // 3.3 Generar y descargar PDF
     if (orderDataTyped) {
+      // ----------------------------------------------------------
+      // Función auxiliar:
+      // Storage path → Blob → Data URL
+      // ----------------------------------------------------------
+
+      const downloadSignatureAsDataUrl = async (
+        path: string | null | undefined,
+      ): Promise<string | null> => {
+        if (!path) {
+          return null;
+        }
+
+        const { data, error } =
+          await supabase.storage
+            .from("signatures")
+            .download(path);
+
+        if (error || !data) {
+          console.error(
+            `No se pudo descargar la firma ${path}:`,
+            error?.message,
+          );
+
+          return null;
+        }
+
+        return await new Promise<string>(
+          (resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+              if (
+                typeof reader.result === "string"
+              ) {
+                resolve(reader.result);
+              } else {
+                reject(
+                  new Error(
+                    "No se pudo convertir la firma a Data URL.",
+                  ),
+                );
+              }
+            };
+
+            reader.onerror = () => {
+              reject(
+                new Error(
+                  "No se pudo leer la imagen de la firma.",
+                ),
+              );
+            };
+
+            reader.readAsDataURL(data);
+          },
+        );
+      };
+
+      // ----------------------------------------------------------
+      // 1. Firma del funcionario / recepcionista
+      // ----------------------------------------------------------
+
+      const funcionarioFirma =
+        await downloadSignatureAsDataUrl(
+          orderDataTyped.funcionario_firma,
+        );
+
+      // ----------------------------------------------------------
+      // 2. Firma del director técnico
+      // ----------------------------------------------------------
+
+      const directorTecnicoFirma =
+        await downloadSignatureAsDataUrl(
+          orderDataTyped.director_tecnico_firma,
+        );
+
+      // ----------------------------------------------------------
+      // 3. Firmas complementarias
+      // ----------------------------------------------------------
+
+      const firmasOrden = await Promise.all(
+        (orderDataTyped.firmas_orden ?? []).map(
+          async (firma) => {
+            if (!firma.signature_path) {
+              return {
+                ...firma,
+                signature_path: null,
+              };
+            }
+
+            const signatureDataUrl =
+              await downloadSignatureAsDataUrl(
+                firma.signature_path,
+              );
+
+            return {
+              ...firma,
+              signature_path: signatureDataUrl,
+            };
+          },
+        ),
+      );
+
+      // ----------------------------------------------------------
+      // 4. Crear los datos que realmente recibirá OrderPDF
+      // ----------------------------------------------------------
+
+      const orderDataForPDF: FetchEntryOrderResult = {
+        ...orderDataTyped,
+        funcionario_firma: funcionarioFirma,
+        director_tecnico_firma:
+          directorTecnicoFirma,
+        firmas_orden: firmasOrden,
+      };
+
+      console.log(
+        "✅ Firmas preparadas para el PDF",
+      );
+
+      // ==========================================================
+      // 3.4 Generar y descargar PDF
+      // ==========================================================
+
       const pdfBlob = await pdf(
-        <OrderPDF orderData={orderDataTyped} />,
+        <OrderPDF
+          orderData={orderDataForPDF}
+        />,
       ).toBlob();
 
       const url = URL.createObjectURL(pdfBlob);
+
       const link = document.createElement("a");
+
       link.href = url;
 
-      const placa = orderDataTyped.vehiculo_placa ? `_${orderDataTyped.vehiculo_placa}` : "";
-      const fecha = new Date().toISOString().split("T")[0];
-      link.download = `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(/\s+/g, "_");
+      const placa =
+        orderDataTyped.vehiculo_placa
+          ? `_${orderDataTyped.vehiculo_placa}`
+          : "";
+
+      const fecha = orderDataTyped.fecha
+        ? new Date(orderDataTyped.fecha)
+            .toISOString()
+            .split("T")[0]
+        : new Date()
+            .toISOString()
+            .split("T")[0];
+
+      link.download =
+        `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(
+          /\s+/g,
+          "_",
+        );
 
       document.body.appendChild(link);
+
       link.click();
+
       document.body.removeChild(link);
+
       URL.revokeObjectURL(url);
     }
 
+    // ============================================================
+    // 3.5 Actualizar créditos
+    // ============================================================
+
+    queryClient.invalidateQueries({
+      queryKey: ["tenant-credits", tenantId],
+    });
   } catch (error: unknown) {
-    console.error("Error inesperado:", error);
-    setServerError("Ocurrió un error inesperado en la validación técnica: " + (error instanceof Error ? error.message : String(error)));
+    console.error(
+      "Error inesperado:",
+      error,
+    );
+
+    setServerError(
+      "Ocurrió un error inesperado en la validación técnica: " +
+        (error instanceof Error
+          ? error.message
+          : String(error)),
+    );
+
     setShowErrorDialog(true);
   } finally {
     setIsSubmitting(false);
   }
 };
-
-
-
-
-
 
 
 
