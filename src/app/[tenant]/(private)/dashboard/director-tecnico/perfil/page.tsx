@@ -34,8 +34,10 @@ import { Button } from "@/components/ui/button";
 import SarlaftMasivo from "@/components/dashboard/admin/SarlaftMasivo";
 import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export default function DirectorTecnicoProfilePage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const canvasRef = useRef<SignatureCanvasRef | null>(null);
@@ -208,9 +210,13 @@ export default function DirectorTecnicoProfilePage() {
         );
       }
     } finally {
-      await queryClient.invalidateQueries({
+      if (user?.signature_path === null) {
+  router.refresh();
+}else{
+await queryClient.invalidateQueries({
         queryKey: ["create-image-link"],
       });
+}
       setIsUpdating(false);
     }
   };

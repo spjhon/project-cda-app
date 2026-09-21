@@ -28,9 +28,11 @@ import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
+import { useRouter } from "next/navigation";
 
 
 export default function ReceptionistaPerfil() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const canvasRef = useRef<SignatureCanvasRef | null>(null);
@@ -199,9 +201,14 @@ const [isUpdating, setIsUpdating] = useState(false);
         );
       }
     } finally {
-      await queryClient.invalidateQueries({
+      if (user?.signature_path === null) {
+  router.refresh();
+}else{
+await queryClient.invalidateQueries({
         queryKey: ["create-image-link"],
       });
+}
+      
       setIsUpdating(false);
     }
   };
