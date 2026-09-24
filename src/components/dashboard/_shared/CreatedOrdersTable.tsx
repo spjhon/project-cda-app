@@ -223,8 +223,8 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
 
   const { query} = EntryOrdersContextRecived?.entryOrdersTableData || {};
-
  
+   const { dateRange = undefined, setDateRange = () => {} } = query || {};
 
   const {
     orderByColumn = "fecha",
@@ -242,6 +242,8 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setPage = () => {},
     rowsPerPage = 50,
     setRowsPerPage = () => {},
+
+    
   } = query || {};
 
 
@@ -677,8 +679,9 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           </div>
 
           <DateRangePicker
-           
-          ></DateRangePicker>
+  dateRange={dateRange}
+  setDateRange={setDateRange}
+/>
 
           <div className="flex items-center space-x-2 bg-background px-3 py-1.5 h-9 rounded-md border border-input shadow-sm hover:border-accent transition-colors">
             <Switch

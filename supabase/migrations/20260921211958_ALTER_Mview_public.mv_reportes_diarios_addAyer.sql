@@ -1,7 +1,4 @@
-
---Tu materialized view no está recorriendo manualmente cada tipo de vehículo. PostgreSQL automáticamente crea una fila por cada combinación 
---diferente de las columnas que pusiste en el GROUP BY.
-
+DROP MATERIALIZED VIEW public.mv_reportes_diarios;
 
 create materialized view public.mv_reportes_diarios as
 select
@@ -37,8 +34,3 @@ ON public.mv_reportes_diarios (
   vehiculo_tipo_snapshot,
   se_compro_soat
 );
-
--- 4. Ejecutar el primer refresco manual para poblar la vista con los nuevos filtros
-REFRESH MATERIALIZED VIEW public.mv_reportes_diarios;
-
-

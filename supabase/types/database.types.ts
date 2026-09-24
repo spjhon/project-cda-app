@@ -150,7 +150,6 @@ export type Database = {
           consecutivo_rtm: string | null
           created_at: string
           deleted_at: string | null
-          director_tecnico_firma_base64_snapshot: string | null
           director_tecnico_firma_path_snapshot: string | null
           director_tecnico_nombre_snapshot: string | null
           director_tecnico_numero_documento_snapshot: string | null
@@ -159,7 +158,6 @@ export type Database = {
           estado_orden: Database["public"]["Enums"]["order_status_enum"]
           fecha: string
           fecha_limite_reinspeccion: string | null
-          funcionario_firma_base64_snapshot: string | null
           funcionario_firma_path_snapshot: string | null
           funcionario_id: string
           funcionario_nombre_snapshot: string
@@ -219,7 +217,6 @@ export type Database = {
           consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
-          director_tecnico_firma_base64_snapshot?: string | null
           director_tecnico_firma_path_snapshot?: string | null
           director_tecnico_nombre_snapshot?: string | null
           director_tecnico_numero_documento_snapshot?: string | null
@@ -228,7 +225,6 @@ export type Database = {
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
           fecha_limite_reinspeccion?: string | null
-          funcionario_firma_base64_snapshot?: string | null
           funcionario_firma_path_snapshot?: string | null
           funcionario_id: string
           funcionario_nombre_snapshot: string
@@ -288,7 +284,6 @@ export type Database = {
           consecutivo_rtm?: string | null
           created_at?: string
           deleted_at?: string | null
-          director_tecnico_firma_base64_snapshot?: string | null
           director_tecnico_firma_path_snapshot?: string | null
           director_tecnico_nombre_snapshot?: string | null
           director_tecnico_numero_documento_snapshot?: string | null
@@ -297,7 +292,6 @@ export type Database = {
           estado_orden?: Database["public"]["Enums"]["order_status_enum"]
           fecha?: string
           fecha_limite_reinspeccion?: string | null
-          funcionario_firma_base64_snapshot?: string | null
           funcionario_firma_path_snapshot?: string | null
           funcionario_id?: string
           funcionario_nombre_snapshot?: string
@@ -541,7 +535,6 @@ export type Database = {
           entry_order_id: string
           id: string
           signature_path: string | null
-          signature_url: string | null
           template_signature_id: string
           tenant_id: string
         }
@@ -550,7 +543,6 @@ export type Database = {
           entry_order_id: string
           id?: string
           signature_path?: string | null
-          signature_url?: string | null
           template_signature_id: string
           tenant_id: string
         }
@@ -559,7 +551,6 @@ export type Database = {
           entry_order_id?: string
           id?: string
           signature_path?: string | null
-          signature_url?: string | null
           template_signature_id?: string
           tenant_id?: string
         }
@@ -981,7 +972,6 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
-          signature_base64: string | null
           signature_path: string | null
           updated_at: string
         }
@@ -993,7 +983,6 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
-          signature_base64?: string | null
           signature_path?: string | null
           updated_at?: string
         }
@@ -1005,7 +994,6 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
-          signature_base64?: string | null
           signature_path?: string | null
           updated_at?: string
         }
@@ -1416,6 +1404,30 @@ export type Database = {
       }
     }
     Views: {
+      mv_reportes_contables: {
+        Row: {
+          cantidad_pagos: number | null
+          fecha: string | null
+          payment_method:
+            | Database["public"]["Enums"]["office_payment_type_enum"]
+            | null
+          service_type: Database["public"]["Enums"]["service_type_enum"] | null
+          tenant_id: string | null
+          total_recaudado: number | null
+          vehiculo_tipo_snapshot:
+            | Database["public"]["Enums"]["vehicle_type_enum"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_order_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mv_reportes_diarios: {
         Row: {
           cantidad: number | null
@@ -1518,6 +1530,43 @@ export type Database = {
           total_rtm_hoy: number
           total_rtm_rechazados_hoy: number
         }[]
+      }
+      fetch_admin_contabilidad_analitics: {
+        Args: {
+          p_ano_solicitado: number
+          p_mes_solicitado: number
+          p_servicio_tipo?: Database["public"]["Enums"]["service_type_enum"]
+        }
+        Returns: {
+          chart_anio: Json
+          chart_mes: Json
+          chart_semana: Json
+          total_recaudado_anio: number
+          total_recaudado_ayer: number
+          total_recaudado_mes: number
+          total_recaudado_semana: number
+        }[]
+      }
+      fetch_admin_contabilidad_diary: {
+        Args: {
+          p_servicio_tipo?: Database["public"]["Enums"]["service_type_enum"]
+        }
+        Returns: {
+          total_recaudado_hoy: number
+        }[]
+      }
+      fetch_admin_payments_by_method: {
+        Args: { p_fecha_desde?: string; p_fecha_hasta?: string }
+        Returns: Json
+      }
+      fetch_admin_payments_by_method_diary: { Args: never; Returns: Json }
+      fetch_admin_vehicles_by_type: {
+        Args: { p_fecha_desde?: string; p_fecha_hasta?: string }
+        Returns: Json
+      }
+      fetch_admin_vehicles_by_type_diary: {
+        Args: { p_tenant_id: string }
+        Returns: Json
       }
       fetch_data_with_placa: {
         Args: { p_placa: string; p_tenant_id: string }

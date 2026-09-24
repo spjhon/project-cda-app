@@ -241,7 +241,7 @@ const handleOpenChange = (open: boolean) => {
         render={
           <Button
             type="button"
-            disabled={!placa}
+            //disabled={!placa}
             className={`
             w-full h-16 gap-2 font-bold rounded-xl transition-all active:scale-95 text-lg
             ${

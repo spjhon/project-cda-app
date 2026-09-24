@@ -1,6 +1,7 @@
 "use client";
 
 import AnaliticaPorCantidad from "@/components/dashboard/admin/AnaliticaPorCantidad";
+import AnaliticaVehiculosPorTipo from "@/components/dashboard/admin/AnaliticaVehiculosPorTipo";
 import {
   Select,
   SelectContent,
@@ -336,6 +337,8 @@ export default function AnaliticaPage() {
           descripcion="Porcentaje de reprobadas con respecto a todas la placas por primera vez (no se cuentan reinspecciones reprobadas)"
           datos={completeDataRTM}
         />
+
+        <AnaliticaVehiculosPorTipo />
       </div>
     </section>
   );

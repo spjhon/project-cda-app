@@ -191,7 +191,7 @@ useEffect(() => {
 const calcularTiempoSOAT = (fechaVencimiento: string): string => {
   if (!fechaVencimiento) return "";
 
-  // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000)
+  // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000) con gtm-05:00
   const ahora = new Date();
   const hoy = new Date(
     ahora.getFullYear(),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import {  useState } from "react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar as CalendarIcon, Check } from "lucide-react";
@@ -15,17 +15,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+
 
 interface DateRangePickerProps {
   className?: React.HTMLAttributes<HTMLDivElement>;
+  dateRange: DateRange | undefined;
+  setDateRange: (range: DateRange | undefined) => void;
 }
 
-export function DateRangePicker({ className }: DateRangePickerProps) {
-  const EntryOrdersContextRecived = useContext(EntryOrdersContext);
-  const { query } = EntryOrdersContextRecived?.entryOrdersTableData || {};
-
-  const { dateRange = undefined, setDateRange = () => {} } = query || {};
+export function DateRangePicker({
+  className,
+  dateRange,
+  setDateRange,
+}: DateRangePickerProps) {
+ 
 
   // 🌟 Estado local borrador del rango
   const [localDate, setLocalDate] = useState<DateRange | undefined>(dateRange);

@@ -1,14 +1,12 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-
+import dynamic from "next/dynamic";
 import { BlobProvider } from "@react-pdf/renderer";
-
 import { Eye, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import dynamic from "next/dynamic";
 
 import {
   useFetchSarlaftEvidence,
@@ -19,13 +17,33 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import SarlaftPDF from "./SarlaftPDF";
 
-interface OrderViewPDFProps {
+// ============================================================
+// PROPS
+// ============================================================
+
+interface SarlaftViewPDFProps {
   orderId?: string;
 }
 
-function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
-  const [readyToProcess, setReadyToProcess] =
-    useState(false);
+// ============================================================
+// COMPONENTE
+// ============================================================
+
+function SarlaftViewPDF({ orderId }: SarlaftViewPDFProps) {
+  // ============================================================
+  // ESTADO PRINCIPAL
+  // ============================================================
+  // Controla cuándo comienza todo el proceso:
+  //
+  // false → solamente mostramos "Cargar Evidencia Sarlaft"
+  // true  → comenzamos a consultar y preparar el PDF
+  // ============================================================
+
+  const [readyToProcess, setReadyToProcess] = useState(false);
+
+  // ============================================================
+  // CONSULTA DE LA EVIDENCIA SARLAFT
+  // ============================================================
 
   const {
     data: orderData,
@@ -39,27 +57,34 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
   // ============================================================
   // FIRMAS PREPARADAS PARA EL PDF
   // ============================================================
+  //
+  // La consulta devuelve paths de Supabase Storage.
+  //
+  // react-pdf necesita poder consumir la imagen directamente,
+  // por eso descargamos cada firma y la convertimos a Data URL.
+  // ============================================================
 
   const [preparedClienteSignature, setPreparedClienteSignature] =
-    useState<SarlaftEvidence["cliente_firma_path"] | null>(
-      null,
-    );
+    useState<SarlaftEvidence["cliente_firma_path"] | null>(null);
 
   const [
     preparedFuncionarioSignature,
     setPreparedFuncionarioSignature,
-  ] = useState<
-    SarlaftEvidence["funcionario_firma_path"] | null
-  >(null);
+  ] = useState<SarlaftEvidence["funcionario_firma_path"] | null>(null);
+
+  // ============================================================
+  // ESTADO DE PREPARACIÓN DE FIRMAS
+  // ============================================================
 
   const [isPreparingSignatures, setIsPreparingSignatures] =
     useState(false);
 
   // ============================================================
-  // PREPARAR FIRMAS DESDE STORAGE
+  // PREPARAR FIRMAS DESDE SUPABASE STORAGE
   // ============================================================
 
   useEffect(() => {
+    // Todavía no tenemos los datos de la evidencia.
     if (!orderData) {
       return;
     }
@@ -70,25 +95,28 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
       setIsPreparingSignatures(true);
 
       try {
-        const supabaseBrowser =
-          createSupabaseBrowserClient();
+        const supabaseBrowser = createSupabaseBrowserClient();
 
-        // --------------------------------------------------
-        // Función auxiliar para descargar una firma
-        // y convertirla en Data URL
-        // --------------------------------------------------
+        // ======================================================
+        // FUNCIÓN AUXILIAR
+        // Descargar firma y convertir Blob → Data URL
+        // ======================================================
 
         const downloadSignatureAsDataUrl = async (
           path: string | null,
         ): Promise<string | null> => {
+          // No existe firma.
           if (!path) {
             return null;
           }
 
-          const { data, error } =
-            await supabaseBrowser.storage
-              .from("signatures")
-              .download(path);
+          // ----------------------------------------------------
+          // Descargar archivo desde Supabase Storage
+          // ----------------------------------------------------
+
+          const { data, error } = await supabaseBrowser.storage
+            .from("signatures")
+            .download(path);
 
           if (error || !data) {
             console.error(
@@ -99,63 +127,61 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
             return null;
           }
 
-          return await new Promise<string>(
-            (resolve, reject) => {
-              const reader = new FileReader();
+          // ----------------------------------------------------
+          // Convertir Blob → Data URL
+          // ----------------------------------------------------
 
-              reader.onloadend = () => {
-                if (
-                  typeof reader.result === "string"
-                ) {
-                  resolve(reader.result);
-                } else {
-                  reject(
-                    new Error(
-                      "No se pudo convertir la firma a Data URL.",
-                    ),
-                  );
-                }
-              };
+          return await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
 
-              reader.onerror = () => {
+            reader.onloadend = () => {
+              if (typeof reader.result === "string") {
+                resolve(reader.result);
+              } else {
                 reject(
                   new Error(
-                    "No se pudo leer la imagen de la firma.",
+                    "No se pudo convertir la firma a Data URL.",
                   ),
                 );
-              };
+              }
+            };
 
-              reader.readAsDataURL(data);
-            },
-          );
+            reader.onerror = () => {
+              reject(
+                new Error(
+                  "No se pudo leer la imagen de la firma.",
+                ),
+              );
+            };
+
+            reader.readAsDataURL(data);
+          });
         };
 
-        // ==================================================
+        // ======================================================
         // 1. FIRMA DEL CLIENTE
-        // ==================================================
+        // ======================================================
 
         const clienteSignature =
           await downloadSignatureAsDataUrl(
             orderData.cliente_firma_path,
           );
 
-        // ==================================================
+        // ======================================================
         // 2. FIRMA DEL FUNCIONARIO / INSPECTOR
-        // ==================================================
+        // ======================================================
 
         const funcionarioSignature =
           await downloadSignatureAsDataUrl(
             orderData.funcionario_firma_path,
           );
 
-        // ==================================================
-        // GUARDAMOS LAS FIRMAS PREPARADAS
-        // ==================================================
+        // ======================================================
+        // GUARDAR FIRMAS PREPARADAS
+        // ======================================================
 
         if (!cancelled) {
-          setPreparedClienteSignature(
-            clienteSignature,
-          );
+          setPreparedClienteSignature(clienteSignature);
 
           setPreparedFuncionarioSignature(
             funcionarioSignature,
@@ -180,13 +206,21 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
 
     prepareSignatures();
 
+    // ==========================================================
+    // CLEANUP
+    // ==========================================================
+
     return () => {
       cancelled = true;
     };
   }, [orderData]);
 
   // ============================================================
-  // DATOS QUE FINALMENTE RECIBE SarlaftPDF
+  // DATOS FINALES PARA SarlaftPDF
+  // ============================================================
+  //
+  // Aquí reemplazamos los paths de Storage por los Data URL
+  // preparados anteriormente.
   // ============================================================
 
   const evidenceDataForPDF = orderData
@@ -224,6 +258,10 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
 
   return (
     <>
+      {/* ======================================================
+          1. CARGANDO DATOS SARLAFT
+          ====================================================== */}
+
       {isLoading && (
         <Button
           variant="ghost"
@@ -234,16 +272,44 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
           <Loader2 className="h-3 w-3 animate-spin" />
 
           <span className="text-xs font-medium">
-            Procesando...
+            Cargando evidencia...
           </span>
         </Button>
       )}
+
+      {/* ======================================================
+          2. ERROR CARGANDO DATOS
+          ====================================================== */}
 
       {error && (
         <span className="text-[10px] text-destructive font-medium px-2">
           Error al cargar datos.
         </span>
       )}
+
+      {/* ======================================================
+          3. PREPARANDO FIRMAS
+          ====================================================== */}
+     
+
+      {!isLoading && isPreparingSignatures && (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled
+          className="h-8 gap-2 text-muted-foreground px-2"
+        >
+          <Loader2 className="h-3 w-3 animate-spin" />
+
+          <span className="text-xs font-medium">
+            Preparando firmas...
+          </span>
+        </Button>
+      )}
+
+      {/* ======================================================
+          4. GENERACIÓN DEL PDF
+          ====================================================== */}
 
       {!isLoading &&
         !isPreparingSignatures &&
@@ -260,6 +326,10 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
               loading,
               error: pdfError,
             }) => {
+              // ------------------------------------------------
+              // ERROR GENERANDO PDF
+              // ------------------------------------------------
+
               if (pdfError) {
                 return (
                   <span className="text-[10px] text-destructive font-medium px-2">
@@ -267,6 +337,10 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
                   </span>
                 );
               }
+
+              // ------------------------------------------------
+              // PDF TODAVÍA GENERÁNDOSE
+              // ------------------------------------------------
 
               if (loading) {
                 return (
@@ -279,11 +353,15 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
                     <Loader2 className="h-3 w-3 animate-spin" />
 
                     <span className="text-xs font-medium">
-                      Procesando...
+                      Generando PDF...
                     </span>
                   </Button>
                 );
               }
+
+              // ------------------------------------------------
+              // PDF LISTO
+              // ------------------------------------------------
 
               return (
                 <Button
@@ -293,6 +371,10 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
                   onClick={() => {
                     if (url) {
                       window.open(url, "_blank");
+
+                      // Permitimos volver a ejecutar el proceso
+                      // la próxima vez que el usuario quiera
+                      // consultar la evidencia.
                       setReadyToProcess(false);
                     }
                   }}
@@ -311,10 +393,21 @@ function SarlaftViewPDF({ orderId }: OrderViewPDFProps) {
   );
 }
 
+// ============================================================
+// EXPORT DINÁMICO
+// ============================================================
+//
+// @react-pdf/renderer trabaja del lado del navegador.
+//
+// ssr: false evita que BlobProvider intente ejecutarse durante
+// SSR.
+// ============================================================
+
 export default dynamic(
   () => Promise.resolve(SarlaftViewPDF),
   {
     ssr: false,
+
     loading: () => (
       <Button
         variant="ghost"

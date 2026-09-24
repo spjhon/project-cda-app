@@ -1,17 +1,13 @@
+
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
-
 import { Download, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-import dynamic from "next/dynamic";
-
-// Importamos el documento PDF y el hook SARLAFT
-import SarlaftPDF from "./SarlaftPDF";
 
 import {
   SarlaftEvidence,
@@ -20,6 +16,8 @@ import {
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
+import SarlaftPDF from "./SarlaftPDF";
+
 interface SarlaftDownloadPDFProps {
   orderId?: string;
 }
@@ -27,8 +25,19 @@ interface SarlaftDownloadPDFProps {
 function SarlaftDownloadPDF({
   orderId,
 }: SarlaftDownloadPDFProps) {
-  const [readyToDownload, setReadyToDownload] =
-    useState(false);
+  // =========================================================
+  // ESTADO PRINCIPAL
+  // =========================================================
+
+  // Inicialmente no hacemos la consulta.
+  //
+  // Solo comenzamos a cargar la evidencia SARLAFT cuando
+  // el usuario presiona "Cargar descarga evidencia SARLAFT".
+  const [readyToDownload, setReadyToDownload] = useState(false);
+
+  // =========================================================
+  // OBTENER EVIDENCIA SARLAFT
+  // =========================================================
 
   const {
     data: sarlaftEvidence,
@@ -39,36 +48,49 @@ function SarlaftDownloadPDF({
     readyToProcess: readyToDownload,
   });
 
-  // ============================================================
-  // FIRMAS PREPARADAS PARA EL PDF
-  // ============================================================
+  // =========================================================
+  // FIRMAS PREPARADAS
+  // =========================================================
+  //
+  // Las firmas vienen inicialmente como rutas de Supabase
+  // Storage.
+  //
+  // Para react-pdf necesitamos convertirlas a Data URL.
+  // =========================================================
 
+  // Firma del cliente.
   const [preparedClienteSignature, setPreparedClienteSignature] =
-    useState<
-      SarlaftEvidence["cliente_firma_path"] | null
-    >(null);
+    useState<SarlaftEvidence["cliente_firma_path"] | null>(null);
 
+  // Firma del funcionario / inspector.
   const [
     preparedFuncionarioSignature,
     setPreparedFuncionarioSignature,
   ] = useState<
-    SarlaftEvidence[
-      "funcionario_firma_path"
-    ] | null
+    SarlaftEvidence["funcionario_firma_path"] | null
   >(null);
 
+  // Indica que todavía estamos descargando y preparando
+  // las firmas desde Supabase Storage.
   const [isPreparingSignatures, setIsPreparingSignatures] =
     useState(false);
 
-
-console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
-
-
-
-  // ============================================================
+  // =========================================================
   // PREPARAR FIRMAS DESDE STORAGE
-  // ============================================================
-
+  // =========================================================
+  //
+  // Flujo:
+  //
+  // Evidencia SARLAFT
+  //        ↓
+  // Rutas de firmas
+  //        ↓
+  // Descargar imágenes
+  //        ↓
+  // Blob → Data URL
+  //        ↓
+  // SarlaftPDF
+  //
   useEffect(() => {
     if (!sarlaftEvidence) {
       return;
@@ -80,14 +102,15 @@ console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
       setIsPreparingSignatures(true);
 
       try {
-        const supabaseBrowser =
-          createSupabaseBrowserClient();
+        const supabaseBrowser = createSupabaseBrowserClient();
 
-        // --------------------------------------------------
-        // Función auxiliar para descargar una firma
-        // y convertirla en Data URL
-        // --------------------------------------------------
-
+        // =====================================================
+        // FUNCIÓN AUXILIAR
+        // =====================================================
+        //
+        // Descarga una firma desde Supabase Storage y la
+        // convierte en Data URL.
+        //
         const downloadSignatureAsDataUrl = async (
           path: string | null,
         ): Promise<string | null> => {
@@ -109,58 +132,54 @@ console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
             return null;
           }
 
-          return await new Promise<string>(
-            (resolve, reject) => {
-              const reader = new FileReader();
+          return await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
 
-              reader.onloadend = () => {
-                if (
-                  typeof reader.result === "string"
-                ) {
-                  resolve(reader.result);
-                } else {
-                  reject(
-                    new Error(
-                      "No se pudo convertir la firma a Data URL.",
-                    ),
-                  );
-                }
-              };
-
-              reader.onerror = () => {
+            reader.onloadend = () => {
+              if (typeof reader.result === "string") {
+                resolve(reader.result);
+              } else {
                 reject(
                   new Error(
-                    "No se pudo leer la imagen de la firma.",
+                    "No se pudo convertir la firma a Data URL.",
                   ),
                 );
-              };
+              }
+            };
 
-              reader.readAsDataURL(data);
-            },
-          );
+            reader.onerror = () => {
+              reject(
+                new Error(
+                  "No se pudo leer la imagen de la firma.",
+                ),
+              );
+            };
+
+            reader.readAsDataURL(data);
+          });
         };
 
-        // ==================================================
+        // =====================================================
         // 1. FIRMA DEL CLIENTE
-        // ==================================================
+        // =====================================================
 
         const clienteSignature =
           await downloadSignatureAsDataUrl(
             sarlaftEvidence.cliente_firma_path,
           );
 
-        // ==================================================
+        // =====================================================
         // 2. FIRMA DEL FUNCIONARIO / INSPECTOR
-        // ==================================================
+        // =====================================================
 
         const funcionarioSignature =
           await downloadSignatureAsDataUrl(
             sarlaftEvidence.funcionario_firma_path,
           );
 
-        // ==================================================
-        // GUARDAMOS LAS FIRMAS PREPARADAS
-        // ==================================================
+        // =====================================================
+        // GUARDAR FIRMAS PREPARADAS
+        // =====================================================
 
         if (!cancelled) {
           setPreparedClienteSignature(
@@ -190,15 +209,21 @@ console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
 
     prepareSignatures();
 
+    // Evita actualizar estado si el componente se desmontó
+    // mientras todavía se estaban descargando las firmas.
     return () => {
       cancelled = true;
     };
   }, [sarlaftEvidence]);
 
-  // ============================================================
-  // DATOS QUE FINALMENTE RECIBE SarlaftPDF
-  // ============================================================
-
+  // =========================================================
+  // DATOS FINALES PARA SarlaftPDF
+  // =========================================================
+  //
+  // Conservamos todos los datos originales de la evidencia
+  // y sustituimos únicamente las rutas de las firmas por
+  // las Data URLs preparadas.
+  //
   const evidenceDataForPDF = sarlaftEvidence
     ? {
         ...sarlaftEvidence,
@@ -211,26 +236,9 @@ console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
       }
     : undefined;
 
-  // ============================================================
-  // BOTÓN INICIAL
-  // ============================================================
-
-  if (!readyToDownload) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-8 gap-2 border-border text-foreground hover:bg-muted"
-        onClick={() => setReadyToDownload(true)}
-      >
-        <span>Cargar descarga evidencia Sarlaft</span>
-      </Button>
-    );
-  }
-
-  // ============================================================
+  // =========================================================
   // NOMBRE DEL ARCHIVO
-  // ============================================================
+  // =========================================================
 
   const getFileName = () => {
     const placa = sarlaftEvidence?.placa_snapshot
@@ -251,120 +259,199 @@ console.log("firma del funcionario", sarlaftEvidence?.funcionario_firma_path)
     );
   };
 
-  // ============================================================
-  // ESTADOS DE CARGA / ERROR
-  // ============================================================
+  // =========================================================
+  // ESTADO 1
+  // =========================================================
+  //
+  // Todavía no hemos iniciado el proceso.
+  //
+  if (!readyToDownload) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-8 gap-2 border-border text-foreground hover:bg-muted"
+        onClick={() => setReadyToDownload(true)}
+      >
+        <span>Cargar descarga evidencia SARLAFT</span>
+      </Button>
+    );
+  }
 
-  return (
-    <>
-      {isLoading && (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled
-          className="h-8 gap-2 text-muted-foreground px-2"
-        >
-          <Loader2 className="h-3 w-3 animate-spin" />
+  // =========================================================
+  // ESTADO 2
+  // =========================================================
+  //
+  // Estamos consultando la evidencia SARLAFT.
+  //
+  if (isLoading) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        className="h-8 gap-2 text-muted-foreground px-2"
+      >
+        <Loader2 className="h-3 w-3 animate-spin" />
 
-          <span className="text-xs font-medium">
-            Procesando...
-          </span>
-        </Button>
-      )}
-
-      {error && (
-        <span className="text-[10px] text-destructive font-medium px-2">
-          Error al cargar datos SARLAFT
+        <span className="text-xs font-medium">
+          Cargando evidencia...
         </span>
-      )}
+      </Button>
+    );
+  }
 
-      {!isLoading &&
-        !isPreparingSignatures &&
-        evidenceDataForPDF && (
-          <PDFDownloadLink
-            document={
-              <SarlaftPDF
-                evidenceData={evidenceDataForPDF}
-              />
-            }
-            fileName={getFileName()}
-          >
-            {({
-              loading,
-              error: pdfError,
-            }) => {
-              // ------------------------------------------------
-              // ERROR GENERANDO PDF
-              // ------------------------------------------------
+  // =========================================================
+  // ERROR AL CARGAR EVIDENCIA
+  // =========================================================
 
-              if (pdfError) {
-                return (
-                  <span className="text-[10px] text-destructive font-medium px-2">
-                    Error PDF
-                  </span>
-                );
-              }
+  if (error) {
+    return (
+      <span className="text-[10px] text-destructive font-medium px-2">
+        Error al cargar datos SARLAFT
+      </span>
+    );
+  }
 
-              // ------------------------------------------------
-              // GENERANDO PDF
-              // ------------------------------------------------
+  // =========================================================
+  // ESTADO 3
+  // =========================================================
+  //
+  // La evidencia ya llegó, pero todavía estamos preparando
+  // las imágenes de las firmas.
+  //
+  if (isPreparingSignatures) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        className="h-8 gap-2 text-muted-foreground px-2"
+      >
+        <Loader2 className="h-3 w-3 animate-spin" />
 
-              if (loading) {
-                return (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled
-                    className="h-8 gap-2 text-muted-foreground px-2"
-                  >
-                    <Loader2 className="h-3 w-3 animate-spin" />
+        <span className="text-xs font-medium">
+          Preparando documento...
+        </span>
+      </Button>
+    );
+  }
 
-                    <span className="text-[10px] font-medium">
-                      Generando...
-                    </span>
-                  </Button>
-                );
-              }
+  // =========================================================
+  // ESTADO 4
+  // =========================================================
+  //
+  // Ya tenemos la evidencia y las firmas preparadas.
+  //
+  // Ahora react-pdf puede generar el documento.
+  //
+  if (evidenceDataForPDF) {
+    return (
+      <PDFDownloadLink
+        document={
+          <SarlaftPDF
+            evidenceData={evidenceDataForPDF}
+          />
+        }
+        fileName={getFileName()}
+      >
+        {({
+          loading,
+          error: pdfError,
+        }) => {
+          // -----------------------------------------------
+          // ERROR GENERANDO PDF
+          // -----------------------------------------------
 
-              // ------------------------------------------------
-              // DESCARGA LISTA
-              // ------------------------------------------------
+          if (pdfError) {
+            return (
+              <span className="text-[10px] text-destructive font-medium px-2">
+                Error PDF
+              </span>
+            );
+          }
 
-              return (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-2 text-foreground hover:bg-muted px-2 border border-border shadow-xs"
-                  title="Descargar evidencia SARLAFT"
-                  onClick={() => {
-                    setTimeout(
-                      () => setReadyToDownload(false),
-                      2000,
-                    );
-                  }}
-                >
-                  <Download className="h-4 w-4 text-muted-foreground" />
+          // -----------------------------------------------
+          // REACT-PDF ESTÁ GENERANDO EL DOCUMENTO
+          // -----------------------------------------------
 
-                  <span className="text-xs font-medium">
-                    Descargar
-                  </span>
-                </Button>
-              );
-            }}
-          </PDFDownloadLink>
-        )}
-    </>
+          if (loading) {
+            return (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled
+                className="h-8 gap-2 text-muted-foreground px-2"
+              >
+                <Loader2 className="h-3 w-3 animate-spin" />
+
+                <span className="text-xs font-medium">
+                  Generando...
+                </span>
+              </Button>
+            );
+          }
+
+          // -----------------------------------------------
+          // DESCARGA LISTA
+          // -----------------------------------------------
+
+          return (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-2 text-foreground hover:bg-muted px-2 border border-border shadow-xs"
+              title="Descargar evidencia SARLAFT"
+              onClick={() => {
+                // Dejamos un pequeño margen para que el navegador
+                // inicie la descarga antes de volver al estado inicial.
+                setTimeout(() => {
+                  setReadyToDownload(false);
+                }, 2000);
+              }}
+            >
+              <Download className="h-4 w-4 text-muted-foreground" />
+
+              <span className="text-xs font-medium">
+                Descargar
+              </span>
+            </Button>
+          );
+        }}
+      </PDFDownloadLink>
+    );
+  }
+
+  // =========================================================
+  // FALLBACK
+  // =========================================================
+  //
+  // No debería ocurrir normalmente, pero evitamos dejar el
+  // componente vacío si no existe evidencia para generar.
+  //
+  return (
+    <span className="text-[10px] text-muted-foreground px-2">
+      No hay evidencia SARLAFT disponible
+    </span>
   );
 }
 
-// ============================================================
+// =============================================================
 // EXPORT DINÁMICO
-// ============================================================
+// =============================================================
+//
+// react-pdf utiliza APIs del navegador, por lo que este
+// componente se mantiene fuera del SSR.
+//
+// También evitamos problemas con FileReader y Storage
+// durante el renderizado del servidor.
+// =============================================================
 
 export default dynamic(
   () => Promise.resolve(SarlaftDownloadPDF),
   {
     ssr: false,
+
     loading: () => (
       <Button
         variant="ghost"

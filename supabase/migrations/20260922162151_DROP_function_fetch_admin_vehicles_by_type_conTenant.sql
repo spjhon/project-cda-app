@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.fetch_admin_vehicles_by_type(uuid, date, date);

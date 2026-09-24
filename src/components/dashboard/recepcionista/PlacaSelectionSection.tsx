@@ -95,6 +95,10 @@ export default function PlacaSelectionSection({
   const [message, setMessage] = useState("");
   const [isNewVehicle, setIsNewVehicle] = useState<boolean | null>(null);
 
+
+
+
+
   // SERVICE TYPE
   const handleServiceTypeChange = (type: ServiceType) => {
     const initialData = getInitialOrderFormData(
@@ -117,6 +121,18 @@ export default function PlacaSelectionSection({
     setSignatureKey((prev) => prev + 1);
   };
 
+
+
+
+
+
+
+
+
+
+
+
+
   // REINSPECCIÓN
   const handleReinspeccionChange = (checked: boolean) => {
     const initialData = getInitialOrderFormData(
@@ -138,6 +154,18 @@ export default function PlacaSelectionSection({
     setSignatureKey((prev) => prev + 1);
   };
 
+
+
+
+
+
+
+
+
+
+
+
+
   // ABRIR DIALOG
   const handleOpenChange = (open: boolean) => {
     setDialogOpen(open);
@@ -148,6 +176,20 @@ export default function PlacaSelectionSection({
       setMessage("");
     }
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // BUSCAR PLACA
 
@@ -605,6 +647,17 @@ export default function PlacaSelectionSection({
     }
   };
 
+
+
+
+
+
+
+
+
+
+  
+
   // ACEPTAR
   const handleAccept = () => {
     setDialogOpen(false);
@@ -900,7 +953,6 @@ export default function PlacaSelectionSection({
                                 type="button"
                                 onClick={handleAccept}
                                 className="w-full"
-                              
                               >
                                 Aceptar
                               </Button>
