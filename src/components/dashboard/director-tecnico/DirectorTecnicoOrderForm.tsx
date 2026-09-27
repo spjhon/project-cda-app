@@ -159,6 +159,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   e.stopPropagation();
 
+   const supabaseBrowser = createSupabaseBrowserClient();
+
   setIsSubmitting(true);
   setServerError(null);
 
@@ -204,7 +206,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   // ============================================================
 
   try {
-    const supabase = createSupabaseBrowserClient();
+  
 
     // Obtener el auth_user_id del director técnico actual
     const directorTecnicoAuthId = user?.id;
@@ -220,7 +222,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     // Consultar si el director técnico tiene firma registrada
     const { data: directorData, error: directorError } =
-      await supabase
+      await supabaseBrowser
         .from("service_users")
         .select("id, full_name, signature_path")
         .eq("id", directorTecnicoAuthId)
@@ -302,6 +304,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   };
 
   try {
+    
     // ============================================================
     // 3.1 Insertar datos del director técnico
     // ============================================================
@@ -329,6 +332,32 @@ const handleSubmit = async (e: React.FormEvent) => {
       data.id,
     );
 
+
+    // ============================================================
+    // Envio del email
+    // ============================================================
+
+
+if (formData.resultado_revision === "aprobado"){
+const { data: edgeResponse, error: edgeError } = await supabaseBrowser.functions.invoke(
+  "send-order-email",
+  {
+    body: {
+      orderId: orden.id,
+    },
+  },
+);
+
+if (edgeError || !edgeResponse) {
+  console.error("Error en el envio del Email: ", edgeError)
+}else{
+   console.log("Respuesta Edge Function:", edgeResponse);
+}
+}
+
+
+
+    
     alert(data.message);
 
     queryClient.invalidateQueries({

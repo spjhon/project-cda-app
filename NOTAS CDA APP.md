@@ -60,6 +60,7 @@ otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/s
 - tener cuidado al cargar desde el context para no cargar todo de una sino que vaya cargandoa medida que se vaya navegando
 - agregar que se vea el consecutivo de la factura en la tabla
 - ojo con los rates repetidos cuando se vuelve a crear un rate
+- pasar el sistema de autenticacion a edge functions
 
 ## FEATURES QUE FALTAN
 
