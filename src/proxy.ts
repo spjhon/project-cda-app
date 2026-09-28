@@ -14,11 +14,11 @@ export const config = {
         {
           type: "header",
           key: "host",
-          // Explicación de la regex:
-          // 1. Evita que sea exactamente cda-app.com o cda-app:3000 (con (?!...))
-          // 2. Valida que empiece por un subdominio ([^.]+) seguido obligatoriamente de \.cda-app
-          // 3. Permite opcionalmente un puerto numérico al final (:\d+)?
-          value: "^(?!cda-app\\.com$|cda-app\\:[0-9]+$)[^.]+\\.cda-app(\\:[0-9]+)?$",
+          // Explicación:
+          // 1. Excluye el dominio raíz (cda-app.com, cda-app:3000, etc.)
+          // 2. Valida cualquier subdominio ([^.]+) seguido de \.cda-app
+          // 3. Permite opcionalmente \.com (para producción) y/o :3000 (para local)
+          value: "^(?!cda-app(\\.com)?(\\:[0-9]+)?$)[^.]+\\.cda-app(\\.com)?(\\:[0-9]+)?$",
         },
       ],
     },
