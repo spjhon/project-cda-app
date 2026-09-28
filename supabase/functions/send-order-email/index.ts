@@ -165,15 +165,13 @@ const crearEmailHtml = (nombreDestinatario: string) => {
     : "";
 
   return `
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>${cdaNombre}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmación de servicio - ${cdaNombre}</title>
 </head>
 
 <body
@@ -182,7 +180,7 @@ const crearEmailHtml = (nombreDestinatario: string) => {
     padding: 0;
     background-color: #f4f6f8;
     font-family: Arial, Helvetica, sans-serif;
-    color: #333333;
+    color: #374151;
   "
 >
   <table
@@ -190,26 +188,27 @@ const crearEmailHtml = (nombreDestinatario: string) => {
     cellpadding="0"
     cellspacing="0"
     border="0"
+    role="presentation"
     style="
       background-color: #f4f6f8;
-      padding: 30px 0;
+      padding: 24px 12px;
     "
   >
     <tr>
       <td align="center">
 
-        <!-- Contenedor principal -->
+        <!-- Contenedor -->
         <table
           width="600"
           cellpadding="0"
           cellspacing="0"
           border="0"
+          role="presentation"
           style="
-            max-width: 600px;
             width: 100%;
+            max-width: 600px;
             background-color: #ffffff;
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 8px;
           "
         >
 
@@ -217,16 +216,18 @@ const crearEmailHtml = (nombreDestinatario: string) => {
           <tr>
             <td
               align="center"
-              style="padding: 35px 30px 20px 30px;"
+              style="padding: 32px 24px 20px 24px;"
             >
               <img
                 src="${cdaLogoUrl}"
                 alt="${cdaNombre}"
+                width="180"
                 style="
-                  max-width: 220px;
-                  max-height: 100px;
                   display: block;
-                  margin: 0 auto;
+                  width: 180px;
+                  max-width: 100%;
+                  height: auto;
+                  border: 0;
                 "
               />
             </td>
@@ -234,84 +235,118 @@ const crearEmailHtml = (nombreDestinatario: string) => {
 
           <!-- Título -->
           <tr>
-            <td style="padding: 10px 40px 0 40px;">
+            <td
+              style="
+                padding: 8px 32px 0 32px;
+                text-align: center;
+              "
+            >
               <h1
                 style="
                   margin: 0;
-                  color: #1f2937;
+                  color: #111827;
                   font-size: 24px;
                   line-height: 1.3;
-                  text-align: center;
+                  font-weight: 700;
                 "
               >
-                ¡Gracias por visitarnos!
+                Servicio realizado correctamente
               </h1>
             </td>
           </tr>
 
-          <!-- Contenido -->
+          <!-- Contenido principal -->
           <tr>
             <td
               style="
-                padding: 25px 40px 10px 40px;
+                padding: 24px 32px 10px 32px;
                 font-size: 16px;
-                line-height: 1.7;
+                line-height: 1.6;
                 color: #4b5563;
               "
             >
 
-              <p style="margin-top: 0;">
-                Hola <strong>${nombreDestinatario}</strong>,
+              <p style="margin: 0 0 18px 0;">
+                Hola, <strong>${nombreDestinatario}</strong>,
               </p>
 
-              <p>
-                Muchas gracias por confiar en
-                <strong>${cdaNombre}</strong> y permitirnos acompañarte
-                en el proceso de
+              <p style="margin: 0 0 18px 0;">
+                Gracias por confiar en
+                <strong>${cdaNombre}</strong>.
+              </p>
+
+              <p style="margin: 0 0 24px 0;">
+                Te confirmamos que el servicio de
                 <strong>${servicio}</strong>
-                de tu vehículo de placa
+                fue realizado para el vehículo de placa
                 <strong>${placa}</strong>.
               </p>
 
-              <p>
-                Para nosotros es muy importante brindarte un servicio
-                confiable, transparente y de calidad. Esperamos que tu
-                experiencia en nuestro Centro de Diagnóstico Automotor
-                haya sido satisfactoria.
-              </p>
+              <!-- Resumen -->
+              <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                role="presentation"
+                style="
+                  background-color: #f8fafc;
+                  border: 1px solid #e5e7eb;
+                  border-radius: 6px;
+                  margin: 0 0 24px 0;
+                "
+              >
+                <tr>
+                  <td
+                    style="
+                      padding: 18px 20px;
+                      font-size: 15px;
+                      line-height: 1.6;
+                    "
+                  >
+                    <strong style="color: #111827;">
+                      Resumen del servicio
+                    </strong>
 
-              <!-- SOAT -->
-              ${soatHtml}
+                    <p style="margin: 12px 0 0 0;">
+                      <strong>Servicio:</strong> ${servicio}<br />
+                      <strong>Placa:</strong> ${placa}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 18px 0;">
+                Recomendamos utilizar la plataforma oficial del RUNT para confirmar el correcto registro de tu
+                revisión técnico mecánica y de emisiones contaminantes:
+              </p>
 
               <!-- RUNT -->
-              <p>
-                Te recomendamos verificar la información y el resultado
-                registrado de tu vehículo directamente en la plataforma
-                oficial del RUNT:
-              </p>
-
-              <p style="text-align: center; margin: 25px 0;">
+              <p style="text-align: center; margin: 24px 0;">
                 <a
                   href="https://portalpublico.runt.gov.co/#/consulta-vehiculo/consulta/consulta-ciudadana"
                   target="_blank"
+                  rel="noopener noreferrer"
                   style="
                     display: inline-block;
-                    padding: 12px 24px;
+                    padding: 12px 22px;
                     background-color: #1f2937;
                     color: #ffffff;
                     text-decoration: none;
                     border-radius: 6px;
-                    font-weight: bold;
+                    font-size: 15px;
+                    font-weight: 600;
                   "
                 >
-                  Consultar información en el RUNT
+                  Consultar en el RUNT
                 </a>
               </p>
 
-              <p>
-                Recuerda que estamos para acompañarte cuando vuelvas a
-                necesitar nuestros servicios. Será un gusto recibirte
-                nuevamente en <strong>${cdaNombre}</strong>.
+              ${soatHtml}
+
+              <p style="margin: 24px 0 0 0;">
+                Si tienes alguna inquietud sobre el servicio,
+                estamos disponibles para atenderte.
               </p>
 
             </td>
@@ -321,75 +356,64 @@ const crearEmailHtml = (nombreDestinatario: string) => {
           <tr>
             <td
               style="
-                padding: 10px 40px 30px 40px;
+                padding: 10px 32px 28px 32px;
               "
             >
-
               <table
                 width="100%"
                 cellpadding="0"
                 cellspacing="0"
                 border="0"
+                role="presentation"
                 style="
                   background-color: #f8fafc;
-                  border-radius: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #e5e7eb;
                 "
               >
                 <tr>
                   <td
-                    style="
-                      padding: 25px;
-                      text-align: center;
-                    "
+                    align="center"
+                    style="padding: 22px 20px;"
                   >
 
                     <h2
                       style="
-                        margin: 0 0 12px 0;
-                        color: #1f2937;
-                        font-size: 19px;
+                        margin: 0 0 10px 0;
+                        color: #111827;
+                        font-size: 18px;
+                        line-height: 1.4;
                       "
                     >
-                      Tu opinión es muy importante para nosotros
+                      ¿Cómo fue tu experiencia?
                     </h2>
 
                     <p
                       style="
-                        margin: 0 0 20px 0;
+                        margin: 0 0 18px 0;
                         color: #4b5563;
-                        font-size: 15px;
+                        font-size: 14px;
                         line-height: 1.6;
                       "
                     >
-                      Si tienes alguna sugerencia, queja, apelación,
-                      felicitación o comentario sobre tu experiencia,
-                      queremos escucharte.
-                    </p>
-
-                    <p
-                      style="
-                        margin: 0 0 20px 0;
-                        color: #4b5563;
-                        font-size: 15px;
-                        line-height: 1.6;
-                      "
-                    >
-                      Tus comentarios nos ayudan a identificar
-                      oportunidades de mejora y a seguir ofreciendo
-                      un mejor servicio a nuestros clientes.
+                      Tus comentarios nos ayudan a mejorar nuestro servicio.
+                       Si tienes alguna Petición, Queja, Apelación o Felicitación te invitamos a que nos escribas
+                a nuestro buzón.
                     </p>
 
                     <a
                       href="${pqrsfUrl}"
                       target="_blank"
+                      rel="noopener noreferrer"
                       style="
                         display: inline-block;
-                        padding: 13px 28px;
+                        padding: 11px 22px;
                         background-color: #2563eb;
                         color: #ffffff;
                         text-decoration: none;
                         border-radius: 6px;
-                        font-weight: bold;
+                        font-size: 14px;
+                        font-weight: 600;
                       "
                     >
                       Compartir mi opinión
@@ -398,38 +422,28 @@ const crearEmailHtml = (nombreDestinatario: string) => {
                   </td>
                 </tr>
               </table>
-
             </td>
           </tr>
 
-          <!-- Cierre -->
+          <!-- Footer -->
           <tr>
             <td
+              align="center"
               style="
-                padding: 0 40px 35px 40px;
-                text-align: center;
+                padding: 0 32px 30px 32px;
                 color: #6b7280;
-                font-size: 14px;
-                line-height: 1.6;
+                font-size: 13px;
+                line-height: 1.5;
               "
             >
 
               <p style="margin: 0 0 8px 0;">
-                Gracias nuevamente por confiar en nosotros.
+                Gracias por confiar en
+                <strong>${cdaNombre}</strong>.
               </p>
 
               <p style="margin: 0;">
-                ¡Te esperamos nuevamente!
-              </p>
-
-              <p
-                style="
-                  margin: 15px 0 0 0;
-                  font-weight: bold;
-                  color: #374151;
-                "
-              >
-                ${cdaNombre}
+                Este mensaje fue enviado automáticamente.
               </p>
 
             </td>
@@ -437,25 +451,27 @@ const crearEmailHtml = (nombreDestinatario: string) => {
 
         </table>
 
-        <!-- Footer -->
+        <!-- Identificación del remitente -->
         <table
           width="600"
           cellpadding="0"
           cellspacing="0"
           border="0"
+          role="presentation"
+          style="width: 100%; max-width: 600px;"
         >
           <tr>
             <td
               align="center"
               style="
-                padding: 20px;
+                padding: 16px 20px;
                 color: #9ca3af;
-                font-size: 12px;
+                font-size: 11px;
                 line-height: 1.5;
               "
             >
-              Este mensaje fue enviado automáticamente por
-              ${cdaNombre}.
+              ${cdaNombre}<br />
+              Centro de Diagnóstico Automotor
             </td>
           </tr>
         </table>

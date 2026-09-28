@@ -355,7 +355,7 @@ if (result?.success) {
               )}
               <div className="flex flex-col gap-0.5">
                 <span className="font-bold">
-                  {actionResult.success ? "¡Radicado Exitoso!" : "Error en el Radicado"}
+                  {actionResult.success ? "¡Envio Exitoso!" : "Error en el envio"}
                 </span>
                 <p className="text-xs opacity-90 leading-relaxed">
                   {actionResult.motive}
@@ -369,7 +369,7 @@ if (result?.success) {
             disabled={isSubmitting}
             className="mb-4 w-full h-12 bg-[#051923] dark:bg-[#00a6fb] text-white dark:text-[#051923] hover:bg-[#006494] dark:hover:bg-[#0582ca] text-sm font-bold tracking-tight rounded-xl shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? "Radicando..." : "Radicar Requerimiento"}
+            {isSubmitting ? "Enviando..." : "Enviar Requerimiento"}
           </Button>
 
           

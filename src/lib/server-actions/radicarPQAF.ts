@@ -101,7 +101,7 @@ export async function radicarPQAF(
     return {
       success: true,
        id: insertedRequirement.id,
-      motive: "Tu requerimiento ha sido radicado con éxito. Nuestro equipo se pondrá en contacto pronto.",
+      motive: "Tu requerimiento ha sido enviado con éxito.",
     };
 
   } catch (error) {
