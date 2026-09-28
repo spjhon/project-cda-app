@@ -25,6 +25,7 @@ import {
 import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react"
 import { radicarPQAF } from "@/lib/server-actions/radicarPQAF"
 import Link from "next/link"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface PqrsfFormData {
   tipoTramite: string
@@ -127,6 +128,41 @@ export default function PqafFormClient({ paramsPromise }: PqrsfFormClientProps) 
           honeypot: "",
         })
       }
+
+
+const supabaseBrowser = createSupabaseBrowserClient();
+
+
+if (result?.success) {
+  const { data, error } = await supabaseBrowser.functions.invoke(
+    "send-pqrsf-email",
+    {
+      body: {
+        requirementId: result.id,
+      },
+    },
+  );
+
+  if (error) {
+    console.error("Error invocando Edge Function PQRSF:", error);
+  } else {
+    console.log("Resultado envío PQRSF:", data);
+  }
+
+  setFormData({
+    tipoTramite: "",
+    nombreCompleto: "",
+    telefono: "",
+    correo: "",
+    placa: "",
+    descripcion: "",
+    habeasData: false,
+    honeypot: "",
+  });
+}
+
+
+
     } catch (error) {
       console.error("Error de comunicación con el servidor:", error)
       setActionResult({
@@ -162,7 +198,11 @@ export default function PqafFormClient({ paramsPromise }: PqrsfFormClientProps) 
           <label className="text-xs font-bold text-[#051923] dark:text-white uppercase tracking-wider">
             Tipo de Trámite <span className="text-red-500">*</span>
           </label>
-          <Select value={formData.tipoTramite} onValueChange={handleSelectChange}>
+          <Select 
+            items={tramitesDisponibles} 
+            value={formData.tipoTramite} 
+            onValueChange={handleSelectChange}
+          >
             <SelectTrigger className="w-full h-11 border-black dark:border-white/20 rounded-xl bg-card">
               <SelectValue placeholder="Selecciona una opción" />
             </SelectTrigger>

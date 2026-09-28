@@ -2,6 +2,7 @@ import DemoLandingPage from "@/components/tenantsLandingPages/DemoLandingPage";
 import FullmotosLandingPage from "@/components/tenantsLandingPages/FullmotosLandingPage";
 import TecnofresnoLandingPage from "@/components/tenantsLandingPages/TecnofresnoLandingPage";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 
 
@@ -13,8 +14,6 @@ export async function generateStaticParams() {
      { tenant: "demo" },
   ];
 }
-
-
 
 
 
@@ -180,31 +179,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 
 
-
-export default async function TenantPage({params}: {params: Promise<{ tenant: string }>}) {
-    
- const { tenant } = await params;
-
-// Pasamos el tenant a minúsculas para evitar problemas de digitación en la URL
+async function TenantContent({ params }: { params: Promise<{ tenant: string }> }) {
+  const { tenant } = await params;
   const currentTenant = tenant.toLowerCase();
 
-
-if (currentTenant === "fullmotos") {
-
+  if (currentTenant === "fullmotos") {
     return <FullmotosLandingPage currentTenant={currentTenant} />;
   }
 
-if (currentTenant === "tecnofresno") {
-    return <TecnofresnoLandingPage  currentTenant={currentTenant} />;
+  if (currentTenant === "tecnofresno") {
+    return <TecnofresnoLandingPage currentTenant={currentTenant} />;
   }
 
   if (currentTenant === "demo") {
-    return <DemoLandingPage  currentTenant={currentTenant} />;
+    return <DemoLandingPage currentTenant={currentTenant} />;
   }
 
+  
 
-
-return (
+  return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center bg-background">
       <h1 className="text-2xl font-bold tracking-tight text-foreground">
         Centro de Diagnóstico no registrado
@@ -213,5 +206,35 @@ return (
         El subdominio <span className="font-mono font-bold text-primary">{tenant}</span> no corresponde a una organización activa en cdApp.
       </p>
     </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export default function TenantPage({ params }: { params: Promise<{ tenant: string }> }) {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+          <p className="text-sm text-muted-foreground animate-pulse">Cargando organización...</p>
+        </div>
+      }
+    >
+      <TenantContent params={params} />
+    </Suspense>
   );
 }

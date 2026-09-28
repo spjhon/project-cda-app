@@ -2,17 +2,16 @@
 
 
 
-import { pqafSchema } from "@/lib/zod-schemas/radicarPQAF_schema";
-import { createSupabaseServerClient } from "../supabase/server";
+import { pqafSchema } from "@/lib/zod-schemas/validaciones-formularios/radicarPQAF_schema";
 import { fetchTenantData } from "./fetch_tenant_domain_cached";
+import { createSupabaseAdminClient } from "../supabase/admin";
 
 
 // Tipado del resultado para el frontend
 export type ActionResult = {
   success: boolean;
- 
-  motive?: string;  // Para detallar errores amigables
- 
+  id?: string;
+  motive?: string; // Para detallar errores amigables
 };
 
 export async function radicarPQAF(
@@ -59,8 +58,7 @@ export async function radicarPQAF(
     const data = validation.data;
 
     
-    const supabaseServer =  await createSupabaseServerClient();
-
+    const supabaseAdmin =  createSupabaseAdminClient()
     // 4. Mapear datos del frontend al esquema de base de datos de Postgres
     const payload = {
       tenant_id: tenantId,
@@ -76,9 +74,12 @@ export async function radicarPQAF(
     // 5. Insertar en la Base de Datos
     // Al usar el cliente anon del servidor, la política RLS "allow_anon_and_auth_insert_requirements"
     // validará que se pueda insertar. La base de datos verificará el tenant_id mediante FK.
-    const { error: insertError } = await supabaseServer
-      .from("service_requirements")
-      .insert(payload);
+   const { data: insertedRequirement, error: insertError } =
+  await supabaseAdmin
+    .from("service_requirements")
+    .insert(payload)
+    .select("id")
+    .single();
 
 
 
@@ -99,6 +100,7 @@ export async function radicarPQAF(
     // 6. Retornar éxito
     return {
       success: true,
+       id: insertedRequirement.id,
       motive: "Tu requerimiento ha sido radicado con éxito. Nuestro equipo se pondrá en contacto pronto.",
     };
 

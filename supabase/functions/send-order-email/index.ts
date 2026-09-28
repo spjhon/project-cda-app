@@ -7,6 +7,8 @@ console.log("Hello from Edge Functions!");
 
 const handler = {
   fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
+
+    
     const { orderId } = await req.json();
 
     const { data: order, error } = await ctx.supabaseAdmin
@@ -491,9 +493,7 @@ if (!RESEND_API_KEY) {
     },
     { status: 500 },
   );
-}
-
-;
+};
 
 for (const destinatario of destinatarios) {
   const html = crearEmailHtml(destinatario.nombre);
@@ -506,7 +506,7 @@ for (const destinatario of destinatarios) {
     },
     body: JSON.stringify({
       from: `${cdaNombre} <notificaciones@cda-app.com>`,
-      to: [destinatario.email, "tortlink8@gmail.com", "tortlink8@hotmail.com"],
+      to: [destinatario.email],
       subject: `Gracias por visitar ${cdaNombre}`,
       html,
     }),

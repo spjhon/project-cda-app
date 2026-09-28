@@ -18,15 +18,17 @@ export const pqafSchema = z.object({
   telefono: z
     .string()
     .regex(/^[0-9+\s-]{7,15}$/, "El número de teléfono no es válido."),
-  placa: z
-    .string()
-    .toUpperCase()
-    .regex(
-      /^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$|^[A-Z]{2}[0-9]{3}[A-Z]$/,
-      "La placa debe ser un formato válido en Colombia (Ej: AAA123 o AAA12B).",
-    )
-    .optional()
-    .or(z.literal("")),
+ placa: z
+  .string()
+  .toUpperCase()
+  .regex(
+    // Agregamos al inicio los formatos de 5 caracteres:
+    // ^[A-Z]{3}[0-9]{2}$ (Ej: HDC05) o ^[A-Z]{3}[0-9]$ (por si acaso de 4)
+    /^[A-Z]{3}[0-9]{2}$|^[A-Z]{3}[0-9]{3}$|^[A-Z]{3}[0-9]{2}[A-Z]$|^[A-Z]{2}[0-9]{3}[A-Z]$/,
+    "La placa debe ser un formato válido en Colombia (Ej: HDC05, AAA123 o AAA12B).",
+  )
+  .optional()
+  .or(z.literal("")),
   descripcion: z
     .string()
     .min(10, "La descripción debe tener al menos 10 caracteres.")
