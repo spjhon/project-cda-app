@@ -25,6 +25,8 @@ tambien ver que falta por actualizar: `pnpm outdated`
 Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest typescript@latest`
 otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/supabase-js@latest`
 
+comando para desplegar funciones edge: `pnpx supabase functions deploy`
+
 ## PENDIENTES
 
 - ajustar rls para verificar si es activo o no para protección y en el login
