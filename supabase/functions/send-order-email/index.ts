@@ -276,10 +276,8 @@ const crearEmailHtml = (nombreDestinatario: string) => {
               </p>
 
               <p style="margin: 0 0 24px 0;">
-                Te confirmamos que el servicio de
-                <strong>${servicio}</strong>
-                fue realizado para el vehículo de placa
-                <strong>${placa}</strong>.
+                Para nosotros es muy importante brindarte un servicio confiable, transparente y de calidad. Esperamos que tu experiencia 
+                en nuestro Centro de Diagnóstico Automotor haya sido satisfactoria.
               </p>
 
               <!-- Resumen -->
@@ -317,8 +315,8 @@ const crearEmailHtml = (nombreDestinatario: string) => {
               </table>
 
               <p style="margin: 0 0 18px 0;">
-                Recomendamos utilizar la plataforma oficial del RUNT para confirmar el correcto registro de tu
-                revisión técnico mecánica y de emisiones contaminantes:
+                Te recomendamos verificar la información y el resultado registrado de tu vehiculo 
+                directamente en la plataforma oficial del <strong>RUNT</strong>:
               </p>
 
               <!-- RUNT -->
