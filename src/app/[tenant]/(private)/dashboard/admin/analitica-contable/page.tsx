@@ -59,7 +59,6 @@ export default function AnaliticaContablePage() {
     anoContabilidadSeleccionado,
     servicioTipoContabilidadSeleccionado,
     setMesContabilidadSeleccionado,
-    setAnoContabilidadSeleccionado,
     setServicioTipoContabilidadSeleccionado,
   } = adminContextReceived.AdminContextValue;
 
@@ -96,6 +95,10 @@ export default function AnaliticaContablePage() {
           ...analyticsContabilidadQuery.data,
 
           total_recaudado_hoy: totalHoy,
+
+          total_recaudado_semana:
+          analyticsContabilidadQuery.data.total_recaudado_semana +
+          totalHoy,
 
           total_recaudado_mes:
             analyticsContabilidadQuery.data.total_recaudado_mes +

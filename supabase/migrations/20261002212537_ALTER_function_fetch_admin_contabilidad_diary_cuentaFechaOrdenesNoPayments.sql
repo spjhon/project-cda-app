@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FUNCTION public.fetch_admin_contabilidad_diary(
     p_servicio_tipo public.service_type_enum DEFAULT NULL
 )
@@ -12,20 +11,9 @@ AS $$
 DECLARE
     v_tenant_id UUID;
 
-    -- Inicio y fin del día actual en Colombia.
-    v_hoy_inicio TIMESTAMP WITH TIME ZONE :=
-        DATE_TRUNC(
-            'day',
-            CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'
-        ) AT TIME ZONE 'America/Bogota';
-
-    v_hoy_fin TIMESTAMP WITH TIME ZONE :=
-        (
-            DATE_TRUNC(
-                'day',
-                CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'
-            ) + INTERVAL '1 day'
-        ) AT TIME ZONE 'America/Bogota';
+    -- Inicio y fin del día actual en la zona horaria de la sesión.
+    v_hoy_inicio TIMESTAMP WITH TIME ZONE := DATE_TRUNC('day', NOW());
+    v_hoy_fin TIMESTAMP WITH TIME ZONE := DATE_TRUNC('day', NOW()) + INTERVAL '1 day';
 
     v_total_recaudado_hoy NUMERIC(12, 2) := 0;
 
@@ -58,10 +46,14 @@ BEGIN
         SUM(eop.monto_bruto),
         0
     )::NUMERIC(12, 2)
+
     INTO v_total_recaudado_hoy
+
     FROM public.entry_order_payments AS eop
+
     INNER JOIN public.entry_orders AS eo
         ON eo.id = eop.entry_order_id
+
     WHERE eop.tenant_id = v_tenant_id
 
       -- Filtro por servicio.
@@ -73,9 +65,8 @@ BEGIN
       -- La orden no debe estar eliminada.
       AND eo.deleted_at IS NULL
 
-      -- La orden no debe estar abierta ni anulada.
-      AND eo.estado_orden <> 'abierta'::order_status_enum
-      AND eo.estado_orden <> 'anulada'::order_status_enum
+      -- No contar órdenes anuladas.
+      AND eo.estado_orden IS DISTINCT FROM 'anulada'
 
       -- Excluir reinspecciones.
       AND (
@@ -83,10 +74,9 @@ BEGIN
           OR eo.es_reinspeccion IS NULL
       )
 
-      -- La fecha contable es la fecha de creación de la orden.
-      -- NO la fecha en que se registró el pago.
-      AND eo.created_at >= v_hoy_inicio
-      AND eo.created_at < v_hoy_fin;
+      -- El pago fue creado hoy.
+      AND eop.created_at >= v_hoy_inicio
+      AND eop.created_at < v_hoy_fin;
 
 
     -- =========================================================================
@@ -94,7 +84,8 @@ BEGIN
     -- =========================================================================
 
     RETURN QUERY
-    SELECT v_total_recaudado_hoy;
+    SELECT
+        v_total_recaudado_hoy;
 
 END;
 $$;
