@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FileText, Ban } from "lucide-react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "./pdfs/OrderViewPDF";
 import OrderDownloadPDF from "./pdfs/OrderDownloadPDF";
 import CancelOrder from "./CancelOrder";
@@ -15,6 +14,7 @@ import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrde
 import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 import SarlaftViewPDF from "./pdfs/SarlaftViewPDF";
 import SarlaftDownloadPDF from "./pdfs/SarlaftDownloadPDF";
+import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;

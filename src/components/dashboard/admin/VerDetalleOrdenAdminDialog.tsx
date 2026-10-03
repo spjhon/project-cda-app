@@ -22,9 +22,9 @@ import {
   Calendar,
   FileSearch,
 } from "lucide-react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
+import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
 
 interface VerDetalleOrdenAdminDialogProps {
   orden: EntryOrderListItem;

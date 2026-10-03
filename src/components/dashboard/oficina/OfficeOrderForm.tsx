@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Ban, Loader2, Save } from "lucide-react";
-import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
 import { $ZodIssue } from "zod/v4/core";
@@ -16,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import CancelOrder from "../_shared/CancelOrder";
 import { useOrderRate } from "@/lib/client-actions/fetch_entry_order_rate";
 import OrderPayments from "./OrderPayments";
+import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/contexts/EntryOrdersContext";
 
 
 export interface OfficeFormState {

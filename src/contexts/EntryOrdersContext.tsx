@@ -1,25 +1,133 @@
 "use client";
 
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
+
 import {
   UseMutateFunction,
   useMutation,
   useQuery,
   useQueryClient,
+  UseQueryResult,
 } from "@tanstack/react-query";
-import { createContext, ReactNode, use, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { startOfMonth, format, startOfDay, subDays } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
+import { Database } from "../../supabase/types/database.types";
+
 
 interface ReceptionistLoaderContext {
   children: ReactNode;
-  entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null>;
-  tenantCreditsPromise: Promise<TenantCredits | null>;
 }
+
+
+
+export interface TirePressureDetail {
+  id: string;
+  eje: number;
+  posicion:
+    | "izquierda"
+    | "derecha"
+    | "centro"
+    | "izquierda_interior"
+    | "derecha_interior"
+    | "repuesto";
+  presion_encontrada: number | null;
+  presion_ajustada: number | null;
+
+}
+
+// ======================================================
+// Tipo de pagos de una orden
+// ======================================================
+
+export interface EntryOrderPaymentDetail {
+  id: string;
+  payment_method: Database["public"]["Enums"]["office_payment_type_enum"] | null;
+  monto_bruto: number;
+  num_comprobante: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type OfficePaymentType = Database["public"]["Enums"]["office_payment_type_enum"];
+
+
+export interface EntryOrderListItem {
+  id: string;
+  placa: string;
+  fecha: string;
+  marca: string;
+  linea: string;
+
+  // Datos del Propietario (Snapshots)
+  propietario_nombre: string;
+  propietario_documento: string;
+  propietario_tipo_documento: string;
+  propietario_telefono: string | null;
+  propietario_email: string | null;
+  propietario_direccion: string | null;
+
+  // Datos del Cliente (Snapshots)
+  cliente_nombre: string;
+  cliente_documento: string;
+  cliente_tipo_documento: string;
+  cliente_telefono: string | null;
+  cliente_email: string | null;
+  cliente_direccion: string | null;
+
+  // Datos Operativos del Vehículo
+  es_reinspeccion: boolean;
+  kilometraje: string | null;
+  soat_vencimiento_snapshot: string | null;
+  service_type: Database["public"]["Enums"]["service_type_enum"];
+  vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"];
+vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"];
+  estado_orden: string;
+
+  // Información de Oficina
+  oficina_pin: string | null;
+  oficina_consecutivo_factura: string | null;
+  se_compro_soat: boolean;
+  rate_price_snapshot: number | null;
+
+  // Resultado de la inspección
+  resultado_revision: string | null;
+
+  // Consecutivos de cierre técnico (ISO 17020)
+  consecutivo_fur: string | null;
+  consecutivo_rtm: string | null;
+
+  // Presiones de Llantas
+  presiones_llantas: TirePressureDetail[];
+
+  // Pagos de la orden
+  payments: EntryOrderPaymentDetail[];
+
+  // Metadata de paginación
+  total_count: number;
+}
+// ======================================================
+// Parámetros de búsqueda
+// ======================================================
+
+export interface FetchEntryOrdersParams {
+  tenantId: string;
+  limit?: number;
+  offset?: number;
+  placa?: string;
+  estado?: "abierta" | "anulada" | "en_prueba" | "finalizada" | undefined;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  clienteDocumento?: string;
+  propietarioDocumento?: string;
+}
+
+
+
+
+
 
 export interface PendingPreviousDayOrder {
   id: string;
@@ -29,19 +137,22 @@ export interface PendingPreviousDayOrder {
   vehiculo_placa_snapshot: string;
 }
 
+export interface TenantCredits {
+  cupo_fupas: number;
+  cupo_certificados: number;
+  updated_at: string | null; // Permitimos string ISO o null si no se ha actualizado nunca
+}
+
 export interface EntryOrdersLoaderContextType {
   entryOrdersTableData: {
     query: {
-      entryOrdersData: EntryOrderListItem[] | null;
-      isFetchingEntryOrders: boolean;
-      isEntryOrdersError: boolean;
-      entryOrdersError: Error | null;
-      refetchEntryOrders: () => void;
-      isEntryOrdersSuccess: boolean;
+      // Query completa de TanStack Query
+      entryOrdersQuery: UseQueryResult<EntryOrderListItem[], Error>;
 
       // Ordenamiento
       orderByColumn: string;
       setOrderByColumn: (column: string) => void;
+
       orderByDirection: "ASC" | "DESC";
       setOrderByDirection: (direction: "ASC" | "DESC") => void;
 
@@ -56,31 +167,26 @@ export interface EntryOrdersLoaderContextType {
       // Búsqueda
       searchColumn: string;
       setSearchColumn: (col: string) => void;
+
       searchTerm: string;
       setSearchTerm: (term: string) => void;
 
       // Paginación
       page: number;
       setPage: (page: number) => void;
+
       rowsPerPage: number;
       setRowsPerPage: (rows: number) => void;
     };
 
     ordenesDelDiaAnteriorQuery: {
       pendingPreviousDayOrders: PendingPreviousDayOrder[] | undefined;
-
       isLoadingPendingPreviousDayOrders: boolean;
       isPendingPreviousDayOrdersError: boolean;
       pendingPreviousDayOrdersError: Error | null;
     };
-        // 🆕 Créditos del tenant
-    tenantCredits: {
-      data: TenantCredits | null;
-      isFetching: boolean;
-      isError: boolean;
-      error: Error | null;
-      refetch: () => void;
-    };
+
+    tenantCreditsQuery: UseQueryResult<TenantCredits, Error>;
 
     mutation: {
       cancelOrder: UseMutateFunction<
@@ -102,13 +208,10 @@ export interface EntryOrdersLoaderContextType {
 
 
 
-
 export const EntryOrdersContext =
   createContext<EntryOrdersLoaderContextType | null>(null);
 
 export default function EntryOrdersLoaderContext({
-  entryOrdersTableDataPromise,
-  tenantCreditsPromise,
   children,
 }: ReceptionistLoaderContext) {
   //state para para que el query siepre mantenta el contexto de lo que debe mantener actualizado y en constante pooling
@@ -158,9 +261,6 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
 
   const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
-  const entryOrdersTableData = use(entryOrdersTableDataPromise);
-  const tenantCredits = use(tenantCreditsPromise);
-
   
 
   const pathname = usePathname();
@@ -177,77 +277,105 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
   //TANSTAK QUERY PARA LAS ORDENES DE ENTRADA
   //--------------------------------------------
 
+const entryOrdersQuery = useQuery({
+  queryKey: ["entry_orders", "list"],
+
+  queryFn: async () => {
+    console.log(
+      `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
+    );
+
+    const fechaDesde = dateRange?.from
+      ? format(dateRange.from, "yyyy-MM-dd")
+      : format(startOfMonth(new Date()), "yyyy-MM-dd");
+
+    const fechaHasta = dateRange?.to
+      ? format(dateRange.to, "yyyy-MM-dd")
+      : format(new Date(), "yyyy-MM-dd");
+
+    const { data, error } = await supabaseBrowser.rpc(
+      "fetch_entry_orders_list",
+      {
+        p_tenant_id: tenantId ?? "",
+        p_limit: rowsPerPage,
+        p_offset: (page - 1) * rowsPerPage,
+        p_order_by_column: orderByColumn,
+        p_order_by_direction: orderByDirection,
+        p_show_deleted: showDeleted,
+        p_fecha_desde: fechaDesde,
+        p_fecha_hasta: fechaHasta,
+        p_search_column: searchColumn,
+        p_search_term: searchTerm,
+      },
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data as unknown as EntryOrderListItem[]) || [];
+  },
+
+  staleTime: 0,
+  refetchInterval: 15000,
+  enabled:
+    pathname === "/dashboard/admin" ||
+    pathname === "/dashboard/recepcionista/ordenes-de-entrada" ||
+    pathname === "/dashboard/director-tecnico" ||
+    pathname === "/dashboard/oficina",
+});
 
 
-  //Manejo del query para mantener los datos actualizados
-  const {
-    data: entryOrdersData,
-    isFetching: isFetchingEntryOrders,
-    isError: isEntryOrdersError,
-    error: entryOrdersError,
-    refetch: refetchEntryOrders,
-    isSuccess: isEntryOrdersSuccess,
-  } = useQuery({
-    queryKey: [
-      "entry-orders",
-      "list",
-      pathname,
-      orderByColumn,
-      orderByDirection,
-      showDeleted,
-      dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
-      dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "null",
-      searchTerm,
-      searchColumn, // 🌟 NUEVO: Si cambian de 'placa' a 'marca', la caché debe cambiar
-      searchTerm, // (Ya lo tenías, perfecto para el texto del input)
-      page, // 🌟 NUEVO: Si cambian de página (1, 2, 3...), hay que traer datos nuevos
-      rowsPerPage, // 🌟 NUEVO: Si cambian de ver 10 filas a ver 50 filas, cambia la consulta
-    ],
 
-    queryFn: async () => {
-      console.log(
-        `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
-      );
 
-      //await new Promise((resolve) => setTimeout(resolve, 5000));
+useEffect(() => {
+  const rutasPermitidas = [
+    "/dashboard/admin",
+    "/dashboard/recepcionista/ordenes-de-entrada",
+    "/dashboard/director-tecnico",
+    "/dashboard/oficina",
+  ];
 
-      // 🌟 Control preventivo de seguridad por si limpian el calendario
-      // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
-      const fechaDesde = dateRange?.from
-        ? format(dateRange.from, "yyyy-MM-dd")
-        : format(startOfMonth(new Date()), "yyyy-MM-dd");
-      const fechaHasta = dateRange?.to
-        ? format(dateRange.to, "yyyy-MM-dd")
-        : format(new Date(), "yyyy-MM-dd");
+  if (!rutasPermitidas.includes(pathname)) {
+    return;
+  }
 
-      const { data, error } = await supabaseBrowser.rpc(
-        "fetch_entry_orders_list",
-        {
-          p_tenant_id: tenantId ?? "",
-          p_limit: rowsPerPage,
-          // 🌟 MATEMÁTICA LÓGICA: Calculamos el offset en tiempo real para saltar las filas correctas
-          // Ejemplo: Si estás en Pág 2 y ves de a 10 filas: (2 - 1) * 10 = Saltarse las primeras 10 filas (p_offset: 10)
-          p_offset: (page - 1) * rowsPerPage,
-          // 🌟 Pasamos los estados DIRECTOS, sin mapeos ni arrays raros
-          p_order_by_column: orderByColumn,
-          p_order_by_direction: orderByDirection,
-          p_show_deleted: showDeleted, // 🌟 ¡Inyectamos el nuevo parámetro al RPC!
-          // 🌟 PASAMOS LAS FECHAS FORMATEADAS AL RPC DE POSTGRESQL
-          p_fecha_desde: fechaDesde,
-          p_fecha_hasta: fechaHasta,
-          p_search_column: "placa",
-          p_search_term: searchTerm,
-        },
-      );
+  entryOrdersQuery.refetch();
+}, [
+  pathname,
+  orderByColumn,
+  orderByDirection,
+  showDeleted,
+  dateRange,
+  searchColumn,
+  searchTerm,
+  page,
+  rowsPerPage,
+]);
 
-      if (error) throw new Error(error.message);
 
-      return (data as unknown as EntryOrderListItem[]) || [];
-    },
-    initialData: entryOrdersTableData,
-    staleTime: 0,
-    refetchInterval: 15000,
-  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -400,37 +528,31 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
 
   //QUERY PARA MANTENER ACTUALIZADAS LAS FUPAS
   //QUERY PARA OBTENER LOS CRÉDITOS DEL TENANT
-  const {
-    data: tenantCreditsData,
-    isFetching: isFetchingTenantCredits,
-    isError: isTenantCreditsError,
-    error: tenantCreditsError,
-    refetch: refetchTenantCredits,
-  } = useQuery({
-    queryKey: ["tenant-credits", tenantId],
+ const tenantCreditsQuery = useQuery({
+  queryKey: ["tenant-credits", tenantId],
+  enabled: !!tenantId,
 
-    enabled: !!tenantId,
-    initialData: tenantCredits,
-    staleTime: 0,
-    refetchInterval: 15000, // 30 segundos
+  staleTime: Infinity,
+  refetchInterval: 15000,
 
-    queryFn: async () => {
-      if (!tenantId) {
-        throw new Error("Tenant ID no definido.");
-      }
+  queryFn: async () => {
+    if (!tenantId) {
+      throw new Error("Tenant ID no definido.");
+    }
 
-      const { data, error } = await supabaseBrowser.rpc("get_tenant_credits", {
+    const { data, error } = await supabaseBrowser
+      .rpc("get_tenant_credits", {
         p_tenant_id: tenantId,
-      }).single();
+      })
+      .single();
 
-      if (error) {
-        throw new Error(error.message);
-      }
+    if (error) {
+      throw new Error(error.message);
+    }
 
-      return data as unknown as TenantCredits;
-    },
-  });
-
+    return data as unknown as TenantCredits;
+  },
+});
 
 
 
@@ -441,12 +563,7 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
   const EntryOrdersContextValue = {
     entryOrdersTableData: {
       query: {
-        entryOrdersData: entryOrdersData,
-        isFetchingEntryOrders: isFetchingEntryOrders,
-        isEntryOrdersError: isEntryOrdersError,
-        entryOrdersError: entryOrdersError,
-        refetchEntryOrders: refetchEntryOrders,
-        isEntryOrdersSuccess: isEntryOrdersSuccess,
+        entryOrdersQuery,
 
         // 🌟 Compartimos los nuevos estados y sus funciones mutadoras
         orderByColumn,
@@ -481,13 +598,7 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
         pendingPreviousDayOrdersError,
       },
       // Dentro de entryOrdersTableData
-      tenantCredits: {
-        data: tenantCreditsData,
-        isFetching: isFetchingTenantCredits,
-        isError: isTenantCreditsError,
-        error: tenantCreditsError,
-        refetch: refetchTenantCredits,
-      },
+      tenantCreditsQuery,
       mutation: {
         cancelOrder: cancelOrder,
         isCancelingOrder: isCancelingOrder,
@@ -503,3 +614,4 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
     </EntryOrdersContext.Provider>
   );
 }
+

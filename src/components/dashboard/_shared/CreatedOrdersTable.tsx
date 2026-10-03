@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
+
 
 import {
   createColumnHelper,
@@ -53,7 +53,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { DateRangePicker } from "./DateRangePicker";
-import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem, EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
@@ -211,7 +211,7 @@ export default function CreatedOrdersTable() {
     AdminContextRecived?.AdminContextValue.rol;
 
   const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersData || [];
+  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersQuery.data || [];
 
 
  
@@ -223,6 +223,8 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
 
   const { query} = EntryOrdersContextRecived?.entryOrdersTableData || {};
+
+  const {entryOrdersQuery} = EntryOrdersContextRecived?.entryOrdersTableData.query || {};
  
    const { dateRange = undefined, setDateRange = () => {} } = query || {};
 
@@ -250,6 +252,12 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
 
    
 
+
+
+
+
+
+
   const [inputValue, setInputValue] = useState(searchTerm);
 
   const debouncedSetSearchTerm = useMemo(() => {
@@ -258,9 +266,10 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setSearchTerm(val);
+         setPage(1);
       }, 400);
     };
-  }, [setSearchTerm]);
+  }, [setSearchTerm, setPage]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -269,10 +278,23 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setPage(1);
   };
 
-  const total = query?.entryOrdersData?.[0]?.total_count ?? 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const total = query?.entryOrdersQuery.data?.[0]?.total_count ?? 0;
 
   const renderStatusBadge = () => {
-    if (query?.isEntryOrdersError) {
+    if (entryOrdersQuery?.isError) {
       return (
         <Badge
           variant="destructive"
@@ -283,7 +305,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
         </Badge>
       );
     }
-    if (query?.isFetchingEntryOrders) {
+    if (entryOrdersQuery?.isFetching || entryOrdersQuery?.isLoading) {
       return (
         <Badge
           variant="default"
@@ -294,7 +316,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
         </Badge>
       );
     }
-    if (query?.isEntryOrdersSuccess) {
+    if (entryOrdersQuery?.isSuccess) {
       return (
         <Badge
           variant="outline"
@@ -613,7 +635,10 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           <Select
           items={SELECT_COLUMNAS}
             value={orderByColumn}
-            onValueChange={(v) => setOrderByColumn(v ? v : "fecha")}
+           onValueChange={(v) => {
+            setOrderByColumn(v || "fecha");
+            setPage(1);
+          }}
           >
             <SelectTrigger className="w-48 h-9 text-sm bg-background border-input shadow-sm focus:ring-ring transition-colors">
               <SelectValue placeholder="Columna" />
@@ -632,8 +657,10 @@ columnHelper.accessor("oficina_consecutivo_factura", {
             onValueChange={(v) => {
               if (v === "ASC" || v === "DESC") {
                 setOrderByDirection(v);
+                setPage(1);
               } else {
                 setOrderByDirection("DESC");
+                setPage(1);
               }
             }}
           >
@@ -680,14 +707,20 @@ columnHelper.accessor("oficina_consecutivo_factura", {
 
           <DateRangePicker
   dateRange={dateRange}
-  setDateRange={setDateRange}
+  setDateRange={(range) => {
+    setDateRange(range);
+    setPage(1);
+  }}
 />
 
           <div className="flex items-center space-x-2 bg-background px-3 py-1.5 h-9 rounded-md border border-input shadow-sm hover:border-accent transition-colors">
             <Switch
               id="show-deleted"
               checked={showDeleted}
-              onCheckedChange={setShowDeleted}
+              onCheckedChange={(checked) => {
+                setShowDeleted(checked);
+                setPage(1);
+              }}
               className="data-[state=checked]:bg-destructive"
             />
             <Label
@@ -810,33 +843,45 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow 
-                  key={row.id} 
-                  className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-12 text-muted-foreground font-medium"
-                >
-                  No se encontraron órdenes
-                </TableCell>
-              </TableRow>
+  {entryOrdersQuery?.isLoading ? (
+    <TableRow>
+      <TableCell
+        colSpan={columns.length}
+        className="h-32 text-center"
+      >
+        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+      </TableCell>
+    </TableRow>
+  ) : table.getRowModel().rows.length ? (
+    table.getRowModel().rows.map((row) => (
+      <TableRow
+        key={row.id}
+        className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
+      >
+        {row.getVisibleCells().map((cell) => (
+          <TableCell
+            key={cell.id}
+            className="py-3"
+          >
+            {flexRender(
+              cell.column.columnDef.cell,
+              cell.getContext(),
             )}
-          </TableBody>
+          </TableCell>
+        ))}
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell
+        colSpan={columns.length}
+        className="text-center py-12 text-muted-foreground font-medium"
+      >
+        No se encontraron órdenes
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
         </Table>
       </div>
 

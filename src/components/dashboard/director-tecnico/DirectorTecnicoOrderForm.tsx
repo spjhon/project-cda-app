@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, ShieldCheck, ShieldAlert, FileSearch, Ban, Undo2 } from "lucide-react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
 import { $ZodIssue } from "zod/v4/core";
@@ -27,6 +26,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { FetchEntryOrderResult } from "@/lib/client-actions/fetch_entry_order_by_id";
 import { pdf } from "@react-pdf/renderer";
 import OrderPDF from "../_shared/pdfs/OrderPDF";
+import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
 
 export type ResultadoRevision = "aprobado" | "rechazado" | null;
 

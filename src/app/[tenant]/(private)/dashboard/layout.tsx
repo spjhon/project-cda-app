@@ -7,13 +7,9 @@ import { redirect } from "next/navigation";
 import PermissionsLoaderContext from "@/contexts/PermissionsLoaderContext";
 import { ReactNode, Suspense } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  EntryOrderListItem,
-  fetchEntryOrders,
-} from "@/lib/server-actions/fetch_entry_orders_list";
+
 
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
-import { fetchTenantCredits, TenantCredits } from "@/lib/server-actions/fetch_tenant_credits";
 import { connection } from "next/server";
 import { fetchTenantModules, TenantModule } from "@/lib/server-actions/fetch_tenant_modules";
 
@@ -132,81 +128,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
 
-  const entryOrdersTableDataPromise: Promise<EntryOrderListItem[] | null> =
-    (async () => {
-      await connection();
-      const { tenant } = await params;
 
-      // ==========================================
-      // 1. Resolver tenant slug -> tenant real
-      // ==========================================
-      const tenantResult = await fetchTenantData(tenant);
-
-      if (!tenantResult?.data?.id) {
-        redirect(
-          `/error?type=Error, no existe tenant en entryOrdersTableDataPromise`,
-        );
-      }
-
-      if (tenantResult.error !== null) {
-        redirect(`/error?type=Error al extraer tenant: ${tenantResult.error}`);
-      }
-
-      // ==========================================
-      // 3. Traer órdenes iniciales
-      // ==========================================
-      const ordersResult = await fetchEntryOrders({
-        tenantId: tenantResult.data.id,
-        limit: 50,
-        offset: 0,
-      });
-
-      if (ordersResult.error !== null) {
-        redirect(`/error?type=Error al extraer órdenes: ${ordersResult.error}`);
-      }
-
-      return ordersResult.data;
-    })();
-
-
-
-
-
-
-//PROMESA PARA LA CONSULTA DE LAS FUTAS
-
-const tenantCreditsPromise: Promise<TenantCredits | null> = (async () => {
-  await connection();
-  const { tenant } = await params;
-
-  // ==========================================
-  // 1. Resolver tenant slug -> tenant real
-  // ==========================================
-  const tenantResult = await fetchTenantData(tenant);
-
-  if (!tenantResult?.data?.id) {
-    redirect(
-      `/error?type=Error, no existe tenant en tenantCreditsPromise`,
-    );
-  }
-
-  if (tenantResult.error !== null) {
-    redirect(`/error?type=Error al extraer tenant: ${tenantResult.error}`);
-  }
-
-  // ==========================================
-  // 2. Traer cupos / créditos del tenant
-  // ==========================================
-  const creditsResult = await fetchTenantCredits({
-    tenantId: tenantResult.data.id,
-  });
-
-  if (creditsResult.error !== null) {
-    redirect(`/error?type=Error al extraer cupos del tenant: ${creditsResult.error}`);
-  }
-
-  return creditsResult.data;
-})();
 
 
 
@@ -271,10 +193,7 @@ const ModulesDataPromise: Promise<TenantModule[]> = (async () => {
           RolesDataPromise={RolesDataPromise}
           ModulesDataPromise={ModulesDataPromise}
         >
-          <EntryOrdersLoaderContext
-            entryOrdersTableDataPromise={entryOrdersTableDataPromise}
-            tenantCreditsPromise={tenantCreditsPromise}
-          >
+          <EntryOrdersLoaderContext>
             {children}
           </EntryOrdersLoaderContext>
         </PermissionsLoaderContext>

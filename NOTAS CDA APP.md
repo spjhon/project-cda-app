@@ -10,7 +10,7 @@ DIRECTOR TECNICO
 
 ## CLI Commands I Use Frequently
 
-Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts` o `pnpx supabase gen types typescript --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > supabase/types/database.types.ts`
+Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts` o `pnpx supabase gen types typescript --db-url "postgresql://postgres:postgres@localhost:54322/postgres?sslmode=disable" > supabase/types/database.types.ts` y luego `pnpx oxfmt supabase/types/database.types.ts`
 
 Make full local system schema backup: `pnpx supabase db dump --local > backup_completo.sql` o `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > backup_schema.sql`
 backup solo de la data: `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" --use-copy --data-only -x "storage.buckets_vectors" -x "storage.vector_indexes" > backup_data.sql`

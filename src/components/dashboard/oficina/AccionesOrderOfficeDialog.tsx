@@ -9,8 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import OfficeOrderForm from "./OfficeOrderForm";
+import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
 
 
 

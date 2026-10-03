@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input";
 
 import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
 
-import { fetchDataWithPlaca } from "@/lib/server-actions/fetch_data_with_placa";
+import { fetchDataWithPlaca } from "@/lib/client-actions/fetch_data_with_placa";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import RuntScraperModal from "./RuntScraperModal";

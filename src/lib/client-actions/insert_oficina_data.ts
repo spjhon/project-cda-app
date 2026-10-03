@@ -6,9 +6,9 @@ import {
 } from "@/lib/zod-schemas/oficinaInfo-schema";
 
 import { createSupabaseBrowserClient } from "../supabase/client";
-import { EntryOrderPaymentDetail } from "../server-actions/fetch_entry_orders_list";
 import { Database } from "../../../supabase/types/database.types";
 import { OfficeFormState } from "@/components/dashboard/oficina/OfficeOrderForm";
+import { EntryOrderPaymentDetail } from "@/contexts/EntryOrdersContext";
 
 
 interface UpdateOfficeOrderArgs {

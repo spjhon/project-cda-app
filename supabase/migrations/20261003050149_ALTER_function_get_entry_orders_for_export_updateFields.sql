@@ -1,3 +1,8 @@
+DROP FUNCTION IF EXISTS public.get_entry_orders_for_export(
+  timestamptz,
+  timestamptz
+);
+
 CREATE OR REPLACE FUNCTION public.get_entry_orders_for_export(
   p_start_date TIMESTAMPTZ,
   p_end_date TIMESTAMPTZ

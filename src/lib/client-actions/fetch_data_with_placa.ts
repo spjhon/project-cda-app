@@ -1,9 +1,7 @@
-"use server"
-
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cache } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { ClaseVehiculoType, CombustibleType, TipoDocumentoType, TipoServicioVehiculoEnumType, TipoVehiculoEnumType } from "../zod-schemas/order-schema";
+import { createSupabaseBrowserClient } from "../supabase/client";
 //import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 
 // --- Interfaces de Salida (Estructuradas para encajar en el formData) ---
@@ -70,10 +68,10 @@ export const fetchDataWithPlaca = cache(async (placa: string, tenantId: string):
     if (!placa) return { data: null, error: "No se suministro una placa", found: false };
     if (!tenantId) return { data: null, error: "No se suministro el tenant ID", found: false };
 
-    const supabaseServer = await createSupabaseServerClient();
+    const supabaseBrowser = createSupabaseBrowserClient();
 
     // Ejecutamos el RPC unificado mandando placa y tenant (aislamiento multi-tenant)
-    const { data, error } = await supabaseServer.rpc("fetch_data_with_placa", {
+    const { data, error } = await supabaseBrowser.rpc("fetch_data_with_placa", {
       p_placa: placa.toUpperCase().trim(),
       p_tenant_id: tenantId
     });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { EntryOrderListItem } from "@/lib/server-actions/fetch_entry_orders_list";
 import { Ban, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem, EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 
 interface CancelOrderProps {
   orden: EntryOrderListItem;
