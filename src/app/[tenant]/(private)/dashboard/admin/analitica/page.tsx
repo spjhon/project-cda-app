@@ -2,6 +2,7 @@
 
 import AnaliticaPorCantidad from "@/components/dashboard/admin/AnaliticaPorCantidad";
 import AnaliticaVehiculosPorTipo from "@/components/dashboard/admin/AnaliticaVehiculosPorTipo";
+import { AnaliticicaRangoPersonalizado } from "@/components/dashboard/admin/AnaliticicaRangoPersonalizado";
 import {
   Select,
   SelectContent,
@@ -339,6 +340,8 @@ export default function AnaliticaPage() {
         />
 
         <AnaliticaVehiculosPorTipo />
+
+        <AnaliticicaRangoPersonalizado></AnaliticicaRangoPersonalizado>
       </div>
     </section>
   );

@@ -34,6 +34,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           entry_order_id: string;
@@ -84,6 +85,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           deleted_at?: string | null;
@@ -193,6 +195,7 @@ export type Database = {
           vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"];
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"];
         };
+        ComputedFields: never;
         Insert: {
           cliente_direccion_snapshot?: string | null;
           cliente_email_snapshot?: string | null;
@@ -400,6 +403,7 @@ export type Database = {
           vehicle_age_to: number | null;
           vehicle_service_rate_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           description?: string | null;
@@ -453,6 +457,7 @@ export type Database = {
           name: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           code: string;
           created_at?: string;
@@ -483,6 +488,7 @@ export type Database = {
           updated_at: string;
           value: Database["public"]["Enums"]["condition_response_enum"];
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           entry_order_id: string;
@@ -527,6 +533,7 @@ export type Database = {
           template_signature_id: string;
           tenant_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           entry_order_id: string;
@@ -583,6 +590,7 @@ export type Database = {
           updated_at: string;
           version: number;
         };
+        ComputedFields: never;
         Insert: {
           base_contract_text?: string | null;
           created_at?: string;
@@ -643,6 +651,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           default_value?: Database["public"]["Enums"]["condition_response_enum"];
@@ -694,6 +703,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           declaration_text: string;
@@ -740,6 +750,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           deleted_at?: string | null;
@@ -794,6 +805,7 @@ export type Database = {
           tipo_documento: Database["public"]["Enums"]["document_type_enum"];
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           actividad_economica?: string | null;
           correo?: string | null;
@@ -853,6 +865,7 @@ export type Database = {
           tipo_documento_snapshot: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           actividad_economica_snapshot: string;
           created_at?: string;
@@ -916,6 +929,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           description: string;
@@ -964,6 +978,7 @@ export type Database = {
           signature_path: string | null;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           auth_user_id: string;
           created_at?: string;
@@ -997,6 +1012,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           cupo_certificados?: number;
@@ -1032,6 +1048,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -1074,6 +1091,7 @@ export type Database = {
           tenant_id: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -1117,6 +1135,7 @@ export type Database = {
           slug: string;
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           domain: string;
@@ -1149,6 +1168,7 @@ export type Database = {
           updated_at: string;
           vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"];
         };
+        ComputedFields: never;
         Insert: {
           base_price: number;
           created_at?: string;
@@ -1190,6 +1210,7 @@ export type Database = {
           vehicle_class: Database["public"]["Enums"]["vehicle_class_enum"];
           vehicle_service_rate_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -1232,6 +1253,7 @@ export type Database = {
           updated_at: string;
           vehicle_service_rate_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           fuel_type: Database["public"]["Enums"]["fuel_type_enum"];
@@ -1274,6 +1296,7 @@ export type Database = {
           updated_at: string;
           vehicle_service_rate_id: string;
         };
+        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
@@ -1330,6 +1353,7 @@ export type Database = {
           tipo_vehiculo: Database["public"]["Enums"]["vehicle_type_enum"];
           updated_at: string;
         };
+        ComputedFields: never;
         Insert: {
           blindaje?: boolean;
           capacidad_pasajeros: number;
@@ -1403,6 +1427,7 @@ export type Database = {
           total_recaudado: number | null;
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"] | null;
         };
+        ComputedFields: never;
         Relationships: [
           {
             foreignKeyName: "entry_order_payments_tenant_id_fkey";
@@ -1423,6 +1448,7 @@ export type Database = {
           tenant_id: string | null;
           vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"] | null;
         };
+        ComputedFields: never;
         Relationships: [
           {
             foreignKeyName: "entry_orders_tenant_id_fkey";
@@ -1771,6 +1797,17 @@ export type Database = {
           tenant_id: string;
           vehicle_type: Database["public"]["Enums"]["vehicle_type_enum"];
         }[];
+      };
+      get_analitica_personalizada: {
+        Args: {
+          p_fecha_fin?: string;
+          p_fecha_inicio?: string;
+          p_result?: string;
+          p_service_type?: Database["public"]["Enums"]["service_type_enum"];
+          p_soat_purchased?: string;
+          p_vehicle_type?: Database["public"]["Enums"]["vehicle_type_enum"];
+        };
+        Returns: number;
       };
       get_entry_orders_for_export: {
         Args: { p_end_date: string; p_start_date: string };
