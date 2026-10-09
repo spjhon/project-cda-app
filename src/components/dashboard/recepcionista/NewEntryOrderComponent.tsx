@@ -670,8 +670,8 @@ if (activeModules.includes("sarlaft")) {
             selectedTemplate={selectedTemplate}
             formData={formData}
             setFormData={setFormData}
-             setShowErrorDialog={setShowErrorDialog}
-             setServerError = {setServerError}
+            setShowErrorDialog={setShowErrorDialog}
+            setServerError = {setServerError}
           />
 
           {/**SECCION DE LAS PRESIONES DEL VEHICULO */}

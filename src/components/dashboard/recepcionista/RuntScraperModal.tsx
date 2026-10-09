@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Globe, Loader2 } from "lucide-react";
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog";
 
 interface RuntScraperModalProps {
   formData: ZodFullFormDataType;
@@ -52,6 +53,87 @@ export default function RuntScraperModal({
   const [numeroDocumento, setNumeroDocumento] = useState( formData.owner_data.numero_documento || "", );
   const [captchaValue, setCaptchaValue] = useState("");
  
+const [isRtmWarningOpen, setIsRtmWarningOpen] = useState(false);
+const [rtmWarningMessage, setRtmWarningMessage] = useState<string | null>(
+  null,
+);
+
+
+
+
+
+
+
+
+const validateRtmExpiration = (fechaStr?: string | null) => {
+  if (!fechaStr) return;
+
+  let fechaVencimiento: Date;
+
+  if (fechaStr.includes("T")) {
+    const parsedDate = new Date(fechaStr);
+
+    if (Number.isNaN(parsedDate.getTime())) return;
+
+    fechaVencimiento = new Date(
+      parsedDate.getFullYear(),
+      parsedDate.getMonth(),
+      parsedDate.getDate(),
+    );
+  } else {
+    // Admite YYYY-MM-DD y DD/MM/YYYY.
+    const partes = fechaStr.split(/[-/]/);
+
+    if (partes.length !== 3) return;
+
+    const [year, month, day] =
+      fechaStr.includes("-")
+        ? partes.map(Number)
+        : [Number(partes[2]), Number(partes[1]), Number(partes[0])];
+
+    fechaVencimiento = new Date(year, month - 1, day);
+
+    // Evita aceptar fechas inexistentes, como 31/02/2026.
+    if (
+      fechaVencimiento.getFullYear() !== year ||
+      fechaVencimiento.getMonth() !== month - 1 ||
+      fechaVencimiento.getDate() !== day
+    ) {
+      return;
+    }
+  }
+
+  const ahora = new Date();
+  const hoy = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate(),
+  );
+
+  const diasVigentes = Math.round(
+    (fechaVencimiento.getTime() - hoy.getTime()) / 86_400_000,
+  );
+
+  if (diasVigentes > 10) {
+    setRtmWarningMessage(
+      `ADVERTENCIA: A la RTM todavía le quedan ${diasVigentes} días de vigencia. Por favor, compruebe la fecha y, si corresponde, informe al cliente para solicitar confirmación.`,
+    );
+    setIsRtmWarningOpen(true);
+  } else {
+    setRtmWarningMessage(null);
+    setIsRtmWarningOpen(false);
+  }
+};
+
+
+
+
+
+
+
+
+
+
 
   const placa = formData?.vehicle?.placa || "";
 
@@ -129,6 +211,7 @@ const captchaImage =
     },
     onSuccess: (data) => {
       if (data.success) {
+        validateRtmExpiration(data.payload.fecha_vencimiento_RTM);
         console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
 
         setFormData((prev: ZodFullFormDataType) => ({
@@ -218,6 +301,12 @@ const handleOpenChange = (open: boolean) => {
   solveRuntMutation.reset();
 };
 
+
+
+
+
+
+
   const handleSubmitRunt = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -236,6 +325,7 @@ const handleOpenChange = (open: boolean) => {
   const mutationData = solveRuntMutation.data;
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
@@ -442,5 +532,13 @@ const handleOpenChange = (open: boolean) => {
         </form>
       </DialogContent>
     </Dialog>
+    <GenericErrorDialog
+  isOpen={isRtmWarningOpen}
+  setIsOpen={setIsRtmWarningOpen}
+  headerText="Advertencia sobre la vigencia de la RTM"
+  descriptionText="Verifica la información obtenida del RUNT."
+  errors={rtmWarningMessage}
+/>
+</>
   );
 }

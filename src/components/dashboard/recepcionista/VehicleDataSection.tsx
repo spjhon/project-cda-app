@@ -123,64 +123,6 @@ export default function VehicleDataSection({
 
 
 
-// 🟢 EFECTO: Evalúa si dispara o limpia el error cuando la fecha de la RTM cambia
-useEffect(() => {
-  
-  const fechaStr = formData.vehicle.fecha_vencimiento_rtm;
- 
-  if (!fechaStr) {
-    setShowErrorDialog(false);
-    setServerError(null);
-    return;
-  }
-
-  const ahora = new Date();
-  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-
-  let fecha: Date;
-  if (fechaStr.includes("T")) {
-    const d = new Date(fechaStr);
-    fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  } else {
-    const partes = fechaStr.split(/[-/]/);
-    if (partes.length >= 3) {
-      fecha = new Date(
-        parseInt(partes[0], 10),
-        parseInt(partes[1], 10) - 1,
-        parseInt(partes[2], 10)
-      );
-    } else {
-      setShowErrorDialog(false);
-      setServerError(null);
-      return;
-    }
-  }
-
-  // Si la fecha parseada no es válida, limpiamos el error
-  if (isNaN(fecha.getTime())) {
-    setShowErrorDialog(false);
-    setServerError(null);
-    return;
-  }
-
-  // Calculamos la diferencia exacta en días naturales
-  const diferenciaMS = fecha.getTime() - hoy.getTime();
-  const diasTotalesVigentes = Math.round(diferenciaMS / (1000 * 60 * 60 * 24));
-
- 
-
-  // Dispara el error si restan MÁS de 10 días, de lo contrario lo limpia
-  if (diasTotalesVigentes > 10) {
-    setShowErrorDialog(
-     true
-    );
-    setServerError(`ADVERTENCIA, AL TECNO TODAVIA LE QUEDA MAS DE 10 DIAS DE VIGENCIA (exactamente ${diasTotalesVigentes} dias de VIGENCIA), FAVOR COMPROBAR. De ser asi dar aviso al cliente para solicitar confirmacion`)
-  } else {
-    setShowErrorDialog(false);
-    setServerError(null);
-  }
-}, [formData.vehicle.fecha_vencimiento_rtm, setShowErrorDialog, setServerError]);
-
 
 
 
