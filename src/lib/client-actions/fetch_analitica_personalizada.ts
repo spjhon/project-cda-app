@@ -8,7 +8,7 @@ import { AnaliticaFilters } from "@/components/dashboard/admin/AnaliticicaRangoP
 
 export function useAnaliticaPersonalizada(filters: AnaliticaFilters) {
   return useQuery({
-    queryKey: ["analitica-personalizada", filters],
+    queryKey: ["analitica-personalizada"],
 
     queryFn: async (): Promise<number> => {
       const supabaseBrowser = createSupabaseBrowserClient();
@@ -59,6 +59,6 @@ export function useAnaliticaPersonalizada(filters: AnaliticaFilters) {
     enabled: false,
 
     // Mantener los datos en caché durante 30 segundos.
-    staleTime: 30_000,
+    staleTime: Infinity,
   });
 }
