@@ -87,7 +87,7 @@ const INITIAL_FILTERS: AnaliticaFilters = {
   dateRange: undefined,
   vehicleType: "todos",
   result: "todos",
-  serviceType: "todos",
+  serviceType: "RTM",
   soatPurchased: "todos",
 };
 
