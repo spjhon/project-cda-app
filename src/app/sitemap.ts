@@ -1,109 +1,122 @@
+
 // src/app/sitemap.ts
-import { MetadataRoute } from "next";
-import { headers } from "next/headers";
+import type { MetadataRoute } from 'next'
+import { headers } from 'next/headers'
 
-// ─────────────────────────────────────────────────────────────
-// Helper: normalización de host (igual que en robots.ts)
-// ─────────────────────────────────────────────────────────────
-async function getNormalizedHost(): Promise<string> {
-  const headersList = await headers();
+const ROOT_DOMAIN = 'cda-app.com'
+
+const TENANT_SUBDOMAINS = new Set([
+  'fullmotos',
+  'tecnofresno',
+  'autobig',
+  'viterbocaldas',
+])
+
+type HostKind = 'main' | 'tenant' | 'blocked'
+
+async function getNormalizedHost(): Promise<string | null> {
+  const headersList = await headers()
+
   const rawHost =
-    headersList.get("x-forwarded-host") ??
-    headersList.get("host") ??
-    "cda-app.com";
+    headersList.get('x-forwarded-host') ??
+    headersList.get('host')
 
-  // x-forwarded-host puede traer "a.com, a.com" en setups con proxy chain
-  return rawHost.split(",")[0].trim().toLowerCase().split(":")[0];
+  if (!rawHost) return null
+
+  try {
+    // Normaliza mayúsculas, elimina el puerto y valida el formato.
+    const value = rawHost.split(',')[0].trim()
+    return new URL(`http://${value}`).hostname.toLowerCase()
+  } catch {
+    return null
+  }
 }
-
-// ─────────────────────────────────────────────────────────────
-// Tipos de host detectables (alineados con robots.ts)
-// ─────────────────────────────────────────────────────────────
-type HostKind = "main" | "tenant" | "blocked";
 
 function classifyHost(host: string): HostKind {
-  const isMain =
-    host === "cda-app.com" ||
-    host === "www.cda-app.com" ||
-    host === "cda-app" ||            // dev local
-    host === "localhost" ||
-    host.startsWith("127.0.0.1");
+  // Dominio principal.
+  if (
+    host === ROOT_DOMAIN ||
+    host === `www.${ROOT_DOMAIN}`
+  ) {
+    return 'main'
+  }
 
-  if (isMain) return "main";
+  // Demo y entornos locales: bloqueados.
+  if (
+    host === `demo.${ROOT_DOMAIN}` ||
+    host === 'localhost' ||
+    host === '127.0.0.1'
+  ) {
+    return 'blocked'
+  }
 
-  // Demo y cualquier subdominio que no sea tenant real → bloqueado
-  const isDemo = host === "demo.cda-app.com";
-  const isTenant =
-    !isDemo && host.endsWith(".cda-app.com") && host.split(".").length === 3;
+  // Solo acepta los subdominios registrados explícitamente.
+  const match = host.match(
+    /^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\.cda-app\.com$/,
+  )
 
-  return isTenant ? "tenant" : "blocked";
+  if (!match) return 'blocked'
+
+  return TENANT_SUBDOMAINS.has(match[1])
+    ? 'tenant'
+    : 'blocked'
 }
 
-// ─────────────────────────────────────────────────────────────
-// Rutas estáticas por dominio
-// ─────────────────────────────────────────────────────────────
+// No inventar fechas de modificación.
+// Añade lastModified cuando tengas la fecha real de actualización
+// del contenido, por ejemplo, desde la base de datos.
 
-// Fechas estables: solo cambian cuando realmente editas el contenido.
-// Actualiza este valor cuando publiques un cambio significativo en la página.
-const LANDING_LAST_MOD = new Date("2026-10-12");
-const ABOUT_LAST_MOD = new Date("2026-10-12");
-const PQAF_LAST_MOD = new Date("2026-10-12");
-
-function buildMainSitemap(baseUrl: string): MetadataRoute.Sitemap {
+function buildMainSitemap(
+  baseUrl: string,
+): MetadataRoute.Sitemap {
   return [
     {
       url: `${baseUrl}/`,
-      lastModified: LANDING_LAST_MOD,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: ABOUT_LAST_MOD,
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
-  ];
+  ]
 }
 
-function buildTenantSitemap(baseUrl: string): MetadataRoute.Sitemap {
+function buildTenantSitemap(
+  baseUrl: string,
+): MetadataRoute.Sitemap {
   return [
     {
       url: `${baseUrl}/`,
-      lastModified: LANDING_LAST_MOD,
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
-      // ⚠️ Antes era /pqaf → 404. Ruta real larga.
       url: `${baseUrl}/peticiones-quejas-apelaciones-felicitaciones`,
-      lastModified: PQAF_LAST_MOD,
-      changeFrequency: "yearly", // El formulario casi no cambia
+      changeFrequency: 'yearly',
       priority: 0.8,
     },
-  ];
+  ]
 }
 
-// ─────────────────────────────────────────────────────────────
-// Sitemap principal
-// ─────────────────────────────────────────────────────────────
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const host = await getNormalizedHost();
-  const kind = classifyHost(host);
-  const baseUrl = `https://${host}`;
+  const host = await getNormalizedHost()
+
+  if (!host) return []
+
+  const kind = classifyHost(host)
 
   switch (kind) {
-    case "main":
-      return buildMainSitemap(baseUrl);
+    case 'main':
+      // Mantiene una URL canónica, incluso si llega por www.
+      return buildMainSitemap(`https://${ROOT_DOMAIN}`)
 
-    case "tenant":
-      return buildTenantSitemap(baseUrl);
+    case 'tenant':
+      return buildTenantSitemap(`https://${host}`)
 
-    case "blocked":
+    case 'blocked':
     default:
-      // Demo y hosts desconocidos: NO devolver sitemap.
-      // Esto evita el warning de Search Console
-      // "Sitemap referenced URL not allowed" cuando robots.ts bloquea todo.
-      return [];
+      return []
   }
 }

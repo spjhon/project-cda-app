@@ -1,79 +1,118 @@
+
 // src/app/robots.ts
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
 import { headers } from 'next/headers'
+
+const ROOT_DOMAIN = 'cda-app.com'
+
+const TENANT_SUBDOMAINS = new Set([
+  'fullmotos',
+  'tecnofresno',
+  'autobig',
+  'viterbocaldas',
+])
+
+const privateDisallows = [
+  '/admin/',
+  '/dashboard/',
+  '/auth/',
+  '/api/',
+  '/error',
+]
+
+const aiBots = [
+  'GPTBot',
+  'Google-Extended',
+  'ClaudeBot',
+  'CCBot',
+]
+
+function getHostname(rawHost: string | null): string | null {
+  if (!rawHost) return null
+
+  const value = rawHost.split(',')[0].trim()
+
+  try {
+    return new URL(`http://${value}`).hostname.toLowerCase()
+  } catch {
+    return null
+  }
+}
+
+function blockAll(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      disallow: '/',
+    },
+  }
+}
+
+function allowPublicPages(): MetadataRoute.Robots {
+  return {
+    rules: [
+      {
+        userAgent: aiBots,
+        disallow: '/',
+      },
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: privateDisallows,
+      },
+    ],
+  }
+}
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headersList = await headers()
-  const rawHost =
+
+  const host = getHostname(
     headersList.get('x-forwarded-host') ??
-    headersList.get('host') ??
-    'cda-app.com'
+      headersList.get('host'),
+  )
 
-  // Normaliza: quita puerto, lower case, primer host si viene CSV
-  const host = rawHost.split(',')[0].trim().toLowerCase().split(':')[0]
+  if (!host) {
+    return blockAll()
+  }
 
-  const isMainDomain =
-    host === 'cda-app.com' ||
-    host === 'www.cda-app.com' ||
-    host === 'cda-app' ||
+  // 1. Dominio principal de cdApp.
+  if (host === ROOT_DOMAIN || host === `www.${ROOT_DOMAIN}`) {
+    return {
+      ...allowPublicPages(),
+      sitemap: `https://${ROOT_DOMAIN}/sitemap.xml`,
+      host: `https://${ROOT_DOMAIN}`,
+    }
+  }
+
+  // 2. Demo: bloquear todo el rastreo.
+  if (
+    host === `demo.${ROOT_DOMAIN}` ||
     host === 'localhost' ||
-    host.startsWith('127.0.0.1')
-
-  const isDemoDomain = host === 'demo.cda-app.com'
-  const isTenantSubdomain =
-    !isMainDomain && !isDemoDomain && host.endsWith('.cda-app.com')
-
-  const privateDisallows = [
-    '/admin/',
-    '/dashboard/',
-    '/auth/',
-    '/cdn/',
-    '/error',
-    '/api/',
-    '/_next/',
-  ]
-
-  // 1. Dominio principal: marketing indexable
-  if (isMainDomain) {
-    return {
-      rules: [
-        // Opcional: bots de IA
-        { userAgent: 'GPTBot', disallow: '/' },
-        { userAgent: 'Google-Extended', disallow: '/' },
-        { userAgent: 'ClaudeBot', disallow: '/' },
-        { userAgent: 'CCBot', disallow: '/' },
-        {
-          userAgent: '*',
-          allow: '/',
-          disallow: privateDisallows,
-        },
-      ],
-      sitemap: `https://${host}/sitemap.xml`,
-      host: `https://${host}`,
-    }
+    host === '127.0.0.1'
+  ) {
+    return blockAll()
   }
 
-  // 2. Subdominio de tenant: landing indexable
-  if (isTenantSubdomain) {
-    return {
-      rules: [
-        { userAgent: 'GPTBot', disallow: '/' },
-        { userAgent: 'Google-Extended', disallow: '/' },
-        { userAgent: 'ClaudeBot', disallow: '/' },
-        { userAgent: 'CCBot', disallow: '/' },
-        {
-          userAgent: '*',
-          allow: '/',
-          disallow: privateDisallows,
-        },
-      ],
-      sitemap: `https://${host}/sitemap.xml`,
-      host: `https://${host}`,
-    }
+  // 3. Permitir únicamente los subdominios registrados en esta lista.
+  const tenantMatch = host.match(
+    /^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\.cda-app\.com$/,
+  )
+
+  if (!tenantMatch) {
+    return blockAll()
   }
 
-  // 3. Demo y cualquier otro host: bloquear todo
+  const tenantSlug = tenantMatch[1]
+
+  if (!TENANT_SUBDOMAINS.has(tenantSlug)) {
+    return blockAll()
+  }
+
+  // 4. Landing pública de un tenant válido.
   return {
-    rules: { userAgent: '*', disallow: '/' },
+    ...allowPublicPages(),
+    sitemap: `https://${host}/sitemap.xml`,
+    host: `https://${host}`,
   }
 }
