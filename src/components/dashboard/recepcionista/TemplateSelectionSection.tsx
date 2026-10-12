@@ -1,8 +1,9 @@
 import { Label } from "@/components/ui/label";
 import { Car, ClipboardCheck, FileText, Hash, ShieldCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
+
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { OrderTemplateType } from "@/types/functions_types";
 
 
 
@@ -24,7 +25,7 @@ const getTemplateIcon = (index: number) => {
 // Interfaz principal para las Props del componente
 export interface TemplateSelectionSectionProps {
   /** Listado de plantillas activas disponibles para el Tenant actual */
-  activeTemplates: OrderTemplate[];
+  activeTemplates: OrderTemplateType[];
   
   /** ID de la plantilla seleccionada actualmente en el formData del Padre (puede ser un string o vacío) */
   plantilla_id: ZodFullFormDataType["plantilla_id"];

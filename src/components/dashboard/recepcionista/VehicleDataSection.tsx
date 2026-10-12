@@ -22,9 +22,10 @@ import {
   ZodFullFormDataType,
 } from "@/lib/zod-schemas/order-schema";
 import { Checkbox } from "../../ui/checkbox";
-import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
+
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { $ZodIssue } from "zod/v4/core";
+import { OrderTemplateType } from "@/types/functions_types";
 
 interface CombustibleOption {
   value: CombustibleType;
@@ -89,7 +90,7 @@ export interface VehicleDataSectionProps {
   /** * La plantilla técnica seleccionada actualmente.
    * Útil si necesitas condicionar campos visuales del vehículo según el tipo de plantilla.
    */
-  selectedTemplate: OrderTemplate | undefined;
+  selectedTemplate: OrderTemplateType | undefined;
 
   /** * El estado completo del formulario de la orden de entrada.
    */

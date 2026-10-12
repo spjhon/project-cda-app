@@ -14,13 +14,12 @@ import {
   useFetchEntryOrder,
 } from "@/lib/client-actions/fetch_entry_order_by_id";
 
-import {
-  OrderTemplate as OrderTemplateType,
-} from "@/lib/server-actions/fetch_orders_templates";
+
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import OrderPDF from "./OrderPDF";
+import { OrderTemplateType } from "@/types/functions_types";
 
 interface OrderDownloadPDFProps {
   orderId?: string;

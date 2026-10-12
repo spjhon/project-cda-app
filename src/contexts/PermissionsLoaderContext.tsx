@@ -1,32 +1,33 @@
 "use client";
 
-import { UserContextData } from "@/app/[tenant]/(private)/dashboard/layout";
-import { TenantFetchResult } from "@/lib/server-actions/fetch_tenant_domain_cached";
-import { TenantModule } from "@/lib/server-actions/fetch_tenant_modules";
+import { fetchTenantDataType } from "@/lib/server-actions/fetch_tenant_domain_cached";
+import { TenantModuleType } from "@/lib/server-actions/fetch_tenant_modules";
+import { get_tenant_roles_type } from "@/types/functions_types";
+import { UserContextDataType } from "@/types/internal_types";
 import { createContext, ReactNode, use } from "react";
 
-interface RolesContextType {
+interface PermissionsContextType {
   PermissionsContextValue: {
-    tenantObject: TenantFetchResult["data"] | undefined;
-    user: UserContextData;
-    RolesArray: string[];
-    tenantModules: TenantModule[]
+    tenantObject: fetchTenantDataType["data"] | undefined;
+    user: UserContextDataType;
+    RolesArray: get_tenant_roles_type;
+    tenantModules: TenantModuleType[];
   };
 }
 
 interface PermissionsLoaderContextProps {
-  tenantPromise: Promise<TenantFetchResult>;
-  userPromise: Promise<UserContextData>;
-  RolesDataPromise: Promise<string[]>;
-ModulesDataPromise: Promise<TenantModule[]>;
+  tenantPromise: Promise<fetchTenantDataType>;
+  userPromise: Promise<UserContextDataType>;
+  RolesDataPromise: Promise<get_tenant_roles_type>;
+  ModulesDataPromise: Promise<TenantModuleType[]>;
   children: ReactNode;
 }
 
 /**Creacion del context con el tipado de que es lo que devuelve y deja listo en el contexto */
-export const PermissionsContext = createContext<RolesContextType | null>(null);
+export const PermissionsContext = createContext<PermissionsContextType | null>(null);
 
 /**
- * 
+ *
  * @param param0 Entran las tres promesas que se crean desde el layout y los children que no se van a renderizar sino hasta que se resuelvan las promesas
  * @returns Retorna el provider del context que se creo aqui para que los componentes cliente que esten en children tengan acceso al context PermissionsContextValue
  */
@@ -34,7 +35,7 @@ export default function PermissionsLoaderContext({
   tenantPromise,
   userPromise,
   RolesDataPromise,
-ModulesDataPromise,
+  ModulesDataPromise,
   children,
 }: PermissionsLoaderContextProps) {
   const RolesData = use(RolesDataPromise);
@@ -46,7 +47,7 @@ ModulesDataPromise,
     tenantObject: tenantData?.data,
     user: user,
     RolesArray: RolesData,
-    tenantModules
+    tenantModules,
   };
 
   return (

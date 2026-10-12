@@ -2,17 +2,9 @@ import HeaderSidebar from "@/components/dashboard/recepcionista/HeaderSidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DirectorTecnicoLoaderContext from "@/contexts/DirectorTecnicoLoaderContext";
+import { ReactNode} from "react";
 
-import {
-  fetchAllTemplates,
-  OrderTemplate,
-} from "@/lib/server-actions/fetch_orders_templates";
-import { redirect } from "next/navigation";
-import { fetchTenantData } from "@/lib/server-actions/fetch_tenant_domain_cached";
 
-import { ReactNode, Suspense } from "react";
-import Loading from "@/components/ui/loading";
-import { connection } from "next/server";
 
 interface DirectorTecnicoDashboardLayoutProps {
   children: ReactNode;
@@ -22,48 +14,15 @@ interface DirectorTecnicoDashboardLayoutProps {
 
 export default function DirectorTecnicoDashboardLayout({
   children,
-  params,
 }: DirectorTecnicoDashboardLayoutProps) {
 
 
 
-  
-  // 2. CREAMOS la promesa de las plantillas DEPENDIENDO de la primera
-  const templateTabelDataPromise: Promise<OrderTemplate[] | null> =
-    (async () => {
-      await connection();
-      const { tenant } = await params;
-      // Esperamos a que el tenant se resuelva para obtener su ID
-      const tenantResult = await fetchTenantData(tenant);
 
-      if (!tenantResult?.data?.id) {
-        redirect(
-          `/error?type=Error, no existe tenant en templateTabelDataPromise`,
-        );
-      }
-
-      if (tenantResult.error !== null) {
-        redirect(`/error?type=Error al extraer el tenant${tenantResult.error}`);
-      }
-
-      // Ahora que tenemos el ID, llamamos a las plantillas
-      const templatesResult = await fetchAllTemplates(tenantResult.data.id);
-
-      if (templatesResult.error !== null) {
-        redirect(
-          `/error?type=Error al extraer las plantillas: ${tenantResult.error}`,
-        );
-      }
-
-      return templatesResult.data; // Retornamos solo el array de objetos
-    })();
 
   return (
-    <Suspense fallback={<Loading />}>
-      <DirectorTecnicoLoaderContext
-        rol={"director-tecnico"}
-        templateTabelDataPromise={templateTabelDataPromise}
-      >
+    
+      <DirectorTecnicoLoaderContext rol={"director-tecnico"}>
         <SidebarProvider>
           <AppSidebar rol={"director-tecnico"} />
 
@@ -73,6 +32,6 @@ export default function DirectorTecnicoDashboardLayout({
           </SidebarInset>
         </SidebarProvider>
       </DirectorTecnicoLoaderContext>
-    </Suspense>
+   
   );
 }

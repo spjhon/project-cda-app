@@ -1,15 +1,15 @@
 "use server";
 
 import { cache } from "react";
-import { PostgrestError } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "../supabase/server"; // Cliente con sesión de usuario
+import { PostgrestError } from "@supabase/supabase-js";
+import { get_tenant_roles_type } from "@/types/functions_types";
 
-
-// Tipamos el resultado del RPC (un array de strings con los roles)
-export interface UserRolesResult {
-  data: string[] | null;
+export interface fetchUserTenantRoles {
+  data: get_tenant_roles_type | null;
   error: string | PostgrestError | null;
 }
+
 
 /**
  * fetchUserTenantRoles
@@ -18,7 +18,7 @@ export interface UserRolesResult {
  * utilizando el contexto de autenticación del servidor (auth.uid()).
  */
 export const fetchUserTenantRoles = cache(
-  async (tenantId: string): Promise<UserRolesResult> => {
+  async (tenantId: string): Promise<fetchUserTenantRoles> => {
 
 
 

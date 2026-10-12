@@ -4,16 +4,11 @@ import { createSupabaseAdminClient } from "../supabase/admin";
 import { PostgrestError } from "@supabase/supabase-js";
 import { cache } from "react";
 import { cacheLife, cacheTag } from "next/cache";
+import { get_tenant_data_type } from "@/types/functions_types";
 
-type TenantData = {
-  domain: string;
-  name: string;
-  id: string;
-  logo_url: string;
-}
 
-export interface TenantFetchResult {
-  data: TenantData | null;
+export interface fetchTenantDataType {
+  data: get_tenant_data_type | null;
   error: string | PostgrestError | null;
 }
 
@@ -22,7 +17,7 @@ export interface TenantFetchResult {
  * ---------------
  * Implementa 'use cache' para persistencia y 'cache' de React para memoización.
  */
-export const fetchTenantData = cache(async (tenantSlug: string): Promise<TenantFetchResult> => {
+export const fetchTenantData = cache(async (tenantSlug: string): Promise<fetchTenantDataType> => {
 
 
 

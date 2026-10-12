@@ -1,27 +1,25 @@
 "use client"
 
 
-import { createContext, ReactNode, use, useContext } from "react";
-
-
-
-import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
+import { createContext, ReactNode, useContext } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   UseMutateFunction,
   useMutation,
   useQuery,
   useQueryClient,
+  UseQueryResult,
 } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
+import { OrderTemplateType } from "@/types/functions_types";
 
 
 
 interface DirectorTecnicoLoaderContext {
   children: ReactNode;
  rol: string;
- templateTabelDataPromise: Promise<OrderTemplate[] | null>;
+
 }
 
 
@@ -29,7 +27,7 @@ export interface DirectorTecnicoContextType {
   DirectorTecnicoContextValue: {
     rol: string;
     templateTableData: {
-      query: TemplateQuery;
+      templateQuery: UseQueryResult<OrderTemplateType[], Error>;
       mutation: TemplateMutation; // Corregido el typo de muetation
     };
   };
@@ -64,17 +62,6 @@ interface TemplateMutation {
   resetDeleteMutation: () => void;
 }
 
-// 2. Tipamos el objeto de la query
-interface TemplateQuery {
-  data: OrderTemplate[] | null;
-  isFetching: boolean;
-  isError: boolean;
-  error: Error | null;
-  refetch: () => void;
-  isSuccess: boolean;
-}
-
-
 
 
 
@@ -92,7 +79,6 @@ export const DirectorTecnicoContext = createContext<DirectorTecnicoContextType |
 export default function DirectorTecnicoLoaderContext({
   rol,
   children,
-  templateTabelDataPromise,
 }: DirectorTecnicoLoaderContext) {
 
 
@@ -103,38 +89,57 @@ export default function DirectorTecnicoLoaderContext({
 
   const permissionscontextRecived = useContext(PermissionsContext);
   const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const templateTableData = use(templateTabelDataPromise);
+
 
   const pathname = usePathname();
 
   const supabaseBrowser = createSupabaseBrowserClient();
 
-  //--------------------------------------------
-  //TANSTAK QUERY PARA LOS TEMPLATES
-  //--------------------------------------------
 
-  //Llamado nuevaamente a los datos que llegaron inicialmente por medio de la promesa
-  const { data, isFetching, isError, error, refetch, isSuccess } = useQuery({
-    queryKey: ["templates", "list", pathname], //TODO, HAY QUE CUADRAR ESTE PATH NAME PARA QUE SOLO SE ACTUALIZE CUANDO SE ENTRE EN EL PAGE.TSX CORRECTO
-    queryFn: async () => {
-      console.log("se llamo la funcion de query de director tecnico context");
-      // LLAMADA DIRECTA A SUPABASE
-      const { data, error } = await supabaseBrowser.rpc(
-        "fetch_orders_templates",
-        {
-          p_tenant_id: tenantId ? tenantId : "",
-        },
-      );
 
-      if (error) throw new Error(error.message);
 
-      return (data as unknown as OrderTemplate[]) || [];
-    },
-    initialData: templateTableData,
-    staleTime: 0,
-    refetchInterval: 10000,
-    refetchOnWindowFocus: false,
-  });
+
+
+
+// --------------------------------------------
+// TANSTACK QUERY: TEMPLATES
+// --------------------------------------------
+
+const templateQuery = useQuery<OrderTemplateType[], Error>({
+  queryKey: ["templates", "list", tenantId],
+
+  queryFn: async () => {
+    if (!tenantId) {
+      throw new Error("No se encontró el ID del tenant.");
+    }
+
+    console.log("Se ejecutó la consulta de templates de Director Técnico");
+
+    const { data, error } = await supabaseBrowser.rpc(
+      "fetch_orders_templates",
+      {
+        p_tenant_id: tenantId,
+      },
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data as unknown as OrderTemplateType[]) ?? [];
+  },
+
+  enabled: pathname === "/dashboard/director-tecnico/plantillas-creadas" || pathname === "/dashboard/director-tecnico/crear-orden-de-entrada",
+  staleTime: 0,
+  refetchInterval:
+    pathname === "/dashboard/director-tecnico/plantillas-creadas" ? 10000 : false,
+  refetchOnWindowFocus: false,
+});
+
+
+
+
+
 
   //useMutation utilizado para cambiar el state de is_active que esta en un switch en el componente hijo
   const { mutate: updateIsActive, isPending: isUpdating } = useMutation({
@@ -164,6 +169,14 @@ export default function DirectorTecnicoLoaderContext({
       // Aquí podrías disparar un toast de error
     },
   });
+
+
+
+
+
+
+
+
 
   //Mutacion para la eliminacion de unn temmplate, primero reviza si ya existe uno y si si, no deja eliminar el template
   const {
@@ -247,14 +260,7 @@ export default function DirectorTecnicoLoaderContext({
 const DirectorTecnicoContextValue = {
   rol: rol,
   templateTableData: {
-      query: {
-        data: data,
-        isFetching: isFetching,
-        isError: isError,
-        error: error,
-        refetch: refetch,
-        isSuccess: isSuccess,
-      },
+      templateQuery,
       mutation: {
         //Mutacion para el cambio de plantilla activa a una inactiva
         updateIsActive: updateIsActive,

@@ -36,13 +36,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { OrderTemplate } from "@/lib/server-actions/fetch_orders_templates";
+
 
 import { fetchDataWithPlaca } from "@/lib/client-actions/fetch_data_with_placa";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import RuntScraperModal from "./RuntScraperModal";
-import { getInitialOrderFormData } from "./NewEntryOrderComponent";
+import { getInitialOrderFormData } from "./NewEntryOrder/NewEntryOrderComponent";
+import { OrderTemplateType } from "@/types/functions_types";
 
 interface ServiceOption {
   id: ServiceType;
@@ -73,7 +74,7 @@ const SERVICE_TYPES: ServiceOption[] = [
 ];
 
 export interface PlacaSelectionSectionProps {
-  selectedTemplate: OrderTemplate | undefined;
+  selectedTemplate: OrderTemplateType | undefined;
   formData: ZodFullFormDataType;
   setFormData: Dispatch<SetStateAction<ZodFullFormDataType>>;
   setSignatureKey: Dispatch<SetStateAction<number>>;

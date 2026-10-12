@@ -1,4 +1,11 @@
+
 "use client";
+
+import { useContext, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { DirectorTecnicoContext } from "@/contexts/DirectorTecnicoLoaderContext";
+import type { OrderTemplateType } from "@/types/functions_types";
 
 import {
   Table,
@@ -8,472 +15,516 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Edit3, 
-  Trash2, 
-  FileText, 
-  AlertCircle, 
-  RefreshCcw, 
+import { Switch } from "@/components/ui/switch";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  Edit3,
+  Trash2,
+  FileText,
+  AlertCircle,
+  RefreshCcw,
   CheckCircle2,
   Loader2,
-  
 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
-import { OrderTemplate, OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
 import OrderViewPDF from "@/components/dashboard/_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "@/components/dashboard/_shared/pdfs/OrderDownloadPDF";
-import { useRouter } from "next/navigation";
-
-
 
 const SELECT_ORDENADO_POR = [
-  { label: "Codigo", value: "document_code" },
-  { label: "Nombre", value: "document_name" },
+  { label: "Código", value: "document_code" },
+  { label: "Nombre", value: "template_name" },
   { label: "Tipo de Servicio", value: "service_type" },
   { label: "Fecha", value: "document_date" },
   { label: "Estado", value: "is_active" },
-
 ];
 
 const SELECT_ORDEN = [
   { label: "Ascendente", value: "asc" },
   { label: "Descendente", value: "desc" },
- 
 ];
 
+export default function CreatedTemplatesTable() {
+  const router = useRouter();
 
-interface CreatedTemplatesTableProps {
-  data: OrderTemplateType[] | null | undefined;
-  isError: boolean;
-  error: Error | null;
-  refetch: () => void;
-  isFetching: boolean;
-  isSuccess: boolean;
-  onUpdateStatus: (id: string, is_active: boolean) => void;
-  isUpdating: boolean;
+  // Query y mutaciones desde el contexto.
+  const contextReceived = useContext(DirectorTecnicoContext);
 
-  deleteTemplate: (id: string, tenantId: string) => void
-  isDeletingTemplate: boolean;
-  errorDeletingTemplate: Error | null;
-   resetDeleteMutation: () => void;
-}
+  const templateContext =
+    contextReceived?.DirectorTecnicoContextValue.templateTableData;
 
+  const templateQuery = templateContext?.templateQuery;
+  const mutation = templateContext?.mutation;
 
+  const [orderBy, setOrderBy] = useState<string>("document_date");
+  const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
 
+  if (!templateQuery || !mutation) {
+    return (
+      <div className="m-5 rounded-md border p-6 text-sm text-muted-foreground">
+        No se encontró el contexto de Director Técnico.
+      </div>
+    );
+  }
 
+  const {
+    data,
+    isPending,
+    isFetching,
+    isError,
+    error,
+    refetch,
+    isSuccess,
+  } = templateQuery;
 
+  const {
+    updateIsActive,
+    isUpdating,
+    deleteTemplate,
+    isDeletingTemplate,
+    errorDeletingTemplate,
+    resetDeleteMutation,
+  } = mutation;
 
-export default function CreatedTemplatesTable({ 
-  //Comandos para el pooling de los templates de la tabla
-  data, 
-  isError, 
-  error, 
-  refetch, 
-  isFetching, 
-  isSuccess, 
-  //Comandos para el is_active
-  onUpdateStatus, 
-  isUpdating,
-  //Comandos para la eliminacion de un template
-  deleteTemplate,
-  isDeletingTemplate, 
-errorDeletingTemplate,
- resetDeleteMutation
-}: CreatedTemplatesTableProps) {
-  
+  // Ordenamiento local.
+  const sortedData = [...(data ?? [])].sort((a, b) => {
+    const rawA = a[orderBy as keyof OrderTemplateType];
+    const rawB = b[orderBy as keyof OrderTemplateType];
 
+    const valueA = String(rawA ?? "");
+    const valueB = String(rawB ?? "");
 
-const router = useRouter();
+    const comparison = valueA.localeCompare(valueB, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
 
+    return orderDir === "asc" ? comparison : -comparison;
+  });
 
-const [orderBy, setOrderBy] = useState<string>("document_date");
-const [orderDir, setOrderDir] = useState<"asc" | "desc">("desc");
-
-
-
-
-
-
- const sortedData = [...(data ?? [])].sort((a, b) => {
-        // 1. Obtenemos los valores originales
-        const rawA = a[orderBy as keyof OrderTemplate];
-        const rawB = b[orderBy as keyof OrderTemplate];
-
-        // 2. Normalizamos: Si es null o undefined, lo convertimos en string vacío
-        // Usamos String() para que booleanos, números y nulls se puedan comparar como texto
-        const valueA = rawA ?? ""; 
-        const valueB = rawB ?? "";
-
-        // 3. Comparación segura
-        if (valueA < valueB) return orderDir === "asc" ? -1 : 1;
-        if (valueA > valueB) return orderDir === "asc" ? 1 : -1;
-        return 0;
-      });
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-// Renderizado del Badge de Estado de Sincronización
+  // Estado de sincronización.
   const renderStatusBadge = () => {
     if (isError) {
       return (
-        <Badge variant="destructive" className="gap-1.5 px-3 py-1 animate-pulse">
+        <Badge variant="destructive" className="gap-1.5 px-3 py-1">
           <AlertCircle className="h-3.5 w-3.5" />
-          Error de Sincronización
+          Error de sincronización
         </Badge>
       );
     }
-    if (isFetching) {
+
+    if (isFetching && !isPending) {
       return (
-        <Badge variant="default" className="gap-1.5 px-3 py-1 bg-primary hover:bg-primary/90">
+        <Badge className="gap-1.5 px-3 py-1">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Actualizando datos...
         </Badge>
       );
     }
+
     if (isSuccess) {
       return (
-        <Badge variant="outline" className="gap-1.5 px-3 py-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+        <Badge
+          variant="outline"
+          className="gap-1.5 border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-600 dark:text-emerald-400"
+        >
           <CheckCircle2 className="h-3.5 w-3.5" />
-          Datos Actualizados
+          Datos actualizados
         </Badge>
       );
     }
+
     return null;
   };
 
-
-
-  // 1. BLOQUE DE ERROR
-  if (isError) {
-    return (
-      <Alert variant="destructive" className="my-4 bg-destructive/5 border-destructive/20">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle className="font-bold">Error de conexión</AlertTitle>
-        <AlertDescription className="flex flex-col gap-3">
-          <p>
-            No pudimos sincronizar las plantillas: {error?.message || "Error desconocido de Supabase"}
-          </p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => refetch()}
-            className="w-fit bg-background hover:bg-destructive/10 border-destructive/20 text-destructive"
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" />
-            Reintentar ahora
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  // 2. ESTADO VACÍO
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg bg-muted/30">
-        <FileText className="h-10 w-10 text-muted-foreground mb-2" />
-        <p className="text-muted-foreground font-medium">No hay plantillas creadas aún.</p>
-      </div>
-    );
-  }
-
-
-if (errorDeletingTemplate) {
   return (
-    <Alert variant="destructive" className="my-4 bg-destructive/5 border-destructive/20 animate-in fade-in-50 duration-200">
-      <AlertCircle className="h-4 w-4 text-red-600" />
-      <AlertTitle className="font-bold text-red-800">Operación de borrado rechazada</AlertTitle>
-      <AlertDescription className="flex flex-col gap-3 mt-1 text-red-700">
-        <p className="text-sm leading-relaxed">
-          {errorDeletingTemplate?.message || "No se pudo eliminar la plantilla debido a un error inesperado de seguridad."}
-        </p>
-        
-        {/* Botón de acción opcional por si quiere forzar el reintento manualmente con el mismo ID */}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          disabled={isDeletingTemplate}
-          onClick={() => {
-            // Aquí puedes quemar el reintento si guardas el ID fallido en un estado, 
-            // o simplemente usar este botón para limpiar el estado del error
-            resetDeleteMutation() // Elimina el banner de error de la pantalla de inmediato
-          }}
-          className="w-fit bg-background hover:bg-destructive/10 border-destructive/20 text-destructive font-medium shadow-xs transition-colors"
-        >
-          {isDeletingTemplate ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="mr-2 h-4 w-4" />
-          )}
-          Entendido
-        </Button>
-      </AlertDescription>
-    </Alert>
-  );
-}
-
-
-
-  return (
-    <div className="rounded-md border bg-card shadow-sm overflow-hidden m-5">
-      {/* Cabecera de la tabla con el Badge de Estado */}
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+    <div className="m-5 overflow-hidden rounded-md border bg-card shadow-sm">
+      {/* Cabecera y filtros: visibles durante la carga. */}
+      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
           Listado de Plantillas
         </h2>
+
         <div>{renderStatusBadge()}</div>
 
-
-        <div className="flex flex-wrap items-center gap-4 px-5 mt-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Select para ordenar por columna. */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground">Ordenar por Columna</label>
-            <Select items={SELECT_ORDENADO_POR} value={orderBy} onValueChange={(value) => setOrderBy(value?value:"")}>
-              <SelectTrigger className="w-45 h-9">
+            <label className="text-[10px] font-bold uppercase text-muted-foreground">
+              Ordenar por columna
+            </label>
+
+            <Select
+              items={SELECT_ORDENADO_POR}
+              value={orderBy}
+              onValueChange={(value) => {
+                if (value) setOrderBy(value);
+              }}
+            >
+              <SelectTrigger className="h-9 w-45">
                 <SelectValue placeholder="Columna" />
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                <SelectItem value="document_code">Código</SelectItem>
-                <SelectItem value="document_name">Nombre</SelectItem>
-                <SelectItem value="service_type">Tipo de Servicio</SelectItem>
-                <SelectItem value="document_date">Fecha</SelectItem>
-                <SelectItem value="is_active">Estado</SelectItem>
-                
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Columnas</SelectLabel>
+
+                  {SELECT_ORDENADO_POR.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Select para dirección del ordenamiento. */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase text-muted-foreground">Orden</label>
-            <Select items={SELECT_ORDEN} value={orderDir} onValueChange={(v) => setOrderDir(v?v:"asc")}>
-              <SelectTrigger className="w-37.5 h-9">
+            <label className="text-[10px] font-bold uppercase text-muted-foreground">
+              Orden
+            </label>
+
+            <Select
+              items={SELECT_ORDEN}
+              value={orderDir}
+              onValueChange={(value) => {
+                if (value === "asc" || value === "desc") {
+                  setOrderDir(value);
+                }
+              }}
+            >
+              <SelectTrigger className="h-9 w-37.5">
                 <SelectValue placeholder="Dirección" />
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false}>
-                <SelectItem value="asc">Ascendente</SelectItem>
-                <SelectItem value="desc">Descendente</SelectItem>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Dirección del orden</SelectLabel>
+
+                  {SELECT_ORDEN.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
         </div>
-
-
-
-
       </div>
+
+      {/* Tabla: los encabezados no dependen de la carga de datos. */}
       <Table>
-        <TableHeader className="hidden md:table-header-group bg-muted/30">
+        <TableHeader className="hidden bg-muted/30 md:table-header-group">
           <TableRow>
-            <TableHead className="font-bold text-foreground">Código</TableHead>
-            <TableHead className="font-bold text-foreground">Nombre de Plantilla</TableHead>
-            <TableHead className="font-bold text-center text-foreground">Versión</TableHead>
-            <TableHead className="font-bold text-center text-foreground">Fecha Documento</TableHead>
-            <TableHead className="font-bold text-foreground">Estado</TableHead>
-            <TableHead className="text-right font-bold text-foreground">Acciones</TableHead>
+            <TableHead className="font-bold text-foreground">
+              Código
+            </TableHead>
+            <TableHead className="font-bold text-foreground">
+              Nombre de Plantilla
+            </TableHead>
+            <TableHead className="text-center font-bold text-foreground">
+              Versión
+            </TableHead>
+            <TableHead className="text-center font-bold text-foreground">
+              Fecha Documento
+            </TableHead>
+            <TableHead className="font-bold text-foreground">
+              Estado
+            </TableHead>
+            <TableHead className="text-right font-bold text-foreground">
+              Acciones
+            </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody className="flex flex-col md:table-row-group">
-          {sortedData.map((template) => (
-            <TableRow 
-              key={template.id} 
-              className="flex flex-col md:table-row p-4 md:p-0 hover:bg-muted/50 transition-colors border-b"
-            >
-
-
-              {/* 1. Celda: Código de Documento (NUEVA POSICIÓN) */}
-              <TableCell className="md:table-cell py-2 md:py-4">
-                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
-                  Código
-                </span>
-                <div className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded w-fit">
-                  {template.document_code}
-                </div>
-              </TableCell>
-
-
-
-              {/* Celda: Nombre */}
-              <TableCell className="md:table-cell py-2 md:py-4">
-                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
-                  Nombre de Plantilla
-                </span>
-                <div className="font-semibold text-foreground">
-                  {template.template_name}
-                </div>
-              </TableCell>
-
-
-              {/* Celda: Versión */}
-              <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
-                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
-                  Versión
-                </span>
-
-                <Badge variant="secondary" className="font-mono">
-                  v{template.version}
-                </Badge>
-              </TableCell>
-
-              {/* Celda: Fecha Documento */}
-              <TableCell className="md:table-cell py-2 md:py-4 text-left md:text-center">
-                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
-                  Fecha Documento
-                </span>
-
-                <Badge variant="secondary" className="font-mono">
-                  {template.document_date}
-                </Badge>
-              </TableCell>
-
-
-              {/* Estado de la plantilla */}
-              <TableCell className="md:table-cell py-2 md:py-4">
-                {/* Etiqueta para móvil */}
-                <span className="md:hidden block text-[10px] font-extrabold text-muted-foreground uppercase mb-1">
-                  Estado
-                </span>
-
-                {/* Contenedor Flex para alinear verticalmente */}
-                <div className="flex flex-col items-start md:items-center gap-2">
-                  <Badge 
-                    variant={template.is_active ? "outline" : "destructive"} 
-                    className={`
-                      capitalize 
-                      ${template.is_active 
-                        ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" 
-                        : "bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20"
-                      }
-                    `}
-                  >
-                    {template.is_active ? "Activo" : "Inactivo"}
-                  </Badge>
-
-                  <Switch
-                    id={`is_active-${template.id}`} // ID único por fila
-                    checked={template.is_active}
-                    onCheckedChange={(checked) => {
-
-                      // 1. Si se intenta desactivar, pasa directo sin problema
-                      if (!checked) {
-                        onUpdateStatus(template.id, false);
-                        return;
-                      }
-
-
-
-
-                  // 2. Si se intenta ACTIVAR, validamos duplicados en memoria local
-                      const yaExisteActivaConMismoCodigo = data?.some(
-                        (t) => 
-                          t.document_code === template.document_code && 
-                          t.is_active === true && 
-                          t.id !== template.id // Asegura que no se compare consigo misma
-                      );
-
-                      if (yaExisteActivaConMismoCodigo) {
-                        // Opción rápida de feedback (Abajo te muestro cómo hacerlo más profesional)
-                        alert(
-                          `Error: Ya existe una plantilla activa con el código "${template.document_code}". Desactívala primero.`
-                        );
-                        return; // 🛑 Bloqueamos la petición, no llamamos a onUpdateStatus
-                      }
-
-                      // 3. Si está libre, se dispara la mutación a Supabase normalmente
-                      onUpdateStatus(template.id, true);
-
-
-
-
-
-                    }}
-                    disabled={isUpdating || isFetching}
-
-                    // Si usas shadcn, recuerda que el Switch suele ser pequeño, 
-                    // podrías añadirle un transform scale si lo quieres más visual
-                    className={"data-checked:bg-emerald-500! data-unchecked:bg-red-500!" }
-                  />
-                </div>
-              </TableCell>
-
-              {/* Celda: Acciones */}
-              <TableCell className="md:table-cell py-2 md:py-4 text-right">
-                <div className="flex items-center justify-end gap-2 mt-3 md:mt-0">
-                  
-                 <OrderViewPDF templateData={template}></OrderViewPDF>
-
-                  <OrderDownloadPDF templateData={template}></OrderDownloadPDF>
-
-
-                  
-
-                
-
-                  {/* Botón Editar */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                    title="Editar plantilla"
-                    onClick={() => {
-                      // Redirige a la misma página o layout agregando el query string seguro
-                      router.push(`/dashboard/director-tecnico/crear-orden-de-entrada?templateId=${template.id}`);
-                    }}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  
-
-
-                  {/* Botón Eliminar */}
-                 <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    title="Eliminar"
-                    // 1. Deshabilitamos el botón de inmediato si otra plantilla o esta misma se está borrando
-                    disabled={isDeletingTemplate} 
-                    // 2. Disparamos la acción pasando el ID de la plantilla actual
-                    onClick={() => deleteTemplate(template.id, template.tenant_id)} 
-                  >
-                    {/* 3. Renderizado condicional: si está cargando, mostramos un spinner animado */}
-                    {isDeletingTemplate ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-destructive" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-
-
+          {/* Spinner solo durante la carga inicial. */}
+          {isPending && (
+            <TableRow>
+              <TableCell colSpan={6} className="h-40 text-center">
+                <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>Cargando plantillas...</span>
                 </div>
               </TableCell>
             </TableRow>
-          ))}
+          )}
+
+          {/* Error sin datos disponibles. */}
+          {isError && (!data || data.length === 0) && (
+            <TableRow>
+              <TableCell colSpan={6}>
+                <Alert variant="destructive" className="my-3">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error de conexión</AlertTitle>
+
+                  <AlertDescription className="flex flex-col gap-3">
+                    <p>
+                      No pudimos sincronizar las plantillas:{" "}
+                      {error?.message || "Error desconocido de Supabase"}
+                    </p>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refetch()}
+                      className="w-fit"
+                    >
+                      <RefreshCcw className="mr-2 h-4 w-4" />
+                      Reintentar ahora
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {/* Error de actualización: conserva los datos anteriores. */}
+          {isError && data && data.length > 0 && (
+            <TableRow>
+              <TableCell colSpan={6}>
+                <Alert variant="destructive" className="my-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>
+                    No se pudieron actualizar los datos
+                  </AlertTitle>
+
+                  <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+                    <span>
+                      {error?.message || "Error de sincronización"}
+                    </span>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => refetch()}
+                    >
+                      <RefreshCcw className="mr-2 h-4 w-4" />
+                      Reintentar
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {/* Error de la mutación de borrado. */}
+          {errorDeletingTemplate && (
+            <TableRow>
+              <TableCell colSpan={6}>
+                <Alert variant="destructive" className="my-3">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>
+                    Operación de borrado rechazada
+                  </AlertTitle>
+
+                  <AlertDescription className="flex flex-col gap-3">
+                    <p>
+                      {errorDeletingTemplate.message ||
+                        "No se pudo eliminar la plantilla debido a un error inesperado de seguridad."}
+                    </p>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isDeletingTemplate}
+                      onClick={resetDeleteMutation}
+                      className="w-fit"
+                    >
+                      {isDeletingTemplate ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Entendido
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {/* Estado vacío. */}
+          {!isPending &&
+            !isError &&
+            (!data || data.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <div className="flex min-h-40 flex-col items-center justify-center gap-2 p-8 text-center">
+                    <FileText className="h-10 w-10 text-muted-foreground" />
+                    <p className="font-medium text-muted-foreground">
+                      No hay plantillas creadas aún.
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+
+          {/* Filas: no se reemplazan durante el refetch. */}
+          {!isPending &&
+            sortedData.map((template) => (
+              <TableRow
+                key={template.id}
+                className="flex flex-col border-b p-4 transition-colors hover:bg-muted/50 md:table-row md:p-0"
+              >
+                <TableCell className="py-2 md:py-4">
+                  <span className="mb-1 block text-[10px] font-extrabold uppercase text-muted-foreground md:hidden">
+                    Código
+                  </span>
+
+                  <div className="w-fit rounded bg-primary/10 px-2 py-1 font-mono text-xs font-bold text-primary">
+                    {template.document_code}
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-2 md:py-4">
+                  <span className="mb-1 block text-[10px] font-extrabold uppercase text-muted-foreground md:hidden">
+                    Nombre de Plantilla
+                  </span>
+
+                  <div className="font-semibold text-foreground">
+                    {template.template_name}
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-2 text-left md:py-4 md:text-center">
+                  <span className="mb-1 block text-[10px] font-extrabold uppercase text-muted-foreground md:hidden">
+                    Versión
+                  </span>
+
+                  <Badge variant="secondary" className="font-mono">
+                    v{template.version}
+                  </Badge>
+                </TableCell>
+
+                <TableCell className="py-2 text-left md:py-4 md:text-center">
+                  <span className="mb-1 block text-[10px] font-extrabold uppercase text-muted-foreground md:hidden">
+                    Fecha Documento
+                  </span>
+
+                  <Badge variant="secondary" className="font-mono">
+                    {template.document_date}
+                  </Badge>
+                </TableCell>
+
+                <TableCell className="py-2 md:py-4">
+                  <span className="mb-1 block text-[10px] font-extrabold uppercase text-muted-foreground md:hidden">
+                    Estado
+                  </span>
+
+                  <div className="flex flex-col items-start gap-2 md:items-center">
+                    <Badge
+                      variant={template.is_active ? "outline" : "destructive"}
+                      className={
+                        template.is_active
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "border-destructive/20 bg-destructive/10 text-destructive"
+                      }
+                    >
+                      {template.is_active ? "Activo" : "Inactivo"}
+                    </Badge>
+
+                    <Switch
+                      id={`is_active-${template.id}`}
+                      checked={template.is_active}
+                      onCheckedChange={(checked) => {
+                        if (!checked) {
+                          updateIsActive({
+                            id: template.id,
+                            is_active: false,
+                          });
+                          return;
+                        }
+
+                        const yaExisteActivaConMismoCodigo = data?.some(
+                          (t) =>
+                            t.document_code === template.document_code &&
+                            t.is_active === true &&
+                            t.id !== template.id,
+                        );
+
+                        if (yaExisteActivaConMismoCodigo) {
+                          alert(
+                            `Error: Ya existe una plantilla activa con el código "${template.document_code}". Desactívala primero.`,
+                          );
+                          return;
+                        }
+
+                        updateIsActive({
+                          id: template.id,
+                          is_active: true,
+                        });
+                      }}
+                      disabled={isUpdating || isFetching}
+                      className="data-checked:bg-emerald-500! data-unchecked:bg-red-500!"
+                    />
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-2 text-right md:py-4">
+                  <div className="mt-3 flex items-center justify-end gap-2 md:mt-0">
+                    <OrderViewPDF templateData={template} />
+                    <OrderDownloadPDF templateData={template} />
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      title="Editar plantilla"
+                      onClick={() => {
+                        router.push(
+                          `/dashboard/director-tecnico/crear-orden-de-entrada?templateId=${template.id}`,
+                        );
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      title="Eliminar"
+                      disabled={isDeletingTemplate}
+                      onClick={() =>
+                        deleteTemplate({
+                          id: template.id,
+                          tenantId: template.tenant_id,
+                        })
+                      }
+                    >
+                      {isDeletingTemplate ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
-
-      
-      
     </div>
-     
   );
 }

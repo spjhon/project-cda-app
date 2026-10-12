@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   ScrollText,
 } from "lucide-react";
-import { OrderTemplateSignature } from "@/lib/server-actions/fetch_orders_templates";
+
 import {
   Dialog,
   DialogClose,
@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { OrderTemplateSignature } from "@/types/functions_types";
 
 interface SignatureSectionProps {
   signatures: OrderTemplateSignature[] | undefined;

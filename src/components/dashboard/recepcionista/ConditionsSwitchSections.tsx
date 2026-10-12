@@ -8,8 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ShieldAlert, CheckCircle2, XCircle, Ban } from "lucide-react";
 
-import { OrderTemplateCondition } from "@/lib/server-actions/fetch_orders_templates";
 import { ConditionResponse, ConditionResultEntry, ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
+import { OrderTemplateCondition } from "@/types/functions_types";
 
 // ─── Tipos ─────────────────────────────────────────────────────────
 

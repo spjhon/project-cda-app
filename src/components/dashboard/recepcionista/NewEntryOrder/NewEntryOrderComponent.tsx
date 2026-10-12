@@ -161,9 +161,10 @@ export default function NewEntryOrderComponent() {
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
 
-  const templateTableData = ReceptionistContextReceived?.ReceptionistContextValue.templateTableData;
-  //FILTRADO DE LOS TEMPLATES: De los que se reciben desde el context
-  const activeTemplates = templateTableData?.query.data?.filter((t) => t.is_active) || [];
+  const templateQuery = ReceptionistContextReceived?.ReceptionistContextValue.templateQuery;
+ // FILTRADO DE LOS TEMPLATES ACTIVOS
+const activeTemplates =
+  templateQuery?.data?.filter((t) => t.is_active) ?? [];
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
@@ -315,9 +316,7 @@ if (activeModules.includes("sarlaft")) {
   //console.log(formData)
 
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
-  const selectedTemplate = activeTemplates.find(
-    (t) => t.id === formData.plantilla_id,
-  );
+  const selectedTemplate = activeTemplates.find( (t) => t.id === formData.plantilla_id,);
 
   // MANEJADOR DE SELECCIÓN DE PLANTILLA
   const handleTemplateSelect = (id: string, checked: boolean) => {
@@ -622,31 +621,36 @@ if (activeModules.includes("sarlaft")) {
         <div className="flex flex-col gap-6">
           {/**badge de refresco de datos */}
           <div className="flex justify-start">
-            {templateTableData?.query.isFetching ? (
-              <Badge
-                variant="secondary"
-                className="bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 animate-pulse gap-1.5 px-3 py-1"
-              >
-                <RefreshCcw className="h-3.5 w-3.5 animate-spin" />
-                Sincronizando base de datos...
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 gap-1.5 px-3 py-1"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Plantillas Actualizadas
-              </Badge>
-            )}
-          </div>
+  {templateQuery?.isFetching ? (
+    <Badge
+      variant="secondary"
+      className="bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 animate-pulse gap-1.5 px-3 py-1"
+    >
+      <RefreshCcw className="h-3.5 w-3.5 animate-spin" />
+      Sincronizando base de datos...
+    </Badge>
+  ) : (
+    <Badge
+      variant="outline"
+      className="bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 gap-1.5 px-3 py-1"
+    >
+      <CheckCircle2 className="h-3.5 w-3.5" />
+      Plantillas Actualizadas
+    </Badge>
+  )}
+</div>
 
-          {/**SECCION DE SELECCION DE PLANTILLA */}
-          <TemplateSelectionSection
-            activeTemplates={activeTemplates}
-            plantilla_id={formData.plantilla_id}
-            handleTemplateSelect={handleTemplateSelect}
-          ></TemplateSelectionSection>
+          {templateQuery?.isPending ? (
+  <div className="my-5 flex min-h-35.5 items-center justify-center">
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+  </div>
+) : (
+  <TemplateSelectionSection
+    activeTemplates={activeTemplates}
+    plantilla_id={formData.plantilla_id}
+    handleTemplateSelect={handleTemplateSelect}
+  />
+)}
 
           {/**SECCION DE BUSQUEDA DE PLACA */}
           <PlacaSelectionSection

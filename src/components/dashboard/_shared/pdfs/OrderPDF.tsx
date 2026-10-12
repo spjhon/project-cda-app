@@ -2,7 +2,8 @@
 
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 import { FetchEntryOrderResult, TirePressureDetail } from '@/lib/client-actions/fetch_entry_order_by_id';
-import {  OrderTemplate as OrderTemplateType } from "@/lib/server-actions/fetch_orders_templates";
+import { OrderTemplateType } from '@/types/functions_types';
+
 
 // ============================================================
 // ESTILOS POR SECCIÓN

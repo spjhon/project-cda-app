@@ -11,7 +11,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import EntryOrdersLoaderContext from "@/contexts/EntryOrdersContext";
 import { connection } from "next/server";
-import { fetchTenantModules, TenantModule } from "@/lib/server-actions/fetch_tenant_modules";
+import { fetchTenantModules, TenantModuleType } from "@/lib/server-actions/fetch_tenant_modules";
+import { UserContextDataType } from "@/types/internal_types";
 
 
 interface DashboardLayout {
@@ -19,16 +20,6 @@ interface DashboardLayout {
   params: Promise<{ tenant: string }>;
 }
 
-export interface UserContextData {
-  authId: string;
-  email?: string;
-  name?: string;
-  id?: string; // Este es el UUID de la tabla service_users
-  document_type?: string | null;
-  document_number?: string | null;
-  signature_path?: string | null;
-  is_active: boolean;
-}
 
 
 
@@ -48,7 +39,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
 
-  const userPromise: Promise<UserContextData> = (async () => {
+  const userPromise: Promise<UserContextDataType> = (async () => {
     await connection();
     const supabase = await createSupabaseServerClient();
 
@@ -134,7 +125,7 @@ export default function DashboardLayout({ children, params }: DashboardLayout) {
 
 
 
-const ModulesDataPromise: Promise<TenantModule[]> = (async () => {
+const ModulesDataPromise: Promise<TenantModuleType[]> = (async () => {
   await connection();
   // Esperamos a que el tenant se resuelva para obtener su ID
   const { tenant } = await params;

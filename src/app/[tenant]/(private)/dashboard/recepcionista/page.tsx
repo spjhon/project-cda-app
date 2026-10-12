@@ -1,6 +1,6 @@
 
 
-import NewEntryOrderComponent from "@/components/dashboard/recepcionista/NewEntryOrderComponent";
+import NewEntryOrderComponent from "@/components/dashboard/recepcionista/NewEntryOrder/NewEntryOrderComponent";
 
 
 export default function NewEntryOrderPage() {

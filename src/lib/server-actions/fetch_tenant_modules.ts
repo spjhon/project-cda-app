@@ -9,7 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 // Tipos de los módulos
 // ======================================================
 
-export interface TenantModule {
+export interface TenantModuleType {
   id: string;
   code: string;
   name: string;
@@ -19,7 +19,7 @@ export interface TenantModule {
 }
 
 export interface TenantModulesFetchResult {
-  data: TenantModule[] | null;
+  data: TenantModuleType[] | null;
   error: string | PostgrestError | null;
 }
 
@@ -86,7 +86,7 @@ export const fetchTenantModules = cache(
         };
       }
 
-      const modules: TenantModule[] =
+      const modules: TenantModuleType[] =
         data
           ?.filter(
             (item) => item.module && item.module.is_active,
