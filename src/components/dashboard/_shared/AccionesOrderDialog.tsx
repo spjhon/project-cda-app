@@ -14,7 +14,8 @@ import AccionesOrderDirectorTecnicoDialog from "../director-tecnico/AccionesOrde
 import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 import SarlaftViewPDF from "./pdfs/SarlaftViewPDF";
 import SarlaftDownloadPDF from "./pdfs/SarlaftDownloadPDF";
-import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
+
 
 interface AccionesOrderDialogProps {
   orden: EntryOrderListItem;

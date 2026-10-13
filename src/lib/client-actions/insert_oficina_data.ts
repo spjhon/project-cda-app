@@ -8,7 +8,8 @@ import {
 import { createSupabaseBrowserClient } from "../supabase/client";
 import { Database } from "../../../supabase/types/database.types";
 import { OfficeFormState } from "@/components/dashboard/oficina/OfficeOrderForm";
-import { EntryOrderPaymentDetail } from "@/contexts/EntryOrdersContext";
+import { EntryOrderPaymentDetail } from "@/types/functions_types";
+
 
 
 interface UpdateOfficeOrderArgs {

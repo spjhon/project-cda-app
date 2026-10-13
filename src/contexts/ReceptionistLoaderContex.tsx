@@ -78,8 +78,8 @@ export default function ReceptionistLoaderContext({
     },
 
     enabled: pathname === "/dashboard/recepcionista",
-    staleTime: 0,
-    refetchInterval: pathname === "/dashboard/recepcionista" ? 10000 : false,
+    staleTime: Infinity,
+    refetchInterval: pathname === "/dashboard/recepcionista" ? 20000 : false,
     refetchOnWindowFocus: false,
   });
 

@@ -15,7 +15,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import CancelOrder from "../_shared/CancelOrder";
 import { useOrderRate } from "@/lib/client-actions/fetch_entry_order_rate";
 import OrderPayments from "./OrderPayments";
-import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_types";
+
 
 
 export interface OfficeFormState {

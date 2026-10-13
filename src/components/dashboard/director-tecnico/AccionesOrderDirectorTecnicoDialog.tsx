@@ -19,7 +19,8 @@ import {
   MapPin,
 } from "lucide-react";
 import DirectorTecnicoOrderForm from "./DirectorTecnicoOrderForm";
-import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
+
 
 interface AccionesOrderDirectorTecnicoDialogProps {
   orden: EntryOrderListItem;

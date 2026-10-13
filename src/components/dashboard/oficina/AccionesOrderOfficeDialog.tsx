@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
 import OfficeOrderForm from "./OfficeOrderForm";
-import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
+
 
 
 

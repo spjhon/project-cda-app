@@ -229,7 +229,7 @@ export const PersonSection = ({
 
       const dataOFAC: APIResponse = await OFACresponse.json();
 
-      console.log("Respuesta del scraper OFAC:", dataOFAC);
+      
 
 
 
@@ -249,7 +249,7 @@ export const PersonSection = ({
 
       const dataUN: APIResponse = await UNresponse.json();
 
-      console.log("Respuesta del scraper UN:", dataUN);
+     
 
 
       let seEncontroAlgunaCoincidencia = false;
@@ -436,7 +436,85 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
     // ==============================================================
 
     onError: (error, personType) => {
-      console.error("Error consultando SARLAFT:", error);
+      console.error(error);
+
+      if (error.message.startsWith("Error HTTP:") || error.message.startsWith("NetworkError")){
+
+
+
+     
+
+      setSarlaftResult({
+        personType,
+        seHizoLaConsulta: false,
+        coincidencia: false,
+        mensaje:
+          error instanceof Error
+            ?  `Error de red: ${error.message} Puede continuar con el proceso, sin embargo se recomienda hacer la consulta una vez se restablesca conexion`
+            : "No fue posible completar la consulta SARLAFT.",
+      });
+
+      
+
+
+
+
+
+      setFormData((prev: ZodFullFormDataType) => {
+        // ============================================================
+        // CASO 1: SE CONSULTÓ EL CLIENTE
+        // ============================================================
+
+        if (personType === "customer") {
+          return {
+            ...prev,
+
+            customer_data: {
+              ...prev.customer_data,
+              se_hizo_la_consulta: true,
+              resultado_consulta_sarlaf_desfavorable: false,
+            },
+
+            // Si cliente = propietario, ambos representan
+            // a la misma persona y la consulta aplica para ambos.
+            owner_data: prev.is_owner_same_as_customer
+              ? {
+                  ...prev.owner_data,
+                  se_hizo_la_consulta: true,
+                  resultado_consulta_sarlaf_desfavorable: false,
+                }
+              : prev.owner_data,
+          };
+        }
+
+        // ============================================================
+        // CASO 2: SE CONSULTÓ EL PROPIETARIO
+        // ============================================================
+
+        return {
+          ...prev,
+
+          owner_data: {
+            ...prev.owner_data,
+            se_hizo_la_consulta: true,
+            resultado_consulta_sarlaf_desfavorable: false,
+          },
+
+          // Si cliente = propietario, también actualizamos el cliente.
+          customer_data: prev.is_owner_same_as_customer
+            ? {
+                ...prev.customer_data,
+                se_hizo_la_consulta: true,
+                resultado_consulta_sarlaf_desfavorable: false,
+              }
+            : prev.customer_data,
+        };
+      });
+
+
+      setShowSarlaftDialog(true);
+return
+      }
 
       // IMPORTANTE:
       // NO modificamos formData.
@@ -803,21 +881,18 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
                         <AlertDialogDescription className="text-base leading-relaxed">
                           {isValidationError ? (
                             <>
-                              Para realizar la consulta SARLAFT del{" "}
+                              Se ha producido un error al realizar la consulta SARLAFT para el{" "}
                               <strong>
                                 {sarlaftResult?.personType === "customer"
                                   ? "cliente"
                                   : "propietario"}
                               </strong>
-                              , debe ingresar primero el{" "}
-                              <strong>nombre completo</strong> y el{" "}
-                              <strong>número de documento</strong>.
-                              <br />
-                              <br />
-                              <span className="font-semibold text-amber-600">
-                                Complete los datos requeridos antes de realizar
-                                la consulta.
-                              </span>
+                              <br></br>
+                              Descripcion del error: {" "}
+                              <br></br>
+                              <strong>{sarlaftResult.mensaje}</strong>
+                              
+                              
                             </>
                           ) : hasCoincidence ? (
                             <>

@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
-import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
+
 
 interface VerDetalleOrdenAdminDialogProps {
   orden: EntryOrderListItem;

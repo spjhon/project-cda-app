@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/select";
 
 import { TipoPago } from "@/lib/zod-schemas/oficinaInfo-schema";
-import { EntryOrderPaymentDetail } from "@/contexts/EntryOrdersContext";
+import { EntryOrderPaymentDetail } from "@/types/functions_types";
+
 
 
 interface OrderPaymentsProps {

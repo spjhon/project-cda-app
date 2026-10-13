@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { EntryOrderListItem, EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import {  EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
 
 interface CancelOrderProps {
   orden: EntryOrderListItem;

@@ -53,7 +53,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { DateRangePicker } from "./DateRangePicker";
-import { EntryOrderListItem, EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import {  EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
@@ -63,6 +63,7 @@ import { Button } from "@/components/ui/button";
 import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
 import { ExportExcelButton } from "./DownloadExcelButton";
 import { TenantCreditsManager } from "./TenantCreditsManager";
+import { EntryOrderListItem } from "@/types/functions_types";
 
 
 const columnHelper = createColumnHelper<EntryOrderListItem>();

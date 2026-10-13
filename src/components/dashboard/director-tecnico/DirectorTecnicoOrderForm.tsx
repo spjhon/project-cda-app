@@ -26,7 +26,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { FetchEntryOrderResult } from "@/lib/client-actions/fetch_entry_order_by_id";
 import { pdf } from "@react-pdf/renderer";
 import OrderPDF from "../_shared/pdfs/OrderPDF";
-import { EntryOrderListItem } from "@/contexts/EntryOrdersContext";
+import { EntryOrderListItem } from "@/types/functions_types";
+
 
 export type ResultadoRevision = "aprobado" | "rechazado" | null;
 
