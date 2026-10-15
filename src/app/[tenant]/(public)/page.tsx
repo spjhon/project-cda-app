@@ -1,3 +1,4 @@
+import AutobigLandingPage from "@/components/tenantsLandingPages/AutobigLandingPage";
 import DemoLandingPage from "@/components/tenantsLandingPages/DemoLandingPage";
 import FullmotosLandingPage from "@/components/tenantsLandingPages/FullmotosLandingPage";
 import TecnofresnoLandingPage from "@/components/tenantsLandingPages/TecnofresnoLandingPage";
@@ -193,6 +194,10 @@ async function TenantContent({ params }: { params: Promise<{ tenant: string }> }
 
   if (currentTenant === "demo") {
     return <DemoLandingPage currentTenant={currentTenant} />;
+  }
+
+  if (currentTenant === "autobig") {
+    return <AutobigLandingPage currentTenant={currentTenant} />;
   }
 
   
