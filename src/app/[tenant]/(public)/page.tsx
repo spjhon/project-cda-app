@@ -13,6 +13,7 @@ export async function generateStaticParams() {
     { tenant: "fullmotos" },
     { tenant: "tecnofresno" },
      { tenant: "demo" },
+      { tenant: "autobig" },
   ];
 }
 
