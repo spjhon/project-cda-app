@@ -15,8 +15,18 @@ export const metadata: Metadata = {
   },
 };
 
-export async function generateStaticParams() {
-  return [{ tenant: "demo" }];
+const TENANTS = [
+  "fullmotos",
+  "tecnofresno",
+  "demo",
+  "autobig",
+  "viterbocaldas",
+];
+
+export function generateStaticParams() {
+  return TENANTS.map((tenant) => ({
+    tenant,
+  }));
 }
 
 export default function TenantLayout({
