@@ -48,18 +48,20 @@ export async function insertDirectorTecnicoData({
   }
 
   // Regla de negocio explícita previa a Zod
-  if (
-    formData.resultado_revision === "aprobado" &&
-    (!formData.consecutivo_rtm ||
-      formData.consecutivo_rtm.trim() === "") &&
-    serviceType !== "preventiva" &&
-    serviceType !== "peritaje"
-  ) {
-    return {
-      data: null,
-      error: "Error: Si la revisión es APROBADA, debe ingresar el consecutivo RTM",
-    };
-  }
+if (
+  formData.resultado_revision === "aprobado" &&
+  (!formData.consecutivo_rtm ||
+    formData.consecutivo_rtm.trim() === "") &&
+  serviceType !== "preventiva" &&
+  serviceType !== "preventiva_viajero" &&
+  serviceType !== "peritaje" &&
+  serviceType !== "prueba_gases"
+) {
+  return {
+    data: null,
+    error: "Error: Si la revisión es APROBADA, debe ingresar el consecutivo RTM",
+  };
+}
 
   const dataToValidate = {
     ...formData,

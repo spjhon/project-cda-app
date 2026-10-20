@@ -1,11 +1,11 @@
 
-
 -- ============================================================================
 -- FUNCIÓN: VEHÍCULOS POR TIPO
--- Obtiene la cantidad de RTM por tipo de vehículo para el tenant autenticado.
+-- Obtiene la cantidad de RTM por tipo de vehículo para el tenant seleccionado.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.fetch_admin_vehicles_by_type(
+    p_tenant_id uuid,
     p_fecha_desde date DEFAULT current_date,
     p_fecha_hasta date DEFAULT current_date
 )
@@ -19,23 +19,28 @@ DECLARE
 BEGIN
 
     -- =========================================================================
-    -- PASO 1: IDENTIFICAR AL TENANT DE FORMA SEGURA
+    -- PASO 1: VALIDAR EL TENANT SOLICITADO
     -- =========================================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
 
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
     -- =========================================================================
     -- PASO 2: OBTENER CANTIDADES POR TIPO DE VEHÍCULO
@@ -67,15 +72,14 @@ BEGIN
 END;
 $$;
 
-
 -- ============================================================================
 -- PERMISOS DE EJECUCIÓN
 -- ============================================================================
 
 REVOKE ALL
-ON FUNCTION public.fetch_admin_vehicles_by_type(date, date)
+ON FUNCTION public.fetch_admin_vehicles_by_type(uuid, date, date)
 FROM PUBLIC;
 
 GRANT EXECUTE
-ON FUNCTION public.fetch_admin_vehicles_by_type(date, date)
+ON FUNCTION public.fetch_admin_vehicles_by_type(uuid, date, date)
 TO authenticated;

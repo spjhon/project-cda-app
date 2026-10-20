@@ -5,13 +5,14 @@
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.fetch_admin_payments_by_method(
+    p_tenant_id UUID,
     p_fecha_desde date DEFAULT current_date,
     p_fecha_hasta date DEFAULT current_date
 )
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''
+SET search_path = 'public'
 AS $$
 DECLARE
     v_tenant_id UUID;
@@ -21,19 +22,25 @@ BEGIN
     -- PASO 1: IDENTIFICAR AL TENANT DE FORMA SEGURA
     -- =========================================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
 
     -- =========================================================================
@@ -70,9 +77,9 @@ $$;
 -- ============================================================================
 
 REVOKE ALL
-ON FUNCTION public.fetch_admin_payments_by_method(date, date)
+ON FUNCTION public.fetch_admin_payments_by_method(UUID, date, date)
 FROM PUBLIC;
 
 GRANT EXECUTE
-ON FUNCTION public.fetch_admin_payments_by_method(date, date)
+ON FUNCTION public.fetch_admin_payments_by_method(UUID, date, date)
 TO authenticated;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { CalendarDays, Filter } from "lucide-react";
 
@@ -20,6 +20,7 @@ import { DateRangePicker } from "../_shared/DateRangePicker";
 import { Button } from "@/components/ui/button";
 import { useAnaliticaPersonalizada } from "@/lib/client-actions/fetch_analitica_personalizada";
 import { CuadroMetrica } from "./CuadroMetrica";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 // Tipos obtenidos de los enums generados por Supabase.
 type VehicleType = Database["public"]["Enums"]["vehicle_type_enum"];
@@ -31,6 +32,7 @@ type SoatPurchased = "si" | "no";
 
 // Estado centralizado de todos los filtros.
 export interface AnaliticaFilters {
+  tenant_id: string;
   dateRange: DateRange | undefined;
   vehicleType: VehicleType | "todos";
   result: InspectionResult | "todos";
@@ -70,7 +72,9 @@ const serviceTypeItems: {
   { label: "Todos los servicios", value: "todos" },
   { label: "RTM", value: "RTM" },
   { label: "Preventiva", value: "preventiva" },
+  { label: "Preventiva viajero", value: "preventiva_viajero" },
   { label: "Peritaje", value: "peritaje" },
+  { label: "Prueba de gases", value: "prueba_gases" },
   { label: "Otro", value: "otro" },
 ];
 
@@ -84,6 +88,7 @@ const soatItems: {
 ];
 
 const INITIAL_FILTERS: AnaliticaFilters = {
+  tenant_id: "",
   dateRange: undefined,
   vehicleType: "todos",
   result: "todos",
@@ -92,11 +97,11 @@ const INITIAL_FILTERS: AnaliticaFilters = {
 };
 
 export function AnaliticicaRangoPersonalizado() {
+
+  const permissionsContext = useContext(PermissionsContext);
+
+const tenantId = permissionsContext?.PermissionsContextValue.tenantObject?.id;
   const [filters, setFilters] = useState<AnaliticaFilters>(INITIAL_FILTERS);
-
-
-
-
 
 
 
@@ -105,8 +110,10 @@ const {
   refetch,
   isFetching,
   error,
-} = useAnaliticaPersonalizada(filters);
-
+} = useAnaliticaPersonalizada({
+  ...filters,
+  tenant_id: tenantId ?? "",
+});
 
 
 const handleConsultar = async () => {

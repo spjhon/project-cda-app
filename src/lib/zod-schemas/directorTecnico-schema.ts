@@ -25,23 +25,26 @@ export const directorTecnicoOrderSchema = z
     serviceType: z.custom<ServiceType>()
   })
   // 2. 🌟 Refinamiento condicional para la regla de negocio del RUNT / ONAC
-  .superRefine((data, ctx) => {
-    // 🌟 Ahora sí puedes leer data.serviceType con total seguridad
-    const requiresRTM = 
-      data.resultado_revision === "aprobado" && 
-      data.serviceType !== "preventiva" && 
-      data.serviceType !== "peritaje";
+.superRefine((data, ctx) => {
+  // Ahora sí puedes leer data.serviceType con total seguridad
+  const requiresRTM =
+    data.resultado_revision === "aprobado" &&
+    data.serviceType !== "preventiva" &&
+    data.serviceType !== "preventiva_viajero" &&
+    data.serviceType !== "peritaje" &&
+    data.serviceType !== "prueba_gases";
 
-    if (requiresRTM) {
-      if (!data.consecutivo_rtm || data.consecutivo_rtm.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
-          path: ["consecutivo_rtm"],
-        });
-      }
+  if (requiresRTM) {
+    if (!data.consecutivo_rtm || data.consecutivo_rtm.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
+        path: ["consecutivo_rtm"],
+      });
     }
-  });
+  }
+});
 
 // Tipo inferido para TypeScript (Reemplaza o mapea tu DirectorTecnicoFormState)
 export type DirectorTecnicoOrderInput = z.infer<typeof directorTecnicoOrderSchema>;

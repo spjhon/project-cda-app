@@ -66,10 +66,22 @@ const SERVICE_TYPES: ServiceOption[] = [
     icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
   },
   {
+    id: "preventiva_viajero",
+    label: "PREVENTIVA VIAJERO",
+    desc: "Control de seguridad para vehículos de servicio viajero",
+    icon: <ShieldCheck className="h-5 w-5 text-teal-600" />,
+  },
+  {
     id: "peritaje",
     label: "PERITAJE",
     desc: "Valoración comercial",
     icon: <Search className="h-5 w-5 text-purple-600" />,
+  },
+  {
+    id: "prueba_gases",
+    label: "PRUEBA DE GASES",
+    desc: "Evaluación de emisiones contaminantes",
+    icon: <ClipboardCheck className="h-5 w-5 text-orange-600" />,
   },
 ];
 

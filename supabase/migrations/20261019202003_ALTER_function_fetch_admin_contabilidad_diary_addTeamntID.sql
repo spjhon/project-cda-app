@@ -1,0 +1,111 @@
+
+DROP FUNCTION IF EXISTS public.fetch_admin_contabilidad_diary(
+    public.service_type_enum
+);
+
+CREATE OR REPLACE FUNCTION public.fetch_admin_contabilidad_diary(
+    p_tenant_id UUID,
+    p_servicio_tipo public.service_type_enum DEFAULT NULL
+)
+RETURNS TABLE (
+    total_recaudado_hoy NUMERIC(12, 2)
+)
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+DECLARE
+    v_tenant_id UUID;
+
+    -- Inicio y fin del día actual en Colombia.
+    v_hoy_inicio TIMESTAMP WITH TIME ZONE :=
+        DATE_TRUNC(
+            'day',
+            CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'
+        ) AT TIME ZONE 'America/Bogota';
+
+    v_hoy_fin TIMESTAMP WITH TIME ZONE :=
+        (
+            DATE_TRUNC(
+                'day',
+                CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'
+            ) + INTERVAL '1 day'
+        ) AT TIME ZONE 'America/Bogota';
+
+    v_total_recaudado_hoy NUMERIC(12, 2) := 0;
+
+BEGIN
+
+    -- =========================================================================
+    -- PASO 1: VALIDACIÓN DE TENANT
+    -- =========================================================================
+
+    IF p_tenant_id IS NULL THEN
+        RAISE EXCEPTION
+            'El tenant seleccionado es obligatorio.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
+
+
+    -- =========================================================================
+    -- PASO 2: RECAUDO DE HOY
+    -- =========================================================================
+
+    SELECT COALESCE(
+        SUM(eop.monto_bruto),
+        0
+    )::NUMERIC(12, 2)
+    INTO v_total_recaudado_hoy
+    FROM public.entry_order_payments AS eop
+    INNER JOIN public.entry_orders AS eo
+        ON eo.id = eop.entry_order_id
+    WHERE eop.tenant_id = v_tenant_id
+
+      -- Filtro por servicio.
+      AND (
+          p_servicio_tipo IS NULL
+          OR eo.service_type = p_servicio_tipo
+      )
+
+      -- La orden no debe estar eliminada.
+      AND eo.deleted_at IS NULL
+
+      -- La orden no debe estar abierta ni anulada.
+      AND eo.estado_orden <> 'abierta'::order_status_enum
+      AND eo.estado_orden <> 'anulada'::order_status_enum
+
+      -- Excluir reinspecciones.
+      AND (
+          eo.es_reinspeccion = false
+          OR eo.es_reinspeccion IS NULL
+      )
+
+      -- La fecha contable es la fecha de creación de la orden.
+      -- NO la fecha en que se registró el pago.
+      AND eo.created_at >= v_hoy_inicio
+      AND eo.created_at < v_hoy_fin;
+
+
+    -- =========================================================================
+    -- PASO 3: RETORNAR RESULTADO
+    -- =========================================================================
+
+    RETURN QUERY
+    SELECT v_total_recaudado_hoy;
+
+END;
+$$;

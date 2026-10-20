@@ -78,9 +78,12 @@ const TirePositionEnum = [
 ] as const;
 
 const ServiceTypeEnum = [
-    "RTM", 
-    "preventiva", 
-    "peritaje"] as const;
+  "RTM",
+  "preventiva",
+  "preventiva_viajero",
+  "peritaje",
+  "prueba_gases",
+] as const;
 
 const EstadoOrdenEnum = [
     "abierta", 

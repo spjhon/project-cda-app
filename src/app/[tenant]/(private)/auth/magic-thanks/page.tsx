@@ -13,7 +13,7 @@ const TENANTS = [
   "viterbocaldas",
 ];
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return TENANTS.map((tenant) => ({
     tenant,
   }));

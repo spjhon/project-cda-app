@@ -1,4 +1,5 @@
 CREATE OR REPLACE FUNCTION public.fetch_admin_analitics(
+    p_tenant_id UUID,
     p_mes_solicitado INTEGER,
     p_ano_solicitado INTEGER,
     p_servicio_tipo public.service_type_enum DEFAULT NULL
@@ -49,19 +50,25 @@ BEGIN
     -- PASO 1: Identificar al Tenant de forma segura
     -- =========================================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = auth.uid()
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
 
     -- =========================================================================
@@ -75,9 +82,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND fecha = v_hoy - 1;
 
 
@@ -87,9 +94,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND fecha >= DATE_TRUNC('month', v_hoy)::DATE
       AND fecha < v_hoy;
 
@@ -100,9 +107,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND fecha >= DATE_TRUNC('year', v_hoy)::DATE
       AND fecha < v_hoy;
 
@@ -118,9 +125,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND resultado_revision = 'rechazado'
       AND fecha = v_hoy - 1;
 
@@ -131,9 +138,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND resultado_revision = 'rechazado'
       AND fecha >= DATE_TRUNC('month', v_hoy)::DATE
       AND fecha < v_hoy;
@@ -145,9 +152,9 @@ BEGIN
     FROM public.mv_reportes_diarios
     WHERE tenant_id = v_tenant_id
       AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+          p_servicio_tipo IS NULL
+          OR service_type = p_servicio_tipo
+      )
       AND resultado_revision = 'rechazado'
       AND fecha >= DATE_TRUNC('year', v_hoy)::DATE
       AND fecha < v_hoy;
@@ -184,9 +191,10 @@ BEGIN
                 INTERVAL '1 day'
             ) AS orden_dia
         )
+
         SELECT --para entender mejor el select es, haz el tratamiento a todos los rows que esta a continuacion
-        --con las condiciones de from y group y where y todo eso
-        --este to char es el que cambia de fecha 2026-02-01 a solamente el dia 01
+            --con las condiciones de from y group y where y todo eso
+            --este to char es el que cambia de fecha 2026-02-01 a solamente el dia 01
             TO_CHAR(
                 cal.fecha_calendario,
                 'DD'
@@ -202,9 +210,9 @@ BEGIN
             ON mv.fecha = cal.fecha_calendario
             AND mv.tenant_id = v_tenant_id
             AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+                p_servicio_tipo IS NULL
+                OR service_type = p_servicio_tipo
+            )
         GROUP BY cal.fecha_calendario
         ORDER BY cal.fecha_calendario
     ) t;
@@ -259,9 +267,9 @@ BEGIN
             ON mv.fecha = cal.fecha_calendario
             AND mv.tenant_id = v_tenant_id
             AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+                p_servicio_tipo IS NULL
+                OR service_type = p_servicio_tipo
+            )
             AND mv.resultado_revision = 'rechazado'
 
         GROUP BY cal.fecha_calendario
@@ -325,9 +333,9 @@ BEGIN
             )::DATE
             AND mv.tenant_id = v_tenant_id
             AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+                p_servicio_tipo IS NULL
+                OR service_type = p_servicio_tipo
+            )
 
         GROUP BY cal.numero_mes
 
@@ -390,9 +398,9 @@ BEGIN
             )::DATE
             AND mv.tenant_id = v_tenant_id
             AND (
-    p_servicio_tipo IS NULL
-    OR service_type = p_servicio_tipo
-)
+                p_servicio_tipo IS NULL
+                OR service_type = p_servicio_tipo
+            )
             AND mv.resultado_revision = 'rechazado'
 
         GROUP BY cal.numero_mes
@@ -421,3 +429,20 @@ BEGIN
 END;
 $$;
 
+-- ============================================================================
+-- PERMISOS DE EJECUCIÓN
+-- ============================================================================
+
+REVOKE ALL ON FUNCTION public.fetch_admin_analitics(
+    UUID,
+    INTEGER,
+    INTEGER,
+    public.service_type_enum
+) FROM PUBLIC;
+
+GRANT EXECUTE ON FUNCTION public.fetch_admin_analitics(
+    UUID,
+    INTEGER,
+    INTEGER,
+    public.service_type_enum
+) TO authenticated;

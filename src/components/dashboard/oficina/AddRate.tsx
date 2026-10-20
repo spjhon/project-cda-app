@@ -56,7 +56,9 @@ const SERVICE_TYPES: {
 }[] = [
   { value: "RTM", label: "RTM" },
   { value: "preventiva", label: "Preventiva" },
+  { value: "preventiva_viajero", label: "Preventiva viajero" },
   { value: "peritaje", label: "Peritaje" },
+  { value: "prueba_gases", label: "Prueba de gases" },
 ];
 
 type VehicleType = Database["public"]["Enums"]["vehicle_type_enum"];

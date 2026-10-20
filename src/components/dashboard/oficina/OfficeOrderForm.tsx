@@ -173,6 +173,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const paymentMatches = totalPayments === totalToPay;
 
+  console.log(orden.service_type)
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* SECCIÓN 2: INFORMACIÓN MODIFICABLE (FORMULARIO) */}
@@ -248,10 +250,10 @@ const handleSubmit = async (e: React.FormEvent) => {
               </span>
             </div>
             {orderRateError && (
-  <p className="text-xs font-medium text-red-600 dark:text-red-400">
-    No hay precio configurado para este vehículo
-  </p>
-)}
+              <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                No hay precio configurado para este vehículo
+              </p>
+            )}
           </div>
 
           {/* Total ingresado */}
@@ -380,9 +382,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="submit"
                 disabled={
                   isSubmitting ||
-                  (orden.estado_orden === "en_prueba" &&
-                    orden.es_reinspeccion) ||
-                  isOrderRateError || isLoadingOrderRate || isFetchingOrderRate
+                  (orden.estado_orden === "en_prueba" && orden.es_reinspeccion) ||
+                  (orden.service_type !== "preventiva" && isOrderRateError) ||
+                  (orden.service_type !== "preventiva" &&
+                    (isLoadingOrderRate || isFetchingOrderRate))
                 }
                 className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70 disabled:cursor-not-allowed text-white font-bold h-10 text-xs transition-all rounded-lg shadow-sm gap-2 px-5"
               >

@@ -1,5 +1,6 @@
-
-CREATE OR REPLACE FUNCTION public.fetch_admin_payments_by_method_diary()
+CREATE OR REPLACE FUNCTION public.fetch_admin_payments_by_method_diary(
+    p_tenant_id UUID
+)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -12,19 +13,25 @@ BEGIN
     -- PASO 1: IDENTIFICAR AL TENANT DE FORMA SEGURA
     -- =========================================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
     -- =========================================================================
     -- PASO 2: OBTENER CANTIDAD DE PAGOS POR MÉTODO
@@ -88,9 +95,9 @@ $$;
 -- ============================================================================
 
 REVOKE ALL
-ON FUNCTION public.fetch_admin_payments_by_method_diary()
+ON FUNCTION public.fetch_admin_payments_by_method_diary(UUID)
 FROM PUBLIC;
 
 GRANT EXECUTE
-ON FUNCTION public.fetch_admin_payments_by_method_diary()
+ON FUNCTION public.fetch_admin_payments_by_method_diary(UUID)
 TO authenticated;

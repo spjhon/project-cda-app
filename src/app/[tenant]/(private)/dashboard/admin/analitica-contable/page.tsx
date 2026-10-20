@@ -46,11 +46,13 @@ export default function AnaliticaContablePage() {
     return null;
   }
 
-    const servicios = [
-    { label: "RTM", value: "RTM" },
-    { label: "Preventiva", value: "preventiva" },
-    { label: "Peritaje", value: "peritaje" },
-    ]
+   const servicios = [
+  { label: "RTM", value: "RTM" },
+  { label: "Preventiva", value: "preventiva" },
+  { label: "Preventiva viajero", value: "preventiva_viajero" },
+  { label: "Peritaje", value: "peritaje" },
+  { label: "Prueba de gases", value: "prueba_gases" },
+];
 
   const {
     analyticsContabilidadQuery,

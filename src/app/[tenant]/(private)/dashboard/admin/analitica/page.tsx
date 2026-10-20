@@ -58,10 +58,12 @@ export default function AnaliticaPage() {
   const { data: analyticsDataDiary } = analyticsQueryDiary;
 
   const servicios = [
-    { label: "RTM", value: "RTM" },
-    { label: "Preventiva", value: "preventiva" },
-    { label: "Peritaje", value: "peritaje" },
-  ];
+  { label: "RTM", value: "RTM" },
+  { label: "Preventiva", value: "preventiva" },
+  { label: "Preventiva viajero", value: "preventiva_viajero" },
+  { label: "Peritaje", value: "peritaje" },
+  { label: "Prueba de gases", value: "prueba_gases" },
+];
 
   const ahora = new Date();
 

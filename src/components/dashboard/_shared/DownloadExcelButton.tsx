@@ -11,6 +11,7 @@ import { Workbook } from "exceljs";
 import { Button } from "@/components/ui/button";
 import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 export function ExportExcelButton() {
   // ============================================================
@@ -18,6 +19,9 @@ export function ExportExcelButton() {
   // ============================================================
 
   const context = useContext(EntryOrdersContext);
+
+  const permissionscontextRecived = useContext(PermissionsContext);
+    const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const dateRange =
     context?.entryOrdersTableData?.query?.dateRange;
@@ -52,6 +56,7 @@ export function ExportExcelButton() {
       const { data: orders, error } = await supabaseBrowser.rpc(
         "get_entry_orders_for_export",
         {
+          p_tenant_id: tenantId ?? "",
           p_start_date: startDate.toISOString(),
           p_end_date: endDate.toISOString(),
         },

@@ -1,5 +1,6 @@
 
 CREATE OR REPLACE FUNCTION public.get_analitica_personalizada(
+    p_tenant_id uuid,
     p_fecha_inicio date DEFAULT NULL,
     p_fecha_fin date DEFAULT NULL,
     p_vehicle_type public.vehicle_type_enum DEFAULT NULL,
@@ -24,19 +25,25 @@ BEGIN
     -- PASO 1: VALIDACIÓN DE TENANT
     -- =========================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
     -- =========================================================
     -- PASO 2: LÍMITES DEL DÍA ACTUAL EN COLOMBIA
@@ -56,6 +63,7 @@ BEGIN
     INTO v_total_historico
     FROM public.mv_reportes_diarios m
     WHERE m.tenant_id = v_tenant_id
+
       AND m.fecha < v_hoy
 
       -- Rango de fechas
@@ -159,6 +167,7 @@ $$;
 
 -- Permisos de ejecución
 REVOKE ALL ON FUNCTION public.get_analitica_personalizada(
+    uuid,
     date,
     date,
     public.vehicle_type_enum,
@@ -168,6 +177,7 @@ REVOKE ALL ON FUNCTION public.get_analitica_personalizada(
 ) FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION public.get_analitica_personalizada(
+    uuid,
     date,
     date,
     public.vehicle_type_enum,

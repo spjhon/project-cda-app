@@ -1,4 +1,5 @@
 CREATE OR REPLACE FUNCTION public.get_entry_orders_for_export(
+  p_tenant_id UUID,
   p_start_date TIMESTAMPTZ,
   p_end_date TIMESTAMPTZ
 )
@@ -61,21 +62,31 @@ BEGIN
   -- ============================================================
   -- Obtener el tenant del usuario autenticado
   -- ============================================================
-  SELECT tp.tenant_id
-  INTO v_tenant_id
-  FROM public.tenant_permissions tp
-  JOIN public.service_users su
-    ON su.id = tp.service_user_id
-  WHERE su.auth_user_id = auth.uid()
-  LIMIT 1;
 
-  IF v_tenant_id IS NULL THEN
-    RETURN;
+  IF p_tenant_id IS NULL THEN
+    RAISE EXCEPTION
+      'El tenant seleccionado es obligatorio.';
   END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.tenant_permissions tp
+    JOIN public.service_users su
+      ON su.id = tp.service_user_id
+    WHERE su.auth_user_id = (SELECT auth.uid())
+      AND su.is_active = true
+      AND tp.tenant_id = p_tenant_id
+  ) THEN
+    RAISE EXCEPTION
+      'Acceso denegado: el usuario no tiene permisos para este tenant.';
+  END IF;
+
+  v_tenant_id := p_tenant_id;
 
   -- ============================================================
   -- Obtener órdenes del tenant dentro del rango solicitado
   -- ============================================================
+
   RETURN QUERY
   SELECT
     eo.id,

@@ -16,6 +16,7 @@ export function useAnaliticaPersonalizada(filters: AnaliticaFilters) {
       const { data, error } = await supabaseBrowser.rpc(
         "get_analitica_personalizada",
         {
+          p_tenant_id: filters.tenant_id,
           p_fecha_inicio: filters.dateRange?.from
             ? format(filters.dateRange.from, "yyyy-MM-dd")
             : undefined,

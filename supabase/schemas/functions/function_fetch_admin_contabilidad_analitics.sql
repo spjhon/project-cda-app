@@ -1,4 +1,6 @@
+
 CREATE OR REPLACE FUNCTION public.fetch_admin_contabilidad_analitics(
+    p_tenant_id UUID,
     p_mes_solicitado INTEGER,
     p_ano_solicitado INTEGER,
     p_servicio_tipo public.service_type_enum DEFAULT NULL
@@ -38,19 +40,25 @@ BEGIN
     -- PASO 1: Identificar al Tenant de forma segura
     -- =========================================================================
 
-    SELECT tp.tenant_id
-    INTO v_tenant_id
-    FROM public.service_users su
-    INNER JOIN public.tenant_permissions tp
-        ON tp.service_user_id = su.id
-    WHERE su.auth_user_id = auth.uid()
-      AND su.is_active = true
-    LIMIT 1;
-
-    IF v_tenant_id IS NULL THEN
+    IF p_tenant_id IS NULL THEN
         RAISE EXCEPTION
-            'Acceso denegado: Usuario no vinculado a un tenant activo.';
+            'El tenant seleccionado es obligatorio.';
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.service_users su
+        INNER JOIN public.tenant_permissions tp
+            ON tp.service_user_id = su.id
+        WHERE su.auth_user_id = (SELECT auth.uid())
+          AND su.is_active = true
+          AND tp.tenant_id = p_tenant_id
+    ) THEN
+        RAISE EXCEPTION
+            'Acceso denegado: el usuario no tiene permisos para este tenant.';
+    END IF;
+
+    v_tenant_id := p_tenant_id;
 
 
     -- =========================================================================
@@ -115,71 +123,70 @@ BEGIN
           OR service_type = p_servicio_tipo
       );
 
-      -- =========================================================================
--- PASO 6: GRÁFICO DE LA SEMANA ACTUAL
---
--- Genera lunes, martes, miércoles... domingo.
---
--- La MV solamente contiene información hasta ayer, por lo que
--- el día actual aparecerá con 0.
--- =========================================================================
+    -- =========================================================================
+    -- PASO 6: GRÁFICO DE LA SEMANA ACTUAL
+    --
+    -- Genera lunes, martes, miércoles... domingo.
+    --
+    -- La MV solamente contiene información hasta ayer, por lo que
+    -- el día actual aparecerá con 0.
+    -- =========================================================================
 
-SELECT json_agg(row_to_json(s))
-INTO v_chart_semana
-FROM (
-    WITH todos_los_dias AS (
-        SELECT
-            orden_dia::DATE AS fecha_calendario
-        FROM generate_series(
-            DATE_TRUNC('week', v_hoy)::DATE,
-            (
-                DATE_TRUNC('week', v_hoy)::DATE
-                + INTERVAL '6 days'
-            )::DATE,
-            INTERVAL '1 day'
-        ) AS orden_dia
-    )
-
-    SELECT
-
-        CASE EXTRACT(ISODOW FROM cal.fecha_calendario)
-            WHEN 1 THEN 'Lunes'
-            WHEN 2 THEN 'Martes'
-            WHEN 3 THEN 'Miércoles'
-            WHEN 4 THEN 'Jueves'
-            WHEN 5 THEN 'Viernes'
-            WHEN 6 THEN 'Sábado'
-            WHEN 7 THEN 'Domingo'
-        END AS dia,
-
-        EXTRACT(
-            ISODOW FROM cal.fecha_calendario
-        )::INTEGER AS numero_dia,
-
-        cal.fecha_calendario AS fecha,
-
-        COALESCE(
-            SUM(mv.total_recaudado),
-            0
-        )::NUMERIC(12, 2) AS total
-
-    FROM todos_los_dias cal
-
-    LEFT JOIN public.mv_reportes_contables mv
-        ON mv.fecha = cal.fecha_calendario
-        AND mv.tenant_id = v_tenant_id
-        AND (
-            p_servicio_tipo IS NULL
-            OR mv.service_type = p_servicio_tipo
+    SELECT json_agg(row_to_json(s))
+    INTO v_chart_semana
+    FROM (
+        WITH todos_los_dias AS (
+            SELECT
+                orden_dia::DATE AS fecha_calendario
+            FROM generate_series(
+                DATE_TRUNC('week', v_hoy)::DATE,
+                (
+                    DATE_TRUNC('week', v_hoy)::DATE
+                    + INTERVAL '6 days'
+                )::DATE,
+                INTERVAL '1 day'
+            ) AS orden_dia
         )
 
-    GROUP BY
-        cal.fecha_calendario
+        SELECT
+            CASE EXTRACT(ISODOW FROM cal.fecha_calendario)
+                WHEN 1 THEN 'Lunes'
+                WHEN 2 THEN 'Martes'
+                WHEN 3 THEN 'Miércoles'
+                WHEN 4 THEN 'Jueves'
+                WHEN 5 THEN 'Viernes'
+                WHEN 6 THEN 'Sábado'
+                WHEN 7 THEN 'Domingo'
+            END AS dia,
 
-    ORDER BY
-        cal.fecha_calendario
+            EXTRACT(
+                ISODOW FROM cal.fecha_calendario
+            )::INTEGER AS numero_dia,
 
-) s;
+            cal.fecha_calendario AS fecha,
+
+            COALESCE(
+                SUM(mv.total_recaudado),
+                0
+            )::NUMERIC(12, 2) AS total
+
+        FROM todos_los_dias cal
+
+        LEFT JOIN public.mv_reportes_contables mv
+            ON mv.fecha = cal.fecha_calendario
+            AND mv.tenant_id = v_tenant_id
+            AND (
+                p_servicio_tipo IS NULL
+                OR mv.service_type = p_servicio_tipo
+            )
+
+        GROUP BY
+            cal.fecha_calendario
+
+        ORDER BY
+            cal.fecha_calendario
+
+    ) s;
 
 
     -- =========================================================================
@@ -317,14 +324,14 @@ FROM (
     -- =========================================================================
 
     RETURN QUERY
-SELECT
-    v_total_recaudado_ayer,
-    v_total_recaudado_mes,
-    v_total_recaudado_semana,
-    v_total_recaudado_anio,
-    v_chart_semana,
-    v_chart_mes,
-    v_chart_anio;
+    SELECT
+        v_total_recaudado_ayer,
+        v_total_recaudado_mes,
+        v_total_recaudado_semana,
+        v_total_recaudado_anio,
+        v_chart_semana,
+        v_chart_mes,
+        v_chart_anio;
 
 END;
 $$;

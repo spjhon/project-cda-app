@@ -22,7 +22,9 @@ const VEHICLE_TYPES: Database["public"]["Enums"]["vehicle_type_enum"][] = [
 const SERVICE_TYPES: Database["public"]["Enums"]["service_type_enum"][] = [
   "RTM",
   "preventiva",
+  "preventiva_viajero",
   "peritaje",
+  "prueba_gases",
 ];
 
 const FUEL_TYPES: Database["public"]["Enums"]["fuel_type_enum"][] = [

@@ -79,9 +79,11 @@ const VEHICLE_TYPE_MAP: Record<
 const SERVICE_TYPE_MAP: Record<string, string> = {
   RTM: "RTM",
   preventiva: "Preventiva",
+  preventiva_viajero: "Preventiva viajero",
   peritaje: "Peritaje",
+  prueba_gases: "Prueba de gases",
   otro: "Otro",
-}
+};
 
 const FUEL_TYPE_MAP: Record<string, string> = {
   gasolina: "Gasolina",

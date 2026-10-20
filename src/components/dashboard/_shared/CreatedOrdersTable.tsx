@@ -119,8 +119,9 @@ const VEHICLE_TYPE_MAP: Record<
 const SERVICE_TYPE_MAP: Record<string, string> = {
   RTM: "RTM",
   preventiva: "Preventiva",
+  preventiva_viajero: "Preventiva viajero",
   peritaje: "Peritaje",
-  otro: "Otro",
+  prueba_gases: "Prueba de gases",
 };
 
 // Badges con soporte claro/oscuro

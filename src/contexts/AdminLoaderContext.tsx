@@ -583,6 +583,7 @@ const analyticsQuery = useQuery({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_analitics",
       {
+        p_tenant_id: tenantId ?? "",
         p_mes_solicitado: mesSeleccionado,
         p_ano_solicitado: anoSeleccionado,
         p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
@@ -607,7 +608,8 @@ const analyticsQuery = useQuery({
 
   staleTime: Infinity,
   refetchOnWindowFocus: false,
-  enabled: pathname === "/dashboard/admin/analitica",
+  enabled: pathname === "/dashboard/admin/analitica" &&
+  !!tenantId,
 });
 
 
@@ -631,6 +633,7 @@ const analyticsQueryDiary = useQuery({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_analitics_diary",
       {
+        p_tenant_id: tenantId ?? "",
         p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
       },
     );
@@ -652,7 +655,8 @@ const analyticsQueryDiary = useQuery({
 
   refetchInterval: 15000,
   staleTime: 0,
-  enabled: pathname === "/dashboard/admin/analitica",
+  enabled: pathname === "/dashboard/admin/analitica" &&
+  !!tenantId,
 });
 
 useEffect(() => {
@@ -715,7 +719,7 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_vehicles_by_type",
       {
-       
+       p_tenant_id: tenantId ?? "",
         p_fecha_desde: fechaDesde,
         p_fecha_hasta: fechaHasta,
       },
@@ -741,7 +745,8 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
 
 
   staleTime: Infinity,
-  enabled: pathname === "/dashboard/admin/analitica",
+  enabled: pathname === "/dashboard/admin/analitica" &&
+  !!tenantId,
 });
 
 
@@ -790,7 +795,8 @@ const vehiclesByTypeDiaryQuery = useQuery<VehiclesByTypeData, Error>({
   
   refetchInterval: 15000,
   staleTime: 0,
-  enabled: pathname === "/dashboard/admin/analitica",
+  enabled: pathname === "/dashboard/admin/analitica" &&
+  !!tenantId,
 });
 
 
@@ -837,6 +843,7 @@ const analyticsContabilidadQuery = useQuery({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_contabilidad_analitics",
       {
+        p_tenant_id: tenantId ?? "",
         p_mes_solicitado: mesContabilidadSeleccionado,
         p_ano_solicitado: anoContabilidadSeleccionado,
         p_servicio_tipo:
@@ -865,7 +872,8 @@ const analyticsContabilidadQuery = useQuery({
   staleTime: Infinity,
   refetchOnWindowFocus: false,
 
-  enabled: pathname === "/dashboard/admin/analitica-contable",
+  enabled: pathname === "/dashboard/admin/analitica-contable" &&
+  !!tenantId,
 });
 
 
@@ -891,6 +899,7 @@ const analyticsContabilidadQueryDiary = useQuery({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_contabilidad_diary",
       {
+        p_tenant_id: tenantId ?? "",
         p_servicio_tipo:
           servicioTipoContabilidadSeleccionado ?? undefined,
       },
@@ -912,7 +921,8 @@ const analyticsContabilidadQueryDiary = useQuery({
   refetchInterval: 15000,
   staleTime: 0,
 
-  enabled: pathname === "/dashboard/admin/analitica-contable",
+  enabled: pathname === "/dashboard/admin/analitica-contable" &&
+  !!tenantId,
 });
 
 
@@ -976,6 +986,7 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
     const { data, error } = await supabaseBrowser.rpc(
       "fetch_admin_payments_by_method",
       {
+        p_tenant_id: tenantId ?? "",
         p_fecha_desde: fechaDesde,
         p_fecha_hasta: fechaHasta,
       },
@@ -1001,7 +1012,8 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
 
   staleTime: Infinity,
 
-  enabled: pathname === "/dashboard/admin/analitica-contable",
+  enabled: pathname === "/dashboard/admin/analitica-contable" &&
+  !!tenantId,
 });
 
 
@@ -1026,8 +1038,11 @@ const paymentsByMethodDiaryQuery = useQuery<
     console.log("Pidiendo pagos por método - diario");
 
     const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_payments_by_method_diary",
-    );
+  "fetch_admin_payments_by_method_diary",
+  {
+    p_tenant_id: tenantId ?? "",
+  }
+);
 
     if (error) {
       console.error(
@@ -1051,7 +1066,8 @@ const paymentsByMethodDiaryQuery = useQuery<
 
   staleTime: 0,
 
-  enabled: pathname === "/dashboard/admin/analitica-contable",
+  enabled: pathname === "/dashboard/admin/analitica-contable" &&
+  !!tenantId,
 });
 
 
