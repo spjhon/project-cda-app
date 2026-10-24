@@ -23,7 +23,7 @@ import {
 } from "@/lib/zod-schemas/order-schema";
 import { Checkbox } from "../../ui/checkbox";
 
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { $ZodIssue } from "zod/v4/core";
 import { OrderTemplateType } from "@/types/functions_types";
 

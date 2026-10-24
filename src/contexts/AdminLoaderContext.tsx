@@ -2,8 +2,8 @@
 
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { keepPreviousData, useQuery, UseQueryResult } from "@tanstack/react-query";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
@@ -559,9 +559,8 @@ const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccio
     staleTime: 0,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData
   });
-
-
 
 
 
@@ -573,6 +572,9 @@ const analyticsQuery = useQuery({
   queryKey: [
     "admin_analytics",
     rol,
+    mesSeleccionado,          // 👈 ¡Obligatorio para que reaccione al cambio de mes!
+    anoSeleccionado,          // 👈 ¡Obligatorio para que reaccione al cambio de año!
+    servicioTipoSeleccionado, // 👈 ¡Obligatorio para que reaccione al cambiar de servicio!
   ],
 
   queryFn: async () => {
@@ -608,12 +610,9 @@ const analyticsQuery = useQuery({
 
   staleTime: Infinity,
   refetchOnWindowFocus: false,
-  enabled: pathname === "/dashboard/admin/analitica" &&
-  !!tenantId,
+  enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+  placeholderData: keepPreviousData
 });
-
-
-
 
 
 
@@ -622,6 +621,7 @@ const analyticsQueryDiary = useQuery({
   queryKey: [
     "admin_analytics_diary",
     rol,
+    servicioTipoSeleccionado, // 👈 ¡Obligatorio! Para que se entere si cambia el servicio
   ],
   queryFn: async () => {
     console.log(
@@ -655,27 +655,9 @@ const analyticsQueryDiary = useQuery({
 
   refetchInterval: 15000,
   staleTime: 0,
-  enabled: pathname === "/dashboard/admin/analitica" &&
-  !!tenantId,
+  enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+  placeholderData: keepPreviousData, // 👈 Opcional pero recomendado para evitar saltos en los datos del día
 });
-
-useEffect(() => {
-  if (pathname !== "/dashboard/admin/analitica") {
-    return;
-  }
-  analyticsQuery.refetch();
-  analyticsQueryDiary.refetch();
-}, [
-  mesSeleccionado,
-  anoSeleccionado,
-  servicioTipoSeleccionado,
-]);
-
-
-
-
-
-
 
 
 
@@ -684,73 +666,69 @@ useEffect(() => {
 
 
 const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
-  queryKey: [
-    "admin_vehicles_by_type",
-    rol,
-    dateVehicleTypeRange?.from
-      ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
-      : "null",
-    dateVehicleTypeRange?.to
-      ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
-      : "null",
-  ],
+    queryKey: [
+      "admin_vehicles_by_type",
+      rol,
+      dateVehicleTypeRange?.from
+        ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
+        : "null",
+      dateVehicleTypeRange?.to
+        ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
+        : "null",
+    ],
 
-  queryFn: async () => {
-    console.log(
-      `Pidiendo vehículos por tipo: ${
-        dateVehicleTypeRange?.from
-          ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
-          : "sin fecha"
-      } - ${
-        dateVehicleTypeRange?.to
-          ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
-          : "sin fecha"
-      }`,
-    );
-
-    const fechaDesde = dateVehicleTypeRange?.from
-      ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
-      : format(subMonths(new Date(), 1), "yyyy-MM-dd");
-
-    const fechaHasta = dateVehicleTypeRange?.to
-      ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
-      : format(new Date(), "yyyy-MM-dd");
-
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_vehicles_by_type",
-      {
-       p_tenant_id: tenantId ?? "",
-        p_fecha_desde: fechaDesde,
-        p_fecha_hasta: fechaHasta,
-      },
-    );
-
-    if (error) {
-      console.error(
-        "Error al extraer vehículos por tipo:",
-        error.message,
+    queryFn: async () => {
+      console.log(
+        `Pidiendo vehículos por tipo: ${
+          dateVehicleTypeRange?.from
+            ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
+            : "sin fecha"
+        } - ${
+          dateVehicleTypeRange?.to
+            ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
+            : "sin fecha"
+        }`,
       );
 
-      throw new Error(error.message);
-    }
+      const fechaDesde = dateVehicleTypeRange?.from
+        ? format(dateVehicleTypeRange.from, "yyyy-MM-dd")
+        : format(subMonths(new Date(), 1), "yyyy-MM-dd");
 
-    if (data) {
-      return data as VehiclesByTypeData;
-    }
+      const fechaHasta = dateVehicleTypeRange?.to
+        ? format(dateVehicleTypeRange.to, "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd");
 
-    throw new Error(
-      "El RPC de vehículos por tipo no devolvió datos.",
-    );
-  },
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_vehicles_by_type",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_fecha_desde: fechaDesde,
+          p_fecha_hasta: fechaHasta,
+        },
+      );
 
+      if (error) {
+        console.error(
+          "Error al extraer vehículos por tipo:",
+          error.message,
+        );
 
-  staleTime: Infinity,
-  enabled: pathname === "/dashboard/admin/analitica" &&
-  !!tenantId,
-});
+        throw new Error(error.message);
+      }
 
+      if (data) {
+        return data as VehiclesByTypeData;
+      }
 
+      throw new Error(
+        "El RPC de vehículos por tipo no devolvió datos.",
+      );
+    },
 
+    staleTime: Infinity,
+    enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
 
 
 
@@ -759,65 +737,44 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
 
 
 const vehiclesByTypeDiaryQuery = useQuery<VehiclesByTypeData, Error>({
-  queryKey: [
-    "admin_vehicles_by_type_diary",
-    rol,
-  ],
+    queryKey: [
+      "admin_vehicles_by_type_diary",
+      rol,
+    ],
 
-  queryFn: async () => {
-    console.log("Pidiendo vehículos por tipo - diario");
+    queryFn: async () => {
+      console.log("Pidiendo vehículos por tipo - diario");
 
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_vehicles_by_type_diary",
-      {
-        p_tenant_id: tenantId ?? "",
-      },
-    );
-
-    if (error) {
-      console.error(
-        "Error al extraer vehículos por tipo diarios:",
-        error.message,
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_vehicles_by_type_diary",
+        {
+          p_tenant_id: tenantId ?? "",
+        },
       );
 
-      throw new Error(error.message);
-    }
+      if (error) {
+        console.error(
+          "Error al extraer vehículos por tipo diarios:",
+          error.message,
+        );
 
-    if (!data) {
-      throw new Error(
-        "El RPC de vehículos por tipo diario no devolvió datos.",
-      );
-    }
+        throw new Error(error.message);
+      }
 
-    return data as unknown as Record<string, number>;
-  },
+      if (!data) {
+        throw new Error(
+          "El RPC de vehículos por tipo diario no devolvió datos.",
+        );
+      }
 
-  
-  refetchInterval: 15000,
-  staleTime: 0,
-  enabled: pathname === "/dashboard/admin/analitica" &&
-  !!tenantId,
-});
+      return data as unknown as Record<string, number>;
+    },
 
-
-
-
-
-useEffect(() => {
-  if (pathname !== "/dashboard/admin/analitica") {
-    return;
-  }
-  vehiclesByTypeQuery.refetch();
-  vehiclesByTypeDiaryQuery.refetch();
-}, [dateVehicleTypeRange]);
-
-
-
-
-
-
-
-
+    refetchInterval: 15000,
+    staleTime: 0,
+    enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 ¡Clave aquí! Evita que la tabla/gráfico parpadee cada 15 segundos cuando se refresca solo en segundo plano.
+  });
 
 
 
@@ -827,60 +784,54 @@ useEffect(() => {
 
 
 const analyticsContabilidadQuery = useQuery({
-  queryKey: [
-    "admin_analytics_contabilidad",
-    rol,
-     mesContabilidadSeleccionado,
-    anoContabilidadSeleccionado,
-    servicioTipoContabilidadSeleccionado,
-  ],
+    queryKey: [
+      "admin_analytics_contabilidad",
+      rol,
+      mesContabilidadSeleccionado,
+      anoContabilidadSeleccionado,
+      servicioTipoContabilidadSeleccionado,
+    ],
 
-  queryFn: async () => {
-    console.log(
-      `Pidiendo analytics contabilidad de ${mesSeleccionado}/${anoSeleccionado}`,
-    );
-
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_contabilidad_analitics",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_mes_solicitado: mesContabilidadSeleccionado,
-        p_ano_solicitado: anoContabilidadSeleccionado,
-        p_servicio_tipo:
-          servicioTipoContabilidadSeleccionado ?? undefined,
-      },
-    );
-
-    if (error) {
-      console.error(
-        "Error al extraer métricas e históricos de contabilidad:",
-        error.message,
+    queryFn: async () => {
+      console.log(
+        `Pidiendo analytics contabilidad de ${mesContabilidadSeleccionado}/${anoContabilidadSeleccionado}`, // 👈 Corregido el log para usar las variables correctas
       );
 
-      throw new Error(error.message);
-    }
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_contabilidad_analitics",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_mes_solicitado: mesContabilidadSeleccionado,
+          p_ano_solicitado: anoContabilidadSeleccionado,
+          p_servicio_tipo:
+            servicioTipoContabilidadSeleccionado ?? undefined,
+        },
+      );
 
-    if (data && data.length > 0) {
-      return data[0] as unknown as AdminContabilidadData;
-    }
+      if (error) {
+        console.error(
+          "Error al extraer métricas e históricos de contabilidad:",
+          error.message,
+        );
 
-    throw new Error(
-      "El RPC no devolvió datos de analytics de contabilidad.",
-    );
-  },
+        throw new Error(error.message);
+      }
 
-  staleTime: Infinity,
-  refetchOnWindowFocus: false,
+      if (data && data.length > 0) {
+        return data[0] as unknown as AdminContabilidadData;
+      }
 
-  enabled: pathname === "/dashboard/admin/analitica-contable" &&
-  !!tenantId,
-});
+      throw new Error(
+        "El RPC no devolvió datos de analytics de contabilidad.",
+      );
+    },
 
-
-
-
-
-
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    enabled:
+      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 Añadido para transiciones fluidas sin spinners
+  });
 
 
 
@@ -889,60 +840,41 @@ const analyticsContabilidadQuery = useQuery({
 
 
 const analyticsContabilidadQueryDiary = useQuery({
-  queryKey: [
-    "admin_analytics_contabilidad_diary",
-    rol,
-    servicioTipoContabilidadSeleccionado,
-  ],
+    queryKey: [
+      "admin_analytics_contabilidad_diary",
+      rol,
+      servicioTipoContabilidadSeleccionado,
+    ],
 
-  queryFn: async () => {
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_contabilidad_diary",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_servicio_tipo:
-          servicioTipoContabilidadSeleccionado ?? undefined,
-      },
-    );
+    queryFn: async () => {
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_contabilidad_diary",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_servicio_tipo:
+            servicioTipoContabilidadSeleccionado ?? undefined,
+        },
+      );
 
-    if (error) {
-      throw new Error(error.message);
-    }
+      if (error) {
+        throw new Error(error.message);
+      }
 
-    if (data && data.length > 0) {
-      return data[0] as AdminContabilidadDiaryData;
-    }
+      if (data && data.length > 0) {
+        return data[0] as AdminContabilidadDiaryData;
+      }
 
-    throw new Error(
-      "El RPC diario de contabilidad no devolvió datos.",
-    );
-  },
+      throw new Error(
+        "El RPC diario de contabilidad no devolvió datos.",
+      );
+    },
 
-  refetchInterval: 15000,
-  staleTime: 0,
-
-  enabled: pathname === "/dashboard/admin/analitica-contable" &&
-  !!tenantId,
-});
-
-
-
-useEffect(() => {
-  if (pathname !== "/dashboard/admin/analitica-contable") {
-    return;
-  }
-
-  analyticsContabilidadQuery.refetch();
-  analyticsContabilidadQueryDiary.refetch();
-}, [
-  mesContabilidadSeleccionado,
-  anoContabilidadSeleccionado,
-  servicioTipoContabilidadSeleccionado,
-]);
-
-
-
-
+    refetchInterval: 15000,
+    staleTime: 0,
+    enabled:
+      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 Transición fluida al cambiar de servicio
+  });
 
 
 
@@ -951,73 +883,70 @@ useEffect(() => {
 
 
 const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
-  queryKey: [
-    "admin_payments_by_method",
-    rol,
-    datePaymentMethodRange?.from
-      ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
-      : "null",
-    datePaymentMethodRange?.to
-      ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
-      : "null",
-  ],
+    queryKey: [
+      "admin_payments_by_method",
+      rol,
+      datePaymentMethodRange?.from
+        ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
+        : "null",
+      datePaymentMethodRange?.to
+        ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
+        : "null",
+    ],
 
-  queryFn: async () => {
-    console.log(
-      `Pidiendo pagos por método: ${
-        datePaymentMethodRange?.from
-          ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
-          : "sin fecha"
-      } - ${
-        datePaymentMethodRange?.to
-          ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
-          : "sin fecha"
-      }`,
-    );
-
-    const fechaDesde = datePaymentMethodRange?.from
-      ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
-      : format(subMonths(new Date(), 1), "yyyy-MM-dd");
-
-    const fechaHasta = datePaymentMethodRange?.to
-      ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
-      : format(new Date(), "yyyy-MM-dd");
-
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_payments_by_method",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_fecha_desde: fechaDesde,
-        p_fecha_hasta: fechaHasta,
-      },
-    );
-
-    if (error) {
-      console.error(
-        "Error al extraer pagos por método:",
-        error.message,
+    queryFn: async () => {
+      console.log(
+        `Pidiendo pagos por método: ${
+          datePaymentMethodRange?.from
+            ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
+            : "sin fecha"
+        } - ${
+          datePaymentMethodRange?.to
+            ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
+            : "sin fecha"
+        }`,
       );
 
-      throw new Error(error.message);
-    }
+      const fechaDesde = datePaymentMethodRange?.from
+        ? format(datePaymentMethodRange.from, "yyyy-MM-dd")
+        : format(subMonths(new Date(), 1), "yyyy-MM-dd");
 
-    if (data) {
-      return data as PaymentsByMethodData;
-    }
+      const fechaHasta = datePaymentMethodRange?.to
+        ? format(datePaymentMethodRange.to, "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd");
 
-    throw new Error(
-      "El RPC de pagos por método no devolvió datos.",
-    );
-  },
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_payments_by_method",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_fecha_desde: fechaDesde,
+          p_fecha_hasta: fechaHasta,
+        },
+      );
 
-  staleTime: Infinity,
+      if (error) {
+        console.error(
+          "Error al extraer pagos por método:",
+          error.message,
+        );
 
-  enabled: pathname === "/dashboard/admin/analitica-contable" &&
-  !!tenantId,
-});
+        throw new Error(error.message);
+      }
 
+      if (data) {
+        return data as PaymentsByMethodData;
+      }
 
+      throw new Error(
+        "El RPC de pagos por método no devolvió datos.",
+      );
+    },
 
+    staleTime: Infinity,
+    enabled:
+      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 Transición fluida al cambiar el rango de fechas
+  });
 
 
 
@@ -1026,64 +955,48 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
 
 
 const paymentsByMethodDiaryQuery = useQuery<
-  PaymentsByMethodData,
-  Error
->({
-  queryKey: [
-    "admin_payments_by_method_diary",
-    rol,
-  ],
+    PaymentsByMethodData,
+    Error
+  >({
+    queryKey: [
+      "admin_payments_by_method_diary",
+      rol,
+    ],
 
-  queryFn: async () => {
-    console.log("Pidiendo pagos por método - diario");
+    queryFn: async () => {
+      console.log("Pidiendo pagos por método - diario");
 
-    const { data, error } = await supabaseBrowser.rpc(
-  "fetch_admin_payments_by_method_diary",
-  {
-    p_tenant_id: tenantId ?? "",
-  }
-);
-
-    if (error) {
-      console.error(
-        "Error al extraer pagos por método diarios:",
-        error.message,
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_payments_by_method_diary",
+        {
+          p_tenant_id: tenantId ?? "",
+        }
       );
 
-      throw new Error(error.message);
-    }
+      if (error) {
+        console.error(
+          "Error al extraer pagos por método diarios:",
+          error.message,
+        );
 
-    if (!data) {
-      throw new Error(
-        "El RPC de pagos por método diario no devolvió datos.",
-      );
-    }
+        throw new Error(error.message);
+      }
 
-    return data as unknown as PaymentsByMethodData;
-  },
+      if (!data) {
+        throw new Error(
+          "El RPC de pagos por método diario no devolvió datos.",
+        );
+      }
 
-  refetchInterval: 15000,
+      return data as unknown as PaymentsByMethodData;
+    },
 
-  staleTime: 0,
-
-  enabled: pathname === "/dashboard/admin/analitica-contable" &&
-  !!tenantId,
-});
-
-
-
-
-useEffect(() => {
-  if (pathname !== "/dashboard/admin/analitica") {
-    return;
-  }
-
-  paymentsByMethodQuery.refetch();
-  paymentsByMethodDiaryQuery.refetch();
-}, [datePaymentMethodRange]);
-
-
-
+    refetchInterval: 15000,
+    staleTime: 0,
+    enabled:
+      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 Evita parpadeos cada 15s cuando se refresca en segundo plano
+  });
 
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,15 +19,11 @@ import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_t
 import { CompanyRateSelectorSingle } from "./CompanyRateSelectorSingle";
 import { useCompanies } from "@/lib/client-actions/fetch_tenant_companies";
 
-
-
 export interface OfficeFormState {
   oficina_pin: string;
   oficina_consecutivo_factura: string;
   se_compro_soat: boolean;
 }
-
-
 
 interface OfficeOrderFormProps {
   orden: EntryOrderListItem;
@@ -40,32 +36,34 @@ export default function OfficeOrderForm({
 }: OfficeOrderFormProps) {
   const queryClient = useQueryClient();
 
+  // 1. Traemos las compañías de forma limpia con TanStack Query
+  const { data: companies } = useCompanies();
 
+  // 2. Encontramos de forma síncrona y directa el ID inicial de la empresa basado en el NIT de la orden
+  const initialCompanyId = companies?.find(
+    (company) => company.nit === orden.company_nit_snapshot
+  )?.id ?? null;
 
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
-
-console.log("Este es el id de la empresa seleccionada: ", orden.company_nit_snapshot)
+  // Estado para cuando el usuario seleccione otra empresa de forma manual
+  const [userSelectedCompanyId, setUserSelectedCompanyId] = useState<string | null>(null);
+  
+  // El ID final que usaremos (si el usuario eligió uno nuevo usamos ese, sino el inicial de la orden)
+  const selectedCompanyId = userSelectedCompanyId ?? initialCompanyId;
 
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(
-    null,
-  );
+  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(null);
 
+  // Inicialización limpia del estado con los datos que ya vienen en la orden
   const [formData, setFormData] = useState<OfficeFormState>({
     oficina_pin: orden.oficina_pin || "",
     oficina_consecutivo_factura: orden.oficina_consecutivo_factura || "",
     se_compro_soat: orden.se_compro_soat || false,
   });
 
-
- 
-
-const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
-  orden.payments ?? []
-);
-
-
+  const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
+    orden.payments ?? []
+  );
 
   const {
     data: orderRate,
@@ -77,43 +75,6 @@ const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
     companyId: selectedCompanyId,
     orderId: orden.id,
   });
-
-
-
-
-
-/**
- * Cuando dependes de datos asíncronos externos (como los que trae useCompanies()), 
- * actualizar el estado local de manera inmediata y síncrona dentro de un useEffect (setSelectedCompanyId) 
- * puede provocar que React intente re-renderizar el componente antes de que termine el ciclo de renderizado actual.
- * Al envolverlo en un setTimeout(..., 0), le dices a JavaScript: "Termina de procesar este renderizado actual y, 
- * justo en el próximo ciclo del Event Loop, actualiza el estado". Esto rompe el ciclo síncrono.
- */
-  const { data: companies, isSuccess } = useCompanies();
-
-  useEffect(() => {
-  if (!isSuccess || !orden.company_nit_snapshot || !companies) return;
-
-  const company = companies.find(
-    (company) => company.nit === orden.company_nit_snapshot
-  );
-
-  if (!company) return;
-
-  const timeoutId = setTimeout(() => {
-    setSelectedCompanyId(company.id);
-  }, 0);
-
-  return () => clearTimeout(timeoutId);
-}, [isSuccess, companies, orden.company_nit_snapshot]);
-
-
-
-
-
-
-
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -127,91 +88,76 @@ const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
     setFormData((prev) => ({ ...prev, se_compro_soat: checked }));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
+    setIsSubmitting(true);
+    setServerError(null);
 
-
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  setIsSubmitting(true);
-  setServerError(null);
-
-  if (formData.oficina_consecutivo_factura.trim() === "") {
-    alert("No se ha colocado un consecutivo de factura");
-    setIsSubmitting(false);
-    return;
-  }
-
-  if (formData.oficina_pin.trim() === "" && orden.service_type === "RTM") {
-    alert("No se ha ingresado un pin");
-    setIsSubmitting(false);
-    return;
-  }
-
-  if (
-    payments.length === 0 ||
-    payments.some(
-      (payment) =>
-        !payment.payment_method ||
-        payment.monto_bruto <= 0,
-    )
-  ) {
-    alert(
-      "Debe registrar al menos un método de pago y todos los pagos deben tener un valor mayor a $0.",
-    );
-    setIsSubmitting(false);
-    return;
-  }
-
-  if (!orderRate) {
-    alert("No se ha podido obtener la tarifa de la orden.");
-    setIsSubmitting(false);
-    return;
-  }
-
-  try {
-    const { data, error } = await insertOficinaData({
-      orderId: orden.id,
-      formData: formData,
-      payments: payments,
-      vehicleServiceRateId: orderRate.rateId,
-      ratePriceSnapshot: orderRate.totalPrice,
-      service_type: orden.service_type,
-       companyId: selectedCompanyId,
-    });
-
-    if (error || !data) {
-      setServerError(error);
-      setShowErrorDialog(true);
+    if (formData.oficina_consecutivo_factura.trim() === "") {
+      alert("No se ha colocado un consecutivo de factura");
+      setIsSubmitting(false);
       return;
     }
 
-    queryClient.invalidateQueries({
-      queryKey: ["entry_orders", "list"],
-    });
+    if (formData.oficina_pin.trim() === "" && orden.service_type === "RTM") {
+      alert("No se ha ingresado un pin");
+      setIsSubmitting(false);
+      return;
+    }
 
-    alert(data);
+    if (
+      payments.length === 0 ||
+      payments.some(
+        (payment) =>
+          !payment.payment_method ||
+          payment.monto_bruto <= 0,
+      )
+    ) {
+      alert(
+        "Debe registrar al menos un método de pago y todos los pagos deben tener un valor mayor a $0.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
 
-    
-  } catch (error: unknown) {
-    alert(
-      "Ocurrio un error inesperado en la validacion: " + error,
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    if (!orderRate) {
+      alert("No se ha podido obtener la tarifa de la orden.");
+      setIsSubmitting(false);
+      return;
+    }
 
+    try {
+      const { data, error } = await insertOficinaData({
+        orderId: orden.id,
+        formData: formData,
+        payments: payments,
+        vehicleServiceRateId: orderRate.rateId,
+        ratePriceSnapshot: orderRate.totalPrice,
+        service_type: orden.service_type,
+        companyId: selectedCompanyId,
+      });
 
+      if (error || !data) {
+        setServerError(error);
+        setShowErrorDialog(true);
+        return;
+      }
 
+      queryClient.invalidateQueries({
+        queryKey: ["entry_orders", "list"],
+      });
 
-
-
-
-
-
+      alert(data);
+    } catch (error: unknown) {
+      alert(
+        "Ocurrio un error inesperado en la validacion: " + error,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const totalPayments = payments.reduce(
     (total, payment) => total + (Number(payment.monto_bruto) || 0),
@@ -219,10 +165,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   );
 
   const totalToPay = orderRate?.totalPrice ?? 0;
-
   const paymentMatches = totalPayments === totalToPay;
-
-
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -331,16 +274,16 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
 
           <div className="sm:col-span-2">
-  <CompanyRateSelectorSingle
-    value={selectedCompanyId}
-    onValueChange={setSelectedCompanyId}
-    disabled={
-      orden.estado_orden === "finalizada" ||
-      orden.estado_orden === "anulada" ||
-      orden.es_reinspeccion
-    }
-  />
-</div>
+            <CompanyRateSelectorSingle
+              value={selectedCompanyId}
+              onValueChange={setUserSelectedCompanyId}
+              disabled={
+                orden.estado_orden === "finalizada" ||
+                orden.estado_orden === "anulada" ||
+                orden.es_reinspeccion
+              }
+            />
+          </div>
 
           {/* Métodos de pago */}
           <div className="sm:col-span-2">
@@ -425,7 +368,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         orden.estado_orden === "anulada" ? (
           <div className="flex items-center gap-2 text-xs font-semibold text-destructive bg-destructive/10 px-4 py-2 rounded-lg border border-destructive/20 shadow-xs animate-fade-in select-none text-center">
             <Ban className="h-4 w-4 shrink-0" />
-
             <span>
               {orden.estado_orden === "anulada"
                 ? "Esta orden ya fue anulada"
@@ -450,7 +392,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 }
                 className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70 disabled:cursor-not-allowed text-white font-bold h-10 text-xs transition-all rounded-lg shadow-sm gap-2 px-5"
               >
-               {isSubmitting ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Procesando pago...</span>

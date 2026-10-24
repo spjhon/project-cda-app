@@ -2,13 +2,14 @@
 
 
 import {
+  keepPreviousData,
   UseMutateFunction,
   useMutation,
   useQuery,
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { startOfMonth, format, startOfDay, subDays } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
@@ -190,88 +191,69 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
 
 
 
+// ============================================
+  // TANSTACK QUERY: ÓRDENES DE ENTRADA (TABLA)
+  // ============================================
+  const entryOrdersQuery = useQuery({
+    queryKey: [
+      "entry_orders",
+      "list",
+      page,
+      rowsPerPage,
+      orderByColumn,
+      orderByDirection,
+      showDeleted,
+      dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
+      dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "null",
+      searchColumn,
+      searchTerm,
+    ],
 
+    queryFn: async () => {
+      console.log(
+        `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
+      );
 
+      const fechaDesde = dateRange?.from
+        ? format(dateRange.from, "yyyy-MM-dd")
+        : format(startOfMonth(new Date()), "yyyy-MM-dd");
 
-  //--------------------------------------------
-  //TANSTAK QUERY PARA LAS ORDENES DE ENTRADA
-  //--------------------------------------------
+      const fechaHasta = dateRange?.to
+        ? format(dateRange.to, "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd");
 
-const entryOrdersQuery = useQuery({
-  queryKey: ["entry_orders", "list"],
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_entry_orders_list",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_limit: rowsPerPage,
+          p_offset: (page - 1) * rowsPerPage, // 👈 Arreglado el error de sintaxis del offset
+          p_order_by_column: orderByColumn,
+          p_order_by_direction: orderByDirection,
+          p_show_deleted: showDeleted,
+          p_fecha_desde: fechaDesde,
+          p_fecha_hasta: fechaHasta,
+          p_search_column: searchColumn,
+          p_search_term: searchTerm,
+        },
+      );
 
-  queryFn: async () => {
-    console.log(
-      `Pidiendo órdenes ordenadas por: ${orderByColumn} ${orderByDirection}`,
-    );
+      if (error) {
+        throw new Error(error.message);
+      }
 
-    const fechaDesde = dateRange?.from
-      ? format(dateRange.from, "yyyy-MM-dd")
-      : format(startOfMonth(new Date()), "yyyy-MM-dd");
+      return (data as unknown as EntryOrderListItem[]) || [];
+    },
 
-    const fechaHasta = dateRange?.to
-      ? format(dateRange.to, "yyyy-MM-dd")
-      : format(new Date(), "yyyy-MM-dd");
-
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_entry_orders_list",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_limit: rowsPerPage,
-        p_offset: (page - 1) * rowsPerPage,
-        p_order_by_column: orderByColumn,
-        p_order_by_direction: orderByDirection,
-        p_show_deleted: showDeleted,
-        p_fecha_desde: fechaDesde,
-        p_fecha_hasta: fechaHasta,
-        p_search_column: searchColumn,
-        p_search_term: searchTerm,
-      },
-    );
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return (data as unknown as EntryOrderListItem[]) || [];
-  },
-
-  staleTime: 0,
-  refetchInterval: 15000,
-  enabled:
-    pathname === "/dashboard/admin" ||
-    pathname === "/dashboard/recepcionista/ordenes-de-entrada" ||
-    pathname === "/dashboard/director-tecnico" ||
-    pathname === "/dashboard/oficina",
-});
-
-
-
-
-useEffect(() => {
-  const rutasPermitidas = [
-    "/dashboard/admin",
-    "/dashboard/recepcionista/ordenes-de-entrada",
-    "/dashboard/director-tecnico",
-    "/dashboard/oficina",
-  ];
-
-  if (!rutasPermitidas.includes(pathname)) {
-    return;
-  }
-
-  entryOrdersQuery.refetch();
-}, [
-  pathname,
-  orderByColumn,
-  orderByDirection,
-  showDeleted,
-  dateRange,
-  searchColumn,
-  searchTerm,
-  page,
-  rowsPerPage,
-]);
+    staleTime: 0,
+    refetchInterval: 15000,
+    enabled:
+      pathname === "/dashboard/admin" ||
+      pathname === "/dashboard/recepcionista/ordenes-de-entrada" ||
+      pathname === "/dashboard/director-tecnico" ||
+      pathname === "/dashboard/oficina",
+    placeholderData: keepPreviousData, // 👈 ¡Clave para tablas! Transición fluida al paginar o filtrar.
+  });
 
 
 
@@ -304,11 +286,9 @@ useEffect(() => {
 
 
 
-
-
-
-
-  //QUERY PARA VERIFICAR QUE NO HAYAN ORDENES DE ENTRADA ABIERTAS DEL DIA ANTERIOR
+// ============================================
+  // TANSTACK QUERY: ÓRDENES PENDIENTES DÍAS ANTERIORES
+  // ============================================
   const {
     data: pendingPreviousDayOrders = [],
     isLoading: isLoadingPendingPreviousDayOrders,
@@ -319,8 +299,10 @@ useEffect(() => {
 
     enabled: !!tenantId,
 
-    staleTime: Infinity,
-    gcTime: Infinity,
+    // 💡 CAMBIO CLAVE: Quitamos Infinity para que los datos operativos 
+    // se mantengan frescos y reflejen la realidad si una orden es cerrada.
+    staleTime: Infinity, // Fresco durante 2 minutos
+    refetchOnWindowFocus: true, // Vuelve a verificar si el usuario regresa a la pestaña
 
     queryFn: async () => {
       const fechaDesde = startOfDay(subDays(new Date(), 7)).toISOString();
@@ -334,12 +316,12 @@ useEffect(() => {
         .from("entry_orders")
         .select(
           `
-        id,
-        consecutivo,
-        fecha,
-        estado_orden,
-        vehiculo_placa_snapshot
-      `,
+          id,
+          consecutivo,
+          fecha,
+          estado_orden,
+          vehiculo_placa_snapshot
+        `,
         )
         .eq("tenant_id", tenantId)
         .gte("fecha", fechaDesde)
@@ -355,8 +337,6 @@ useEffect(() => {
       return data ?? [];
     },
   });
-
-
 
 
 
