@@ -432,7 +432,7 @@ useEffect(() => {
 
     onSuccess: () => {
       // Invalidamos la caché para refrescar la lista/tabla de órdenes
-      queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["entry_orders", "list"] });
     },
 
     onError: (err: Error) => {

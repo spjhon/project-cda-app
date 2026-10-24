@@ -362,7 +362,7 @@ if (edgeError || !edgeResponse) {
     alert(data.message);
 
     queryClient.invalidateQueries({
-      queryKey: ["entry-orders", "list"],
+      queryKey: ["entry_orders", "list"],
     });
 
     // ============================================================

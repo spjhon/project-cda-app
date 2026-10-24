@@ -253,7 +253,15 @@ cliente_direccion_snapshot                  TEXT,
     updated_at                                  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     -- Soft delete.
-    deleted_at                                  TIMESTAMPTZ
+    deleted_at                                  TIMESTAMPTZ,
+
+        -- ==========================================
+    -- EMPRESA ASOCIADA (Histórico)
+    -- ==========================================
+
+    company_id UUID NULL,
+    company_name_snapshot TEXT NULL,
+    company_nit_snapshot TEXT NULL,
 
 );
 
@@ -304,6 +312,22 @@ WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL);
 CREATE INDEX entry_orders_vehicle_service_rate_id_idx
 ON public.entry_orders (vehicle_service_rate_id);
 
+ALTER TABLE public.entry_orders
+ADD CONSTRAINT entry_orders_tenant_company_fkey
+FOREIGN KEY (tenant_id, company_id)
+REFERENCES public.tenants_company (tenant_id, id)
+ON DELETE RESTRICT;
+
+CREATE INDEX entry_orders_tenant_company_fecha_idx
+ON public.entry_orders (tenant_id, company_id, fecha DESC)
+WHERE company_id IS NOT NULL;
+
+
+-- Permite usar tenant_id + id como llave foránea compuesta.
+ALTER TABLE public.tenants_company
+ADD CONSTRAINT tenants_company_tenant_id_id_key
+UNIQUE (tenant_id, id);
+
 
 -- ==========================================
 -- 4. COMENTARIOS
@@ -336,6 +360,15 @@ COMMENT ON COLUMN public.entry_orders.rate_price_snapshot IS
 
 COMMENT ON COLUMN public.entry_orders.director_tecnico_firma_path_snapshot IS
 'Ruta en Supabase Storage de la firma del director técnico utilizada como snapshot en la orden de entrada.';
+
+COMMENT ON COLUMN public.entry_orders.company_id IS
+'Referencia a la empresa asociada a la orden. Permite identificar la empresa para consultas y estadísticas históricas.';
+
+COMMENT ON COLUMN public.entry_orders.company_name_snapshot IS
+'Nombre de la empresa al momento de registrar la orden. Se conserva como dato histórico aunque el nombre actual cambie.';
+
+COMMENT ON COLUMN public.entry_orders.company_nit_snapshot IS
+'NIT de la empresa al momento de registrar la orden. Se conserva como dato histórico ante cambios posteriores.';
 -- ==========================================
 -- 5. CONSTRAINTS (Unicidad)
 -- ==========================================

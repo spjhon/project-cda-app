@@ -145,6 +145,7 @@ vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_ty
   oficina_consecutivo_factura: string | null;
   se_compro_soat: boolean;
   rate_price_snapshot: number | null;
+  company_nit_snapshot: string | null;
 
   // Resultado de la inspección
   resultado_revision: string | null;

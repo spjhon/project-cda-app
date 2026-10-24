@@ -67,6 +67,7 @@ const rpcArgs: CreateVehicleServiceRateRpcArgs = {
   p_service_types: rate.service_types,
 
   p_fees: rate.fees,
+  p_company_ids: rate.company_ids
 };
 
       const { data, error } = await supabaseBrowser.rpc(

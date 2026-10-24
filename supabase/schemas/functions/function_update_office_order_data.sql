@@ -1,3 +1,15 @@
+
+-- Eliminar la firma anterior porque cambia la lista de parámetros.
+DROP FUNCTION IF EXISTS public.update_office_order_data(
+    uuid,
+    character varying,
+    character varying,
+    boolean,
+    uuid,
+    numeric,
+    jsonb
+);
+
 CREATE OR REPLACE FUNCTION public.update_office_order_data(
     p_order_id uuid,
     p_pin character varying,
@@ -5,6 +17,7 @@ CREATE OR REPLACE FUNCTION public.update_office_order_data(
     p_se_compro_soat boolean,
     p_vehicle_service_rate_id uuid,
     p_rate_price_snapshot numeric(12, 2),
+    p_company_id uuid,
     p_payments jsonb
 )
 RETURNS text
@@ -16,6 +29,9 @@ DECLARE
     v_estado_actual public.order_status_enum;
     v_tenant_id uuid;
 
+    v_company_name text := NULL;
+    v_company_nit text := NULL;
+
     v_payment jsonb;
     v_payment_method public.office_payment_type_enum;
     v_monto numeric(12, 2);
@@ -24,9 +40,7 @@ DECLARE
     v_total_pagos numeric(12, 2) := 0;
 BEGIN
 
-    /*
-     * 1. Obtener la orden
-     */
+    -- 1. Obtener la orden
     SELECT
         estado_orden,
         tenant_id
@@ -43,9 +57,7 @@ BEGIN
     END IF;
 
 
-    /*
-     * 2. Validar estado de la orden
-     */
+    -- 2. Validar estado de la orden
     IF v_estado_actual IN (
         'finalizada'::public.order_status_enum,
         'anulada'::public.order_status_enum
@@ -57,18 +69,7 @@ BEGIN
     END IF;
 
 
-    /*
-     * 3. Validar PIN
-   
-    IF p_pin IS NULL OR TRIM(p_pin) = '' THEN
-        RAISE EXCEPTION
-            'Operación cancelada: No se ha registrado un PIN.';
-    END IF;
-  */
-
-    /*
-     * 4. Validar consecutivo de factura
-     */
+    -- 3. Validar consecutivo de factura
     IF p_consecutivo_factura IS NULL
        OR TRIM(p_consecutivo_factura) = '' THEN
         RAISE EXCEPTION
@@ -76,9 +77,7 @@ BEGIN
     END IF;
 
 
-    /*
-     * 5. Validar tarifa
-     */
+    -- 4. Validar tarifa
     IF p_vehicle_service_rate_id IS NULL THEN
         RAISE EXCEPTION
             'Operación cancelada: No se ha seleccionado una tarifa.';
@@ -91,9 +90,7 @@ BEGIN
     END IF;
 
 
-    /*
-     * 6. Validar que la tarifa pertenezca al mismo tenant
-     */
+    -- 5. Validar que la tarifa pertenezca al mismo tenant
     IF NOT EXISTS (
         SELECT 1
         FROM public.vehicle_service_rate
@@ -105,9 +102,30 @@ BEGIN
     END IF;
 
 
-    /*
-     * 7. Validar payments
-     */
+    -- 6. Obtener y validar la empresa seleccionada.
+    -- Si no se seleccionó empresa, los snapshots permanecen NULL.
+    IF p_company_id IS NOT NULL THEN
+
+        SELECT
+            tc.name,
+            tc.nit
+        INTO
+            v_company_name,
+            v_company_nit
+        FROM public.tenants_company AS tc
+        WHERE tc.id = p_company_id
+          AND tc.tenant_id = v_tenant_id
+          AND tc.deleted_at IS NULL;
+
+        IF NOT FOUND THEN
+            RAISE EXCEPTION
+                'Operación cancelada: La empresa no existe, está eliminada o no pertenece al tenant de la orden.';
+        END IF;
+
+    END IF;
+
+
+    -- 7. Validar payments
     IF p_payments IS NULL
        OR jsonb_typeof(p_payments) <> 'array'
        OR jsonb_array_length(p_payments) = 0 THEN
@@ -116,27 +134,18 @@ BEGIN
     END IF;
 
 
-    /*
-     * 8. Validar cada payment
-     */
+    -- 8. Validar cada payment
     FOR v_payment IN
         SELECT value
         FROM jsonb_array_elements(p_payments)
     LOOP
 
-        /*
-         * Método de pago
-         */
         IF v_payment->>'paymentMethod' IS NULL
            OR TRIM(v_payment->>'paymentMethod') = '' THEN
             RAISE EXCEPTION
                 'Operación cancelada: Todos los pagos deben tener un método de pago seleccionado.';
         END IF;
 
-
-        /*
-         * Convertir al enum existente
-         */
         BEGIN
             v_payment_method :=
                 (v_payment->>'paymentMethod')
@@ -149,10 +158,6 @@ BEGIN
                     v_payment->>'paymentMethod';
         END;
 
-
-        /*
-         * Obtener monto
-         */
         BEGIN
             v_monto :=
                 (v_payment->>'amount')::numeric;
@@ -163,19 +168,11 @@ BEGIN
                     'Operación cancelada: El valor de un pago no es válido.';
         END;
 
-
-        /*
-         * Validar monto
-         */
         IF v_monto IS NULL OR v_monto <= 0 THEN
             RAISE EXCEPTION
                 'Operación cancelada: Todos los pagos deben tener un valor mayor que cero.';
         END IF;
 
-
-        /*
-         * Obtener comprobante
-         */
         v_num_comprobante :=
             NULLIF(
                 TRIM(
@@ -187,10 +184,6 @@ BEGIN
                 ''
             );
 
-
-        /*
-         * Las tarjetas requieren voucher/comprobante
-         */
         IF v_payment_method IN (
             'tarjeta_debito'::public.office_payment_type_enum,
             'tarjeta_credito'::public.office_payment_type_enum
@@ -200,20 +193,12 @@ BEGIN
                 'Operación cancelada: Las transacciones con tarjeta requieren un número de voucher o comprobante.';
         END IF;
 
-
-        /*
-         * Acumular total de pagos
-         */
-        v_total_pagos :=
-            v_total_pagos + v_monto;
+        v_total_pagos := v_total_pagos + v_monto;
 
     END LOOP;
 
 
-    /*
-     * 9. Validar que el total de los pagos
-     *    sea igual al valor de la orden
-     */
+    -- 9. Validar que el total pagado coincida con la tarifa
     IF v_total_pagos <> p_rate_price_snapshot THEN
         RAISE EXCEPTION
             'Operación cancelada: El total de los pagos ($%) no coincide con el valor a pagar ($%).',
@@ -222,9 +207,7 @@ BEGIN
     END IF;
 
 
-    /*
-     * 10. Actualizar la orden
-     */
+    -- 10. Actualizar la orden y guardar el histórico de la empresa
     UPDATE public.entry_orders
     SET
         oficina_pin =
@@ -242,23 +225,27 @@ BEGIN
         rate_price_snapshot =
             p_rate_price_snapshot,
 
+        company_id =
+            p_company_id,
+
+        company_name_snapshot =
+            v_company_name,
+
+        company_nit_snapshot =
+            v_company_nit,
+
         estado_orden =
             'en_prueba'::public.order_status_enum
 
     WHERE id = p_order_id;
 
 
-
-    /*
-    * Se hace un delete de los datos anterirores en caso de que se actualizen los metodos de pago al enviar nuevamente la info
-    */
-
+    -- 11. Reemplazar los pagos anteriores
     DELETE FROM public.entry_order_payments
     WHERE entry_order_id = p_order_id;
 
-    /*
-     * 11. Insertar los payments
-     */
+
+    -- 12. Insertar los nuevos pagos
     FOR v_payment IN
         SELECT value
         FROM jsonb_array_elements(p_payments)

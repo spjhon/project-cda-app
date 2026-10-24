@@ -42,6 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext"
@@ -53,7 +54,11 @@ import {
 import { AddRateDialog } from "./AddRate"
 import { useUpdateVehicleRateActive } from "@/lib/client-actions/update_vehicle_service_rate_is_active"
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog"
-import { DeleteRateDialog } from "./DeleteRateDialog"
+import { useDeleteVehicleRate } from "@/lib/client-actions/delete_vehicle_service_rate"
+import { GenericConfirmDialog } from "@/components/feedbackDialogs/GenericConfirmDialog"
+
+
+
 
 // ==========================================
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
@@ -377,7 +382,8 @@ export default function RatesTable() {
     permissionsContextRecived?.PermissionsContextValue
       .tenantObject?.id
 
-  const updateVehicleRateActiveMutation = useUpdateVehicleRateActive()
+  const updateVehicleRateActiveMutation = useUpdateVehicleRateActive();
+  const deleteVehicleRateMutation = useDeleteVehicleRate();
 
  
 
@@ -425,16 +431,11 @@ const handleToggleActive = (rate: VehicleRate) => {
   // PLACEHOLDER MUTATION: ELIMINAR
   // ==========================================
 
-  const handleDeleteRate = (rate: VehicleRate) => {
-    console.log(
-      "PLACEHOLDER: eliminar rate",
-      rate.id,
-    )
-
-    // TODO:
-    // Aquí irá la mutación para eliminar/desactivar
-    // la tarifa.
-  }
+  const handleDeleteRate = async (rate: VehicleRate): Promise<void> => {
+  await deleteVehicleRateMutation.mutateAsync({
+    id: rate.id,
+  });
+};
 
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS
@@ -666,6 +667,67 @@ columnHelper.accessor("is_active", {
     )
   },
 }),
+
+
+
+ // ------------------------------------------
+ // COMPANIES
+ // ------------------------------------------
+
+columnHelper.accessor("companies", {
+  header: "Empresas relacionadas",
+  cell: (info) => {
+    const companies = info.getValue() ?? [];
+    const hasCompanies = companies.length > 0;
+
+    return (
+      <Dialog>
+        <DialogTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit whitespace-nowrap"
+            />
+          }
+        >
+          {hasCompanies
+            ? `Ver empresas (${companies.length})`
+            : "General"}
+        </DialogTrigger>
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Empresas relacionadas
+            </DialogTitle>
+            <DialogDescription>
+              Empresas asociadas a esta tarifa.
+            </DialogDescription>
+          </DialogHeader>
+
+          {hasCompanies ? (
+            <ul className="flex flex-col gap-2">
+              {companies.map((company) => (
+                <li
+                  key={company.id}
+                  className="rounded-md border px-3 py-2"
+                >
+                  {company.name}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Esta es una tarifa general, sin empresas asociadas.
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  },
+}),
+
 
       // ------------------------------------------
 // ACCIONES
@@ -1071,14 +1133,41 @@ function FeesCell({
 // ACCIONES DE LA FILA
 // ==========================================
 
+
 function RateActionsCell({
   rate,
   onDelete,
+  isPending = false,
 }: {
-  rate: VehicleRate
-  onDelete: (rate: VehicleRate) => void
+  rate: VehicleRate;
+  onDelete: (rate: VehicleRate) => Promise<void>;
+  isPending?: boolean;
 }) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleConfirmDelete = async () => {
+    try {
+      await onDelete(rate);
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al eliminar la tarifa.",
+      );
+    }
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (isPending) return;
+
+    setIsDeleteDialogOpen(open);
+
+    if (open) {
+      setDeleteError(null);
+    }
+  };
 
   return (
     <>
@@ -1089,15 +1178,26 @@ function RateActionsCell({
         className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
         onClick={() => setIsDeleteDialogOpen(true)}
         title="Eliminar tarifa"
+        aria-label="Eliminar tarifa"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
 
-      <DeleteRateDialog
-        rate={rate}
+      <GenericConfirmDialog
         open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+        onOpenChange={handleDialogOpenChange}
+        title="¿Eliminar tarifa?"
+        description={
+          deleteError
+            ? `No fue posible eliminar la tarifa: ${deleteError}`
+            : "Esta acción eliminará la tarifa seleccionada. ¿Deseas continuar?"
+        }
+        itemName="Tarifa de vehículo"
+        itemDetails={`ID: ${rate.id}`}
+        confirmText="Eliminar tarifa"
+        onConfirm={handleConfirmDelete}
+        isPending={isPending}
       />
     </>
-  )
+  );
 }

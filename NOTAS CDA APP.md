@@ -10,6 +10,8 @@ DIRECTOR TECNICO
 
 ## CLI Commands I Use Frequently
 
+Mandar las migraciones de local a la nube linkeada de supabase: `pnpx supabase db push --linked`
+
 Local Types Generation: `pnpx supabase gen types typescript --local > supabase/types/database.types.ts` o `pnpx supabase gen types typescript --db-url "postgresql://postgres:postgres@localhost:54322/postgres?sslmode=disable" > supabase/types/database.types.ts` y luego `pnpx oxfmt supabase/types/database.types.ts`
 
 Make full local system schema backup: `pnpx supabase db dump --local > backup_completo.sql` o `pnpx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" > backup_schema.sql`

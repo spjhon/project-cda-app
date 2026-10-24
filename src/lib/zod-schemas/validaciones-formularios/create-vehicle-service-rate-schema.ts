@@ -162,6 +162,13 @@ export const createVehicleServiceRateSchema = z.object({
     )
   ),
 
+   // ==========================================
+  // COMPANIES
+  // ==========================================
+  company_ids: z
+    .array(z.string("El ID de la empresa no es válido"))
+    .nullable(),
+
   // ==========================================
   // FEES
   // ==========================================

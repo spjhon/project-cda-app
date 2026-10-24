@@ -1052,10 +1052,13 @@ function GeneralInfoSection({ orderData, fechaEntrada }: {
 // 3. DATOS DEL VEHÍCULO
 // --------------------------------------------------
 function VehicleSection({ orderData }: { orderData: FetchEntryOrderResult | undefined}) {
-  const formatFechaSnapshot = (dateString: string | undefined) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('es-CO');
-  };
+
+
+const formatFechaSnapshot = (dateString: string | undefined) => {
+  if (!dateString) return "N/A";
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("es-CO");
+};
 
   return (
     <View style={sectionStyles.sectionContainer}>

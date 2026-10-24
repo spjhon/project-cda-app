@@ -19,6 +19,7 @@ interface UpdateOfficeOrderArgs {
   vehicleServiceRateId: string;
   ratePriceSnapshot: number;
   service_type: Database["public"]["Enums"]["service_type_enum"];
+  companyId: string | null;
 }
 
 export async function insertOficinaData({
@@ -27,7 +28,8 @@ export async function insertOficinaData({
   payments,
   vehicleServiceRateId,
   ratePriceSnapshot,
-  service_type
+  service_type,
+  companyId
 }: UpdateOfficeOrderArgs) {
   if (!orderId || orderId === "") {
     return {
@@ -120,10 +122,13 @@ export async function insertOficinaData({
         validatedFields.data.se_compro_soat,
       p_vehicle_service_rate_id: vehicleServiceRateId,
       p_rate_price_snapshot: ratePriceSnapshot,
+       // ✅ Parámetro independiente del RPC
+   p_company_id: companyId!,
        p_payments: payments.map((payment) => ({
       paymentMethod: payment.payment_method,
       amount: payment.monto_bruto,
       receiptNumber: payment.num_comprobante ?? null,
+      
     })),
     });
 

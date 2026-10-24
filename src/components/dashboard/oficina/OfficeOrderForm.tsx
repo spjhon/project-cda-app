@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ import CancelOrder from "../_shared/CancelOrder";
 import { useOrderRate } from "@/lib/client-actions/fetch_entry_order_rate";
 import OrderPayments from "./OrderPayments";
 import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_types";
+import { CompanyRateSelectorSingle } from "./CompanyRateSelectorSingle";
+import { useCompanies } from "@/lib/client-actions/fetch_tenant_companies";
 
 
 
@@ -37,6 +39,12 @@ export default function OfficeOrderForm({
   tenantId,
 }: OfficeOrderFormProps) {
   const queryClient = useQueryClient();
+
+
+
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+
+console.log("Este es el id de la empresa seleccionada: ", orden.company_nit_snapshot)
 
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,8 +74,46 @@ const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
     error: orderRateError,
     isError: isOrderRateError,
   } = useOrderRate({
+    companyId: selectedCompanyId,
     orderId: orden.id,
   });
+
+
+
+
+
+/**
+ * Cuando dependes de datos asíncronos externos (como los que trae useCompanies()), 
+ * actualizar el estado local de manera inmediata y síncrona dentro de un useEffect (setSelectedCompanyId) 
+ * puede provocar que React intente re-renderizar el componente antes de que termine el ciclo de renderizado actual.
+ * Al envolverlo en un setTimeout(..., 0), le dices a JavaScript: "Termina de procesar este renderizado actual y, 
+ * justo en el próximo ciclo del Event Loop, actualiza el estado". Esto rompe el ciclo síncrono.
+ */
+  const { data: companies, isSuccess } = useCompanies();
+
+  useEffect(() => {
+  if (!isSuccess || !orden.company_nit_snapshot || !companies) return;
+
+  const company = companies.find(
+    (company) => company.nit === orden.company_nit_snapshot
+  );
+
+  if (!company) return;
+
+  const timeoutId = setTimeout(() => {
+    setSelectedCompanyId(company.id);
+  }, 0);
+
+  return () => clearTimeout(timeoutId);
+}, [isSuccess, companies, orden.company_nit_snapshot]);
+
+
+
+
+
+
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -132,7 +178,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       payments: payments,
       vehicleServiceRateId: orderRate.rateId,
       ratePriceSnapshot: orderRate.totalPrice,
-      service_type: orden.service_type
+      service_type: orden.service_type,
+       companyId: selectedCompanyId,
     });
 
     if (error || !data) {
@@ -141,11 +188,13 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
+    queryClient.invalidateQueries({
+      queryKey: ["entry_orders", "list"],
+    });
+
     alert(data);
 
-    queryClient.invalidateQueries({
-      queryKey: ["entry-orders", "list"],
-    });
+    
   } catch (error: unknown) {
     alert(
       "Ocurrio un error inesperado en la validacion: " + error,
@@ -173,7 +222,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const paymentMatches = totalPayments === totalToPay;
 
-  console.log(orden.service_type)
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -280,6 +329,18 @@ const handleSubmit = async (e: React.FormEvent) => {
               </span>
             </div>
           </div>
+
+          <div className="sm:col-span-2">
+  <CompanyRateSelectorSingle
+    value={selectedCompanyId}
+    onValueChange={setSelectedCompanyId}
+    disabled={
+      orden.estado_orden === "finalizada" ||
+      orden.estado_orden === "anulada" ||
+      orden.es_reinspeccion
+    }
+  />
+</div>
 
           {/* Métodos de pago */}
           <div className="sm:col-span-2">

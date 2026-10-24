@@ -544,7 +544,7 @@ if (activeModules.includes("sarlaft")) {
 
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
         setSignatureKey((prev) => prev + 1);
-        queryClient.invalidateQueries({ queryKey: ["entry-orders", "list"] });
+        queryClient.invalidateQueries({ queryKey: ["entry_orders", "list"] });
 
         /** 
         const supabase = createSupabaseBrowserClient();

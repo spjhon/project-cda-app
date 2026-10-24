@@ -1,3 +1,4 @@
+
 -- ============================================================
 -- RPC: OBTENER TODAS LAS TARIFAS DE SERVICIOS
 -- ============================================================
@@ -13,6 +14,7 @@
 --   - Classes asociadas
 --   - Service types asociados
 --   - Fees asociados
+--   - Empresas relacionadas
 --
 -- Las relaciones se devuelven como arreglos JSONB para mantener
 -- una sola fila por cada tarifa.
@@ -34,7 +36,8 @@ RETURNS TABLE (
     fuels JSONB,
     classes JSONB,
     service_types JSONB,
-    fees JSONB
+    fees JSONB,
+    companies JSONB
 )
 
 LANGUAGE sql
@@ -66,6 +69,7 @@ AS $$
                 )
                 FROM public.vehicle_service_rate_fuels AS vsrf
                 WHERE vsrf.vehicle_service_rate_id = vsr.id
+                  AND vsrf.tenant_id = vsr.tenant_id
             ),
             '[]'::JSONB
         ) AS fuels,
@@ -82,6 +86,7 @@ AS $$
                 )
                 FROM public.vehicle_service_rate_classes AS vsrc
                 WHERE vsrc.vehicle_service_rate_id = vsr.id
+                  AND vsrc.tenant_id = vsr.tenant_id
             ),
             '[]'::JSONB
         ) AS classes,
@@ -98,6 +103,7 @@ AS $$
                 )
                 FROM public.vehicle_service_rate_service_types AS vsrst
                 WHERE vsrst.vehicle_service_rate_id = vsr.id
+                  AND vsrst.tenant_id = vsr.tenant_id
             ),
             '[]'::JSONB
         ) AS service_types,
@@ -125,9 +131,35 @@ AS $$
                 )
                 FROM public.fee_types AS ft
                 WHERE ft.vehicle_service_rate_id = vsr.id
+                  AND ft.tenant_id = vsr.tenant_id
             ),
             '[]'::JSONB
-        ) AS fees
+        ) AS fees,
+
+        -- ====================================================
+        -- EMPRESAS RELACIONADAS
+        -- ====================================================
+
+        COALESCE(
+            (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'id', tc.id,
+                        'name', tc.name
+                    )
+                    ORDER BY tc.name
+                )
+                FROM public.vehicle_service_rate_companies AS vsrc
+                INNER JOIN public.tenants_company AS tc
+                    ON tc.id = vsrc.company_id
+                   AND tc.tenant_id = vsrc.tenant_id
+                WHERE vsrc.vehicle_service_rate_id = vsr.id
+                  AND vsrc.tenant_id = vsr.tenant_id
+                  AND tc.tenant_id = vsr.tenant_id
+                  AND tc.deleted_at IS NULL
+            ),
+            '[]'::JSONB
+        ) AS companies
 
     FROM public.vehicle_service_rate AS vsr
 

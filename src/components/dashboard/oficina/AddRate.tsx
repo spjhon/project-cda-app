@@ -43,6 +43,8 @@ import FeesTable from "./FeesTable";
 import { useCreateVehicleServiceRate } from "@/lib/client-actions/create_vehicle_service_rate";
 import { createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
 import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
+import { CompanyRateSelector } from "./CompanyRateSelector";
+import { useQueryClient } from "@tanstack/react-query";
 
 // -----------------------------------------------------------------------------
 // OPCIONES
@@ -155,17 +157,32 @@ const RATE_SERVICE_TYPES: {
 
 
 interface RateFormState {
+  tenant_id: string
+  name: string
+  service_type: ServiceType | ""
+  vehicle_type: VehicleType | ""
+  fuels: FuelType[]
+  classes: VehicleClass[]
+  service_types: VehicleServiceType[]
+  base_price_rtm: string
+  iva_percentage: string
+  fees: CreateFeeInput[]
+  company_ids: string[]
+}
+
+type CreateVehicleServiceRateData = {
   tenant_id: string;
   name: string;
-  service_type: ServiceType | "";
-  vehicle_type: VehicleType | "";
+  service_type: ServiceType | null;
+  vehicle_type: VehicleType | null;
   fuels: FuelType[];
   classes: VehicleClass[];
   service_types: VehicleServiceType[];
-  base_price_rtm: string;
-  iva_percentage: string;
+  base_price_rtm: number | null;
+  iva_percentage: number | null;
   fees: CreateFeeInput[];
-}
+  company_ids: string[];
+};
 
 interface MultiSelectOption<T extends string> {
   value: T;
@@ -295,7 +312,6 @@ function MultiSelectField<T extends string>({
 // -----------------------------------------------------------------------------
 // INITIAL STATE
 // -----------------------------------------------------------------------------
-
 const INITIAL_FORM: RateFormState = {
   tenant_id: "",
   name: "",
@@ -307,7 +323,8 @@ const INITIAL_FORM: RateFormState = {
   base_price_rtm: "",
   iva_percentage: "",
   fees: [],
-};
+  company_ids: [],
+}
 
 // -----------------------------------------------------------------------------
 // COMPONENTE
@@ -315,6 +332,8 @@ const INITIAL_FORM: RateFormState = {
 
 export function AddRateDialog() {
   const contextReceived = useContext(PermissionsContext);
+
+const queryClient = useQueryClient()
 
   const tenantId = contextReceived?.PermissionsContextValue?.tenantObject?.id;
 
@@ -367,11 +386,20 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 // DATOS DEL FORMULARIO
 // ========================================================
 
-const data = {
+const data: CreateVehicleServiceRateData = {
   tenant_id: form.tenant_id,
   name: form.name.trim(),
-  service_type: form.service_type,
-  vehicle_type: form.vehicle_type,
+
+  service_type:
+    form.service_type === ""
+      ? null
+      : form.service_type,
+
+  vehicle_type:
+    form.vehicle_type === ""
+      ? null
+      : form.vehicle_type,
+
   fuels: form.fuels,
   classes: form.classes,
   service_types: form.service_types,
@@ -387,6 +415,7 @@ const data = {
       : Number(form.iva_percentage),
 
   fees: form.fees,
+  company_ids: form.company_ids,
 };
 
   // ========================================================
@@ -426,13 +455,20 @@ createVehicleServiceRateMutation.mutate(
     service_types: result.data.service_types,
 
     fees: result.data.fees,
+    company_ids: result.data.company_ids
   },
   {
-    onSuccess: () => {
-      setSuccessMessages("La tarifa fue creada correctamente.");
-      setIsSuccessOpen(true);
-       setIsOpen(false);
-    },
+    onSuccess: async () => {
+  await queryClient.invalidateQueries({
+    queryKey: ["vehicle-rates", form.tenant_id],
+    exact: true,
+  })
+
+  setSuccessMessages("La tarifa fue creada correctamente.")
+
+  setIsSuccessOpen(true)
+  setIsOpen(false)
+},
     onError: (error) => {
       setErrors(error.message);
       setIsErrorOpen(true);
@@ -605,6 +641,11 @@ createVehicleServiceRateMutation.mutate(
                   description="Seleccione los tipos de servicio a los que aplicará este rate."
                 />
               </div>
+
+              <CompanyRateSelector
+  form={form}
+  setForm={setForm}
+/>
 
               {/* ----------------------------------------------------------------
                   PRECIO BASE

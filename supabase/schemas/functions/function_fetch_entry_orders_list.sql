@@ -43,6 +43,7 @@ RETURNS TABLE (
     oficina_consecutivo_factura CHARACTER VARYING,
     se_compro_soat BOOLEAN,
     rate_price_snapshot NUMERIC(12, 2),
+    company_nit_snapshot TEXT,
     resultado_revision TEXT,
     consecutivo_fur CHARACTER VARYING,
     consecutivo_rtm CHARACTER VARYING,
@@ -107,7 +108,7 @@ BEGIN
                 THEN old_o.rate_price_snapshot
                 ELSE o.rate_price_snapshot
             END AS rate_price_snapshot,
-
+            o.company_nit_snapshot,
             o.resultado_revision,
             o.consecutivo_fur,
             o.consecutivo_rtm,

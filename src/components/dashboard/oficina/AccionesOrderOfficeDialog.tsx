@@ -28,7 +28,6 @@ export default function AccionesOrderOfficeDialog({
   orden,
   tenantId,
   rol,
-  
   open,
   onOpenChange,
 }: AccionesOrderOfficeDialogProps) {

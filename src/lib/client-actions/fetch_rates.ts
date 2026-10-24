@@ -49,6 +49,15 @@ export interface VehicleRateFee {
 // TIPO DE RATE
 // ============================================================
 
+// ============================================================
+// TIPO DE EMPRESA RELACIONADA
+// ============================================================
+
+export interface VehicleRateCompany {
+  id: string
+  name: string
+}
+
 export interface VehicleRate {
   id: string
   tenant_id: string
@@ -68,6 +77,9 @@ export interface VehicleRate {
   service_types: VehicleServiceType[]
 
   fees: VehicleRateFee[]
+
+  // Empresas relacionadas con la tarifa
+  companies: VehicleRateCompany[]
 }
 
 
