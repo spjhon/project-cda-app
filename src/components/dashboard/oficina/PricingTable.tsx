@@ -58,6 +58,7 @@ import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDia
 import { useDeleteVehicleRate } from "@/lib/client-actions/delete_vehicle_service_rate"
 import { GenericConfirmDialog } from "@/components/feedbackDialogs/GenericConfirmDialog"
 import { calculateVehicleRateTotal } from "@/lib/utils/calculate-vehicle-rate-total";
+import { RatePriceDialog } from "./RatePriceDialog";
 
 
 
@@ -691,28 +692,20 @@ columnHelper.accessor("name", {
         },
       }),
 
-      // ------------------------------------------
-// PRECIO TOTAL FINAL
-// ------------------------------------------
-columnHelper.display({
-  id: "total_price",
-  header: "Precio final",
-  cell: ({ row }) => {
-    const rate = row.original
+ // ------------------------------------------
+ // PRECIO TOTAL FINAL
+ // ------------------------------------------
+ columnHelper.display({
+   id: "total_price",
+   header: "Precio final",
+   cell: ({ row }) => {
+     const rate = row.original
 
-    const totalPrice = calculateVehicleRateTotal({
-      basePrice: rate.base_price,
-      ivaPercentage: rate.iva_percentage,
-      fees: rate.fees,
-    })
-
-    return (
-      <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm whitespace-nowrap">
-        ${totalPrice.toLocaleString("es-CO")}
-      </span>
-    )
-  },
-}),
+     return (
+       <RatePriceDialog rate={rate} />
+     )
+   },
+ }),
 
       // ------------------------------------------
       // ACCIONES
