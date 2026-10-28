@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
+import { cn } from "cn"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
@@ -94,15 +94,16 @@ function Carousel({
   }, [api, setApi])
 
   React.useEffect(() => {
-    if (!api) return
-    onSelect(api)
-    api.on("reInit", onSelect)
-    api.on("select", onSelect)
+  if (!api) return
 
-    return () => {
-      api?.off("select", onSelect)
-    }
-  }, [api, onSelect])
+  api.on("reInit", onSelect)
+  api.on("select", onSelect)
+
+  return () => {
+    api.off("reInit", onSelect)
+    api.off("select", onSelect)
+  }
+}, [api, onSelect])
 
   return (
     <CarouselContext.Provider
