@@ -700,7 +700,7 @@ columnHelper.accessor("name", {
    header: "Precio final",
    cell: ({ row }) => {
      const rate = row.original
-
+    console.log(rate)
      return (
        <RatePriceDialog rate={rate} />
      )

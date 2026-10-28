@@ -378,7 +378,7 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   const normalizedRate = {
   ...form,
   iva_percentage:
-    form.iva_percentage === "" ? null : form.iva_percentage,
+    form.iva_percentage === "" ? null : Number(form.iva_percentage),
   base_price_rtm: Number(form.base_price_rtm)
 };
 

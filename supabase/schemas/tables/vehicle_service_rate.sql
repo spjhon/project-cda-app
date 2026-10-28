@@ -81,19 +81,7 @@ ON public.vehicle_service_rate (
 );
 
 
--- ============================================================
--- RESTRICCIÓN DE DUPLICADOS ACTIVOS
--- ============================================================
 
--- Un tenant no puede tener dos tarifas activas para la
--- misma combinación de tipo de vehículo y servicio.
-CREATE UNIQUE INDEX vehicle_service_rate_active_unique_idx
-ON public.vehicle_service_rate (
-    tenant_id,
-    vehicle_type,
-    service_type
-)
-WHERE is_active = TRUE;
 
 
 -- ============================================================
