@@ -26,24 +26,37 @@ type VehicleClass =
 type VehicleServiceType =
   Database["public"]["Enums"]["vehicle_service_type_enum"]
 
+  type VehicleRateFee =
+  Database["public"]["Tables"]["fee_types"]["Row"]
 
 // ============================================================
 // TIPO DE FEE
 // ============================================================
 
-export interface VehicleRateFee {
+export interface VehicleRate {
   id: string
   tenant_id: string
   name: string
-  description: string | null
-  fee_amount: number
-  iva_percentage: number | null
-  vehicle_age_from: number | null
-  vehicle_age_to: number | null
-  created_at: string
-  updated_at: string
-}
 
+  vehicle_type: VehicleType
+
+  base_price: number
+  iva_percentage: number | null
+
+  service_type: ServiceType
+
+  is_active: boolean
+  created_at: string
+
+  fuels: FuelType[]
+  classes: VehicleClass[]
+  service_types: VehicleServiceType[]
+
+  fees: VehicleRateFee[]
+
+  // Empresas relacionadas con la tarifa
+  companies: VehicleRateCompany[]
+}
 
 // ============================================================
 // TIPO DE RATE

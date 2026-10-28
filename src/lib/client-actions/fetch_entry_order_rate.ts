@@ -4,6 +4,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
+import { calculateVehicleRateTotal } from "../utils/calculate-vehicle-rate-total"
 
 interface UseOrderRateArgs {
   orderId: string | undefined
@@ -83,46 +84,12 @@ export function useOrderRate({
 
       const basePrice = Number(rate.base_price)
 
-      /**
-       * IVA del precio base de la tarifa.
-       * Se redondea individualmente antes de sumarlo.
-       */
-      const baseIva =
-        rate.iva_percentage != null
-          ? Math.round(
-              basePrice * (Number(rate.iva_percentage) / 100),
-            )
-          : 0
-
-      /**
-       * Calcular el valor de cada fee incluyendo
-       * únicamente su propio IVA cuando corresponda.
-       * El IVA de cada fee se redondea individualmente.
-       */
-      const feesTotal = (rate.fees ?? []).reduce(
-        (total, fee) => {
-          const feeAmount = Number(fee.fee_amount)
-
-          const feeIva =
-            fee.iva_percentage != null
-              ? Math.round(
-                  feeAmount *
-                    (Number(fee.iva_percentage) / 100),
-                )
-              : 0
-
-          return total + feeAmount + feeIva
-        },
-        0,
-      )
-
-      /**
-       * Precio final:
-       * precio base + IVA base + fees + IVA de cada fee.
-       */
-      const totalPrice = Math.round(
-        basePrice + baseIva + feesTotal,
-      )
+      
+const totalPrice = calculateVehicleRateTotal({
+  basePrice,
+  ivaPercentage: rate.iva_percentage,
+  fees: rate.fees ?? [],
+})
 
       return {
         rateId: rate.rate_id,

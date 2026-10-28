@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 
 import { useMutation } from "@tanstack/react-query";
 
@@ -7,43 +6,25 @@ import { createSupabaseBrowserClient } from "../supabase/client";
 
 import {
   CreateVehicleServiceRateInput,
-  createVehicleServiceRateSchema,
 } from "../zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
-
 import { Database } from "../../../supabase/types/database.types";
 
-// ============================================================
-// TIPOS
-// ============================================================
-
-type CreateVehicleServiceRateRpcArgs =
-  Omit<
-    Database["public"]["Functions"]["create_vehicle_service_rate"]["Args"],
-    "p_iva_percentage"
-  > & {
-    p_iva_percentage: number | null;
-  };
 
 // ============================================================
 // HOOK
 // ============================================================
 
+
 export function useCreateVehicleServiceRate() {
   return useMutation({
-
     mutationFn: async (rate: CreateVehicleServiceRateInput) => {
-
       // ========================================================
       // VALIDAR DATOS
       // ========================================================
 
-      const result = createVehicleServiceRateSchema.safeParse(rate);
 
-      if (!result.success) {
-        throw new Error(
-          result.error.issues.map((issue) => issue.message).join("\n")
-        );
-      }
+      
+     
 
       // ========================================================
       // CLIENTE SUPABASE
@@ -52,11 +33,12 @@ export function useCreateVehicleServiceRate() {
       const supabaseBrowser = createSupabaseBrowserClient();
 
       // ========================================================
-// CREAR RATE PRINCIPAL
-// ========================================================
+      // CREAR RATE PRINCIPAL
+      // ========================================================
 
-const rpcArgs: CreateVehicleServiceRateRpcArgs = {
+      const rpcArgs = {
   p_tenant_id: rate.tenant_id,
+  p_name: rate.name,
   p_vehicle_type: rate.vehicle_type,
   p_base_price_rtm: Number(rate.base_price_rtm),
   p_iva_percentage: rate.iva_percentage,
@@ -67,7 +49,7 @@ const rpcArgs: CreateVehicleServiceRateRpcArgs = {
   p_service_types: rate.service_types,
 
   p_fees: rate.fees,
-  p_company_ids: rate.company_ids
+  p_company_ids: rate.company_ids,
 };
 
       const { data, error } = await supabaseBrowser.rpc(
@@ -89,7 +71,7 @@ const rpcArgs: CreateVehicleServiceRateRpcArgs = {
 
       if (!data) {
         throw new Error(
-          "La tarifa no pudo crearse. No se recibió el identificador de la tarifa. Verifica los permisos de escritura y las políticas RLS."
+          "La tarifa no pudo crearse. No se recibió el identificador de la tarifa. Verifica los permisos de escritura y las políticas RLS.",
         );
       }
 
@@ -99,6 +81,5 @@ const rpcArgs: CreateVehicleServiceRateRpcArgs = {
 
       return data;
     },
-
   });
 }

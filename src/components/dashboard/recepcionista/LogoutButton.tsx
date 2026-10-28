@@ -2,7 +2,7 @@
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils"; 
+import { cn } from "@/lib/utils/utils"; 
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

@@ -18,7 +18,7 @@ import type { OrderTemplateInput } from "@/lib/zod-schemas/order-template-schema
 import { createOrderTemplateAction } from "@/lib/server-actions/order-template-validation";
 
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

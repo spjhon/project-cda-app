@@ -533,14 +533,14 @@ isOneToOne: false
                   ]
                 },"vehicle_service_rate": {
                   Row: {
-                    "base_price": number,"created_at": string,"id": string,"is_active": boolean,"iva_percentage": number | null,"service_type": Database["public"]['Enums']["service_type_enum"],"tenant_id": string,"updated_at": string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
+                    "base_price": number,"created_at": string,"id": string,"is_active": boolean,"iva_percentage": number | null,"name": string,"service_type": Database["public"]['Enums']["service_type_enum"],"tenant_id": string,"updated_at": string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "base_price": number,"created_at"?: string,"id"?: string,"is_active"?: boolean,"iva_percentage"?: number | null,"service_type": Database["public"]['Enums']["service_type_enum"],"tenant_id": string,"updated_at"?: string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
+                    "base_price": number,"created_at"?: string,"id"?: string,"is_active"?: boolean,"iva_percentage"?: number | null,"name": string,"service_type": Database["public"]['Enums']["service_type_enum"],"tenant_id": string,"updated_at"?: string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
                   }
                   Update: {
-                    "base_price"?: number,"created_at"?: string,"id"?: string,"is_active"?: boolean,"iva_percentage"?: number | null,"service_type"?: Database["public"]['Enums']["service_type_enum"],"tenant_id"?: string,"updated_at"?: string,"vehicle_type"?: Database["public"]['Enums']["vehicle_type_enum"]
+                    "base_price"?: number,"created_at"?: string,"id"?: string,"is_active"?: boolean,"iva_percentage"?: number | null,"name"?: string,"service_type"?: Database["public"]['Enums']["service_type_enum"],"tenant_id"?: string,"updated_at"?: string,"vehicle_type"?: Database["public"]['Enums']["vehicle_type_enum"]
                   }
                   Relationships: [
                     {
@@ -765,7 +765,7 @@ isOneToOne: false
         isSetofReturn: false
       } },
 "create_vehicle_service_rate":
-{ Args: { "p_base_price_rtm": number,"p_classes"?: Json,"p_company_ids"?: Json,"p_fees"?: Json,"p_fuels"?: Json,"p_iva_percentage": number,"p_service_type": Database["public"]['Enums']["service_type_enum"],"p_service_types"?: Json,"p_tenant_id": string,"p_vehicle_type": Database["public"]['Enums']["vehicle_type_enum"] }; Returns: string
+{ Args: { "p_base_price_rtm": number,"p_classes"?: Json,"p_company_ids"?: Json,"p_fees"?: Json,"p_fuels"?: Json,"p_iva_percentage": number,"p_name": string,"p_service_type": Database["public"]['Enums']["service_type_enum"],"p_service_types"?: Json,"p_tenant_id": string,"p_vehicle_type": Database["public"]['Enums']["vehicle_type_enum"] }; Returns: string
                            },
 "fetch_admin_analitics":
 { Args: { "p_ano_solicitado": number,"p_mes_solicitado": number,"p_servicio_tipo"?: Database["public"]['Enums']["service_type_enum"],"p_tenant_id": string }; Returns: {
@@ -839,7 +839,7 @@ isOneToOne: false
                            },
 "fetch_vehicle_service_rates":
 { Args: { "p_tenant_id": string }; Returns: {
-              "base_price": number,"classes": Json,"companies": Json,"created_at": string,"fees": Json,"fuels": Json,"id": string,"is_active": boolean,"iva_percentage": number,"service_type": Database["public"]['Enums']["service_type_enum"],"service_types": Json,"tenant_id": string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
+              "base_price": number,"classes": Json,"companies": Json,"created_at": string,"fees": Json,"fuels": Json,"id": string,"is_active": boolean,"iva_percentage": number,"name": string,"service_type": Database["public"]['Enums']["service_type_enum"],"service_types": Json,"tenant_id": string,"vehicle_type": Database["public"]['Enums']["vehicle_type_enum"]
             }[]
                            },
 "get_analitica_personalizada":

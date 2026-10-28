@@ -17,6 +17,7 @@ const VEHICLE_TYPES: Database["public"]["Enums"]["vehicle_type_enum"][] = [
   "motocarro_2t",
   "motocicleta_electrica",
   "motocarro_diesel",
+  
 ];
 
 const SERVICE_TYPES: Database["public"]["Enums"]["service_type_enum"][] = [
@@ -25,6 +26,7 @@ const SERVICE_TYPES: Database["public"]["Enums"]["service_type_enum"][] = [
   "preventiva_viajero",
   "peritaje",
   "prueba_gases",
+  
 ];
 
 const FUEL_TYPES: Database["public"]["Enums"]["fuel_type_enum"][] = [
@@ -83,6 +85,15 @@ export const createVehicleServiceRateSchema = z.object({
   tenant_id: z.string(
     "No se encontró un tenant válido"
   ),
+
+  // ==========================================
+// NOMBRE
+// ==========================================
+
+name: z
+  .string("El nombre debe ser un texto")
+  .trim()
+  .min(3, "El nombre es obligatorio"),
 
   // ==========================================
   // TIPO DE VEHÍCULO

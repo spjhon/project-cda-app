@@ -57,6 +57,7 @@ import { useUpdateVehicleRateActive } from "@/lib/client-actions/update_vehicle_
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog"
 import { useDeleteVehicleRate } from "@/lib/client-actions/delete_vehicle_service_rate"
 import { GenericConfirmDialog } from "@/components/feedbackDialogs/GenericConfirmDialog"
+import { calculateVehicleRateTotal } from "@/lib/utils/calculate-vehicle-rate-total";
 
 
 
@@ -472,6 +473,18 @@ const columns = useMemo(
       }),
 
       // ------------------------------------------
+// NOMBRE DE LA TARIFA
+// ------------------------------------------
+columnHelper.accessor("name", {
+  header: "Nombre",
+  cell: (info) => (
+    <span className="font-semibold text-foreground text-sm">
+      {info.getValue()}
+    </span>
+  ),
+}),
+
+      // ------------------------------------------
       // SERVICIO
       // ------------------------------------------
       columnHelper.accessor("service_type", {
@@ -677,6 +690,29 @@ const columns = useMemo(
           );
         },
       }),
+
+      // ------------------------------------------
+// PRECIO TOTAL FINAL
+// ------------------------------------------
+columnHelper.display({
+  id: "total_price",
+  header: "Precio final",
+  cell: ({ row }) => {
+    const rate = row.original
+
+    const totalPrice = calculateVehicleRateTotal({
+      basePrice: rate.base_price,
+      ivaPercentage: rate.iva_percentage,
+      fees: rate.fees,
+    })
+
+    return (
+      <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm whitespace-nowrap">
+        ${totalPrice.toLocaleString("es-CO")}
+      </span>
+    )
+  },
+}),
 
       // ------------------------------------------
       // ACCIONES

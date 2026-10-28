@@ -9,6 +9,8 @@ CREATE TABLE public.vehicle_service_rate (
     -- Tenant propietario de la tarifa.
     tenant_id UUID NOT NULL,
 
+    name TEXT not null
+
     -- Tipo de vehículo al que aplica la tarifa.
     vehicle_type public.vehicle_type_enum NOT NULL,
 
@@ -124,6 +126,9 @@ COMMENT ON COLUMN public.vehicle_service_rate.created_at IS
 
 COMMENT ON COLUMN public.vehicle_service_rate.updated_at IS
 'Fecha y hora de la última actualización de la tarifa.';
+
+COMMENT ON COLUMN public.vehicle_service_rate.name
+IS 'Nombre descriptivo de la tarifa del servicio vehicular.';
 
 
 -- ============================================================

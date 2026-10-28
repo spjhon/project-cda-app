@@ -7,17 +7,27 @@
 -- independientemente de si están activas o inactivas.
 --
 -- Incluye:
---   - Datos principales de la tarifa
---   - IVA del precio base
+--   - Identificador y nombre descriptivo de la tarifa
+--   - Tenant al que pertenece
+--   - Tipo de vehículo y precio base
+--   - IVA aplicado al precio base
+--   - Tipo de servicio
 --   - Estado activo/inactivo
+--   - Fecha de creación
 --   - Fuels asociados
 --   - Classes asociadas
 --   - Service types asociados
---   - Fees asociados
+--   - Fees asociados, incluyendo sus respectivos datos e IVA
 --   - Empresas relacionadas
 --
 -- Las relaciones se devuelven como arreglos JSONB para mantener
 -- una sola fila por cada tarifa.
+--
+-- Las relaciones sin registros se devuelven como arreglos vacíos
+-- ([]), evitando valores NULL en las colecciones.
+--
+-- Los resultados se limitan al tenant indicado y se ordenan por
+-- tipo de servicio, tipo de vehículo y fecha de creación.
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION public.fetch_vehicle_service_rates(
@@ -26,6 +36,7 @@ CREATE OR REPLACE FUNCTION public.fetch_vehicle_service_rates(
 RETURNS TABLE (
     id UUID,
     tenant_id UUID,
+    name TEXT,
     vehicle_type public.vehicle_type_enum,
     base_price NUMERIC(12,2),
     iva_percentage NUMERIC(5,2),
@@ -50,6 +61,7 @@ AS $$
     SELECT
         vsr.id,
         vsr.tenant_id,
+        vsr.name,
         vsr.vehicle_type,
         vsr.base_price,
         vsr.iva_percentage,
@@ -59,6 +71,9 @@ AS $$
 
         -- ====================================================
         -- FUELS
+        -- ====================================================
+        -- Combustibles asociados a la tarifa.
+        -- Devuelve un arreglo vacío si no existen relaciones.
         -- ====================================================
 
         COALESCE(
@@ -77,6 +92,8 @@ AS $$
         -- ====================================================
         -- CLASSES
         -- ====================================================
+        -- Clases de vehículo asociadas a la tarifa.
+        -- ====================================================
 
         COALESCE(
             (
@@ -94,6 +111,8 @@ AS $$
         -- ====================================================
         -- SERVICE TYPES
         -- ====================================================
+        -- Tipos de servicio vehicular asociados a la tarifa.
+        -- ====================================================
 
         COALESCE(
             (
@@ -110,6 +129,10 @@ AS $$
 
         -- ====================================================
         -- FEES
+        -- ====================================================
+        -- Cargos adicionales asociados a la tarifa.
+        -- Incluye el nombre, descripción, importe, IVA y rangos
+        -- de antigüedad del vehículo, además de sus fechas.
         -- ====================================================
 
         COALESCE(
@@ -138,6 +161,11 @@ AS $$
 
         -- ====================================================
         -- EMPRESAS RELACIONADAS
+        -- ====================================================
+        -- Devuelve el identificador y nombre de cada empresa
+        -- relacionada con la tarifa.
+        --
+        -- Excluye las empresas eliminadas lógicamente.
         -- ====================================================
 
         COALESCE(

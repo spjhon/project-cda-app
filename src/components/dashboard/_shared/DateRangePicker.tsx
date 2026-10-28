@@ -6,7 +6,7 @@ import { es } from "date-fns/locale";
 import { Calendar as CalendarIcon, Check } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";

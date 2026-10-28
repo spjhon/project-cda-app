@@ -41,7 +41,7 @@ import { GenericSuccessDialog } from "@/components/feedbackDialogs/GenericSucces
 import { Database } from "../../../../supabase/types/database.types";
 import FeesTable from "./FeesTable";
 import { useCreateVehicleServiceRate } from "@/lib/client-actions/create_vehicle_service_rate";
-import { createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
+import { CreateVehicleServiceRateInput, createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
 import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
 import { CompanyRateSelector } from "./CompanyRateSelector";
 import { useQueryClient } from "@tanstack/react-query";
@@ -156,30 +156,17 @@ const RATE_SERVICE_TYPES: {
 
 
 
-interface RateFormState {
-  tenant_id: string
-  name: string
-  service_type: ServiceType | ""
-  vehicle_type: VehicleType | ""
-  fuels: FuelType[]
-  classes: VehicleClass[]
-  service_types: VehicleServiceType[]
-  base_price_rtm: string
-  iva_percentage: string
-  fees: CreateFeeInput[]
-  company_ids: string[]
-}
 
 type CreateVehicleServiceRateData = {
   tenant_id: string;
   name: string;
-  service_type: ServiceType | null;
-  vehicle_type: VehicleType | null;
+  service_type: ServiceType | "";
+  vehicle_type: VehicleType | "";
   fuels: FuelType[];
   classes: VehicleClass[];
   service_types: VehicleServiceType[];
-  base_price_rtm: number | null;
-  iva_percentage: number | null;
+  base_price_rtm: number | "";
+  iva_percentage: number | "";
   fees: CreateFeeInput[];
   company_ids: string[];
 };
@@ -312,7 +299,7 @@ function MultiSelectField<T extends string>({
 // -----------------------------------------------------------------------------
 // INITIAL STATE
 // -----------------------------------------------------------------------------
-const INITIAL_FORM: RateFormState = {
+const INITIAL_FORM: CreateVehicleServiceRateData = {
   tenant_id: "",
   name: "",
   service_type: "",
@@ -339,7 +326,7 @@ const queryClient = useQueryClient()
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const [form, setForm] = useState<RateFormState>({
+  const [form, setForm] = useState<CreateVehicleServiceRateData>({
     ...INITIAL_FORM,
     tenant_id: tenantId ?? "",
   });
@@ -361,7 +348,7 @@ const queryClient = useQueryClient()
   // HANDLERS
   // ---------------------------------------------------------------------------
 
-  const handleChange = (field: keyof RateFormState, value: string) => {
+  const handleChange = (field: keyof CreateVehicleServiceRateData, value: string) => {
     setForm((previous) => ({
       ...previous,
       [field]: value,
@@ -382,47 +369,20 @@ const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault();
   event.stopPropagation();
 
-// ========================================================
-// DATOS DEL FORMULARIO
-// ========================================================
 
-const data: CreateVehicleServiceRateData = {
-  tenant_id: form.tenant_id,
-  name: form.name.trim(),
-
-  service_type:
-    form.service_type === ""
-      ? null
-      : form.service_type,
-
-  vehicle_type:
-    form.vehicle_type === ""
-      ? null
-      : form.vehicle_type,
-
-  fuels: form.fuels,
-  classes: form.classes,
-  service_types: form.service_types,
-
-  base_price_rtm:
-    form.base_price_rtm === ""
-      ? null
-      : Number(form.base_price_rtm),
-
-  iva_percentage:
-    form.iva_percentage === ""
-      ? null
-      : Number(form.iva_percentage),
-
-  fees: form.fees,
-  company_ids: form.company_ids,
-};
 
   // ========================================================
   // VALIDAR DATOS CON ZOD
   // ========================================================
 
-  const result = createVehicleServiceRateSchema.safeParse(data);
+  const normalizedRate = {
+  ...form,
+  iva_percentage:
+    form.iva_percentage === "" ? null : form.iva_percentage,
+  base_price_rtm: Number(form.base_price_rtm)
+};
+
+const result = createVehicleServiceRateSchema.safeParse(normalizedRate);
 
  
 
@@ -444,18 +404,7 @@ const data: CreateVehicleServiceRateData = {
 
 createVehicleServiceRateMutation.mutate(
   {
-    tenant_id: result.data.tenant_id,
-    vehicle_type: result.data.vehicle_type,
-    base_price_rtm: result.data.base_price_rtm,
-    iva_percentage: result.data.iva_percentage,
-    service_type: result.data.service_type,
-
-    fuels: result.data.fuels,
-    classes: result.data.classes,
-    service_types: result.data.service_types,
-
-    fees: result.data.fees,
-    company_ids: result.data.company_ids
+    ...result.data
   },
   {
     onSuccess: async () => {
