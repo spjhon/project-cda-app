@@ -16,7 +16,8 @@ export function calculateVehicleRateTotal({
 }: CalculateVehicleRateTotalArgs): number {
   const normalizedBasePrice = Number(basePrice)
 
-  // IVA del precio base, redondeado individualmente.
+  // IVA aplicado exclusivamente al precio base.
+  // Se redondea individualmente antes de sumarlo.
   const baseIva =
     ivaPercentage != null
       ? Math.round(
@@ -24,7 +25,8 @@ export function calculateVehicleRateTotal({
         )
       : 0
 
-  // Valor de cada fee más su propio IVA.
+  // Cada fee conserva su propio IVA independiente.
+  // El IVA de cada fee se redondea individualmente.
   const feesTotal = fees.reduce((total, fee) => {
     const feeAmount = Number(fee.fee_amount)
 
@@ -38,6 +40,6 @@ export function calculateVehicleRateTotal({
     return total + feeAmount + feeIva
   }, 0)
 
-  // Precio base + IVA base + fees con sus respectivos IVA.
+  // Precio final: precio base + IVA base + cada fee con su IVA.
   return Math.round(normalizedBasePrice + baseIva + feesTotal)
 }
