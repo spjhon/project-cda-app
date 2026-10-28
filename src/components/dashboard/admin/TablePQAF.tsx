@@ -1,11 +1,12 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
+  stockFeatures,
+  useTable,
+  type StockFeatures,
 } from "@tanstack/react-table";
 import { format, subDays, subMonths } from "date-fns";
 import { es } from "date-fns/locale";
@@ -61,7 +62,7 @@ import { AdminContext, PQAFListItem } from "@/contexts/AdminLoaderContext";
 import DetallesPQAFDialog from "./DetallesPQAFDialog";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
-const columnHelper = createColumnHelper<PQAFListItem>();
+const columnHelper = createColumnHelper<StockFeatures, PQAFListItem>();
 
 const REQUERIMIENTO_MAP: Record<string, { label: string; className: string }> =
   {
@@ -217,18 +218,20 @@ export default function PQAFTable() {
   };
 
 
-
+const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce para optimizar consultas de texto libre
-  const debouncedSetSearchTerm = useMemo(() => {
-    let timeoutId: NodeJS.Timeout;
-    return (val: string) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setSearchTerm(val);
-      }, 400);
-    };
-  }, [setSearchTerm]);
+ const debouncedSetSearchTerm = useMemo(() => {
+  return (val: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setSearchTerm(val);
+    }, 400);
+  };
+}, [setSearchTerm]);
 
 
 
@@ -283,11 +286,16 @@ export default function PQAFTable() {
   // CONFIGURACIÓN DE COLUMNAS
   // ==========================================
   const columns = useMemo(
-    () => [
+  () =>
+    columnHelper.columns([
+      // -----------------------------------------------------------------------
+      // FECHA DE CREACIÓN
+      // -----------------------------------------------------------------------
       columnHelper.accessor("created_at", {
         header: "Fecha de Creación",
         cell: (info) => {
           const date = new Date(info.getValue());
+
           return (
             <span className="font-semibold text-foreground tracking-tight">
               {date.toLocaleString("es-CO", {
@@ -300,6 +308,9 @@ export default function PQAFTable() {
         },
       }),
 
+      // -----------------------------------------------------------------------
+      // TIPO DE REQUERIMIENTO
+      // -----------------------------------------------------------------------
       columnHelper.accessor("requirement_type", {
         header: "Tipo de Requerimiento",
         cell: (info) => {
@@ -308,6 +319,7 @@ export default function PQAFTable() {
             label: value,
             className: "bg-muted text-foreground border-border",
           };
+
           return (
             <Badge
               variant="outline"
@@ -319,6 +331,9 @@ export default function PQAFTable() {
         },
       }),
 
+      // -----------------------------------------------------------------------
+      // ESTADO
+      // -----------------------------------------------------------------------
       columnHelper.accessor("status", {
         header: "Estado",
         cell: (info) => {
@@ -327,6 +342,7 @@ export default function PQAFTable() {
             label: value,
             className: "bg-muted text-foreground border-border",
           };
+
           return (
             <Badge
               variant="outline"
@@ -338,10 +354,14 @@ export default function PQAFTable() {
         },
       }),
 
+      // -----------------------------------------------------------------------
+      // ÚLTIMA ACTUALIZACIÓN
+      // -----------------------------------------------------------------------
       columnHelper.accessor("updated_at", {
         header: "Fecha Ultima Actualizacion",
         cell: (info) => {
           const rawValue = info.getValue();
+
           if (!rawValue) {
             return (
               <span className="text-xs text-muted-foreground italic font-medium">
@@ -349,7 +369,9 @@ export default function PQAFTable() {
               </span>
             );
           }
+
           const date = new Date(rawValue);
+
           return (
             <span className="font-medium text-muted-foreground tracking-tight">
               {date.toLocaleString("es-CO", {
@@ -362,23 +384,27 @@ export default function PQAFTable() {
         },
       }),
 
+      // -----------------------------------------------------------------------
+      // ACCIONES
+      // -----------------------------------------------------------------------
       columnHelper.display({
         id: "acciones",
         header: "Acciones",
         cell: ({ row }) => {
           const pqaf = row.original;
-          return <DetallesPQAFDialog pqaf={pqaf} ></DetallesPQAFDialog>;
+
+          return <DetallesPQAFDialog pqaf={pqaf} />;
         },
       }),
-    ],
-    [],
-  );
+    ]),
+  []
+);
 
-  const table = useReactTable({
-    data: pqafData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+const table = useTable({
+  features: stockFeatures,
+  data: pqafData,
+  columns,
+});
 
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm border border-border/50">

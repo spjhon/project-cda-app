@@ -1,13 +1,12 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
-
+import { useContext, useMemo, useRef, useState } from "react";
 
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
+  useTable,
+  stockFeatures,
 } from "@tanstack/react-table";
 
 import {
@@ -53,7 +52,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { DateRangePicker } from "./DateRangePicker";
-import {  EntryOrdersContext } from "@/contexts/EntryOrdersContext";
+import { EntryOrdersContext } from "@/contexts/EntryOrdersContext";
 import { ReceptionistContext } from "@/contexts/ReceptionistLoaderContex";
 import { OficinaContext } from "@/contexts/OficinaLoaderContext";
 import AccionesOrderDialog from "./AccionesOrderDialog";
@@ -65,54 +64,55 @@ import { ExportExcelButton } from "./DownloadExcelButton";
 import { TenantCreditsManager } from "./TenantCreditsManager";
 import { EntryOrderListItem } from "@/types/functions_types";
 
-
-const columnHelper = createColumnHelper<EntryOrderListItem>();
+const columnHelper = createColumnHelper<
+  typeof stockFeatures,
+  EntryOrderListItem
+>();
 
 // ==========================================
 // DICCIONARIOS DE MAPEO Y TRADUCCIÓN
 // ==========================================
-
 
 const VEHICLE_TYPE_MAP: Record<
   string,
   { label: string; icon: React.ComponentType<{ className?: string }> }
 > = {
   // CARROS Y PESADOS
-  liviano: { 
-    label: "Liviano", 
-    icon: Car 
+  liviano: {
+    label: "Liviano",
+    icon: Car,
   },
-  pesado: { 
-    label: "Pesado", 
-    icon: Truck 
+  pesado: {
+    label: "Pesado",
+    icon: Truck,
   },
 
   // MOTOCICLETAS (2 Ruedas)
-  motocicleta_4t: { 
-    label: "Moto 4T", 
-    icon: Bike 
+  motocicleta_4t: {
+    label: "Moto 4T",
+    icon: Bike,
   },
-  motocicleta_2t: { 
-    label: "Moto 2T", 
-    icon: Bike 
+  motocicleta_2t: {
+    label: "Moto 2T",
+    icon: Bike,
   },
-  motocicleta_electrica: { 
-    label: "Moto Eléctrica", 
-    icon: Zap 
+  motocicleta_electrica: {
+    label: "Moto Eléctrica",
+    icon: Zap,
   },
 
   // MOTOCARROS (3 Ruedas)
-  motocarro_4t: { 
-    label: "Moto-Carro 4T", 
-    icon: Gauge 
+  motocarro_4t: {
+    label: "Moto-Carro 4T",
+    icon: Gauge,
   },
-  motocarro_2t: { 
-    label: "Moto-Carro 2T", 
-    icon: ShieldAlert 
+  motocarro_2t: {
+    label: "Moto-Carro 2T",
+    icon: ShieldAlert,
   },
-  motocarro_diesel: { 
-    label: "Moto-Carro Diésel", 
-    icon: Truck 
+  motocarro_diesel: {
+    label: "Moto-Carro Diésel",
+    icon: Truck,
   },
 };
 
@@ -187,12 +187,14 @@ const REVISION_RESULT_MAP: Record<
 > = {
   aprobado: {
     label: "Aprobado",
-    className: "bg-emerald-100 text-emerald-800 border-emerald-400 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800 font-bold shadow-sm transition-colors",
+    className:
+      "bg-emerald-100 text-emerald-800 border-emerald-400 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800 font-bold shadow-sm transition-colors",
     icon: CheckCircle2,
   },
   rechazado: {
     label: "Rechazado",
-    className: "bg-rose-100 text-rose-800 border-rose-400 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800 font-bold shadow-sm transition-colors",
+    className:
+      "bg-rose-100 text-rose-800 border-rose-400 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800 font-bold shadow-sm transition-colors",
     icon: AlertCircle,
   },
 };
@@ -212,23 +214,23 @@ export default function CreatedOrdersTable() {
     DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol ||
     AdminContextRecived?.AdminContextValue.rol;
 
-  const tenantId = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
-  const EntryOrders = EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersQuery.data || [];
-
-
- 
-
-
+  const tenantId =
+    PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const EntryOrders =
+    EntryOrdersContextRecived?.entryOrdersTableData.query.entryOrdersQuery
+      .data || [];
 
   //con este state vamos a aislar el dialog de las acciones para que si se actualiza la tabla, no se actualice el dialog al mismo tiempo
-const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(null);
+  const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(
+    null,
+  );
 
+  const { query } = EntryOrdersContextRecived?.entryOrdersTableData || {};
 
-  const { query} = EntryOrdersContextRecived?.entryOrdersTableData || {};
+  const { entryOrdersQuery } =
+    EntryOrdersContextRecived?.entryOrdersTableData.query || {};
 
-  const {entryOrdersQuery} = EntryOrdersContextRecived?.entryOrdersTableData.query || {};
- 
-   const { dateRange = undefined, setDateRange = () => {} } = query || {};
+  const { dateRange = undefined, setDateRange = () => {} } = query || {};
 
   const {
     orderByColumn = "fecha",
@@ -237,7 +239,7 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setOrderByDirection = () => {},
     showDeleted = false,
     setShowDeleted = () => {},
-    
+
     searchColumn = "placa",
     setSearchColumn = () => {},
     searchTerm = "",
@@ -246,32 +248,23 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     setPage = () => {},
     rowsPerPage = 50,
     setRowsPerPage = () => {},
-
-    
   } = query || {};
-
-
-
-   
-
-
-
-
-
-
 
   const [inputValue, setInputValue] = useState(searchTerm);
 
-  const debouncedSetSearchTerm = useMemo(() => {
-    let timeoutId: NodeJS.Timeout;
-    return (val: string) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setSearchTerm(val);
-         setPage(1);
-      }, 400);
-    };
-  }, [setSearchTerm, setPage]);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ const debouncedSetSearchTerm = useMemo(() => {
+  return (val: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setSearchTerm(val);
+    }, 400);
+  };
+}, [setSearchTerm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -279,19 +272,6 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     debouncedSetSearchTerm(value);
     setPage(1);
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const total = query?.entryOrdersQuery.data?.[0]?.total_count ?? 0;
 
@@ -332,291 +312,327 @@ const [selectedOrden, setSelectedOrden] = useState<EntryOrderListItem | null>(nu
     return null;
   };
 
+  
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS
   // ==========================================
   const columns = useMemo(
-    () => [
-      columnHelper.accessor("placa", {
-        header: "Placa",
-        cell: ({ row }) => {
-          const placaText =
-            row.original.placa?.toString().toUpperCase() || "---";
-          const servicioRaw =
-            row.original.vehiculo_tipo_servicio_snapshot
-              ?.toString()
-              .toLowerCase() || "particular";
+    () =>
+      columnHelper.columns([
+        // ------------------------------------------
+        // PLACA
+        // ------------------------------------------
+        columnHelper.accessor("placa", {
+          header: "Placa",
+          cell: ({ row }) => {
+            const placaText =
+              row.original.placa?.toString().toUpperCase() || "---";
 
-          // Las placas mantienen colores fijos por ser representación del objeto real
-          const STYLES_MAP: Record<
-            string,
-            { bg: string; text: string; border: string; line: string }
-          > = {
-            particular: {
-              bg: "bg-[#FACC15]",
-              text: "text-slate-900",
-              border: "border-slate-800",
-              line: "border-slate-800/30",
-            },
-            publico: {
-              bg: "bg-white",
-              text: "text-slate-900",
-              border: "border-slate-800",
-              line: "border-slate-800/30",
-            },
-            oficial: {
-              bg: "bg-blue-700",
-              text: "text-white",
-              border: "border-blue-950",
-              line: "border-white/30",
-            },
-          };
+            const servicioRaw =
+              row.original.vehiculo_tipo_servicio_snapshot
+                ?.toString()
+                .toLowerCase() || "particular";
 
-          const estilo = STYLES_MAP[servicioRaw] || STYLES_MAP.particular;
-          const labelServicio = servicioRaw.toUpperCase();
+            const STYLES_MAP: Record<
+              string,
+              { bg: string; text: string; border: string; line: string }
+            > = {
+              particular: {
+                bg: "bg-[#FACC15]",
+                text: "text-slate-900",
+                border: "border-slate-800",
+                line: "border-slate-800/30",
+              },
+              publico: {
+                bg: "bg-white",
+                text: "text-slate-900",
+                border: "border-slate-800",
+                line: "border-slate-800/30",
+              },
+              oficial: {
+                bg: "bg-blue-700",
+                text: "text-white",
+                border: "border-blue-950",
+                line: "border-white/30",
+              },
+            };
 
-          return (
-            <div
-              className={`inline-flex flex-col items-center justify-center ${estilo.bg} ${estilo.text} ${estilo.border} border-2 rounded-md px-3 py-1 min-w-26.25 tracking-wider text-center text-sm select-none transition-transform hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]`}
-            >
-              <span className="leading-none text-base font-black">
-                {placaText}
-              </span>
-              <div className={`w-full border-t ${estilo.line} my-0.5`} />
-              <span className="text-[7.5px] font-black tracking-widest leading-none opacity-90">
-                {labelServicio}
-              </span>
-            </div>
-          );
-        },
-      }),
+            const estilo = STYLES_MAP[servicioRaw] ?? STYLES_MAP.particular;
+            const labelServicio = servicioRaw.toUpperCase();
 
-   columnHelper.accessor("fecha", {
-  header: "Fecha y Hora",
-  cell: (info) => {
-    const date = new Date(info.getValue());
-
-    const formattedDate = date
-      .toLocaleString("es-CO", {
-        timeZone: "America/Bogota",
-        dateStyle: "short",
-        timeStyle: "short",
-        hour12: true,
-      })
-      .replace(/\u00A0/g, " ");
-
-    return (
-      <span className="font-semibold text-foreground tracking-tight">
-        {formattedDate}
-      </span>
-    );
-  },
-}),
-
-      columnHelper.accessor("marca", {
-        header: "Marca",
-        cell: (info) => (
-          <span className="text-foreground font-medium">{info.getValue()}</span>
-        ),
-      }),
-
-      columnHelper.accessor("linea", {
-        header: "Línea",
-        cell: (info) => (
-          <span className="text-muted-foreground">{info.getValue()}</span>
-        ),
-      }),
-
-      columnHelper.accessor("vehiculo_tipo_snapshot", {
-        header: "Tipo de Vehículo",
-        cell: (info) => {
-          const value = info.getValue() as string;
-          const config = VEHICLE_TYPE_MAP[value] || {
-            label: value || "No especificado",
-            icon: Car,
-          };
-          const IconComponent = config.icon;
-
-          return (
-            <div className="flex items-center gap-2 font-medium text-foreground">
-              <div className="p-1.5 rounded-md bg-muted text-primary border border-border">
-                <IconComponent className="h-4 w-4 shrink-0" />
-              </div>
-              <span className="text-sm truncate">{config.label}</span>
-            </div>
-          );
-        },
-      }),
-
-      columnHelper.accessor("service_type", {
-        header: "Tipo de Servicio",
-        cell: (info) => {
-          const value = info.getValue() as string;
-          const translatedLabel = SERVICE_TYPE_MAP[value] || value || "---";
-          return (
-            <span className="font-semibold text-foreground text-sm tracking-tight bg-muted px-2.5 py-1 rounded-md border border-border">
-              {translatedLabel}
-            </span>
-          );
-        },
-      }),
-
-
-     columnHelper.accessor("se_compro_soat", {
-  header: "Se compró SOAT?",
-  cell: (info) => {
-    const boughtSoat = Boolean(info.getValue());
-
-    return (
-      <Badge
-        variant="outline"
-        className={
-          boughtSoat
-            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-bold"
-            : "text-muted-foreground border-border font-medium"
-        }
-      >
-        {boughtSoat ? "Sí" : "No"}
-      </Badge>
-    );
-  },
-}),
-
-columnHelper.accessor("oficina_consecutivo_factura", {
-  header: "Consecutivo factura",
-  cell: (info) => {
-    const consecutivo = info.getValue();
-
-    return (
-      <span className="font-medium">
-        {consecutivo || "—"}
-      </span>
-    );
-  },
-}),
-
-      columnHelper.accessor("es_reinspeccion", {
-        header: "Tipo Inspección",
-        cell: ({ row }) => {
-          const esReinspeccion = row.original.es_reinspeccion;
-          const config = esReinspeccion
-            ? INSPECTION_TYPE_MAP.reinspeccion
-            : INSPECTION_TYPE_MAP.original;
-
-          return (
-            <Badge variant="outline" className={`${config.className} shadow-sm`}>
-              {config.label}
-            </Badge>
-          );
-        },
-      }),
-
-      columnHelper.accessor("estado_orden", {
-        header: "Estado",
-        cell: (info) => {
-          const rawStatus = info.getValue() as string;
-          const statusConfig = STATUS_MAP[rawStatus] || {
-            label: rawStatus,
-            className: "bg-muted text-foreground border-border",
-          };
-
-          return (
-            <Badge variant="outline" className={statusConfig.className}>
-              {statusConfig.label}
-            </Badge>
-          );
-        },
-      }),
-
-      columnHelper.accessor("resultado_revision", {
-        header: "Dictamen Técnico",
-        cell: (info) => {
-          const rawResult = info.getValue() as string;
-
-          if (!rawResult) {
             return (
-              <span className="text-xs text-muted-foreground italic pl-1 font-medium">
-                Pendiente de firma
+              <div
+                className={`inline-flex flex-col items-center justify-center ${estilo.bg} ${estilo.text} ${estilo.border} border-2 rounded-md px-3 py-1 min-w-26.25 tracking-wider text-center text-sm select-none transition-transform hover:scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]`}
+              >
+                <span className="leading-none text-base font-black">
+                  {placaText}
+                </span>
+
+                <div className={`w-full border-t ${estilo.line} my-0.5`} />
+
+                <span className="text-[7.5px] font-black tracking-widest leading-none opacity-90">
+                  {labelServicio}
+                </span>
+              </div>
+            );
+          },
+        }),
+
+        // ------------------------------------------
+        // FECHA Y HORA
+        // ------------------------------------------
+        columnHelper.accessor("fecha", {
+          header: "Fecha y Hora",
+          cell: (info) => {
+            const date = new Date(info.getValue());
+
+            const formattedDate = date
+              .toLocaleString("es-CO", {
+                timeZone: "America/Bogota",
+                dateStyle: "short",
+                timeStyle: "short",
+                hour12: true,
+              })
+              .replace(/\u00A0/g, " ");
+
+            return (
+              <span className="font-semibold text-foreground tracking-tight">
+                {formattedDate}
               </span>
             );
-          }
+          },
+        }),
 
-          const config = REVISION_RESULT_MAP[rawResult] || {
-            label: rawResult.toUpperCase(),
-            className: "bg-muted text-foreground border-border",
-            icon: AlertCircle,
-          };
+        // ------------------------------------------
+        // MARCA
+        // ------------------------------------------
+        columnHelper.accessor("marca", {
+          header: "Marca",
+          cell: (info) => (
+            <span className="text-foreground font-medium">
+              {info.getValue()}
+            </span>
+          ),
+        }),
 
-          const IconComponent = config.icon;
+        // ------------------------------------------
+        // LÍNEA
+        // ------------------------------------------
+        columnHelper.accessor("linea", {
+          header: "Línea",
+          cell: (info) => (
+            <span className="text-muted-foreground">
+              {info.getValue()}
+            </span>
+          ),
+        }),
 
-          return (
-            <Badge
-              variant="outline"
-              className={`gap-1 px-2.5 py-0.5 text-xs shadow-sm ${config.className}`}
-            >
-              <IconComponent className="h-3.5 w-3.5 shrink-0" />
-              {config.label}
-            </Badge>
-          );
-        },
-      }),
+        // ------------------------------------------
+        // TIPO DE VEHÍCULO
+        // ------------------------------------------
+        columnHelper.accessor("vehiculo_tipo_snapshot", {
+          header: "Tipo de Vehículo",
+          cell: (info) => {
+            const value = info.getValue() as string;
 
+            const config = VEHICLE_TYPE_MAP[value] ?? {
+              label: value || "No especificado",
+              icon: Car,
+            };
 
+            const IconComponent = config.icon;
 
+            return (
+              <div className="flex items-center gap-2 font-medium text-foreground">
+                <div className="p-1.5 rounded-md bg-muted text-primary border border-border">
+                  <IconComponent className="h-4 w-4 shrink-0" />
+                </div>
 
+                <span className="text-sm truncate">{config.label}</span>
+              </div>
+            );
+          },
+        }),
 
+        // ------------------------------------------
+        // TIPO DE SERVICIO
+        // ------------------------------------------
+        columnHelper.accessor("service_type", {
+          header: "Tipo de Servicio",
+          cell: (info) => {
+            const value = info.getValue() as string;
+            const translatedLabel = SERVICE_TYPE_MAP[value] || value || "---";
 
-     columnHelper.display({
-  id: "acciones",
-  header: "Acciones",
-  cell: ({ row }) => {
-    const orden = row.original;
+            return (
+              <span className="font-semibold text-foreground text-sm tracking-tight bg-muted px-2.5 py-1 rounded-md border border-border">
+                {translatedLabel}
+              </span>
+            );
+          },
+        }),
 
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setSelectedOrden(orden)}
-      >
-        Acciones
-      </Button>
-    );
-  },
-}),
+        // ------------------------------------------
+        // SOAT
+        // ------------------------------------------
+        columnHelper.accessor("se_compro_soat", {
+          header: "Se compró SOAT?",
+          cell: (info) => {
+            const boughtSoat = Boolean(info.getValue());
 
+            return (
+              <Badge
+                variant="outline"
+                className={
+                  boughtSoat
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-bold"
+                    : "text-muted-foreground border-border font-medium"
+                }
+              >
+                {boughtSoat ? "Sí" : "No"}
+              </Badge>
+            );
+          },
+        }),
 
+        // ------------------------------------------
+        // CONSECUTIVO DE FACTURA
+        // ------------------------------------------
+        columnHelper.accessor("oficina_consecutivo_factura", {
+          header: "Consecutivo factura",
+          cell: (info) => {
+            const consecutivo = info.getValue();
 
+            return (
+              <span className="font-medium">{consecutivo || "—"}</span>
+            );
+          },
+        }),
 
+        // ------------------------------------------
+        // TIPO DE INSPECCIÓN
+        // ------------------------------------------
+        columnHelper.accessor("es_reinspeccion", {
+          header: "Tipo Inspección",
+          cell: ({ row }) => {
+            const esReinspeccion = row.original.es_reinspeccion;
 
-    ],
+            const config = esReinspeccion
+              ? INSPECTION_TYPE_MAP.reinspeccion
+              : INSPECTION_TYPE_MAP.original;
+
+            return (
+              <Badge
+                variant="outline"
+                className={`${config.className} shadow-sm`}
+              >
+                {config.label}
+              </Badge>
+            );
+          },
+        }),
+
+        // ------------------------------------------
+        // ESTADO DE LA ORDEN
+        // ------------------------------------------
+        columnHelper.accessor("estado_orden", {
+          header: "Estado",
+          cell: (info) => {
+            const rawStatus = info.getValue() as string;
+
+            const statusConfig = STATUS_MAP[rawStatus] ?? {
+              label: rawStatus,
+              className: "bg-muted text-foreground border-border",
+            };
+
+            return (
+              <Badge variant="outline" className={statusConfig.className}>
+                {statusConfig.label}
+              </Badge>
+            );
+          },
+        }),
+
+        // ------------------------------------------
+        // DICTAMEN TÉCNICO
+        // ------------------------------------------
+        columnHelper.accessor("resultado_revision", {
+          header: "Dictamen Técnico",
+          cell: (info) => {
+            const rawResult = info.getValue() as string;
+
+            if (!rawResult) {
+              return (
+                <span className="text-xs text-muted-foreground italic pl-1 font-medium">
+                  Pendiente de firma
+                </span>
+              );
+            }
+
+            const config = REVISION_RESULT_MAP[rawResult] ?? {
+              label: rawResult.toUpperCase(),
+              className: "bg-muted text-foreground border-border",
+              icon: AlertCircle,
+            };
+
+            const IconComponent = config.icon;
+
+            return (
+              <Badge
+                variant="outline"
+                className={`gap-1 px-2.5 py-0.5 text-xs shadow-sm ${config.className}`}
+              >
+                <IconComponent className="h-3.5 w-3.5 shrink-0" />
+                {config.label}
+              </Badge>
+            );
+          },
+        }),
+
+        // ------------------------------------------
+        // ACCIONES
+        // ------------------------------------------
+        columnHelper.display({
+          id: "acciones",
+          header: "Acciones",
+          cell: ({ row }) => {
+            const orden = row.original;
+
+            return (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedOrden(orden)}
+              >
+                Acciones
+              </Button>
+            );
+          },
+        }),
+      ]),
     [],
   );
 
-  const table = useReactTable({
+
+  const table = useTable({
+    features: stockFeatures,
     data: EntryOrders,
     columns,
-    getCoreRowModel: getCoreRowModel(),
   });
-
-
-
-  
 
   return (
     <div className="space-y-5 p-6 bg-background rounded-2xl shadow-sm ">
       {/* DIÁLOGO ELEVADO (Fuera de la tabla) */}
-{selectedOrden && (
-  <AccionesOrderDialog
-    orden={selectedOrden}
-    tenantId={tenantId}
-  
-    rol={rol}
-    open={Boolean(selectedOrden)}
-    onOpenChange={(open) => {
-      if (!open) setSelectedOrden(null);
-    }}
-  />
-)}
+      {selectedOrden && (
+        <AccionesOrderDialog
+          orden={selectedOrden}
+          tenantId={tenantId}
+          rol={rol}
+          open={Boolean(selectedOrden)}
+          onOpenChange={(open) => {
+            if (!open) setSelectedOrden(null);
+          }}
+        />
+      )}
       {/* SECCIÓN SUPERIOR: Info, Selects de Ordenamiento y Estado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border border-border shadow-sm">
         <div className="flex items-baseline gap-2">
@@ -635,12 +651,12 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           </div>
 
           <Select
-          items={SELECT_COLUMNAS}
+            items={SELECT_COLUMNAS}
             value={orderByColumn}
-           onValueChange={(v) => {
-            setOrderByColumn(v || "fecha");
-            setPage(1);
-          }}
+            onValueChange={(v) => {
+              setOrderByColumn(v || "fecha");
+              setPage(1);
+            }}
           >
             <SelectTrigger className="w-48 h-9 text-sm bg-background border-input shadow-sm focus:ring-ring transition-colors">
               <SelectValue placeholder="Columna" />
@@ -685,10 +701,10 @@ columnHelper.accessor("oficina_consecutivo_factura", {
                 searchColumn === "placa"
                   ? "placa"
                   : searchColumn === "marca"
-                  ? "marca"
-                  : searchColumn === "linea"
-                  ? "línea"
-                  : "documento"
+                    ? "marca"
+                    : searchColumn === "linea"
+                      ? "línea"
+                      : "documento"
               }...`}
               value={inputValue}
               onChange={handleInputChange}
@@ -708,12 +724,12 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           </div>
 
           <DateRangePicker
-  dateRange={dateRange}
-  setDateRange={(range) => {
-    setDateRange(range);
-    setPage(1);
-  }}
-/>
+            dateRange={dateRange}
+            setDateRange={(range) => {
+              setDateRange(range);
+              setPage(1);
+            }}
+          />
 
           <div className="flex items-center space-x-2 bg-background px-3 py-1.5 h-9 rounded-md border border-input shadow-sm hover:border-accent transition-colors">
             <Switch
@@ -766,24 +782,16 @@ columnHelper.accessor("oficina_consecutivo_factura", {
 
           <span className="text-xs font-medium text-muted-foreground ml-2">
             Mostrando {Math.min((page - 1) * rowsPerPage + 1, total)} -{" "}
-            {Math.min(page * rowsPerPage, total)} de <span className="font-bold text-foreground">{total}</span>
+            {Math.min(page * rowsPerPage, total)} de{" "}
+            <span className="font-bold text-foreground">{total}</span>
           </span>
         </div>
 
+        {(rol === "oficina" || rol === "admin") && <TenantCreditsManager />}
 
-       
-
-
-
-{(rol === "oficina" || rol === "admin") && (
-  <TenantCreditsManager />
-)}
-
-{(rol === "oficina" || rol === "admin" || rol === "director-tecnico") && (
-  <ExportExcelButton 
-          
-        />
-)}
+        {(rol === "oficina" ||
+          rol === "admin" ||
+          rol === "director-tecnico") && <ExportExcelButton />}
 
         <div className="flex items-center">{renderStatusBadge()}</div>
 
@@ -820,9 +828,7 @@ columnHelper.accessor("oficina_consecutivo_factura", {
         </Pagination>
       </div>
 
-      <PreviousDayOrdersAlert
-  
-/>
+      <PreviousDayOrdersAlert />
 
       {/* CONTENEDOR DE LA TABLA */}
       <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-background">
@@ -831,7 +837,10 @@ columnHelper.accessor("oficina_consecutivo_factura", {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="font-semibold text-foreground h-11">
+                  <TableHead
+                    key={header.id}
+                    className="font-semibold text-foreground h-11"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -845,49 +854,44 @@ columnHelper.accessor("oficina_consecutivo_factura", {
           </TableHeader>
 
           <TableBody>
-  {entryOrdersQuery?.isLoading ? (
-    <TableRow>
-      <TableCell
-        colSpan={columns.length}
-        className="h-32 text-center"
-      >
-        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-      </TableCell>
-    </TableRow>
-  ) : table.getRowModel().rows.length ? (
-    table.getRowModel().rows.map((row) => (
-      <TableRow
-        key={row.id}
-        className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
-      >
-        {row.getVisibleCells().map((cell) => (
-          <TableCell
-            key={cell.id}
-            className="py-3"
-          >
-            {flexRender(
-              cell.column.columnDef.cell,
-              cell.getContext(),
+            {entryOrdersQuery?.isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center"
+                >
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="hover:bg-muted/50 border-b border-border transition-colors data-[state=selected]:bg-muted"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="py-3">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-12 text-muted-foreground font-medium"
+                >
+                  No se encontraron órdenes
+                </TableCell>
+              </TableRow>
             )}
-          </TableCell>
-        ))}
-      </TableRow>
-    ))
-  ) : (
-    <TableRow>
-      <TableCell
-        colSpan={columns.length}
-        className="text-center py-12 text-muted-foreground font-medium"
-      >
-        No se encontraron órdenes
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
+          </TableBody>
         </Table>
       </div>
-
-      
     </div>
   );
 }

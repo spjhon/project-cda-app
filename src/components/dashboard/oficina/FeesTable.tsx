@@ -5,8 +5,9 @@ import { useMemo } from "react";
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
+  stockFeatures,
+  useTable,
+  type StockFeatures,
 } from "@tanstack/react-table";
 
 import {
@@ -30,7 +31,7 @@ import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear
 // CONFIGURACIÓN DE COLUMNAS
 // -----------------------------------------------------------------------------
 
-const columnHelper = createColumnHelper<CreateFeeInput>();
+const columnHelper = createColumnHelper<StockFeatures, CreateFeeInput>();
 
 // -----------------------------------------------------------------------------
 // PROPS
@@ -52,13 +53,12 @@ export default function FeesTable({
   // ===========================================================================
   // CONFIGURACIÓN DE COLUMNAS
   // ===========================================================================
-
-  const columns = useMemo(
-    () => [
+const columns = useMemo(
+  () =>
+    columnHelper.columns([
       // -----------------------------------------------------------------------
       // FEE
       // -----------------------------------------------------------------------
-
       columnHelper.accessor("name", {
         header: "Fee",
         cell: (info) => {
@@ -75,7 +75,6 @@ export default function FeesTable({
       // -----------------------------------------------------------------------
       // DESCRIPCIÓN
       // -----------------------------------------------------------------------
-
       columnHelper.accessor("description", {
         header: "Descripción",
         cell: (info) => {
@@ -92,7 +91,6 @@ export default function FeesTable({
       // -----------------------------------------------------------------------
       // VALOR DEL FEE
       // -----------------------------------------------------------------------
-
       columnHelper.accessor("fee_amount", {
         header: "Valor",
         cell: (info) => {
@@ -109,7 +107,6 @@ export default function FeesTable({
       // -----------------------------------------------------------------------
       // IVA
       // -----------------------------------------------------------------------
-
       columnHelper.accessor("iva_percentage", {
         header: "IVA",
         cell: (info) => {
@@ -117,9 +114,7 @@ export default function FeesTable({
 
           return (
             <span className="text-sm font-medium whitespace-nowrap">
-              {Number(iva || 0) === 0
-                ? "Sin IVA"
-                : `${Number(iva)}%`}
+              {Number(iva || 0) === 0 ? "Sin IVA" : `${Number(iva)}%`}
             </span>
           );
         },
@@ -128,21 +123,19 @@ export default function FeesTable({
       // -----------------------------------------------------------------------
       // EDAD DEL VEHÍCULO
       // -----------------------------------------------------------------------
-
       columnHelper.display({
         id: "vehicle_age_range",
         header: "Edad vehículo",
         cell: ({ row }) => {
-          const from = row.original.vehicle_age_from;
-          const to = row.original.vehicle_age_to;
+          const { vehicle_age_from: from, vehicle_age_to: to } = row.original;
 
           let label = "Todas las edades";
 
-          if (from !== null && from !== undefined && to !== null && to !== undefined) {
+          if (from != null && to != null) {
             label = `${from} - ${to} años`;
-          } else if (from !== null && from !== undefined) {
+          } else if (from != null) {
             label = `${from} años en adelante`;
-          } else if (to !== null && to !== undefined) {
+          } else if (to != null) {
             label = `Hasta ${to} años`;
           }
 
@@ -157,7 +150,6 @@ export default function FeesTable({
       // -----------------------------------------------------------------------
       // ACCIONES
       // -----------------------------------------------------------------------
-
       columnHelper.display({
         id: "actions",
         header: "",
@@ -178,20 +170,19 @@ export default function FeesTable({
           </Button>
         ),
       }),
-    ],
-    [fees, onFeesChange]
-  );
+    ]),
+  [fees, onFeesChange]
+);
 
   // ===========================================================================
   // CONFIGURACIÓN DE LA TABLA
   // ===========================================================================
 
-  const table = useReactTable({
-    data: fees,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
+ const table = useTable({
+  features: stockFeatures,
+  data: fees,
+  columns,
+});
   // ===========================================================================
   // RENDER
   // ===========================================================================

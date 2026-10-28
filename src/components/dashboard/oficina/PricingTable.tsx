@@ -1,13 +1,14 @@
 "use client"
 
-import { useContext, useMemo, useState } from "react"
+import { useCallback, useContext, useMemo, useState } from "react"
 
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
+  stockFeatures,
+  useTable,
+  type StockFeatures,
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -135,7 +136,7 @@ const VEHICLE_SERVICE_TYPE_MAP: Record<string, string> = {
   especial: "Especial",
 }
 
-const columnHelper = createColumnHelper<VehicleRate>()
+const columnHelper = createColumnHelper<StockFeatures, VehicleRate>();
 
 // ==========================================
 // DIALOG: COMBUSTIBLES
@@ -404,54 +405,61 @@ export default function RatesTable() {
     tenantId,
   })
 
-  // ==========================================
-  // PLACEHOLDER MUTATION: ESTADO ACTIVO
-  // ==========================================
+ 
+/* ==========================================
+ * MUTATION: ESTADO ACTIVO
+ * ========================================== */
 
-const handleToggleActive = (rate: VehicleRate) => {
-
-  
-
-  updateVehicleRateActiveMutation.mutate(
-    {
-      id: rate.id,
-      is_active: !rate.is_active,
-    },
-    {
-      
-      onError: (error) => {
-        setErrors(error.message)
-        setIsErrorOpen(true)
+const handleToggleActive = useCallback(
+  (rate: VehicleRate): void => {
+    updateVehicleRateActiveMutation.mutate(
+      {
+        id: rate.id,
+        is_active: !rate.is_active,
       },
-    }
-  )
-}
+      {
+        onError: (error) => {
+          setErrors(error.message);
+          setIsErrorOpen(true);
+        },
+      }
+    );
+  },
+  [
+    updateVehicleRateActiveMutation,
+    setErrors,
+    setIsErrorOpen,
+  ]
+);
 
-  // ==========================================
-  // PLACEHOLDER MUTATION: ELIMINAR
-  // ==========================================
+/* ==========================================
+ * MUTATION: ELIMINAR
+ * ========================================== */
 
-  const handleDeleteRate = async (rate: VehicleRate): Promise<void> => {
-  await deleteVehicleRateMutation.mutateAsync({
-    id: rate.id,
-  });
-};
+const handleDeleteRate = useCallback(
+  async (rate: VehicleRate): Promise<void> => {
+    await deleteVehicleRateMutation.mutateAsync({
+      id: rate.id,
+    });
+  },
+  [deleteVehicleRateMutation]
+);
+
 
   // ==========================================
   // CONFIGURACIÓN DE COLUMNAS
   // ==========================================
 
-  const columns = useMemo(
-    () => [
+const columns = useMemo(
+  () =>
+    columnHelper.columns([
       // ------------------------------------------
       // FECHA
       // ------------------------------------------
-
       columnHelper.accessor("created_at", {
         header: "Fecha",
-
         cell: (info) => {
-          const date = new Date(info.getValue())
+          const date = new Date(info.getValue());
 
           return (
             <span className="text-muted-foreground text-sm whitespace-nowrap">
@@ -459,309 +467,251 @@ const handleToggleActive = (rate: VehicleRate) => {
                 dateStyle: "medium",
               })}
             </span>
-          )
+          );
         },
       }),
 
       // ------------------------------------------
       // SERVICIO
       // ------------------------------------------
-
       columnHelper.accessor("service_type", {
         header: "Servicio",
-
         cell: (info) => {
-          const value = info.getValue() as string
-
-          const translatedLabel =
-            SERVICE_TYPE_MAP[value] || value || "---"
+          const value = info.getValue() as string;
+          const translatedLabel = SERVICE_TYPE_MAP[value] || value || "---";
 
           return (
             <span className="font-semibold text-foreground text-sm tracking-tight bg-muted px-2.5 py-1 rounded-md border border-border whitespace-nowrap">
               {translatedLabel}
             </span>
-          )
+          );
         },
       }),
 
       // ------------------------------------------
       // TIPO DE VEHÍCULO
       // ------------------------------------------
-
       columnHelper.accessor("vehicle_type", {
         header: "Tipo de Vehículo",
-
         cell: (info) => {
-          const value = info.getValue() as string
+          const value = info.getValue() as string;
 
-          const config = VEHICLE_TYPE_MAP[value] || {
+          const config = VEHICLE_TYPE_MAP[value] ?? {
             label: value || "No especificado",
             icon: Car,
-          }
+          };
 
-          const IconComponent = config.icon
+          const IconComponent = config.icon;
 
           return (
             <div className="flex items-center gap-2 font-medium text-foreground">
               <div className="p-1.5 rounded-md bg-muted text-primary border border-border">
                 <IconComponent className="h-4 w-4 shrink-0" />
               </div>
-
-              <span className="text-sm truncate">
-                {config.label}
-              </span>
+              <span className="text-sm truncate">{config.label}</span>
             </div>
-          )
+          );
         },
       }),
 
       // ------------------------------------------
       // PRECIO BASE
       // ------------------------------------------
-
       columnHelper.accessor("base_price", {
         header: "Precio Base",
-
         cell: (info) => {
-          const price = info.getValue() as number
+          const price = info.getValue();
 
           return (
             <span className="font-bold text-primary text-sm whitespace-nowrap">
-              ${price.toLocaleString("es-CO")}
+              ${Number(price).toLocaleString("es-CO")}
             </span>
-          )
+          );
         },
       }),
 
       // ------------------------------------------
-      // % IVA
+      // IVA
       // ------------------------------------------
-
       columnHelper.accessor("iva_percentage", {
         header: "% IVA",
-
         cell: (info) => {
-          const iva = info.getValue()
+          const iva = info.getValue();
 
           if (iva === null) {
             return (
-              <Badge
-                variant="outline"
-                className="text-xs"
-              >
+              <Badge variant="outline" className="text-xs">
                 Sin IVA
               </Badge>
-            )
+            );
           }
 
           return (
             <span className="text-sm font-medium whitespace-nowrap">
               {iva}%
             </span>
-          )
+          );
         },
       }),
 
       // ------------------------------------------
       // COMBUSTIBLES
       // ------------------------------------------
-
       columnHelper.display({
         id: "fuels",
-
         header: "Combustibles",
-
-        cell: ({ row }) => {
-          const rate = row.original
-
-          return (
-            <FuelsCell rate={rate} />
-          )
-        },
+        cell: ({ row }) => <FuelsCell rate={row.original} />,
       }),
 
       // ------------------------------------------
       // CLASES
       // ------------------------------------------
-
       columnHelper.display({
         id: "classes",
-
         header: "Clases",
-
-        cell: ({ row }) => {
-          const rate = row.original
-
-          return (
-            <ClassesCell rate={rate} />
-          )
-        },
+        cell: ({ row }) => <ClassesCell rate={row.original} />,
       }),
 
       // ------------------------------------------
       // TIPO DE SERVICIO DEL VEHÍCULO
       // ------------------------------------------
-
       columnHelper.display({
         id: "service_types",
-
         header: "Tipo servicio vehículo",
-
-        cell: ({ row }) => {
-          const rate = row.original
-
-          return (
-            <VehicleServiceTypesCell rate={rate} />
-          )
-        },
+        cell: ({ row }) => (
+          <VehicleServiceTypesCell rate={row.original} />
+        ),
       }),
 
       // ------------------------------------------
-      // FEES
+      // TARIFAS ADICIONALES
       // ------------------------------------------
-
       columnHelper.display({
         id: "fees",
-
         header: "Tarifas",
-
-        cell: ({ row }) => {
-          const rate = row.original
-
-          return (
-            <FeesCell rate={rate} />
-          )
-        },
+        cell: ({ row }) => <FeesCell rate={row.original} />,
       }),
 
       // ------------------------------------------
       // ESTADO
       // ------------------------------------------
+      columnHelper.accessor("is_active", {
+        header: "Estado",
+        cell: (info) => {
+          const rate = info.row.original;
+          const isActive = info.getValue();
 
-columnHelper.accessor("is_active", {
-  header: "Estado",
-  cell: (info) => {
-    const rate = info.row.original
-    const isActive = info.getValue()
+          return (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isActive}
+                onCheckedChange={() => handleToggleActive(rate)}
+                disabled={isFetchingRates || isLoadingRates}
+                aria-label={
+                  isActive ? "Desactivar tarifa" : "Activar tarifa"
+                }
+              />
 
-    return (
-      <div className="flex items-center gap-2">
-        <Switch
-          checked={isActive}
-          onCheckedChange={() => handleToggleActive(rate)}
-          disabled={isFetchingRates || isLoadingRates}
-          aria-label={
-            isActive
-              ? "Desactivar tarifa"
-              : "Activar tarifa"
-          }
-        />
-
-        <Badge
-          variant={isActive ? "default" : "secondary"}
-          className="w-24 justify-center whitespace-nowrap"
-        >
-          {isActive ? "Activa" : "Desactivada"}
-        </Badge>
-      </div>
-    )
-  },
-}),
-
-
-
- // ------------------------------------------
- // COMPANIES
- // ------------------------------------------
-
-columnHelper.accessor("companies", {
-  header: "Empresas relacionadas",
-  cell: (info) => {
-    const companies = info.getValue() ?? [];
-    const hasCompanies = companies.length > 0;
-
-    return (
-      <Dialog>
-        <DialogTrigger
-          render={
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-fit whitespace-nowrap"
-            />
-          }
-        >
-          {hasCompanies
-            ? `Ver empresas (${companies.length})`
-            : "General"}
-        </DialogTrigger>
-
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Empresas relacionadas
-            </DialogTitle>
-            <DialogDescription>
-              Empresas asociadas a esta tarifa.
-            </DialogDescription>
-          </DialogHeader>
-
-          {hasCompanies ? (
-            <ul className="flex flex-col gap-2">
-              {companies.map((company) => (
-                <li
-                  key={company.id}
-                  className="rounded-md border px-3 py-2"
-                >
-                  {company.name}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Esta es una tarifa general, sin empresas asociadas.
-            </p>
-          )}
-        </DialogContent>
-      </Dialog>
-    );
-  },
-}),
-
+              <Badge
+                variant={isActive ? "default" : "secondary"}
+                className="w-24 justify-center whitespace-nowrap"
+              >
+                {isActive ? "Activa" : "Desactivada"}
+              </Badge>
+            </div>
+          );
+        },
+      }),
 
       // ------------------------------------------
-// ACCIONES
-// ------------------------------------------
+      // EMPRESAS RELACIONADAS
+      // ------------------------------------------
+      columnHelper.accessor("companies", {
+        header: "Empresas relacionadas",
+        cell: (info) => {
+          const companies = info.getValue() ?? [];
+          const hasCompanies = companies.length > 0;
 
-columnHelper.display({
-  id: "actions",
-  header: "",
-  cell: ({ row }) => {
-    const rate = row.original
+          return (
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-fit whitespace-nowrap"
+                  />
+                }
+              >
+                {hasCompanies
+                  ? `Ver empresas (${companies.length})`
+                  : "General"}
+              </DialogTrigger>
 
-    return (
-      <RateActionsCell
-        rate={rate}
-        onDelete={handleDeleteRate}
-      />
-    )
-  },
-}),
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Empresas relacionadas</DialogTitle>
+                  <DialogDescription>
+                    Empresas asociadas a esta tarifa.
+                  </DialogDescription>
+                </DialogHeader>
 
+                {hasCompanies ? (
+                  <ul className="flex flex-col gap-2">
+                    {companies.map((company) => (
+                      <li
+                        key={company.id}
+                        className="rounded-md border px-3 py-2"
+                      >
+                        {company.name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Esta es una tarifa general, sin empresas asociadas.
+                  </p>
+                )}
+              </DialogContent>
+            </Dialog>
+          );
+        },
+      }),
 
-    ],
-    [isFetchingRates, isLoadingRates],
-  )
+      // ------------------------------------------
+      // ACCIONES
+      // ------------------------------------------
+      columnHelper.display({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <RateActionsCell
+            rate={row.original}
+            onDelete={handleDeleteRate}
+            isPending={deleteVehicleRateMutation.isPending}
+          />
+        ),
+      }),
+    ]),
+  [
+    isFetchingRates,
+    isLoadingRates,
+    handleToggleActive,
+    handleDeleteRate,
+    deleteVehicleRateMutation.isPending,
+  ],
+);
+
 
   // ==========================================
   // TABLA TANSTACK
   // ==========================================
 
-  const table = useReactTable({
-    data: rates || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
+  const table = useTable({
+  features: stockFeatures,
+  data: rates,
+  columns,
+});
 
   // ==========================================
   // STATUS BADGE
