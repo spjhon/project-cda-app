@@ -57,7 +57,6 @@ import { useUpdateVehicleRateActive } from "@/lib/client-actions/update_vehicle_
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog"
 import { useDeleteVehicleRate } from "@/lib/client-actions/delete_vehicle_service_rate"
 import { GenericConfirmDialog } from "@/components/feedbackDialogs/GenericConfirmDialog"
-import { calculateVehicleRateTotal } from "@/lib/utils/calculate-vehicle-rate-total";
 import { RatePriceDialog } from "./RatePriceDialog";
 
 
@@ -386,7 +385,7 @@ export default function RatesTable() {
       .tenantObject?.id
 
   const updateVehicleRateActiveMutation = useUpdateVehicleRateActive();
-  const deleteVehicleRateMutation = useDeleteVehicleRate();
+
 
  
 
@@ -434,18 +433,7 @@ const handleToggleActive = useCallback(
   ]
 );
 
-/* ==========================================
- * MUTATION: ELIMINAR
- * ========================================== */
 
-const handleDeleteRate = useCallback(
-  async (rate: VehicleRate): Promise<void> => {
-    await deleteVehicleRateMutation.mutateAsync({
-      id: rate.id,
-    });
-  },
-  [deleteVehicleRateMutation]
-);
 
 
   // ==========================================
@@ -700,7 +688,7 @@ columnHelper.accessor("name", {
    header: "Precio final",
    cell: ({ row }) => {
      const rate = row.original
-    console.log(rate)
+   
      return (
        <RatePriceDialog rate={rate} />
      )
@@ -708,26 +696,20 @@ columnHelper.accessor("name", {
  }),
 
       // ------------------------------------------
-      // ACCIONES
-      // ------------------------------------------
-      columnHelper.display({
-        id: "actions",
-        header: "",
-        cell: ({ row }) => (
-          <RateActionsCell
-            rate={row.original}
-            onDelete={handleDeleteRate}
-            isPending={deleteVehicleRateMutation.isPending}
-          />
-        ),
-      }),
+// ACCIONES
+// ------------------------------------------
+columnHelper.display({
+  id: "actions",
+  header: "",
+  cell: ({ row }) => (
+    <RateActionsCell rate={row.original} />
+  ),
+}),
     ]),
   [
     isFetchingRates,
-    isLoadingRates,
-    handleToggleActive,
-    handleDeleteRate,
-    deleteVehicleRateMutation.isPending,
+  isLoadingRates,
+  handleToggleActive
   ],
 );
 
@@ -1111,42 +1093,28 @@ function FeesCell({
 // ==========================================
 // ACCIONES DE LA FILA
 // ==========================================
+function RateActionsCell({ rate }: { rate: VehicleRate }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-
-function RateActionsCell({
-  rate,
-  onDelete,
-  isPending = false,
-}: {
-  rate: VehicleRate;
-  onDelete: (rate: VehicleRate) => Promise<void>;
-  isPending?: boolean;
-}) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const deleteVehicleRateMutation = useDeleteVehicleRate()
 
   const handleConfirmDelete = async () => {
-    try {
-      await onDelete(rate);
-      setIsDeleteDialogOpen(false);
-    } catch (error) {
-      setDeleteError(
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error al eliminar la tarifa.",
-      );
-    }
-  };
+    await deleteVehicleRateMutation.mutateAsync(
+      { id: rate.id },
+      {
+        onSuccess: () => setIsDeleteDialogOpen(false),
+      }
+    )
+  }
 
   const handleDialogOpenChange = (open: boolean) => {
-    if (isPending) return;
+  if (deleteVehicleRateMutation.isPending) return
 
-    setIsDeleteDialogOpen(open);
+  setIsDeleteDialogOpen(open)
 
-    if (open) {
-      setDeleteError(null);
-    }
-  };
+  // Limpia el error SIEMPRE que cambie el estado del diálogo
+  deleteVehicleRateMutation.reset()
+}
 
   return (
     <>
@@ -1166,17 +1134,14 @@ function RateActionsCell({
         open={isDeleteDialogOpen}
         onOpenChange={handleDialogOpenChange}
         title="¿Eliminar tarifa?"
-        description={
-          deleteError
-            ? `No fue posible eliminar la tarifa: ${deleteError}`
-            : "Esta acción eliminará la tarifa seleccionada. ¿Deseas continuar?"
-        }
+        description="Esta acción eliminará la tarifa seleccionada. ¿Deseas continuar?"
         itemName="Tarifa de vehículo"
         itemDetails={`ID: ${rate.id}`}
         confirmText="Eliminar tarifa"
         onConfirm={handleConfirmDelete}
-        isPending={isPending}
+        isPending={deleteVehicleRateMutation.isPending}
+        error={deleteVehicleRateMutation.error?.message ?? null}
       />
     </>
-  );
+  )
 }

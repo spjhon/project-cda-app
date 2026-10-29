@@ -49,7 +49,7 @@ export default function AccionesOrderOfficeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-6xl p-6 overflow-y-auto max-h-[90vh]">
         {/* Encabezado Principal */}
         <DialogHeader className="text-center sm:text-center flex flex-col items-center border-b border-border pb-4 mb-4">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold text-foreground justify-center">

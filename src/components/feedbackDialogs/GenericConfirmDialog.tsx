@@ -1,4 +1,3 @@
-
 "use client"
 
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/dialog"
 
 import { Button } from "@/components/ui/button"
+import { AlertCircle, Loader2 } from "lucide-react"
 
 interface GenericConfirmDialogProps {
   open: boolean
@@ -25,7 +25,17 @@ interface GenericConfirmDialogProps {
 
   onConfirm: () => void | Promise<void>
 
+  /**
+   * Estado de espera de la mutación.
+   * Puedes pasar directamente `mutation.isPending`.
+   */
   isPending?: boolean
+
+  /**
+   * Mensaje de error que provenga de la mutación.
+   * Si existe, se muestra entre el detalle del item y los botones.
+   */
+  error?: string | null
 }
 
 export function GenericConfirmDialog({
@@ -39,10 +49,8 @@ export function GenericConfirmDialog({
   cancelText = "Cancelar",
   onConfirm,
   isPending = false,
+  error = null,
 }: GenericConfirmDialogProps) {
-
-
-    
   const handleConfirm = async () => {
     await onConfirm()
   }
@@ -59,9 +67,7 @@ export function GenericConfirmDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
 
-          <DialogDescription>
-            {description}
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         {(itemName || itemDetails) && (
@@ -77,6 +83,17 @@ export function GenericConfirmDialog({
                 {itemDetails}
               </p>
             )}
+          </div>
+        )}
+
+        {/* Mensaje de error proveniente de la mutación */}
+        {error && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+          >
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <p className="leading-snug">{error}</p>
           </div>
         )}
 
@@ -96,7 +113,14 @@ export function GenericConfirmDialog({
             disabled={isPending}
             onClick={handleConfirm}
           >
-            {isPending ? "Procesando..." : confirmText}
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              confirmText
+            )}
           </Button>
         </div>
       </DialogContent>
