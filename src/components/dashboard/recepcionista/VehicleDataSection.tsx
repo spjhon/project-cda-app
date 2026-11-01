@@ -114,13 +114,10 @@ export default function VehicleDataSection({
   selectedTemplate,
   formData,
   setFormData,
-  setShowErrorDialog,
-  setServerError
 }: VehicleDataSectionProps) {
   const requiereGas =
     formData.vehicle.combustible === "gas_natural_vehicular" ||
     formData.vehicle.combustible === "gas_gasolina";
-
 
 
 

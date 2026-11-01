@@ -1,99 +1,111 @@
-
-
-
-
 export interface RateFeeForCalculation {
   fee_amount: number
   iva_percentage: number | null
 }
 
-interface CalculateVehicleRateTotalArgs {
+export interface VehicleRateForCalculation {
+  rateId: string
   basePrice: number
   ivaPercentage: number | null
   fees: RateFeeForCalculation[]
 }
 
+interface CalculateVehicleRateTotalArgs {
+  rates: VehicleRateForCalculation[]
+}
+
+export interface CalculatedVehicleRate extends VehicleRateForCalculation {
+  totalPrice: number
+  price: number
+}
+
+// =====================================================
+// MÉTODO 1: REDONDEO AL PESO
+// =====================================================
+
 export function calculateVehicleRateTotal({
-  basePrice,
-  ivaPercentage,
-  fees,
-}: CalculateVehicleRateTotalArgs): number {
-  const normalizedBasePrice = Number(basePrice)
+  rates,
+}: CalculateVehicleRateTotalArgs): CalculatedVehicleRate[] {
+  return rates.map((rate) => {
+    const normalizedBasePrice = Number(rate.basePrice)
 
-  // IVA del precio base, redondeado al peso.
-  const baseIva =
-    ivaPercentage != null
-      ? Math.round(
-          normalizedBasePrice * (Number(ivaPercentage) / 100),
-        )
-      : 0
-
-  // Cada tarifa adicional conserva su IVA independiente,
-  // redondeado al peso antes de sumarlo.
-  const feesTotal = fees.reduce((total, fee) => {
-    const feeAmount = Number(fee.fee_amount)
-
-    const feeIva =
-      fee.iva_percentage != null
+    // IVA del precio base, redondeado al peso.
+    const baseIva =
+      rate.ivaPercentage != null
         ? Math.round(
-            feeAmount * (Number(fee.iva_percentage) / 100),
+            normalizedBasePrice * (Number(rate.ivaPercentage) / 100),
           )
         : 0
 
-    return total + feeAmount + feeIva
-  }, 0)
+    // Cada tarifa adicional conserva su IVA independiente,
+    // redondeado al peso antes de sumarlo.
+    const feesTotal = rate.fees.reduce((total, fee) => {
+      const feeAmount = Number(fee.fee_amount)
 
-  // Total final en pesos enteros.
-  return Math.round(normalizedBasePrice + baseIva + feesTotal)
+      const feeIva =
+        fee.iva_percentage != null
+          ? Math.round(
+              feeAmount * (Number(fee.iva_percentage) / 100),
+            )
+          : 0
+
+      return total + feeAmount + feeIva
+    }, 0)
+
+    // Total final en pesos enteros.
+    const totalPrice = Math.round(
+      normalizedBasePrice + baseIva + feesTotal,
+    )
+
+    return {
+      ...rate,
+      totalPrice,
+      price: totalPrice,
+    }
+  })
 }
 
+// =====================================================
+// MÉTODO 2: REDONDEO A DOS DECIMALES
+// =====================================================
 
-
-
-
-
-
-/** 
-export interface RateFeeForCalculation {
-  fee_amount: number
-  iva_percentage: number | null
-}
-
-interface CalculateVehicleRateTotalArgs {
-  basePrice: number
-  ivaPercentage: number | null
-  fees: RateFeeForCalculation[]
-}
-
+/*
 export function calculateVehicleRateTotal({
-  basePrice,
-  ivaPercentage,
-  fees,
-}: CalculateVehicleRateTotalArgs): number {
-  const normalizedBasePrice = Number(basePrice)
+  rates,
+}: CalculateVehicleRateTotalArgs): CalculatedVehicleRate[] {
+  return rates.map((rate) => {
+    const normalizedBasePrice = Number(rate.basePrice)
 
-  // IVA aplicado al precio base, conservando los decimales.
-  const baseIva =
-    ivaPercentage != null
-      ? normalizedBasePrice * (Number(ivaPercentage) / 100)
-      : 0
-
-  // Cada tarifa conserva el IVA exacto, sin redondearlo individualmente.
-  const feesTotal = fees.reduce((total, fee) => {
-    const feeAmount = Number(fee.fee_amount)
-
-    const feeIva =
-      fee.iva_percentage != null
-        ? feeAmount * (Number(fee.iva_percentage) / 100)
+    // IVA aplicado al precio base, conservando los decimales.
+    const baseIva =
+      rate.ivaPercentage != null
+        ? normalizedBasePrice * (Number(rate.ivaPercentage) / 100)
         : 0
 
-    return total + feeAmount + feeIva
-  }, 0)
+    // Cada tarifa conserva el IVA exacto,
+    // sin redondearlo individualmente.
+    const feesTotal = rate.fees.reduce((total, fee) => {
+      const feeAmount = Number(fee.fee_amount)
 
-  // Redondeamos únicamente el resultado final a dos decimales.
-  const total = normalizedBasePrice + baseIva + feesTotal
+      const feeIva =
+        fee.iva_percentage != null
+          ? feeAmount * (Number(fee.iva_percentage) / 100)
+          : 0
 
- 
+      return total + feeAmount + feeIva
+    }, 0)
 
-  return Math.round((total + Number.EPSILON) * 100) / 100
-}*/
+    // Redondeamos únicamente el resultado final a dos decimales.
+    const total = normalizedBasePrice + baseIva + feesTotal
+
+    const totalPrice =
+      Math.round((total + Number.EPSILON) * 100) / 100
+
+    return {
+      ...rate,
+      totalPrice,
+      price: totalPrice,
+    }
+  })
+}
+*/

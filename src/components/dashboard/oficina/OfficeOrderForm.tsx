@@ -18,6 +18,7 @@ import OrderPayments from "./OrderPayments";
 import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_types";
 import { CompanyRateSelectorSingle } from "./CompanyRateSelectorSingle";
 import { useCompanies } from "@/lib/client-actions/fetch_tenant_companies";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface OfficeFormState {
   oficina_pin: string;
@@ -45,10 +46,10 @@ export default function OfficeOrderForm({
   )?.id ?? null;
 
   // Estado para cuando el usuario seleccione otra empresa de forma manual
-  const [userSelectedCompanyId, setUserSelectedCompanyId] = useState<string | null>(null);
-  
-  // El ID final que usaremos (si el usuario eligió uno nuevo usamos ese, sino el inicial de la orden)
-  const selectedCompanyId = userSelectedCompanyId ?? initialCompanyId;
+  const [userSelectedCompanyId, setUserSelectedCompanyId] =
+  useState<string | null | undefined>(undefined);
+
+const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId : userSelectedCompanyId;
 
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,8 +66,10 @@ export default function OfficeOrderForm({
     orden.payments ?? []
   );
 
+const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
+
   const {
-    data: orderRate,
+    data: orderRates,
     isLoading: isLoadingOrderRate,
     isFetching: isFetchingOrderRate,
     error: orderRateError,
@@ -75,6 +78,22 @@ export default function OfficeOrderForm({
     companyId: selectedCompanyId,
     orderId: orden.id,
   });
+
+  console.log("estos son los order rates: ", orderRates)
+
+  const selectedRate =
+  orderRates?.find((rate) => rate.rateId === selectedRateId) ??
+  orderRates?.[0]
+
+  const rateItems = [
+  { label: "Seleccione una tarifa", value: null },
+  ...(orderRates?.map((rate) => ({
+    label: `$${rate.totalPrice.toLocaleString("es-CO")}`,
+    value: rate.rateId,
+  })) ?? []),
+]
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -122,19 +141,19 @@ export default function OfficeOrderForm({
       return;
     }
 
-    if (!orderRate) {
-      alert("No se ha podido obtener la tarifa de la orden.");
-      setIsSubmitting(false);
-      return;
-    }
+   if (!selectedRate) {
+  alert("Debe seleccionar una tarifa para la orden.")
+  setIsSubmitting(false)
+  return
+}
 
     try {
       const { data, error } = await insertOficinaData({
         orderId: orden.id,
         formData: formData,
         payments: payments,
-        vehicleServiceRateId: orderRate.rateId,
-        ratePriceSnapshot: orderRate.totalPrice,
+        vehicleServiceRateId: selectedRate.rateId,
+ratePriceSnapshot: selectedRate.totalPrice,
         service_type: orden.service_type,
         companyId: selectedCompanyId,
       });
@@ -164,7 +183,7 @@ export default function OfficeOrderForm({
     0,
   );
 
-  const totalToPay = orderRate?.totalPrice ?? 0;
+  const totalToPay = selectedRate?.totalPrice ?? 0
   const paymentMatches = totalPayments === totalToPay;
 
   return (
@@ -226,27 +245,44 @@ export default function OfficeOrderForm({
           </div>
 
           {/* Valor a pagar */}
-          <div className="space-y-1.5">
-            <Label className="text-foreground text-xs font-semibold">
-              VALOR A PAGAR
-            </Label>
+       <div className="space-y-1.5">
+  <Label className="text-foreground text-xs font-semibold">
+    VALOR A PAGAR
+  </Label>
 
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-md h-10 flex items-center px-3">
-              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                $
-                {orderRateError
-                  ? " No hay precio"
-                  : isLoadingOrderRate || isFetchingOrderRate
-                    ? " Cargando Rate"
-                    : orderRate?.totalPrice?.toLocaleString("es-CO")}
-              </span>
-            </div>
-            {orderRateError && (
-              <p className="text-xs font-medium text-red-600 dark:text-red-400">
-                No hay precio configurado para este vehículo
-              </p>
-            )}
-          </div>
+  {isLoadingOrderRate || isFetchingOrderRate ? (
+    <div className="flex items-center gap-2 h-10 text-xs text-muted-foreground">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Consultando tarifas...
+    </div>
+  ) : orderRateError || !orderRates?.length ? (
+    <p className="text-xs font-medium text-red-600 dark:text-red-400">
+      No hay tarifas configuradas para este vehículo.
+    </p>
+  ) : (
+   <Select
+  items={rateItems}
+  value={selectedRate?.rateId ?? null}
+  onValueChange={setSelectedRateId}
+>
+  <SelectTrigger className="w-full bg-background h-10 text-xs">
+    <SelectValue />
+  </SelectTrigger>
+
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Tarifas disponibles</SelectLabel>
+
+      {rateItems.map((item) => (
+        <SelectItem key={item.value ?? "empty"} value={item.value}>
+          {item.label}
+        </SelectItem>
+      ))}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+  )}
+</div>
 
           {/* Total ingresado */}
           <div className="space-y-1.5">

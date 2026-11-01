@@ -53,10 +53,15 @@ export function calculateVehicleRateScenarios({
         ageTo: null,
         fees,
         totalPrice: calculateVehicleRateTotal({
-          basePrice,
-          ivaPercentage,
-          fees,
-        }),
+          rates: [
+            {
+              rateId: "general",
+              basePrice,
+              ivaPercentage,
+              fees,
+            },
+          ],
+        })[0].totalPrice,
       },
     ]
   }
@@ -77,14 +82,33 @@ export function calculateVehicleRateScenarios({
 
   const sortedBoundaries = [...boundaries].sort((a, b) => a - b)
 
-  const intervals = sortedBoundaries.map((ageFrom, index) => {
-    const nextBoundary = sortedBoundaries[index + 1]
+  const intervals = sortedBoundaries
+    .map((ageFrom, index) => {
+      const nextBoundary = sortedBoundaries[index + 1]
 
-    return {
-      ageFrom,
-      ageTo: nextBoundary === undefined ? null : nextBoundary - 1,
-    }
-  })
+      return {
+        ageFrom,
+        ageTo: nextBoundary === undefined ? null : nextBoundary - 1,
+      }
+    })
+    // Descartamos intervalos sin tarifas aplicables.
+   .filter(({ ageFrom }) =>
+  fees.some((fee) => {
+    const hasAgeRange =
+      fee.vehicle_age_from !== null ||
+      fee.vehicle_age_to !== null
+
+    const matchesFrom =
+      fee.vehicle_age_from === null ||
+      ageFrom >= fee.vehicle_age_from
+
+    const matchesTo =
+      fee.vehicle_age_to === null ||
+      ageFrom <= fee.vehicle_age_to
+
+    return hasAgeRange && matchesFrom && matchesTo
+  }),
+)
 
   return intervals.map(({ ageFrom, ageTo }) => {
     const applicableFees = fees.filter((fee) => {
@@ -109,6 +133,8 @@ export function calculateVehicleRateScenarios({
         fee.vehicle_age_to !== null,
     )
 
+    const scenarioFees = [...fixedFees, ...rangedFees]
+
     const label =
       ageTo === null
         ? `Desde ${ageFrom} años`
@@ -121,12 +147,17 @@ export function calculateVehicleRateScenarios({
       label,
       ageFrom,
       ageTo,
-      fees: [...fixedFees, ...rangedFees],
+      fees: scenarioFees,
       totalPrice: calculateVehicleRateTotal({
-        basePrice,
-        ivaPercentage,
-        fees: [...fixedFees, ...rangedFees],
-      }),
+        rates: [
+          {
+            rateId: `${ageFrom}-${ageTo ?? "plus"}`,
+            basePrice,
+            ivaPercentage,
+            fees: scenarioFees,
+          },
+        ],
+      })[0].totalPrice,
     }
   })
 }

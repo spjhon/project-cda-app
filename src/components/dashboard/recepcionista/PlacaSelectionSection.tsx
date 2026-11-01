@@ -41,9 +41,10 @@ import { Input } from "@/components/ui/input";
 import { fetchDataWithPlaca } from "@/lib/client-actions/fetch_data_with_placa";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import RuntScraperModal from "./RuntScraperModal";
 import { getInitialOrderFormData } from "./NewEntryOrder/NewEntryOrderComponent";
 import { OrderTemplateType } from "@/types/functions_types";
+import RuntScraperModalFirefox from "./NewEntryOrder/RuntScraperModalFirefox";
+import RuntScraperModal from "./RuntScraperModal";
 
 interface ServiceOption {
   id: ServiceType;

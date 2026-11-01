@@ -199,9 +199,9 @@ BEGIN
             THEN 0
             ELSE 1
         END,
-        vsr.id
+        vsr.id;
 
-    LIMIT 1;
+
 
 END;
 $$;
