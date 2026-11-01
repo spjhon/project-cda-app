@@ -81,9 +81,13 @@ const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
 
   console.log("estos son los order rates: ", orderRates)
 
-  const selectedRate =
-  orderRates?.find((rate) => rate.rateId === selectedRateId) ??
-  orderRates?.[0]
+  const selectedRateIdFromOrder = orden.vehicle_service_rate_id;
+
+const selectedRate =
+  orderRates?.find(
+    (rate) =>
+      rate.rateId === (selectedRateId ?? selectedRateIdFromOrder),
+  ) ?? orderRates?.[0];
 
   const rateItems = [
   { label: "Seleccione una tarifa", value: null },

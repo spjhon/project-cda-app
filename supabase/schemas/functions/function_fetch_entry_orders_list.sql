@@ -42,6 +42,7 @@ RETURNS TABLE (
     oficina_pin CHARACTER VARYING,
     oficina_consecutivo_factura CHARACTER VARYING,
     se_compro_soat BOOLEAN,
+    vehicle_service_rate_id UUID,
     rate_price_snapshot NUMERIC(12, 2),
     company_nit_snapshot TEXT,
     resultado_revision TEXT,
@@ -101,6 +102,13 @@ BEGIN
                 THEN old_o.se_compro_soat
                 ELSE o.se_compro_soat
             END AS se_compro_soat,
+
+            -- RATE UTILIZADO
+            CASE
+                WHEN o.es_reinspeccion = TRUE
+                THEN old_o.vehicle_service_rate_id
+                ELSE o.vehicle_service_rate_id
+            END AS vehicle_service_rate_id,
 
             -- PRECIO DEL RATE UTILIZADO
             CASE
