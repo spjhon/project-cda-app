@@ -17,19 +17,19 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     tenant_id                   UUID NOT NULL,
 
     -- Vehículo asociado a la orden.
-    vehiculo_id                 UUID NOT NULL,
+    vehiculo_id                 UUID NULL,
 
     -- Propietario registrado al momento de crear la orden.
-    propietario_id              UUID NOT NULL,
+    propietario_id              UUID NULL,
 
     -- Persona que presenta el vehículo.
-    cliente_id                  UUID NOT NULL,
+    cliente_id                  UUID NULL,
 
     -- Funcionario que recibe el vehículo.
     funcionario_id              UUID NOT NULL,
 
     -- Plantilla utilizada para generar la orden.
-    plantilla_id                UUID NOT NULL,
+    plantilla_id                UUID NULL,
 
 
     -- ==========================================
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     vehiculo_modelo_snapshot                    INTEGER NOT NULL,
 
     -- Color registrado.
-    vehiculo_color_snapshot                     VARCHAR NOT NULL,
+    vehiculo_color_snapshot                     VARCHAR NULL,
 
     -- Tipo de vehículo.
     vehiculo_tipo_snapshot                      public.vehicle_type_enum NOT NULL,
@@ -81,13 +81,13 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     vehiculo_combustible_snapshot               VARCHAR NOT NULL,
 
     -- Cilindraje registrado.
-    vehiculo_cilindrada_snapshot                INTEGER NOT NULL,
+    vehiculo_cilindrada_snapshot                INTEGER NULL,
 
     -- Indica si posee blindaje.
     vehiculo_blindaje_snapshot                  BOOLEAN NOT NULL,
 
     -- Capacidad máxima de pasajeros.
-    vehiculo_capacidad_pasajeros_snapshot       INTEGER NOT NULL,
+    vehiculo_capacidad_pasajeros_snapshot       INTEGER NULL,
 
     -- Vehículo de enseñanza.
     vehiculo_es_ensenanza_snapshot              BOOLEAN NOT NULL,
@@ -104,13 +104,13 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
 -- ==========================================
 
 -- Tipo de documento del propietario.
-propietario_tipo_documento_snapshot         TEXT NOT NULL,
+propietario_tipo_documento_snapshot         TEXT NULL,
 
 -- Número de documento del propietario.
-propietario_numero_documento_snapshot       VARCHAR NOT NULL,
+propietario_numero_documento_snapshot       VARCHAR NULL,
 
 -- Nombre completo del propietario.
-propietario_nombre_snapshot                 TEXT NOT NULL,
+propietario_nombre_snapshot                 TEXT NULL,
 
 -- Teléfono del propietario.
 propietario_telefono_snapshot               VARCHAR,
@@ -127,13 +127,13 @@ propietario_direccion_snapshot              TEXT,
 -- ==========================================
 
 -- Tipo de documento de quien presenta el vehículo.
-cliente_tipo_documento_snapshot             TEXT NOT NULL,
+cliente_tipo_documento_snapshot             TEXT NULL,
 
 -- Número de documento.
-cliente_numero_documento_snapshot           VARCHAR NOT NULL,
+cliente_numero_documento_snapshot           VARCHAR NULL,
 
 -- Nombre completo.
-cliente_nombre_snapshot                     TEXT NOT NULL,
+cliente_nombre_snapshot                     TEXT NULL,
 
 -- Teléfono de contacto.
 cliente_telefono_snapshot                   VARCHAR,

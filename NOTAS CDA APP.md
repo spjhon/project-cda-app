@@ -65,6 +65,7 @@ comando para desplegar funciones edge: `pnpx supabase functions deploy`
 - agregar que se vea el consecutivo de la factura en la tabla
 - ojo con los rates repetidos cuando se vuelve a crear un rate
 - pasar el sistema de autenticacion a edge functions
+- crear la tabla entry_order_fees para guardar el historico de los fees utilizados y al momento de guardar datos editados desde el form de la oficina, que elimine los fees viejos e inserte los nuevos por si se utilizo un set de rates nuevos, osea que se edito la tarifa.
 
 ## FEATURES QUE FALTAN
 

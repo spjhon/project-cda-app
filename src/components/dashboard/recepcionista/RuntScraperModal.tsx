@@ -21,12 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Globe, Loader2 } from "lucide-react";
-import { ZodFullFormDataType } from "@/lib/zod-schemas/order-schema";
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog";
 
-interface RuntScraperModalProps {
-  formData: ZodFullFormDataType;
-  setFormData: React.Dispatch<React.SetStateAction<ZodFullFormDataType>>;
+interface RuntScraperModalProps<T> {
+  formData: T;
+  setFormData: React.Dispatch<React.SetStateAction<T>>;
 }
 
 // Opciones de identificación según tu lista
@@ -41,16 +40,16 @@ export const ID_DOCUMENT_OPTIONS = [
   { label: "Permiso por Protección Temporal", value: "permiso_por_proteccion_temporal" },
 ];
 
-export default function RuntScraperModal({
+export default function RuntScraperModal<T extends { vehicle?: { placa?: string } }>({
   formData,
   setFormData,
-}: RuntScraperModalProps) {
+}: RuntScraperModalProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Campos locales del formulario del RUNT
   // Estados locales independientes
-  const [tipoDocumento, setTipoDocumento] = useState( formData.owner_data.tipo_documento || "" );
-  const [numeroDocumento, setNumeroDocumento] = useState( formData.owner_data.numero_documento || "", );
+  const [tipoDocumento, setTipoDocumento] = useState( "cedula_ciudadania" );
+  const [numeroDocumento, setNumeroDocumento] = useState( "", );
   const [captchaValue, setCaptchaValue] = useState("");
  
 const [isRtmWarningOpen, setIsRtmWarningOpen] = useState(false);
@@ -209,66 +208,93 @@ const captchaImage =
 
 
     },
-    onSuccess: (data) => {
+        onSuccess: (data) => {
       if (data.success) {
         validateRtmExpiration(data.payload.fecha_vencimiento_RTM);
         console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
 
-        setFormData((prev: ZodFullFormDataType) => ({
-          ...prev,
-          soat_vencimiento_snapshot:
-            data.payload.soat || prev.soat_vencimiento_snapshot,
-          vehicle: {
-            ...prev.vehicle,
-            capacidad_pasajeros:
-              data.payload.capacidad_pasajeros ||
-              prev.vehicle.capacidad_pasajeros,
-            cilindrada:
-              data.payload.cilindrada_vehiculo || prev.vehicle.cilindrada,
-            clase: data.payload.clase_vehiculo || prev.vehicle.clase,
-            color: data.payload.color_vehiculo || prev.vehicle.color,
-            combustible:
-              data.payload.combustible_vehiculo || prev.vehicle.combustible,
-            es_ensenanza:
-              data.payload.es_ensenanza || prev.vehicle.es_ensenanza,
-            linea: data.payload.lineaVehiculo || prev.vehicle.linea,
-            marca: data.payload.marca_vehiculo || prev.vehicle.marca,
-            modelo: data.payload.modelo_vehiculo || prev.vehicle.modelo,
-            tipo_servicio_vehiculo:
-              data.payload.tipo_servicio || prev.vehicle.tipo_servicio_vehiculo,
+        setFormData((prev) => {
+          // 1. Hacemos un cast a un tipo que tenga las propiedades del vehículo
+          // Esto le dice a TS: "Confía en mí, este objeto tiene estas propiedades".
+          const prevData = prev as T & {
+            soat_vencimiento_snapshot?: string;
+            vehicle: {
+              placa?: string;
+              capacidad_pasajeros?: string;
+              cilindrada?: string;
+              clase?: string;
+              color?: string;
+              combustible?: string;
+              es_ensenanza?: boolean;
+              linea?: string;
+              marca?: string;
+              modelo?: string;
+              tipo_servicio_vehiculo?: string;
+              fecha_vencimiento_rtm?: string;
+              organismo_que_expidio_ultima_rtm?: string;
+              rtm_vigente_de_acuerdo_al_runt?: string | boolean;
+              se_encontro_fecha_vencimiento_rtm?: string | boolean;
+              fecha_matricula?: string;
+              soat_vigente_de_acuerdo_al_runt?: string | boolean;
+            };
+          };
 
-            // RTM - Fecha de vencimiento
-            fecha_vencimiento_rtm:
-              data.payload.fecha_vencimiento_RTM ||
-              prev.vehicle.fecha_vencimiento_rtm,
+          return {
+            ...prev,
+            // Actualizamos el SOAT general si existe
+            ...(prevData.soat_vencimiento_snapshot !== undefined && {
+              soat_vencimiento_snapshot: data.payload.soat || prevData.soat_vencimiento_snapshot,
+            }),
+            informacion_buscada: true,
+            vehicle: {
+              ...prev.vehicle,
+              capacidad_pasajeros:
+                data.payload.capacidad_pasajeros ||
+                prevData.vehicle?.capacidad_pasajeros || "",
+              cilindrada:
+                data.payload.cilindrada_vehiculo || prevData.vehicle?.cilindrada || "",
+              clase: data.payload.clase_vehiculo || prevData.vehicle?.clase || "",
+              color: data.payload.color_vehiculo || prevData.vehicle?.color || "",
+              combustible:
+                data.payload.combustible_vehiculo || prevData.vehicle?.combustible || "",
+              es_ensenanza:
+                data.payload.es_ensenanza ?? prevData.vehicle?.es_ensenanza ?? false,
+              linea: data.payload.lineaVehiculo || prevData.vehicle?.linea || "",
+              marca: data.payload.marca_vehiculo || prevData.vehicle?.marca || "",
+              modelo: data.payload.modelo_vehiculo || prevData.vehicle?.modelo || "",
+              tipo_servicio_vehiculo:
+                data.payload.tipo_servicio || prevData.vehicle?.tipo_servicio_vehiculo || "",
 
-            // RTM - Organismo que expidió
-            organismo_que_expidio_ultima_rtm:
-              data.payload.organismo_que_expidio_la_ultima_RTM ||
-              prev.vehicle.organismo_que_expidio_ultima_rtm,
+              // RTM - Fecha de vencimiento
+              fecha_vencimiento_rtm:
+                data.payload.fecha_vencimiento_RTM || prevData.vehicle?.fecha_vencimiento_rtm || "",
 
-            // RTM - Vigente según RUNT
-            rtm_vigente_de_acuerdo_al_runt:
-              data.payload.RTM_vigente_de_acuerdo_al_runt !== undefined
-                ? data.payload.RTM_vigente_de_acuerdo_al_runt
-                : prev.vehicle.rtm_vigente_de_acuerdo_al_runt,
+              // RTM - Organismo que expidió
+              organismo_que_expidio_ultima_rtm:
+                data.payload.organismo_que_expidio_la_ultima_RTM || prevData.vehicle?.organismo_que_expidio_ultima_rtm || "",
 
-            // RTM - Se encontró fecha de vencimiento
-            se_encontro_fecha_vencimiento_rtm:
-              data.payload.se_encontro_fecha_vencimiento_RTM !== undefined
-                ? data.payload.se_encontro_fecha_vencimiento_RTM
-                : prev.vehicle.se_encontro_fecha_vencimiento_rtm,
+              // RTM - Vigente según RUNT
+              rtm_vigente_de_acuerdo_al_runt:
+                data.payload.RTM_vigente_de_acuerdo_al_runt !== undefined
+                  ? data.payload.RTM_vigente_de_acuerdo_al_runt
+                  : prevData.vehicle?.rtm_vigente_de_acuerdo_al_runt || "",
 
-            // Fecha de matrícula
-            fecha_matricula:
-              data.payload.fecha_matricula || prev.vehicle.fecha_matricula,
+              // RTM - Se encontró fecha de vencimiento
+              se_encontro_fecha_vencimiento_rtm:
+                data.payload.se_encontro_fecha_vencimiento_RTM !== undefined
+                  ? data.payload.se_encontro_fecha_vencimiento_RTM
+                  : prevData.vehicle?.se_encontro_fecha_vencimiento_rtm || "",
 
-            // ✅ SOAT vigente - AHORA DENTRO DE vehicle
-            soat_vigente_de_acuerdo_al_runt:
-              data.payload.SOAT_vigente_de_acuerdo_al_RUNT ||
-              prev.vehicle.soat_vigente_de_acuerdo_al_runt,
-          },
-        }));
+              // Fecha de matrícula
+              fecha_matricula:
+                data.payload.fecha_matricula || prevData.vehicle?.fecha_matricula || "",
+
+              // ✅ SOAT vigente - AHORA DENTRO DE vehicle
+              soat_vigente_de_acuerdo_al_runt:
+                data.payload.SOAT_vigente_de_acuerdo_al_RUNT || prevData.vehicle?.soat_vigente_de_acuerdo_al_runt || "",
+            },
+          } as T; // Volvemos a castear al tipo original T
+        });
 
         setCaptchaValue(""); // Limpiamos el input
       } else {
@@ -290,8 +316,8 @@ const handleOpenChange = (open: boolean) => {
   setIsOpen(open);
 
   if (open) {
-    setNumeroDocumento(formData.owner_data.numero_documento || "");
-    setTipoDocumento(formData.owner_data.tipo_documento || "");
+    setNumeroDocumento("");
+    setTipoDocumento("cedula_ciudadania");
   }
 
   if (!open) {
@@ -331,7 +357,7 @@ const handleOpenChange = (open: boolean) => {
         render={
           <Button
             type="button"
-            //disabled={!placa}
+            disabled={!placa}
             className={`
             w-full h-16 gap-2 font-bold rounded-xl transition-all active:scale-95 text-lg
             ${

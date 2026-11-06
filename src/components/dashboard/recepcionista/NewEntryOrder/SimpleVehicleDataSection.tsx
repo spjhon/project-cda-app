@@ -1,0 +1,861 @@
+import {
+  CalendarDays,
+  Car,
+  Globe,
+  GraduationCap,
+  Hash,
+  Shield,
+  ShieldCheck,
+} from "lucide-react";
+
+import {
+  ClaseVehiculoType,
+  CombustibleType,
+} from "@/lib/zod-schemas/order-schema";
+
+import { Dispatch, SetStateAction } from "react";
+import { SimpleOrderFormData } from "./NewSimpleEntryOrderComponent";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+
+interface CombustibleOption {
+  value: CombustibleType;
+  label: string;
+}
+
+export const FUEL_OPTIONS: CombustibleOption[] = [
+  { value: "gasolina", label: "Gasolina" },
+  { value: "gas_natural_vehicular", label: "Gas Natural Vehicular" },
+  { value: "diesel", label: "Diesel" },
+  { value: "gas_gasolina", label: "Gas-Gasolina" },
+  { value: "hibrido", label: "Híbrido" },
+  { value: "electrico", label: "Eléctrico" },
+  { value: "etanol", label: "Etanol" },
+  { value: "biodiesel", label: "Biodiesel" },
+  { value: "hidrogeno", label: "Hidrógeno" },
+];
+
+interface TipoServicioOption {
+  value:
+    | "particular"
+    | "ensenanza"
+    | "oficial"
+    | "publico"
+    | "diplomatico"
+    | "especial";
+  label: string;
+}
+
+export const TIPO_SERVICIO_OPTIONS: TipoServicioOption[] = [
+  { value: "particular", label: "Particular" },
+  { value: "ensenanza", label: "Enseñanza" },
+  { value: "oficial", label: "Oficial" },
+  { value: "publico", label: "Público" },
+  { value: "diplomatico", label: "Diplomático" },
+  { value: "especial", label: "Especial" },
+];
+
+interface ClaseOption {
+  value: ClaseVehiculoType;
+  label: string;
+}
+
+export const CLASE_OPTIONS: ClaseOption[] = [
+  { value: "automovil", label: "Automóvil" },
+  { value: "bus", label: "Bus" },
+  { value: "buseta", label: "Buseta" },
+  { value: "camion", label: "Camión" },
+  { value: "camioneta", label: "Camioneta" },
+  { value: "campero", label: "Campero" },
+  { value: "microbus", label: "Microbús" },
+  { value: "tractocamion", label: "Tractocamión" },
+  { value: "motocicleta", label: "Motocicleta" },
+  { value: "motocarro", label: "Motocarro" },
+  { value: "mototriciclo", label: "Mototriciclo" },
+  { value: "cuatrimoto", label: "Cuatrimoto" },
+  { value: "remolque", label: "Remolque" },
+  { value: "semiremolque", label: "Semirremolque" },
+  { value: "volqueta", label: "Volqueta" },
+  { value: "sin_clase", label: "Sin Clase" },
+  {
+    value: "maquinaria_construccion_o_minera",
+    label: "Maquinaria de Construcción o Minera",
+  },
+  { value: "ciclomotor", label: "Ciclomotor" },
+  { value: "tricimoto", label: "Tricimoto" },
+  { value: "cuadriciclo", label: "Cuadriciclo" },
+];
+
+const VEHICLE_TYPE_ITEMS = [
+  { label: "Liviano", value: "liviano" },
+  { label: "Pesado", value: "pesado" },
+  { label: "Moto 4T", value: "motocicleta_4t" },
+  { label: "Moto 2T", value: "motocicleta_2t" },
+  { label: "Moto Eléctrica", value: "motocicleta_electrica" },
+  { label: "Moto-Carro 4T", value: "motocarro_4t" },
+  { label: "Moto-Carro 2T", value: "motocarro_2t" },
+  { label: "Moto-Carro Diesel", value: "motocarro_diesel" },
+];
+
+export interface SimpleVehicleDataSectionProps {
+  formData: SimpleOrderFormData;
+  setFormData: Dispatch<SetStateAction<SimpleOrderFormData>>;
+}
+
+export default function SimpleVehicleDataSection({
+  formData,
+  setFormData,
+}: SimpleVehicleDataSectionProps) {
+
+
+  // Función para calcular tiempo restante o vencido del SOAT
+  const calcularTiempoSOAT = (fechaVencimiento: string): string => {
+    if (!fechaVencimiento) return "";
+    // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000) con gtm-05:00
+    const ahora = new Date();
+    const hoy = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate(),
+    );
+
+    // 2. Parseamos la fecha evitando desfases de zonas horarias (UTC vs Local)
+    let fecha: Date;
+    if (fechaVencimiento.includes("T")) {
+      // Si viene ISO completa con hora
+      const d = new Date(fechaVencimiento);
+      fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    } else {
+      // Si viene solo "YYYY-MM-DD" o "YYYY/MM/DD"
+      const partes = fechaVencimiento.split(/[-/]/);
+      if (partes.length < 3) return "";
+      fecha = new Date(
+        parseInt(partes[0], 10),
+        parseInt(partes[1], 10) - 1, // Los meses en JS van de 0 a 11
+        parseInt(partes[2], 10),
+      );
+    }
+
+    // Validamos que sea una fecha real en milisegundos
+    if (isNaN(fecha.getTime())) return "";
+
+    // 3. Verificamos si es EXACTAMENTE el mismo día
+    if (fecha.getTime() === hoy.getTime()) {
+      return "VENCE HOY";
+    }
+
+    // 4. Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
+    if (fecha > hoy) {
+      let años = fecha.getFullYear() - hoy.getFullYear();
+      let meses = fecha.getMonth() - hoy.getMonth();
+      let dias = fecha.getDate() - hoy.getDate();
+
+      if (dias < 0) {
+        meses--;
+        const mesAnterior = new Date(fecha.getFullYear(), fecha.getMonth(), 0);
+        dias += mesAnterior.getDate();
+      }
+
+      if (meses < 0) {
+        años--;
+        meses += 12;
+      }
+
+      const partes = [];
+      if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+      if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+      if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+      if (partes.length === 0) return "VENCE HOY";
+      return `VIGENTE - ${partes.join(" Y ")} RESTANTES`;
+    }
+
+    // 5. Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    let meses = hoy.getMonth() - fecha.getMonth();
+    let dias = hoy.getDate() - fecha.getDate();
+
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      dias += mesAnterior.getDate();
+    }
+
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    const partes = [];
+    if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+    if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+    if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+    if (partes.length === 0) return "VENCE HOY";
+    return `VENCIDO HACE ${partes.join(" Y ")}`;
+  };
+
+  // Función para calcular tiempo restante o vencido de la RTM
+  const calcularTiempoRTM = (fechaVencimiento: string): string => {
+    if (!fechaVencimiento) return "";
+
+    // 1. Normalizamos 'hoy' a medianoche exacta (00:00:00.000)
+    const ahora = new Date();
+    const hoy = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate(),
+    );
+
+    // 2. Parseamos la fecha evitando desfases de zonas horarias (UTC vs Local)
+    let fecha: Date;
+    if (fechaVencimiento.includes("T")) {
+      // Si viene ISO completa con hora
+      const d = new Date(fechaVencimiento);
+      fecha = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    } else {
+      // Si viene solo "YYYY-MM-DD" o "YYYY/MM/DD"
+      const partes = fechaVencimiento.split(/[-/]/);
+      if (partes.length < 3) return "";
+      fecha = new Date(
+        parseInt(partes[0], 10),
+        parseInt(partes[1], 10) - 1, // Los meses en JS van de 0 a 11
+        parseInt(partes[2], 10),
+      );
+    }
+
+    // 3. Verificamos si es EXACTAMENTE el mismo día
+    if (fecha.getTime() === hoy.getTime()) {
+      return "VENCE HOY";
+    }
+
+    // 4. Si la fecha de vencimiento es mayor a hoy → AÚN VIGENTE
+    if (fecha > hoy) {
+      let años = fecha.getFullYear() - hoy.getFullYear();
+      let meses = fecha.getMonth() - hoy.getMonth();
+      let dias = fecha.getDate() - hoy.getDate();
+
+      if (dias < 0) {
+        meses--;
+        const mesAnterior = new Date(fecha.getFullYear(), fecha.getMonth(), 0);
+        dias += mesAnterior.getDate();
+      }
+
+      if (meses < 0) {
+        años--;
+        meses += 12;
+      }
+
+      const partes = [];
+      if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+      if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+      if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+      if (partes.length === 0) return "VENCE HOY";
+      return `VIGENTE - ${partes.join(" Y ")} RESTANTES`;
+    }
+
+    // 5. Si la fecha de vencimiento es menor a hoy → YA VENCIÓ
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    let meses = hoy.getMonth() - fecha.getMonth();
+    let dias = hoy.getDate() - fecha.getDate();
+
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      dias += mesAnterior.getDate();
+    }
+
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    const partes = [];
+    if (años > 0) partes.push(`${años} ${años === 1 ? "AÑO" : "AÑOS"}`);
+    if (meses > 0) partes.push(`${meses} ${meses === 1 ? "MES" : "MESES"}`);
+    if (dias > 0) partes.push(`${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`);
+
+    if (partes.length === 0) return "VENCE HOY";
+    return `VENCIDO HACE ${partes.join(" Y ")}`;
+  };
+
+  // Función para calcular antigüedad de la fecha de matrícula (siempre hacia atrás)
+  const calcularAntiguedad = (fechaMatricula: string): string => {
+    if (!fechaMatricula) return "";
+
+    const hoy = new Date();
+    const fecha = new Date(fechaMatricula);
+
+    if (isNaN(fecha.getTime())) return "";
+
+    let años = hoy.getFullYear() - fecha.getFullYear();
+    let meses = hoy.getMonth() - fecha.getMonth();
+    let dias = hoy.getDate() - fecha.getDate();
+
+    // Ajustar si el día del mes aún no ha llegado
+    if (dias < 0) {
+      meses--;
+      const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      dias += mesAnterior.getDate();
+    }
+
+    // Ajustar si el mes aún no ha llegado
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    // Caso: menos de 1 día
+    if (años === 0 && meses === 0 && dias === 0) {
+      return "HACE MENOS DE 1 DÍA";
+    }
+
+    // Caso: menos de 1 mes (solo días)
+    if (años === 0 && meses === 0) {
+      return `HACE ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}`;
+    }
+
+    // Caso: menos de 1 año (meses y días)
+    if (años === 0) {
+      const parteMeses = `${meses} ${meses === 1 ? "MES" : "MESES"}`;
+      const parteDias =
+        dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
+      return `HACE ${parteMeses}${parteDias}`;
+    }
+
+    // Caso: 1 año o más (años, meses y días)
+    const parteAños = `${años} ${años === 1 ? "AÑO" : "AÑOS"}`;
+    const parteMeses =
+      meses > 0 ? ` Y ${meses} ${meses === 1 ? "MES" : "MESES"}` : "";
+    const parteDias =
+      dias > 0 ? ` Y ${dias} ${dias === 1 ? "DÍA" : "DÍAS"}` : "";
+
+    return `HACE ${parteAños}${parteMeses}${parteDias}`;
+  };
+
+  return (
+    <fieldset
+      className={`mt-2 transition-all duration-500 ${formData.vehicle.placa ? "opacity-100" : "opacity-40 pointer-events-none translate-y-4"}`}
+    >
+      <div className="border-t pt-6">
+        <legend className="text-xs font-bold uppercase text-muted-foreground tracking-widest my-5">
+          4. Datos del vehiculo
+        </legend>
+
+        <div className="bg-muted/80 border rounded-xl p-6 space-y-10">
+          {/* GRUPO 3.1: Identificación Básica */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Car className="h-4 w-4 text-muted-foreground" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Identificación del Vehículo
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Marca</Label>
+
+                <Input
+                  required
+                  placeholder="Ej: Chevrolet"
+                  value={formData.vehicle.marca}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        marca: e.target.value.toUpperCase(),
+                      },
+                    }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Línea</Label>
+
+                <Input
+                  required
+                  placeholder="Ej: Spark GT"
+                  value={formData.vehicle.linea}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        linea: e.target.value.toUpperCase(),
+                      },
+                    }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Modelo (Año)</Label>
+
+                <Input
+                  required
+                  type="number"
+                  min={1900}
+                  placeholder="Ej: 2026"
+                  value={formData.vehicle.modelo}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        modelo: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </div>
+             
+            </div>
+          </div>
+
+          {/* GRUPO 3.2: Especificaciones Técnicas */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Hash className="h-4 w-4 text-muted-foreground" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Especificaciones Técnicas
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+             
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Combustible</Label>
+
+                <Select
+                  required
+                  items={FUEL_OPTIONS}
+                  value={formData.vehicle.combustible}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        combustible: value ? value : "gasolina",
+                      },
+                    }))
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full bg-background text-left">
+                    <SelectValue placeholder="Selecciona combustible" />
+                  </SelectTrigger>
+
+                  <SelectContent alignItemWithTrigger={false}>
+                    {/* Mapeo dinámico */}
+                    {FUEL_OPTIONS.map((opcion) => (
+                      <SelectItem key={opcion.value} value={opcion.value}>
+                        {opcion.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">
+                  Clase de Vehículo
+                </Label>
+
+                <Select
+                  required
+                  items={CLASE_OPTIONS}
+                  value={formData.vehicle.clase}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        clase: value ? value : "automovil",
+                      },
+                    }))
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full bg-background text-left">
+                    <SelectValue placeholder="Selecciona una clase" />
+                  </SelectTrigger>
+
+                  <SelectContent alignItemWithTrigger={false}>
+                    {CLASE_OPTIONS.map((opcion) => (
+                      <SelectItem key={opcion.value} value={opcion.value}>
+                        {opcion.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">
+                  Tipo de Vehículo
+                </Label>
+
+                <Select
+                  required
+                  value={formData.vehicle.tipo_vehiculo}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        tipo_vehiculo: value ? value : "",
+                      },
+                    }))
+                  }
+                  items={VEHICLE_TYPE_ITEMS}
+                >
+                  <SelectTrigger className="h-10 bg-background w-full">
+                    <SelectValue placeholder="Selecciona un tipo" />
+                  </SelectTrigger>
+
+                  <SelectContent alignItemWithTrigger={false}>
+                    {VEHICLE_TYPE_ITEMS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">
+                  Tipo de Servicio
+                </Label>
+
+                <Select
+                  required
+                  items={TIPO_SERVICIO_OPTIONS}
+                  value={formData.vehicle.tipo_servicio_vehiculo}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      vehicle: {
+                        ...prev.vehicle,
+                        tipo_servicio_vehiculo: value ? value : "particular",
+                      },
+                    }))
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full bg-background">
+                    <SelectValue placeholder="Selecciona tipo de servicio" />
+                  </SelectTrigger>
+
+                  <SelectContent alignItemWithTrigger={false}>
+                    {TIPO_SERVICIO_OPTIONS.map((opcion) => (
+                      <SelectItem key={opcion.value} value={opcion.value}>
+                        {opcion.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* GRUPO 3.3: Snapshots Legales (SOAT y GAS) */}
+          <div className="pt-4 border-t border-border">
+            <div className="bg-card p-5 rounded-xl border border-blue-100 shadow-sm space-y-6">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h3 className="text-sm font-bold text-foreground">
+                  Documentación y Snapshots de Ley
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* --- SOAT --- */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
+                    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
+                  </Label>
+                  <Input
+                    required
+                    type="date"
+                    className="border-blue-100 focus:ring-blue-500"
+                    value={formData.soat_vencimiento_snapshot || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        soat_vencimiento_snapshot: e.target.value,
+                      }))
+                    }
+                  />
+
+                  {/* 🆕 Estado y Tiempo Restante del SOAT según RUNT */}
+                  {formData.soat_vencimiento_snapshot && (
+                    <div
+                      className={`mt-2 p-2.5 rounded-lg border text-xs font-bold flex flex-col gap-1 ${
+                        formData.vehicle.soat_vigente_de_acuerdo_al_runt ===
+                        "VIGENTE"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : "bg-red-50 text-red-800 border-red-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <span>
+                            {formData.vehicle
+                              .soat_vigente_de_acuerdo_al_runt === "VIGENTE"
+                              ? "✅"
+                              : "❌"}
+                          </span>
+                          SOAT:{" "}
+                          {formData.vehicle.soat_vigente_de_acuerdo_al_runt ||
+                            "DESCONOCIDO"}
+                        </span>
+                      </div>
+
+                      {/* Cálculo dinámico del tiempo restante o vencido */}
+                      {calcularTiempoSOAT(
+                        formData.soat_vencimiento_snapshot,
+                      ) && (
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pl-6">
+                          {calcularTiempoSOAT(
+                            formData.soat_vencimiento_snapshot,
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+               
+
+                
+              </div>
+
+              {/* 🆕 INFORMACIÓN DEL RUNT - Fecha de Matrícula */}
+              {formData.vehicle.fecha_matricula && (
+                <div className="bg-linear-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg">
+                      <CalendarDays className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">
+                        Fecha de Matrícula
+                      </span>
+                      <p className="text-sm font-bold text-indigo-900">
+                        {formData.vehicle.fecha_matricula}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="px-3 py-1 bg-indigo-100 rounded-lg border border-indigo-200 whitespace-nowrap">
+                    <span className="text-xs font-bold text-indigo-700">
+                      {calcularAntiguedad(formData.vehicle.fecha_matricula)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 🆕 INFORMACIÓN DEL RUNT - RTM */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-slate-600" />
+                  <span className="text-[10px] font-bold uppercase text-slate-600 tracking-wider">
+                    Información RTM (Revisión Técnico Mecánica)
+                  </span>
+                </div>
+
+                {/* Caso: No se encontraron datos de RTM */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  "NO" && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                      <p className="text-sm font-bold text-amber-800">
+                        No se encontraron datos de Revisión Técnico Mecánica
+                      </p>
+                      <p className="text-xs text-amber-600">
+                        El vehículo no tiene registro de RTM en el RUNT
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Caso: Sí se encontraron datos de RTM */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  "SI" && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Fecha de Vencimiento con antigüedad */}
+                    {/* Fecha de Vencimiento con estado de vigencia */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-3">
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Fecha de Vencimiento
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                        {formData.vehicle.fecha_vencimiento_rtm ||
+                          "No disponible"}
+                      </p>
+                      {formData.vehicle.fecha_vencimiento_rtm && (
+                        <p
+                          className={`text-[9px] font-bold mt-1 ${
+                            new Date(formData.vehicle.fecha_vencimiento_rtm) >=
+                            new Date()
+                              ? "text-emerald-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {calcularTiempoRTM(
+                            formData.vehicle.fecha_vencimiento_rtm,
+                          )}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Estado (Vigente/No Vigente) */}
+                    <div
+                      className={`bg-white border rounded-lg p-3 ${
+                        formData.vehicle.rtm_vigente_de_acuerdo_al_runt === "SI"
+                          ? "border-emerald-200"
+                          : "border-red-200"
+                      }`}
+                    >
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Estado
+                      </span>
+                      <p
+                        className={`text-sm font-bold mt-0.5 flex items-center gap-2 ${
+                          formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                          "SI"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span>
+                          {formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                          "SI"
+                            ? "✅"
+                            : "❌"}
+                        </span>
+                        {formData.vehicle.rtm_vigente_de_acuerdo_al_runt ===
+                        "SI"
+                          ? "VIGENTE"
+                          : "NO VIGENTE"}
+                      </p>
+                    </div>
+
+                    {/* Organismo que expidió */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-3">
+                      <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">
+                        Organismo que expidió
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                        {formData.vehicle.organismo_que_expidio_ultima_rtm ||
+                          "No disponible"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Si no hay información de RTM (undefined o null) */}
+                {formData.vehicle.se_encontro_fecha_vencimiento_rtm ===
+                  undefined && (
+                  <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 flex items-center justify-center">
+                    <p className="text-xs text-slate-500">
+                      No se ha consultado información de RTM en el RUNT
+                    </p>
+                  </div>
+                )}
+              </div>
+
+             
+            </div>
+          </div>
+
+          {/* Checkboxes de Estado Especial */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-slate-200"></div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">
+                Estado Especial
+              </span>
+              <div className="h-px flex-1 bg-slate-200"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {[
+                {
+                  id: "blindaje",
+                  label: "VEHÍCULO BLINDADO",
+                  desc: "Protección balística",
+                  icon: <Shield className="h-5 w-5 text-amber-600" />,
+                  checked: formData.vehicle.blindaje,
+                  field: "blindaje" as const,
+                },
+                {
+                  id: "ensenanza",
+                  label: "VEHÍCULO DE ENSEÑANZA",
+                  desc: "Escuelas de conducción",
+                  icon: <GraduationCap className="h-5 w-5 text-emerald-600" />,
+                  checked: formData.vehicle.es_ensenanza,
+                  field: "es_ensenanza" as const,
+                },
+                {
+                  id: "extranjero",
+                  label: "VEHÍCULO EXTRANJERO",
+                  desc: "Placa o registro de otro país",
+                  icon: <Globe className="h-5 w-5 text-purple-600" />,
+                  checked: formData.vehicle.es_extranjero,
+                  field: "es_extranjero" as const,
+                },
+              ].map((item) => (
+                <Label
+                  key={item.id}
+                  className={`group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all bg-card hover:border-blue-300 ${
+                    item.checked
+                      ? "border-blue-600 bg-blue-50/50 ring-1 ring-blue-600"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <div
+                      className={`p-2 border rounded-lg transition-colors ${
+                        item.checked
+                          ? "bg-card border-blue-100"
+                          : "bg-muted border-slate-100"
+                      }`}
+                    >
+                      {item.icon}
+                    </div>
+
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          vehicle: {
+                            ...prev.vehicle,
+                            [item.field]: !!checked,
+                          },
+                        }))
+                      }
+                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:border-blue-600 data-[state=checked]:bg-primary ml-4"
+                    />
+                  </div>
+
+                  <div className="space-y-0.5">
+                    <p className="text-[11px] font-black text-foreground uppercase leading-tight">
+                      {item.label}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-medium">
+                      {item.desc}
+                    </p>
+                  </div>
+                </Label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  );
+}

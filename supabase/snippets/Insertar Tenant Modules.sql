@@ -4,7 +4,7 @@ INSERT INTO public.tenant_modules (
     is_enabled
 )
 VALUES (
-    'aaaaaaaa-0000-0000-0000-000000000001',
-    '79e4d9f6-d650-478e-ac44-baa5d6f75673',
+    'aaaaaaaa-0000-0000-0000-000000000005',
+    '60b5ec6e-3197-4c7e-a879-bc1cc50fba0a',
     true
 );

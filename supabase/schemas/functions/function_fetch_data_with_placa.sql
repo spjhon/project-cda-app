@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION fetch_data_with_placa(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
@@ -24,10 +24,7 @@ BEGIN
       AND v.deleted_at IS NULL
     LIMIT 1;
 
-    -- 2. Si NO existe el vehículo en este CDA, retornamos NULL plano de inmediato
-    IF v_vehicle_row.id IS NULL THEN
-        RETURN NULL;
-    END IF;
+   
 
     -- =========================================================================
     -- 🌟 CONTROL ADAPTADO: VALIDACIÓN DE ÓRDENES ACTIVAS O EN PROCESO
@@ -36,7 +33,7 @@ BEGIN
         SELECT 1 
         FROM public.entry_orders
         WHERE tenant_id = p_tenant_id
-          AND vehiculo_placa_snapshot = UPPER(TRIM(p_placa))
+          AND UPPER(TRIM(vehiculo_placa_snapshot)) = UPPER(TRIM(p_placa))
           AND estado_orden IN ('abierta'::public.order_status_enum, 'en_prueba'::public.order_status_enum)
           AND deleted_at IS NULL
     ) INTO v_has_active_order;
@@ -45,6 +42,11 @@ BEGIN
         RAISE EXCEPTION 'Operación cancelada: El vehículo con placa % ya cuenta con una orden de entrada activa (Abierta o En Prueba) en este centro.', UPPER(TRIM(p_placa));
     END IF;
     -- =========================================================================
+
+     -- 2. Si NO existe el vehículo en este CDA, retornamos NULL plano de inmediato
+    IF v_vehicle_row.id IS NULL THEN
+        RETURN NULL;
+    END IF;
 
     -- 3. Si existe y está libre, buscamos los datos del propietario actual en la tabla personas
     IF v_vehicle_row.propietario_actual_id IS NOT NULL THEN
@@ -121,4 +123,4 @@ BEGIN
 
     RETURN v_result;
 END;
-$$;vv
+$$;

@@ -129,12 +129,11 @@ export function getInitialOrderFormData(
       telefono: "",
       correo: "",
       direccion: "",
-       actividad_economica: "",
+      actividad_economica: "",
       origen_fondos: "",
       es_persona_publicamente_expuesta: false,
       se_hizo_la_consulta: false,
       resultado_consulta_sarlaf_desfavorable: false,
-      
     },
     owner_data: {
       id: null,
@@ -144,14 +143,13 @@ export function getInitialOrderFormData(
       telefono: "",
       correo: "",
       direccion: "",
-       actividad_economica: "",
+      actividad_economica: "",
       origen_fondos: "",
       es_persona_publicamente_expuesta: false,
       se_hizo_la_consulta: false,
       resultado_consulta_sarlaf_desfavorable: false,
     },
     is_owner_same_as_customer: false,
-    
   };
 }
 
@@ -161,26 +159,21 @@ export default function NewEntryOrderComponent() {
   const ReceptionistContextReceived = useContext(ReceptionistContext);
   const PermissionsContextReceived = useContext(PermissionsContext);
 
-  const templateQuery = ReceptionistContextReceived?.ReceptionistContextValue.templateQuery;
- // FILTRADO DE LOS TEMPLATES ACTIVOS
-const activeTemplates =
-  templateQuery?.data?.filter((t) => t.is_active) ?? [];
+  const templateQuery =
+    ReceptionistContextReceived?.ReceptionistContextValue.templateQuery;
+  // FILTRADO DE LOS TEMPLATES ACTIVOS
+  const activeTemplates = templateQuery?.data?.filter((t) => t.is_active) ?? [];
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
+  const { tenantModules = [] } =
+    PermissionsContextReceived?.PermissionsContextValue ?? {};
 
+  const activeModules = tenantModules
+    .filter((module) => module.is_active && module.is_enabled)
+    .map((module) => module.code);
 
-const { tenantModules = []  } = PermissionsContextReceived?.PermissionsContextValue ?? {};
-
-
-
-
-const activeModules = tenantModules
-  .filter((module) => module.is_active && module.is_enabled)
-  .map((module) => module.code);
-
-
-/**
+  /**
  
 const hasSarlaft = activeModules.includes("sarlaft");
 
@@ -195,11 +188,6 @@ if (activeModules.includes("sarlaft")) {
 
  */
 
-
-
-
-
-  
   // Estados para controlar el Dialog de errores
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   // Estado local para el cargando (reemplaza a isPending de useActionState)
@@ -288,7 +276,7 @@ if (activeModules.includes("sarlaft")) {
       telefono: "",
       correo: "",
       direccion: "",
-       actividad_economica: "",
+      actividad_economica: "",
       origen_fondos: "",
       es_persona_publicamente_expuesta: false,
       se_hizo_la_consulta: false,
@@ -302,27 +290,26 @@ if (activeModules.includes("sarlaft")) {
       telefono: "",
       correo: "",
       direccion: "",
-       actividad_economica: "",
+      actividad_economica: "",
       origen_fondos: "",
       es_persona_publicamente_expuesta: false,
       se_hizo_la_consulta: false,
       resultado_consulta_sarlaf_desfavorable: false,
     },
     is_owner_same_as_customer: false, // Switch maestro
-    
-      
   });
 
   //console.log(formData)
 
   //TEMPLATE SELECCIONADO DE ENTRE LOS ACTIVOS: Seleccionar cual de los activos esta tambien seleccionado, se utiliza para saber si renderizar o no el contenido
-  const selectedTemplate = activeTemplates.find( (t) => t.id === formData.plantilla_id,);
+  const selectedTemplate = activeTemplates.find(
+    (t) => t.id === formData.plantilla_id,
+  );
 
   // MANEJADOR DE SELECCIÓN DE PLANTILLA
   const handleTemplateSelect = (id: string, checked: boolean) => {
     if (
-      !PermissionsContextReceived?.PermissionsContextValue.user
-        ?.signature_path
+      !PermissionsContextReceived?.PermissionsContextValue.user?.signature_path
     ) {
       setServerError(
         "Error: El inspector no posee una firma registrada, por fa registralo la seccion del perfil",
@@ -419,10 +406,13 @@ if (activeModules.includes("sarlaft")) {
       };
 
       // Enviamos el payload filtrado a la Server Action
-      const { data, error } = await createOrderAction(payloadToSubmit, activeModules);
+      const { data, error } = await createOrderAction(
+        payloadToSubmit,
+        activeModules,
+      );
 
       if (error || !data) {
-        console.log("Error del createOrderAction", error)
+        console.log("Error del createOrderAction", error);
         setServerError(error);
         setShowErrorDialog(true);
         return; // Detenemos la ejecución aquí
@@ -511,11 +501,11 @@ if (activeModules.includes("sarlaft")) {
             telefono: "",
             correo: "",
             direccion: "",
-             actividad_economica: "",
-      origen_fondos: "",
-      es_persona_publicamente_expuesta: false,
-      se_hizo_la_consulta: false,
-      resultado_consulta_sarlaf_desfavorable: false,
+            actividad_economica: "",
+            origen_fondos: "",
+            es_persona_publicamente_expuesta: false,
+            se_hizo_la_consulta: false,
+            resultado_consulta_sarlaf_desfavorable: false,
           },
           owner_data: {
             id: null,
@@ -525,21 +515,21 @@ if (activeModules.includes("sarlaft")) {
             telefono: "",
             correo: "",
             direccion: "",
-             actividad_economica: "",
-      origen_fondos: "",
-      es_persona_publicamente_expuesta: false,
-      se_hizo_la_consulta: false,
-      resultado_consulta_sarlaf_desfavorable: false,
+            actividad_economica: "",
+            origen_fondos: "",
+            es_persona_publicamente_expuesta: false,
+            se_hizo_la_consulta: false,
+            resultado_consulta_sarlaf_desfavorable: false,
           },
           is_owner_same_as_customer: false,
-           actividad_economica_cliente: "",
-      origen_fondos_cliente: "",
-      es_cliente_persona_publicamente_expuesta: false,
-      resultado_consulta_sarlaft_cliente_desfavorable: false, 
-      actividad_economica_propietario: "",
-      origen_fondos_propietario: "",
-      es_propietario_persona_publicamente_expuesta: false,
-      resultado_consulta_sarlaft_propietario_desfavorable: false,
+          actividad_economica_cliente: "",
+          origen_fondos_cliente: "",
+          es_cliente_persona_publicamente_expuesta: false,
+          resultado_consulta_sarlaft_cliente_desfavorable: false,
+          actividad_economica_propietario: "",
+          origen_fondos_propietario: "",
+          es_propietario_persona_publicamente_expuesta: false,
+          resultado_consulta_sarlaft_propietario_desfavorable: false,
         }));
 
         // ⚡ FORZAMOS EL BORRADO DEL ESTADO INTERNO DE LAS FIRMAS
@@ -595,9 +585,14 @@ if (activeModules.includes("sarlaft")) {
          */
       }
     } catch (error: unknown) {
-      console.log("Error en el handleSubmit al crear una nueva orden, el error es: ", error)
-      alert("Ocurrio un error inesperado y desconocido al crear la orden de entrada: " + error);
-      
+      console.log(
+        "Error en el handleSubmit al crear una nueva orden, el error es: ",
+        error,
+      );
+      alert(
+        "Ocurrio un error inesperado y desconocido al crear la orden de entrada: " +
+          error,
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -621,36 +616,36 @@ if (activeModules.includes("sarlaft")) {
         <div className="flex flex-col gap-6">
           {/**badge de refresco de datos */}
           <div className="flex justify-start">
-  {templateQuery?.isFetching ? (
-    <Badge
-      variant="secondary"
-      className="bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 animate-pulse gap-1.5 px-3 py-1"
-    >
-      <RefreshCcw className="h-3.5 w-3.5 animate-spin" />
-      Sincronizando base de datos...
-    </Badge>
-  ) : (
-    <Badge
-      variant="outline"
-      className="bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 gap-1.5 px-3 py-1"
-    >
-      <CheckCircle2 className="h-3.5 w-3.5" />
-      Plantillas Actualizadas
-    </Badge>
-  )}
-</div>
+            {templateQuery?.isFetching ? (
+              <Badge
+                variant="secondary"
+                className="bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 animate-pulse gap-1.5 px-3 py-1"
+              >
+                <RefreshCcw className="h-3.5 w-3.5 animate-spin" />
+                Sincronizando base de datos...
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-green-50 text-green-700 border-green-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50 gap-1.5 px-3 py-1"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Plantillas Actualizadas
+              </Badge>
+            )}
+          </div>
 
-          {templateQuery?.isPending ? (
-  <div className="my-5 flex min-h-35.5 items-center justify-center">
-    <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
-  </div>
-) : (
-  <TemplateSelectionSection
-    activeTemplates={activeTemplates}
-    plantilla_id={formData.plantilla_id}
-    handleTemplateSelect={handleTemplateSelect}
-  />
-)}
+          {templateQuery?.isLoading ? (
+            <div className="my-5 flex min-h-35.5 items-center justify-center">
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+            </div>
+          ) : (
+            <TemplateSelectionSection
+              activeTemplates={activeTemplates}
+              plantilla_id={formData.plantilla_id}
+              handleTemplateSelect={handleTemplateSelect}
+            />
+          )}
 
           {/**SECCION DE BUSQUEDA DE PLACA */}
           <PlacaSelectionSection
@@ -658,7 +653,6 @@ if (activeModules.includes("sarlaft")) {
             setFormData={setFormData}
             formData={formData}
             setSignatureKey={setSignatureKey}
-           
           ></PlacaSelectionSection>
 
           {/**SECCION DE LAS PERSONAS */}
@@ -675,7 +669,7 @@ if (activeModules.includes("sarlaft")) {
             formData={formData}
             setFormData={setFormData}
             setShowErrorDialog={setShowErrorDialog}
-            setServerError = {setServerError}
+            setServerError={setServerError}
           />
 
           {/**SECCION DE LAS PRESIONES DEL VEHICULO */}

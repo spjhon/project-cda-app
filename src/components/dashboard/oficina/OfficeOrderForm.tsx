@@ -46,8 +46,7 @@ export default function OfficeOrderForm({
   )?.id ?? null;
 
   // Estado para cuando el usuario seleccione otra empresa de forma manual
-  const [userSelectedCompanyId, setUserSelectedCompanyId] =
-  useState<string | null | undefined>(undefined);
+  const [userSelectedCompanyId, setUserSelectedCompanyId] = useState<string | null | undefined>(undefined);
 
 const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId : userSelectedCompanyId;
 

@@ -1,6 +1,6 @@
 INSERT INTO public.tenant_permissions (tenant_id, service_user_id, role)
 VALUES (
-  'aaaaaaaa-0000-0000-0000-000000000001', 
-  '6800852e-2312-454c-aed8-6cfdc0feca47', 
-  'gerente'
+  'dddddddd-0000-0000-0000-000000000004', 
+  '0eb9553f-5478-4046-8931-63686dea5561', 
+  'director_tecnico'
 );

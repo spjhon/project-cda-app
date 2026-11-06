@@ -286,6 +286,7 @@ export default function RuntScraperModalFirefox({
 
         setFormData((prev: ZodFullFormDataType) => ({
           ...prev,
+           informacion_buscada: true,
           soat_vencimiento_snapshot:
             data.payload.soat || prev.soat_vencimiento_snapshot,
           vehicle: {

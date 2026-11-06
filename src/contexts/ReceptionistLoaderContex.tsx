@@ -7,6 +7,7 @@ import { PermissionsContext } from "./PermissionsLoaderContext";
 import { usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { OrderTemplateType } from "@/types/functions_types";
+import { TenantModuleType } from "@/lib/server-actions/fetch_tenant_modules";
 
 // --------------------------------------------
 // TIPOS DEL CONTEXTO
@@ -36,14 +37,22 @@ export default function ReceptionistLoaderContext({
 }: ReceptionistLoaderContextProps) {
   const permissionsContextReceived = useContext(PermissionsContext);
 
-  const tenantId =
-    permissionsContextReceived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId = permissionsContextReceived?.PermissionsContextValue.tenantObject?.id;
 
   const pathname = usePathname();
 
   const supabaseBrowser = createSupabaseBrowserClient();
 
 
+  const tenantModules = permissionsContextReceived?.PermissionsContextValue.tenantModules ?? [];
+
+  
+
+  const hasFullInfoModule = tenantModules.some(
+  (module) =>
+    module.code === "full_info_module" &&
+    module.is_enabled
+);
 
 
 
@@ -77,7 +86,7 @@ export default function ReceptionistLoaderContext({
       return (data as unknown as OrderTemplateType[]) ?? [];
     },
 
-    enabled: pathname === "/dashboard/recepcionista",
+    enabled: pathname === "/dashboard/recepcionista" && hasFullInfoModule,
     staleTime: Infinity,
     refetchInterval: pathname === "/dashboard/recepcionista" ? 20000 : false,
     refetchOnWindowFocus: false,

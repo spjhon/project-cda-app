@@ -44,6 +44,26 @@ export const FUEL_OPTIONS: CombustibleOption[] = [
   { value: "hidrogeno", label: "Hidrógeno" },
 ];
 
+interface TipoServicioOption {
+  value:
+    | "particular"
+    | "ensenanza"
+    | "oficial"
+    | "publico"
+    | "diplomatico"
+    | "especial";
+  label: string;
+}
+
+export const TIPO_SERVICIO_OPTIONS: TipoServicioOption[] = [
+  { value: "particular", label: "Particular" },
+  { value: "ensenanza", label: "Enseñanza" },
+  { value: "oficial", label: "Oficial" },
+  { value: "publico", label: "Público" },
+  { value: "diplomatico", label: "Diplomático" },
+  { value: "especial", label: "Especial" },
+];
+
 interface ClaseOption {
   value: ClaseVehiculoType;
   label: string;
@@ -610,46 +630,36 @@ const calcularTiempoSOAT = (fechaVencimiento: string): string => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">
-                  Tipo de Servicio
-                </Label>
+            <div className="space-y-2">
+  <Label className="text-xs font-semibold">Tipo de Servicio</Label>
 
-                <Select
-                  required
-                  value={formData.vehicle.tipo_servicio_vehiculo}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      vehicle: {
-                        ...prev.vehicle,
-                        tipo_servicio_vehiculo: value ? value : "particular",
-                      },
-                    }))
-                  }
-                  items={[
-                    { label: "Particular", value: "particular" },
-                    { label: "Enseñanza", value: "ensenanza" },
-                    { label: "Oficial", value: "oficial" },
-                    { label: "Público", value: "publico" },
-                    { label: "Diplomático", value: "diplomatico" },
-                    { label: "Especial", value: "especial" },
-                  ]}
-                >
-                  <SelectTrigger className="h-10 w-full bg-background">
-                    <SelectValue placeholder="Selecciona tipo de servicio" />
-                  </SelectTrigger>
+  <Select
+    required
+    items={TIPO_SERVICIO_OPTIONS}
+    value={formData.vehicle.tipo_servicio_vehiculo}
+    onValueChange={(value) =>
+      setFormData((prev) => ({
+        ...prev,
+        vehicle: {
+          ...prev.vehicle,
+          tipo_servicio_vehiculo: value ? value : "particular",
+        },
+      }))
+    }
+  >
+    <SelectTrigger className="h-10 w-full bg-background">
+      <SelectValue placeholder="Selecciona tipo de servicio" />
+    </SelectTrigger>
 
-                  <SelectContent alignItemWithTrigger={false}>
-                    <SelectItem value="particular">Particular</SelectItem>
-                    <SelectItem value="ensenanza">Enseñanza</SelectItem>
-                    <SelectItem value="oficial">Oficial</SelectItem>
-                    <SelectItem value="publico">Público</SelectItem>
-                    <SelectItem value="diplomatico">Diplomático</SelectItem>
-                    <SelectItem value="especial">Especial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+    <SelectContent alignItemWithTrigger={false}>
+      {TIPO_SERVICIO_OPTIONS.map((opcion) => (
+        <SelectItem key={opcion.value} value={opcion.value}>
+          {opcion.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
             </div>
           </div>
 

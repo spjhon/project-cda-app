@@ -5,8 +5,8 @@ INSERT INTO public.modules (
     is_active
 )
 VALUES (
-    'sarlaft',
-    'SARLAFT',
-    'Consulta de clientes y propietarios en listas restrictivas y de control SARLAFT.',
+    'full_info_module',
+    'FULLINFOMODULE',
+    'Habilitacion del modulo de orden de entrada y recoleccion de datos completos',
     true
 );
