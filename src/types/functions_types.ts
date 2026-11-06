@@ -138,6 +138,11 @@ export interface EntryOrderListItem {
   service_type: Database["public"]["Enums"]["service_type_enum"];
   vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"];
 vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"];
+vehiculo_combustible_snapshot: string | null;
+vehiculo_blindaje_snapshot: boolean | null;
+vehiculo_es_ensenanza_snapshot: boolean | null;
+vehiculo_es_extranjero_snapshot: boolean | null;
+funcionario_nombre_snapshot: string | null;
   estado_orden: string;
 
   // Información de Oficina

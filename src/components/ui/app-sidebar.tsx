@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { LogoutButton } from "@/components/dashboard/recepcionista/LogoutButton";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { Separator } from "./separator";
 import { ModeToggle } from "../landingPage/NavBar/mode-toggle";
@@ -194,7 +194,26 @@ const contextRecived = useContext(PermissionsContext);
   const user = contextRecived?.PermissionsContextValue.user;
 
 
+const tenantModules = contextRecived?.PermissionsContextValue.tenantModules;
 
+const hasFullInfoModule = tenantModules?.some(
+  (module) =>
+    module.code === "full_info_module" &&
+    module.is_active &&
+    module.is_enabled
+);
+
+const filteredNavData = useMemo(() => {
+  if (rol !== "director-tecnico" || hasFullInfoModule) {
+    return NAV_DATA;
+  }
+
+  return NAV_DATA.filter(
+    (item) =>
+      item.href !== "/dashboard/director-tecnico/crear-orden-de-entrada" &&
+      item.href !== "/dashboard/director-tecnico/plantillas-creadas"
+  );
+}, [rol, hasFullInfoModule]);
 
   const pathname = usePathname();
 
@@ -282,7 +301,7 @@ const contextRecived = useContext(PermissionsContext);
 
           <SidebarGroupContent className="flex flex-col gap-2 px-2">
             <SidebarMenu>
-              {NAV_DATA.map((item) => {
+              {filteredNavData.map((item) => {
                 const active = isActive(item.href);
                 const Icon = item.icon;
 

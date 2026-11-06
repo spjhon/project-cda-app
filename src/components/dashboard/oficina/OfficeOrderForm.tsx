@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_t
 import { CompanyRateSelectorSingle } from "./CompanyRateSelectorSingle";
 import { useCompanies } from "@/lib/client-actions/fetch_tenant_companies";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 export interface OfficeFormState {
   oficina_pin: string;
@@ -35,6 +36,20 @@ export default function OfficeOrderForm({
   orden,
   tenantId,
 }: OfficeOrderFormProps) {
+
+  const contextRecived = useContext(PermissionsContext);
+  
+  const tenantModules =
+    contextRecived?.PermissionsContextValue.tenantModules;
+  
+  const hasFullInfoModule = tenantModules?.some(
+    (module) =>
+      module.code === "full_info_module" &&
+      module.is_active &&
+      module.is_enabled
+  );
+
+  
   const queryClient = useQueryClient();
 
   // 1. Traemos las compañías de forma limpia con TanStack Query
@@ -383,16 +398,18 @@ ratePriceSnapshot: selectedRate.totalPrice,
       </div>
 
       {/* DOCUMENTOS */}
-      <div className="flex flex-col gap-1.5 text-center">
-        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Visor de Documentos Públicos
-        </span>
+{hasFullInfoModule && (
+  <div className="flex flex-col gap-1.5 text-center">
+    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+      Visor de Documentos Públicos
+    </span>
 
-        <div className="flex items-center justify-center gap-3 p-2.5 bg-muted rounded-xl border border-border">
-          <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-          <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
-        </div>
-      </div>
+    <div className="flex items-center justify-center gap-3 p-2.5 bg-muted rounded-xl border border-border">
+      <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+      <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+    </div>
+  </div>
+)}
 
       {/* BOTONES */}
       <div

@@ -38,6 +38,11 @@ RETURNS TABLE (
     service_type public.service_type_enum,
     vehiculo_tipo_snapshot public.vehicle_type_enum,
     vehiculo_tipo_servicio_snapshot public.vehicle_service_type_enum,
+     vehiculo_combustible_snapshot CHARACTER VARYING,
+    vehiculo_blindaje_snapshot BOOLEAN,
+    vehiculo_es_ensenanza_snapshot BOOLEAN,
+    vehiculo_es_extranjero_snapshot BOOLEAN,
+    funcionario_nombre_snapshot TEXT,
     estado_orden public.order_status_enum,
     oficina_pin CHARACTER VARYING,
     oficina_consecutivo_factura CHARACTER VARYING,
@@ -82,6 +87,11 @@ BEGIN
             o.service_type,
             o.vehiculo_tipo_snapshot,
             o.vehiculo_tipo_servicio_snapshot,
+            o.vehiculo_combustible_snapshot,
+            o.vehiculo_blindaje_snapshot,
+            o.vehiculo_es_ensenanza_snapshot,
+            o.vehiculo_es_extranjero_snapshot,
+            o.funcionario_nombre_snapshot,
             o.estado_orden,
 
             -- DATOS DE OFICINA

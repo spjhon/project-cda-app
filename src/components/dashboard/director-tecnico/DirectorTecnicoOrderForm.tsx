@@ -11,13 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ShieldCheck, ShieldAlert, FileSearch, Ban, Undo2 } from "lucide-react";
+import {
+  Loader2,
+  ShieldCheck,
+  ShieldAlert,
+  FileSearch,
+  Ban,
+  Undo2,
+} from "lucide-react";
 import OrderViewPDF from "../_shared/pdfs/OrderViewPDF";
 import OrderDownloadPDF from "../_shared/pdfs/OrderDownloadPDF";
 import { $ZodIssue } from "zod/v4/core";
 
 import { ZodErrorDialog } from "../recepcionista/ZodErrorDialog";
-import {useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertDirectorTecnicoData } from "@/lib/server-actions/insert_director_tecnico_data";
 import CancelOrder from "../_shared/CancelOrder";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
@@ -27,7 +34,6 @@ import { FetchEntryOrderResult } from "@/lib/client-actions/fetch_entry_order_by
 import { pdf } from "@react-pdf/renderer";
 import OrderPDF from "../_shared/pdfs/OrderPDF";
 import { EntryOrderListItem } from "@/types/functions_types";
-
 
 export type ResultadoRevision = "aprobado" | "rechazado" | null;
 
@@ -39,13 +45,11 @@ export interface DirectorTecnicoFormState {
   director_tecnico_numero_documento_snapshot: string | null;
   director_tecnico_nombre_snapshot: string | null;
   director_tecnico_firma_path_snapshot: string | null;
-
 }
 
 interface DirectorTecnicoOrderFormProps {
   orden: EntryOrderListItem;
   tenantId: string | undefined;
-  
 }
 
 const SELECT_RESULTADO = [
@@ -56,21 +60,29 @@ const SELECT_RESULTADO = [
 export default function DirectorTecnicoOrderForm({
   orden,
   tenantId,
-  
 }: DirectorTecnicoOrderFormProps) {
-
   const PermissioncontextRecived = useContext(PermissionsContext);
 
   const user = PermissioncontextRecived?.PermissionsContextValue.user;
 
+  const tenantModules =
+    PermissioncontextRecived?.PermissionsContextValue.tenantModules;
 
+  const hasFullInfoModule = tenantModules?.some(
+    (module) =>
+      module.code === "full_info_module" &&
+      module.is_active &&
+      module.is_enabled,
+  );
 
   const queryClient = useQueryClient();
 
   // Estados para el Dialog de errores de Zod
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(null);
+  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(
+    null,
+  );
 
   // Inicialización mapeando los datos existentes de la orden
   const [formData, setFormData] = useState<DirectorTecnicoFormState>({
@@ -81,12 +93,15 @@ export default function DirectorTecnicoOrderForm({
     director_tecnico_numero_documento_snapshot: user?.document_number ?? null,
     director_tecnico_nombre_snapshot: user?.name ?? null,
     director_tecnico_firma_path_snapshot: user?.signature_path ?? null,
-  
   });
 
   // 🌟 CONTROL: Identificar si es un tipo de servicio que exime de certificado oficial RTM
   const tipoServicioLower = orden.service_type?.toLowerCase() || "";
-  const noAplicaRTM = tipoServicioLower === "preventiva" || tipoServicioLower === "peritaje" ||  tipoServicioLower === "prueba_gases" || tipoServicioLower === "preventiva_viajero";
+  const noAplicaRTM =
+    tipoServicioLower === "preventiva" ||
+    tipoServicioLower === "peritaje" ||
+    tipoServicioLower === "prueba_gases" ||
+    tipoServicioLower === "preventiva_viajero";
 
   // Manejador para inputs de texto (RTM y FUR)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,384 +117,325 @@ export default function DirectorTecnicoOrderForm({
     setFormData((prev) => ({ ...prev, resultado_revision: value }));
   };
 
+  // Mutación TanStack Query para devolver el estado a 'en_prueba'
+  const revertToEnPruebaMutation = useMutation({
+    mutationFn: async () => {
+      const supabase = createSupabaseBrowserClient();
 
+      // Actualizamos el estado de la orden en la tabla entry_orders
+      const { data, error } = await supabase
+        .from("entry_orders")
+        .update({
+          estado_orden: "en_prueba",
+          resultado_revision: null, // 👈 Se resetea el resultado a null
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", orden.id)
+        .select();
 
+      if (error) {
+        throw new Error(error.message);
+      }
 
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidamos las queries necesarias para refrescar la UI en tiempo real
+      queryClient.invalidateQueries({ queryKey: ["entry-orders"] });
+    },
+    onError: (err: Error) => {
+      setServerError(`Error al revertir el estado de la orden: ${err.message}`);
+      setShowErrorDialog(true);
+    },
+  });
 
+  // Handler para ejecutar al hacer clic en el botón
+  const handleRevertToEnPrueba = () => {
+    revertToEnPruebaMutation.mutate();
+  };
 
-// Mutación TanStack Query para devolver el estado a 'en_prueba'
-const revertToEnPruebaMutation = useMutation({
-  mutationFn: async () => {
-    const supabase = createSupabaseBrowserClient();
-    
-    // Actualizamos el estado de la orden en la tabla entry_orders
-    const { data, error } = await supabase
-      .from("entry_orders")
-      .update({ 
-        estado_orden: "en_prueba",
-        resultado_revision: null, // 👈 Se resetea el resultado a null
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", orden.id)
-      .select();
+  // Validación local y envío de datos
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    const supabaseBrowser = createSupabaseBrowserClient();
 
-    return data;
-  },
-  onSuccess: () => {
-    
+    setIsSubmitting(true);
+    setServerError(null);
 
-    // Invalidamos las queries necesarias para refrescar la UI en tiempo real
-    queryClient.invalidateQueries({ queryKey: ["entry-orders"] });
-  },
-  onError: (err: Error) => {
-    setServerError(`Error al revertir el estado de la orden: ${err.message}`);
-    setShowErrorDialog(true);
-  },
-});
+    // ============================================================
+    // 1. VALIDACIONES INICIALES
+    // ============================================================
 
-// Handler para ejecutar al hacer clic en el botón
-const handleRevertToEnPrueba = () => {
-  revertToEnPruebaMutation.mutate();
-};
-
-
-
-
-
-
-
-
-
-
-// Validación local y envío de datos
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-   const supabaseBrowser = createSupabaseBrowserClient();
-
-  setIsSubmitting(true);
-  setServerError(null);
-
-  // ============================================================
-  // 1. VALIDACIONES INICIALES
-  // ============================================================
-
-  if (!formData.resultado_revision) {
-    setServerError(
-      "Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)",
-    );
-    setShowErrorDialog(true);
-    setIsSubmitting(false);
-    return;
-  }
-
-  if (formData.consecutivo_fur.trim() === "") {
-    setServerError(
-      "El consecutivo del FUR es obligatorio para el cierre técnico",
-    );
-    setShowErrorDialog(true);
-    setIsSubmitting(false);
-    return;
-  }
-
-  // Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
-  if (
-    !noAplicaRTM &&
-    formData.resultado_revision === "aprobado" &&
-    formData.consecutivo_rtm.trim() === ""
-  ) {
-    setServerError(
-      "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
-    );
-    setShowErrorDialog(true);
-    setIsSubmitting(false);
-    return;
-  }
-
-  // ============================================================
-  // 2. VALIDACIÓN:
-  //    Verificar si el director técnico tiene firma
-  // ============================================================
-
-  try {
-  
-
-    // Obtener el auth_user_id del director técnico actual
-    const directorTecnicoAuthId = user?.id;
-
-    if (!directorTecnicoAuthId) {
+    if (!formData.resultado_revision) {
       setServerError(
-        "No se encontró el director técnico asignado a esta orden",
+        "Debe seleccionar el resultado final de la revisión (Aprobado o Rechazado)",
       );
       setShowErrorDialog(true);
       setIsSubmitting(false);
       return;
     }
 
-    // Consultar si el director técnico tiene firma registrada
-    const { data: directorData, error: directorError } =
-      await supabaseBrowser
+    if (formData.consecutivo_fur.trim() === "") {
+      setServerError(
+        "El consecutivo del FUR es obligatorio para el cierre técnico",
+      );
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
+    if (
+      !noAplicaRTM &&
+      formData.resultado_revision === "aprobado" &&
+      formData.consecutivo_rtm.trim() === ""
+    ) {
+      setServerError(
+        "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
+      );
+      setShowErrorDialog(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // ============================================================
+    // 2. VALIDACIÓN:
+    //    Verificar si el director técnico tiene firma
+    // ============================================================
+
+    try {
+      // Obtener el auth_user_id del director técnico actual
+      const directorTecnicoAuthId = user?.id;
+
+      if (!directorTecnicoAuthId) {
+        setServerError(
+          "No se encontró el director técnico asignado a esta orden",
+        );
+        setShowErrorDialog(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Consultar si el director técnico tiene firma registrada
+      const { data: directorData, error: directorError } = await supabaseBrowser
         .from("service_users")
         .select("id, full_name, signature_path")
         .eq("id", directorTecnicoAuthId)
         .eq("is_active", true)
         .single();
 
-    if (directorError) {
-      console.error(
-        "Error consultando director técnico:",
-        directorError,
+      if (directorError) {
+        console.error("Error consultando director técnico:", directorError);
+
+        setServerError(
+          "Error al verificar la información del director técnico",
+        );
+        setShowErrorDialog(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!directorData) {
+        setServerError(
+          "No se encontró un director técnico activo para esta orden",
+        );
+        setShowErrorDialog(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Verificar que el campo signature_path exista y tenga contenido
+      const tieneFirma =
+        directorData.signature_path &&
+        directorData.signature_path.trim() !== "";
+
+      if (!tieneFirma) {
+        setServerError(
+          `El director técnico ${
+            directorData.full_name || "asignado"
+          } no tiene una firma registrada.\n\n` +
+            "Por favor, registre su firma antes de realizar el cierre técnico.",
+        );
+
+        setShowErrorDialog(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log(
+        "✅ Director técnico verificado:",
+        directorData.full_name,
+        "con firma registrada",
       );
+    } catch (error) {
+      console.error("Error en validación de firma:", error);
 
       setServerError(
-        "Error al verificar la información del director técnico",
+        "Ocurrió un error al verificar la firma del director técnico",
       );
+
       setShowErrorDialog(true);
       setIsSubmitting(false);
       return;
     }
 
-    if (!directorData) {
-      setServerError(
-        "No se encontró un director técnico activo para esta orden",
-      );
-      setShowErrorDialog(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Verificar que el campo signature_path exista y tenga contenido
-    const tieneFirma =
-      directorData.signature_path &&
-      directorData.signature_path.trim() !== "";
-
-    if (!tieneFirma) {
-      setServerError(
-        `El director técnico ${
-          directorData.full_name || "asignado"
-        } no tiene una firma registrada.\n\n` +
-          "Por favor, registre su firma antes de realizar el cierre técnico.",
-      );
-
-      setShowErrorDialog(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    console.log(
-      "✅ Director técnico verificado:",
-      directorData.full_name,
-      "con firma registrada",
-    );
-  } catch (error) {
-    console.error(
-      "Error en validación de firma:",
-      error,
-    );
-
-    setServerError(
-      "Ocurrió un error al verificar la firma del director técnico",
-    );
-
-    setShowErrorDialog(true);
-    setIsSubmitting(false);
-    return;
-  }
-
-  // ============================================================
-  // 3. CONTINUAR CON EL CIERRE TÉCNICO
-  // ============================================================
-
-  // Aseguramos mandar data limpia al server action
-  // en caso de que no aplique RTM
-  const payloadData = {
-    ...formData,
-    consecutivo_rtm: noAplicaRTM
-      ? ""
-      : formData.consecutivo_rtm,
-  };
-
-  try {
-    
     // ============================================================
-    // 3.1 Insertar datos del director técnico
+    // 3. CONTINUAR CON EL CIERRE TÉCNICO
     // ============================================================
 
-    const { data, error } =
-      await insertDirectorTecnicoData({
+    // Aseguramos mandar data limpia al server action
+    // en caso de que no aplique RTM
+    const payloadData = {
+      ...formData,
+      consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
+    };
+
+    try {
+      // ============================================================
+      // 3.1 Insertar datos del director técnico
+      // ============================================================
+
+      const { data, error } = await insertDirectorTecnicoData({
         orderId: orden.id,
         formData: payloadData,
         serviceType: orden.service_type as ServiceType,
       });
 
-    if (error || !data) {
-      setServerError(error);
-      setShowErrorDialog(true);
-      return;
-    }
+      if (error || !data) {
+        setServerError(error);
+        setShowErrorDialog(true);
+        return;
+      }
 
-    console.log(
-      "✅ Cierre técnico exitoso:",
-      data.message,
-    );
+      console.log("✅ Cierre técnico exitoso:", data.message);
 
-    console.log(
-      "📦 ID de la orden actualizada:",
-      data.id,
-    );
+      console.log("📦 ID de la orden actualizada:", data.id);
 
+      // ============================================================
+      // Envio del email
+      // ============================================================
 
-    // ============================================================
-    // Envio del email
-    // ============================================================
+      if (formData.resultado_revision === "aprobado") {
+        const { data: edgeResponse, error: edgeError } =
+          await supabaseBrowser.functions.invoke("send-order-email", {
+            body: {
+              orderId: orden.id,
+            },
+          });
 
+        if (edgeError || !edgeResponse) {
+          console.error("Error en el envio del Email: ", edgeError);
+        } else {
+          console.log("Respuesta Edge Function:", edgeResponse);
+        }
+      }
 
-if (formData.resultado_revision === "aprobado"){
-const { data: edgeResponse, error: edgeError } = await supabaseBrowser.functions.invoke(
-  "send-order-email",
-  {
-    body: {
-      orderId: orden.id,
-    },
-  },
-);
+      alert(data.message);
 
-if (edgeError || !edgeResponse) {
-  console.error("Error en el envio del Email: ", edgeError)
-}else{
-   console.log("Respuesta Edge Function:", edgeResponse);
-}
-}
+      queryClient.invalidateQueries({
+        queryKey: ["entry_orders", "list"],
+      });
 
+      // ============================================================
+      // 3.2 Obtener la orden actualizada para el PDF
+      // ============================================================
 
+      const supabase = createSupabaseBrowserClient();
 
-    
-    alert(data.message);
-
-    queryClient.invalidateQueries({
-      queryKey: ["entry_orders", "list"],
-    });
-
-    // ============================================================
-    // 3.2 Obtener la orden actualizada para el PDF
-    // ============================================================
-
-    const supabase = createSupabaseBrowserClient();
-
-    const { data: orderData, error: orderDataError } =
-      await supabase.rpc(
+      const { data: orderData, error: orderDataError } = await supabase.rpc(
         "fetch_entry_order_by_id",
         {
           p_order_id: data.id,
           p_tenant_id:
-            PermissioncontextRecived
-              ?.PermissionsContextValue
-              .tenantObject?.id || "",
+            PermissioncontextRecived?.PermissionsContextValue.tenantObject
+              ?.id || "",
         },
       );
 
-    const orderDataTyped =
-      (orderData as unknown as FetchEntryOrderResult[])?.[0];
+      const orderDataTyped = (
+        orderData as unknown as FetchEntryOrderResult[]
+      )?.[0];
 
-    if (orderDataError || !orderDataTyped) {
-      console.error(
-        "Error en RPC:",
-        orderDataError || "No se encontraron datos",
-      );
-    }
+      if (orderDataError || !orderDataTyped) {
+        console.error(
+          "Error en RPC:",
+          orderDataError || "No se encontraron datos",
+        );
+      }
 
-    // ============================================================
-    // 3.3 Preparar firmas para OrderPDF
-    // ============================================================
+      // ============================================================
+      // 3.3 Preparar firmas para OrderPDF
+      // ============================================================
 
-    if (orderDataTyped) {
-      // ----------------------------------------------------------
-      // Función auxiliar:
-      // Storage path → Blob → Data URL
-      // ----------------------------------------------------------
+      if (orderDataTyped) {
+        // ----------------------------------------------------------
+        // Función auxiliar:
+        // Storage path → Blob → Data URL
+        // ----------------------------------------------------------
 
-      const downloadSignatureAsDataUrl = async (
-        path: string | null | undefined,
-      ): Promise<string | null> => {
-        if (!path) {
-          return null;
-        }
+        const downloadSignatureAsDataUrl = async (
+          path: string | null | undefined,
+        ): Promise<string | null> => {
+          if (!path) {
+            return null;
+          }
 
-        const { data, error } =
-          await supabase.storage
+          const { data, error } = await supabase.storage
             .from("signatures")
             .download(path);
 
-        if (error || !data) {
-          console.error(
-            `No se pudo descargar la firma ${path}:`,
-            error?.message,
-          );
+          if (error || !data) {
+            console.error(
+              `No se pudo descargar la firma ${path}:`,
+              error?.message,
+            );
 
-          return null;
-        }
+            return null;
+          }
 
-        return await new Promise<string>(
-          (resolve, reject) => {
+          return await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
 
             reader.onloadend = () => {
-              if (
-                typeof reader.result === "string"
-              ) {
+              if (typeof reader.result === "string") {
                 resolve(reader.result);
               } else {
-                reject(
-                  new Error(
-                    "No se pudo convertir la firma a Data URL.",
-                  ),
-                );
+                reject(new Error("No se pudo convertir la firma a Data URL."));
               }
             };
 
             reader.onerror = () => {
-              reject(
-                new Error(
-                  "No se pudo leer la imagen de la firma.",
-                ),
-              );
+              reject(new Error("No se pudo leer la imagen de la firma."));
             };
 
             reader.readAsDataURL(data);
-          },
-        );
-      };
+          });
+        };
 
-      // ----------------------------------------------------------
-      // 1. Firma del funcionario / recepcionista
-      // ----------------------------------------------------------
+        // ----------------------------------------------------------
+        // 1. Firma del funcionario / recepcionista
+        // ----------------------------------------------------------
 
-      const funcionarioFirma =
-        await downloadSignatureAsDataUrl(
+        const funcionarioFirma = await downloadSignatureAsDataUrl(
           orderDataTyped.funcionario_firma,
         );
 
-      // ----------------------------------------------------------
-      // 2. Firma del director técnico
-      // ----------------------------------------------------------
+        // ----------------------------------------------------------
+        // 2. Firma del director técnico
+        // ----------------------------------------------------------
 
-      const directorTecnicoFirma =
-        await downloadSignatureAsDataUrl(
+        const directorTecnicoFirma = await downloadSignatureAsDataUrl(
           orderDataTyped.director_tecnico_firma,
         );
 
-      // ----------------------------------------------------------
-      // 3. Firmas complementarias
-      // ----------------------------------------------------------
+        // ----------------------------------------------------------
+        // 3. Firmas complementarias
+        // ----------------------------------------------------------
 
-      const firmasOrden = await Promise.all(
-        (orderDataTyped.firmas_orden ?? []).map(
-          async (firma) => {
+        const firmasOrden = await Promise.all(
+          (orderDataTyped.firmas_orden ?? []).map(async (firma) => {
             if (!firma.signature_path) {
               return {
                 ...firma,
@@ -487,328 +443,310 @@ if (edgeError || !edgeResponse) {
               };
             }
 
-            const signatureDataUrl =
-              await downloadSignatureAsDataUrl(
-                firma.signature_path,
-              );
+            const signatureDataUrl = await downloadSignatureAsDataUrl(
+              firma.signature_path,
+            );
 
             return {
               ...firma,
               signature_path: signatureDataUrl,
             };
-          },
-        ),
-      );
+          }),
+        );
 
-      // ----------------------------------------------------------
-      // 4. Crear los datos que realmente recibirá OrderPDF
-      // ----------------------------------------------------------
+        // ----------------------------------------------------------
+        // 4. Crear los datos que realmente recibirá OrderPDF
+        // ----------------------------------------------------------
 
-      const orderDataForPDF: FetchEntryOrderResult = {
-        ...orderDataTyped,
-        funcionario_firma: funcionarioFirma,
-        director_tecnico_firma:
-          directorTecnicoFirma,
-        firmas_orden: firmasOrden,
-      };
+        const orderDataForPDF: FetchEntryOrderResult = {
+          ...orderDataTyped,
+          funcionario_firma: funcionarioFirma,
+          director_tecnico_firma: directorTecnicoFirma,
+          firmas_orden: firmasOrden,
+        };
 
-      console.log(
-        "✅ Firmas preparadas para el PDF",
-      );
+        console.log("✅ Firmas preparadas para el PDF");
 
-      // ==========================================================
-      // 3.4 Generar y descargar PDF
-      // ==========================================================
+        // ==========================================================
+        // 3.4 Generar y descargar PDF
+        // ==========================================================
 
-      const pdfBlob = await pdf(
-        <OrderPDF
-          orderData={orderDataForPDF}
-        />,
-      ).toBlob();
+        const pdfBlob = await pdf(
+          <OrderPDF orderData={orderDataForPDF} />,
+        ).toBlob();
 
-      const url = URL.createObjectURL(pdfBlob);
+        const url = URL.createObjectURL(pdfBlob);
 
-      const link = document.createElement("a");
+        const link = document.createElement("a");
 
-      link.href = url;
+        link.href = url;
 
-      const placa =
-        orderDataTyped.vehiculo_placa
+        const placa = orderDataTyped.vehiculo_placa
           ? `_${orderDataTyped.vehiculo_placa}`
           : "";
 
-      const fecha = orderDataTyped.fecha
-        ? new Date(orderDataTyped.fecha)
-            .toISOString()
-            .split("T")[0]
-        : new Date()
-            .toISOString()
-            .split("T")[0];
+        const fecha = orderDataTyped.fecha
+          ? new Date(orderDataTyped.fecha).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0];
 
-      link.download =
-        `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(
+        link.download = `Orden_de_Ingreso${placa}_${fecha}.pdf`.replace(
           /\s+/g,
           "_",
         );
 
-      document.body.appendChild(link);
+        document.body.appendChild(link);
 
-      link.click();
+        link.click();
 
-      document.body.removeChild(link);
+        document.body.removeChild(link);
 
-      URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);
+      }
+
+      // ============================================================
+      // 3.5 Actualizar créditos
+      // ============================================================
+
+      queryClient.invalidateQueries({
+        queryKey: ["tenant-credits", tenantId],
+      });
+    } catch (error: unknown) {
+      console.error("Error inesperado:", error);
+
+      setServerError(
+        "Ocurrió un error inesperado en la validación técnica: " +
+          (error instanceof Error ? error.message : String(error)),
+      );
+
+      setShowErrorDialog(true);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    // ============================================================
-    // 3.5 Actualizar créditos
-    // ============================================================
-
-    queryClient.invalidateQueries({
-      queryKey: ["tenant-credits", tenantId],
-    });
-  } catch (error: unknown) {
-    console.error(
-      "Error inesperado:",
-      error,
-    );
-
-    setServerError(
-      "Ocurrió un error inesperado en la validación técnica: " +
-        (error instanceof Error
-          ? error.message
-          : String(error)),
-    );
-
-    setShowErrorDialog(true);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-
-
-return (
-  <form onSubmit={handleSubmit} className="space-y-5">
-    
-    {/* SECCIÓN DEL FORMULARIO: Adaptada dinámicamente según el dictamen técnico */}
-    <div
-      className={`p-4 rounded-xl border transition-all duration-300 space-y-4 ${
-        formData.resultado_revision === "aprobado"
-          ? "bg-emerald-500/10 border-emerald-500/20"
-          : formData.resultado_revision === "rechazado"
-          ? "bg-destructive/5 border-destructive/20"
-          : "bg-muted/30 border-border"
-      }`}
-    >
-      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block border-b border-border pb-1.5">
-        Cierre Técnico de Inspección (ISO 17020)
-      </span>
-
-      {/* Rejilla de Inputs de digitación técnica */}
-      <div className="grid grid-cols-1 gap-4">
-
-        {/* Select: Resultado de la Revisión */}
-        <div className="space-y-1.5">
-          <Label htmlFor="resultado_revision" className="text-foreground font-semibold text-xs">
-            Resultado Final de la Inspección
-          </Label>
-
-          <Select
-            items={SELECT_RESULTADO}
-            value={formData.resultado_revision || ""}
-            onValueChange={(value) =>
-              handleSelectChange(value as "aprobado" | "rechazado")
-            }
-            disabled={orden.estado_orden !== "en_prueba"}
-          >
-            <SelectTrigger
-              id="resultado_revision"
-              className="bg-background border-border font-medium text-xs h-9"
-            >
-              <SelectValue placeholder="Seleccione el dictamen final" />
-            </SelectTrigger>
-
-            <SelectContent alignItemWithTrigger={false}>
-              {SELECT_RESULTADO.map((item) => (
-                <SelectItem
-                  key={item.value}
-                  value={item.value}
-                  className="text-xs"
-                >
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Input: Consecutivo FUR */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="consecutivo_fur"
-            className="text-foreground font-medium text-xs"
-          >
-            Consecutivo FUR (Formato Único de Resultados)
-          </Label>
-
-          <Input
-            id="consecutivo_fur"
-            name="consecutivo_fur"
-            placeholder="Ej: FUR-482012"
-            value={formData.consecutivo_fur}
-            onChange={handleChange}
-            disabled={orden.estado_orden !== "en_prueba"}
-            className="bg-background border-border font-mono text-xs h-9"
-          />
-        </div>
-
-        {/* Input: Consecutivo RTM */}
-        <div className="space-y-1.5">
-          <Label
-            htmlFor="consecutivo_rtm"
-            className={`text-foreground font-medium text-xs ${
-              formData.resultado_revision === "aprobado" && !noAplicaRTM
-                ? "after:content-['_*_'] after:text-destructive"
-                : ""
-            }`}
-          >
-            Consecutivo Certificado RTM
-          </Label>
-
-          <Input
-            id="consecutivo_rtm"
-            name="consecutivo_rtm"
-            placeholder={
-              noAplicaRTM
-                ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}`
-                : formData.resultado_revision === "rechazado"
-                ? "No aplica por rechazo del vehículo"
-                : "Ej: RTM-2026X"
-            }
-            disabled={
-              noAplicaRTM ||
-              formData.resultado_revision === "rechazado" ||
-              orden.estado_orden !== "en_prueba" ||
-              !formData.resultado_revision
-            }
-            value={
-              noAplicaRTM || formData.resultado_revision === "rechazado"
-                ? ""
-                : formData.consecutivo_rtm
-            }
-            onChange={handleChange}
-            className="bg-background border-border font-mono text-xs h-9 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
-          />
-        </div>
-      </div>
-    </div>
-
-    {/* SECCIÓN DOCUMENTAL */}
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1.5 pl-1">
-        <FileSearch className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Soportes Digitales de Entrada
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* SECCIÓN DEL FORMULARIO: Adaptada dinámicamente según el dictamen técnico */}
+      <div
+        className={`p-4 rounded-xl border transition-all duration-300 space-y-4 ${
+          formData.resultado_revision === "aprobado"
+            ? "bg-emerald-500/10 border-emerald-500/20"
+            : formData.resultado_revision === "rechazado"
+              ? "bg-destructive/5 border-destructive/20"
+              : "bg-muted/30 border-border"
+        }`}
+      >
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block border-b border-border pb-1.5">
+          Cierre Técnico de Inspección (ISO 17020)
         </span>
-      </div>
 
-      <div className="grid grid-cols-2 gap-2 p-2.5 bg-muted/30 rounded-xl border border-border">
-        <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-        <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
-      </div>
-    </div>
+        {/* Rejilla de Inputs de digitación técnica */}
+        <div className="grid grid-cols-1 gap-4">
+          {/* Select: Resultado de la Revisión */}
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="resultado_revision"
+              className="text-foreground font-semibold text-xs"
+            >
+              Resultado Final de la Inspección
+            </Label>
 
-    {/* CONTENEDOR DE ACCIONES */}
-    <div
-      className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
-        orden.estado_orden !== "en_prueba"
-          ? "bg-destructive/5 border-destructive/20"
-          : "bg-muted/30 border-border"
-      }`}
-    >
-     {orden.estado_orden !== "en_prueba" ? (
-  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full p-3 bg-destructive/10 border border-destructive/20 rounded-xl shadow-xs">
-    <div className="flex items-center gap-2 text-xs font-semibold text-destructive select-none">
-      <Ban className="h-4 w-4 shrink-0" />
-      <span>
-        {orden.estado_orden === "anulada" && "Esta orden ya fue anulada"}
-        {orden.estado_orden === "finalizada" && "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
-        {orden.estado_orden === "abierta" && "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
-      </span>
-    </div>
+            <Select
+              items={SELECT_RESULTADO}
+              value={formData.resultado_revision || ""}
+              onValueChange={(value) =>
+                handleSelectChange(value as "aprobado" | "rechazado")
+              }
+              disabled={orden.estado_orden !== "en_prueba"}
+            >
+              <SelectTrigger
+                id="resultado_revision"
+                className="bg-background border-border font-medium text-xs h-9"
+              >
+                <SelectValue placeholder="Seleccione el dictamen final" />
+              </SelectTrigger>
 
-    {/* Botón mejorado para devolver el estado */}
-   {orden.estado_orden === "finalizada" && <Button
-  type="button"
-  onClick={handleRevertToEnPrueba}
-  disabled={revertToEnPruebaMutation.isPending}
-  className="w-full sm:w-auto min-w-52.5 justify-center shrink-0 h-9 px-3.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 font-semibold text-xs transition-all gap-2 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed"
->
-  {revertToEnPruebaMutation.isPending ? (
-    <>
-      <Loader2 className="h-4 w-4 animate-spin shrink-0" />
-      <span>Devolviendo a EN PRUEBA...</span>
-    </>
-  ) : (
-    <>
-      <Undo2 className="h-4 w-4 shrink-0" />
-      <span>Devolver a estado EN PRUEBA</span>
-    </>
-  )}
-</Button>}
-  </div>
-) : (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+              <SelectContent alignItemWithTrigger={false}>
+                {SELECT_RESULTADO.map((item) => (
+                  <SelectItem
+                    key={item.value}
+                    value={item.value}
+                    className="text-xs"
+                  >
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <div className="w-full sm:w-auto order-2 sm:order-1">
-            <CancelOrder
-              orden={orden}
-              tenantId={tenantId}
-              
+          {/* Input: Consecutivo FUR */}
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="consecutivo_fur"
+              className="text-foreground font-medium text-xs"
+            >
+              Consecutivo FUR (Formato Único de Resultados)
+            </Label>
+
+            <Input
+              id="consecutivo_fur"
+              name="consecutivo_fur"
+              placeholder="Ej: FUR-482012"
+              value={formData.consecutivo_fur}
+              onChange={handleChange}
+              disabled={orden.estado_orden !== "en_prueba"}
+              className="bg-background border-border font-mono text-xs h-9"
             />
           </div>
 
-          <div className="w-full sm:w-auto order-1 sm:order-2">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full sm:w-auto font-bold h-10 transition-all rounded-lg shadow-sm gap-2 text-xs  px-5 ${
-                formData.resultado_revision === "aprobado"
-                  ? "bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70"
-                  : formData.resultado_revision === "rechazado"
-                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-70"
-                  : "bg-primary hover:bg-primary/90 disabled:opacity-70"
-              } disabled:cursor-not-allowed`}
+          {/* Input: Consecutivo RTM */}
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="consecutivo_rtm"
+              className={`text-foreground font-medium text-xs ${
+                formData.resultado_revision === "aprobado" && !noAplicaRTM
+                  ? "after:content-['_*_'] after:text-destructive"
+                  : ""
+              }`}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Firmando y subiendo a plataforma RUNT...</span>
-                </>
-              ) : formData.resultado_revision === "rechazado" ? (
-                <>
-                  <ShieldAlert className="h-4 w-4" />
-                  <span>Cerrar con Defectos (Rechazado)</span>
-                </>
-              ) : (
-                <>
-                  <ShieldCheck className="h-4 w-4" />
-                  <span>Firmar y Emitir Certificado</span>
-                </>
-              )}
-            </Button>
+              Consecutivo Certificado RTM
+            </Label>
+
+            <Input
+              id="consecutivo_rtm"
+              name="consecutivo_rtm"
+              placeholder={
+                noAplicaRTM
+                  ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}`
+                  : formData.resultado_revision === "rechazado"
+                    ? "No aplica por rechazo del vehículo"
+                    : "Ej: RTM-2026X"
+              }
+              disabled={
+                noAplicaRTM ||
+                formData.resultado_revision === "rechazado" ||
+                orden.estado_orden !== "en_prueba" ||
+                !formData.resultado_revision
+              }
+              value={
+                noAplicaRTM || formData.resultado_revision === "rechazado"
+                  ? ""
+                  : formData.consecutivo_rtm
+              }
+              onChange={handleChange}
+              className="bg-background border-border font-mono text-xs h-9 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* SECCIÓN DOCUMENTAL */}
+      {hasFullInfoModule && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 pl-1">
+            <FileSearch className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Soportes Digitales de Entrada
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 p-2.5 bg-muted/30 rounded-xl border border-border">
+            <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+            <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
           </div>
         </div>
       )}
-    </div>
 
-    <ZodErrorDialog
-      isOpen={showErrorDialog}
-      setIsOpen={setShowErrorDialog}
-      errors={serverError}
-    />
-  </form>
-);
+      {/* CONTENEDOR DE ACCIONES */}
+      <div
+        className={`flex flex-col items-center justify-center p-4 rounded-xl border w-full transition-colors duration-200 ${
+          orden.estado_orden !== "en_prueba"
+            ? "bg-destructive/5 border-destructive/20"
+            : "bg-muted/30 border-border"
+        }`}
+      >
+        {orden.estado_orden !== "en_prueba" ? (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full p-3 bg-destructive/10 border border-destructive/20 rounded-xl shadow-xs">
+            <div className="flex items-center gap-2 text-xs font-semibold text-destructive select-none">
+              <Ban className="h-4 w-4 shrink-0" />
+              <span>
+                {orden.estado_orden === "anulada" &&
+                  "Esta orden ya fue anulada"}
+                {orden.estado_orden === "finalizada" &&
+                  "No se pueden modificar ni anular los datos porque la orden ya se encuentra FINALIZADA"}
+                {orden.estado_orden === "abierta" &&
+                  "No se puede realizar el cierre técnico porque todavía no se han ingresado datos de PIN y factura en oficina"}
+              </span>
+            </div>
+
+            {/* Botón mejorado para devolver el estado */}
+            {orden.estado_orden === "finalizada" && (
+              <Button
+                type="button"
+                onClick={handleRevertToEnPrueba}
+                disabled={revertToEnPruebaMutation.isPending}
+                className="w-full sm:w-auto min-w-52.5 justify-center shrink-0 h-9 px-3.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 font-semibold text-xs transition-all gap-2 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {revertToEnPruebaMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                    <span>Devolviendo a EN PRUEBA...</span>
+                  </>
+                ) : (
+                  <>
+                    <Undo2 className="h-4 w-4 shrink-0" />
+                    <span>Devolver a estado EN PRUEBA</span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+            <div className="w-full sm:w-auto order-2 sm:order-1">
+              <CancelOrder orden={orden} tenantId={tenantId} />
+            </div>
+
+            <div className="w-full sm:w-auto order-1 sm:order-2">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full sm:w-auto font-bold h-10 transition-all rounded-lg shadow-sm gap-2 text-xs  px-5 ${
+                  formData.resultado_revision === "aprobado"
+                    ? "bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/70"
+                    : formData.resultado_revision === "rechazado"
+                      ? "bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-70"
+                      : "bg-primary hover:bg-primary/90 disabled:opacity-70"
+                } disabled:cursor-not-allowed`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Firmando y subiendo a plataforma RUNT...</span>
+                  </>
+                ) : formData.resultado_revision === "rechazado" ? (
+                  <>
+                    <ShieldAlert className="h-4 w-4" />
+                    <span>Cerrar con Defectos (Rechazado)</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>Firmar y Emitir Certificado</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <ZodErrorDialog
+        isOpen={showErrorDialog}
+        setIsOpen={setShowErrorDialog}
+        errors={serverError}
+      />
+    </form>
+  );
 }

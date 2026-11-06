@@ -15,6 +15,8 @@ import VerDetalleOrdenAdminDialog from "../admin/VerDetalleOrdenAdminDialog";
 import SarlaftViewPDF from "./pdfs/SarlaftViewPDF";
 import SarlaftDownloadPDF from "./pdfs/SarlaftDownloadPDF";
 import { EntryOrderListItem } from "@/types/functions_types";
+import { useContext } from "react";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 
 interface AccionesOrderDialogProps {
@@ -32,6 +34,20 @@ export default function AccionesOrderDialog({
   open,
   onOpenChange,
 }: AccionesOrderDialogProps) {
+
+
+   const contextRecived = useContext(PermissionsContext);
+    
+    const tenantModules =
+      contextRecived?.PermissionsContextValue.tenantModules;
+    
+    const hasFullInfoModule = tenantModules?.some(
+      (module) =>
+        module.code === "full_info_module" &&
+        module.is_active &&
+        module.is_enabled
+    );
+  
   // 🌟 Control 1: Si el rol es undefined, no se expone ninguna acción
   if (!rol) {
     console.log("Acción denegada: El rol actual es undefined");
@@ -60,18 +76,21 @@ export default function AccionesOrderDialog({
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
-            {/* Sección PDF */}
-            <div className="flex flex-col gap-2.5 text-center">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Documentación PDF
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
-                <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-                <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
-                <SarlaftViewPDF orderId={orden.id}></SarlaftViewPDF>
-                <SarlaftDownloadPDF orderId={orden.id}></SarlaftDownloadPDF>
-              </div>
-            </div>
+           {/* DOCUMENTACIÓN PDF */}
+{hasFullInfoModule && (
+  <div className="flex flex-col gap-2.5 text-center">
+    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+      Documentación PDF
+    </span>
+
+    <div className="flex flex-wrap items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
+      <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+      <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+      <SarlaftViewPDF orderId={orden.id} />
+      <SarlaftDownloadPDF orderId={orden.id} />
+    </div>
+  </div>
+)}
 
             {/* Sección Control de Estado */}
             <div className="flex flex-col gap-2.5 text-center">
