@@ -848,6 +848,11 @@ isOneToOne: false
 "get_analitica_personalizada":
 { Args: { "p_fecha_fin"?: string,"p_fecha_inicio"?: string,"p_result"?: string,"p_service_type"?: Database["public"]['Enums']["service_type_enum"],"p_soat_purchased"?: string,"p_tenant_id": string,"p_vehicle_type"?: Database["public"]['Enums']["vehicle_type_enum"] }; Returns: number
                            },
+"get_autobig_entry_orders_for_export":
+{ Args: { "p_end_date": string,"p_start_date": string,"p_tenant_id": string }; Returns: {
+              "certificado_runt": string,"consecutivo_fur": string,"empresa": string,"fecha": string,"forma_pago": string,"pin": string,"placa": string,"resultado_inspeccion": string,"servicio": Database["public"]['Enums']["vehicle_service_type_enum"],"tipo_inspeccion": Database["public"]['Enums']["service_type_enum"],"valor_recaudado": number
+            }[]
+                           },
 "get_entry_orders_for_export":
 { Args: { "p_end_date": string,"p_start_date": string,"p_tenant_id": string }; Returns: {
               "cilindraje": number,"cliente_direccion": string,"cliente_documento": string,"cliente_email": string,"cliente_nombre": string,"cliente_telefono": string,"cliente_tipo_documento": string,"consecutivo": number,"consecutivo_fur": string,"consecutivo_rtm": string,"es_reinspeccion": boolean,"estado_orden": Database["public"]['Enums']["order_status_enum"],"fecha": string,"id": string,"kilometraje": string,"linea": string,"marca": string,"modelo": number,"oficina_consecutivo_factura": string,"oficina_pin": string,"placa": string,"propietario_direccion": string,"propietario_documento": string,"propietario_email": string,"propietario_nombre": string,"propietario_telefono": string,"propietario_tipo_documento": string,"rate_price_snapshot": number,"resultado_revision": string,"se_compro_soat": boolean,"service_type": Database["public"]['Enums']["service_type_enum"],"soat_vencimiento_snapshot": string,"vehiculo_tipo_servicio_snapshot": Database["public"]['Enums']["vehicle_service_type_enum"],"vehiculo_tipo_snapshot": Database["public"]['Enums']["vehicle_type_enum"]

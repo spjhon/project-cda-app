@@ -63,6 +63,7 @@ import PreviousDayOrdersAlert from "./PreviousDayOrdersAlertProps";
 import { ExportExcelButton } from "./DownloadExcelButton";
 import { TenantCreditsManager } from "./TenantCreditsManager";
 import { EntryOrderListItem } from "@/types/functions_types";
+import { DownloadAutobigExcelButton } from "./DownloadAutobigExcelButton";
 
 const columnHelper = createColumnHelper<
   typeof stockFeatures,
@@ -213,6 +214,8 @@ export default function CreatedOrdersTable() {
     OficinaContextRecived?.rol ||
     DirectorTecnicoContextRecived?.DirectorTecnicoContextValue.rol ||
     AdminContextRecived?.AdminContextValue.rol;
+
+  const tenantName = PermissioncontextRecived?.PermissionsContextValue.tenantObject?.domain ?? ""
 
   const tenantId =
     PermissioncontextRecived?.PermissionsContextValue.tenantObject?.id;
@@ -788,10 +791,14 @@ export default function CreatedOrdersTable() {
         </div>
 
         {(rol === "oficina" || rol === "admin") && <TenantCreditsManager />}
-
-        {(rol === "oficina" ||
-          rol === "admin" ||
-          rol === "director-tecnico") && <ExportExcelButton />}
+{(rol === "oficina" ||
+  rol === "admin" ||
+  rol === "director-tecnico") &&
+  (tenantName === "autobig" ? (
+    <DownloadAutobigExcelButton />
+  ) : (
+    <ExportExcelButton />
+  ))}
 
         <div className="flex items-center">{renderStatusBadge()}</div>
 
