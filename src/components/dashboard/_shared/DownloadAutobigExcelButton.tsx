@@ -135,6 +135,11 @@ export function DownloadAutobigExcelButton() {
           width: 8,
         },
         {
+  header: "FUR",
+  key: "consecutivo_fur",
+  width: 16,
+},
+        {
           header: "PLACA",
           key: "placa",
           width: 14,
@@ -227,6 +232,8 @@ export function DownloadAutobigExcelButton() {
             ? format(new Date(row.fecha), "dd/MM/yyyy")
             : "",
 
+            consecutivo_fur: row.consecutivo_fur ?? "",
+
           placa: row.placa ?? "",
 
           pin: row.pin ?? "",
@@ -262,6 +269,68 @@ export function DownloadAutobigExcelButton() {
           numero_lateral: "",
         });
       });
+
+
+
+// ==========================================================
+// Estilos por columna
+// ==========================================================
+
+// FECHA
+worksheet.getColumn("fecha").font = {
+  name: "Calibri",
+  size: 14,
+  bold: true,
+};
+
+worksheet.getColumn("placa").eachCell((cell, rowNumber) => {
+  if (rowNumber > 1) {
+    cell.font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: "FFFF0000" }, // Rojo
+    };
+  }
+});
+
+worksheet.getColumn("tipo_inspeccion").eachCell((cell, rowNumber) => {
+  if (rowNumber > 1) {
+    const tipoInspeccion = String(cell.value ?? "").toLowerCase();
+
+    if (tipoInspeccion.includes("preventiva")) {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF4B183" },
+      };
+    }
+
+    if (tipoInspeccion.includes("reinspeccion") ||
+        tipoInspeccion.includes("reinspección")) {
+      cell.font = {
+        name: "Calibri",
+        size: 11,
+        bold: true,
+        color: { argb: "FFFF0000" },
+      };
+    }
+  }
+});
+
+worksheet.getColumn("servicio").eachCell((cell, rowNumber) => {
+  if (rowNumber > 1) {
+    const servicio = String(cell.value ?? "").toLowerCase().trim();
+
+    if (servicio === "particular") {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF4B183" },
+      };
+    }
+  }
+});
 
       // ==========================================================
       // Formato de valores numéricos
