@@ -97,7 +97,7 @@ export default function DirectorTecnicoOrderForm({
 
   // 🌟 CONTROL: Identificar si es un tipo de servicio que exime de certificado oficial RTM
   const tipoServicioLower = orden.service_type?.toLowerCase() || "";
-  const AplicaRTM = tipoServicioLower === "rmt"
+  const AplicaRTM = tipoServicioLower === "rtm"
     
 
   // Manejador para inputs de texto (RTM y FUR)
