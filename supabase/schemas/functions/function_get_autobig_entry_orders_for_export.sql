@@ -10,7 +10,8 @@ RETURNS TABLE (
   pin VARCHAR,
   tipo_inspeccion public.service_type_enum,
   servicio public.vehicle_service_type_enum,
-  forma_pago TEXT,
+  vehiculo_tipo public.vehicle_type_enum,
+  metodos_pago TEXT[],
   empresa TEXT,
   valor_recaudado NUMERIC(12, 2),
   certificado_runt VARCHAR,
@@ -63,7 +64,7 @@ BEGIN
   v_tenant_id := p_tenant_id;
 
   -- ============================================================
-  -- Obtener información de las órdenes
+  -- Obtener información de las órdenes y sus pagos
   -- ============================================================
 
   RETURN QUERY
@@ -79,13 +80,24 @@ BEGIN
     -- Servicio del vehículo: particular, público, etc.
     eo.vehiculo_tipo_servicio_snapshot AS servicio,
 
-    -- Pendiente: conectar con la estructura real de pagos.
-    NULL::TEXT AS forma_pago,
+    -- Tipo de vehículo: liviano, pesado, motocicleta, etc.
+    eo.vehiculo_tipo_snapshot AS vehiculo_tipo,
+
+    -- Array con los métodos de pago asociados a la orden.
+    COALESCE(
+      (
+        SELECT ARRAY_AGG(DISTINCT eop.payment_method::TEXT ORDER BY eop.payment_method::TEXT)
+        FROM public.entry_order_payments eop
+        WHERE eop.entry_order_id = eo.id
+          AND eop.tenant_id = eo.tenant_id
+      ),
+      ARRAY[]::TEXT[]
+    ) AS metodos_pago,
 
     -- Empresa registrada al momento de crear la orden.
     eo.company_name_snapshot AS empresa,
 
-    -- Pendiente: obtener el valor efectivamente recaudado.
+    -- Valor recaudado registrado en la orden.
     eo.rate_price_snapshot AS valor_recaudado,
 
     -- Número de certificado RUNT.

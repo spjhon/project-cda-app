@@ -33,6 +33,8 @@ interface AutobigReportRow {
   pin: string | null;
   tipo_inspeccion: string | null;
   servicio: string | null;
+  vehiculo_tipo: string | null;
+  metodos_pago: string[] | null;
   forma_pago: string | null;
   empresa: string | null;
   valor_recaudado: number | string | null;
@@ -111,6 +113,8 @@ export function DownloadAutobigExcelButton() {
         );
       }
 
+      console.log(orders);
+
       // ==========================================================
       // Crear libro de Excel
       // ==========================================================
@@ -135,10 +139,10 @@ export function DownloadAutobigExcelButton() {
           width: 8,
         },
         {
-  header: "FUR",
-  key: "consecutivo_fur",
-  width: 16,
-},
+          header: "FUR",
+          key: "consecutivo_fur",
+          width: 16,
+        },
         {
           header: "PLACA",
           key: "placa",
@@ -148,6 +152,11 @@ export function DownloadAutobigExcelButton() {
           header: "PIN",
           key: "pin",
           width: 14,
+        },
+        {
+          header: "TIPO DE VEHÍCULO",
+          key: "vehiculo_tipo",
+          width: 20,
         },
         {
           header: "TIPO DE INSPECCION",
@@ -160,7 +169,7 @@ export function DownloadAutobigExcelButton() {
           width: 18,
         },
         {
-          header: "FORMA DE PAGO",
+          header: "METODOS DE PAGO",
           key: "forma_pago",
           width: 18,
         },
@@ -228,25 +237,23 @@ export function DownloadAutobigExcelButton() {
           // Datos provenientes de la RPC
           // ------------------------------------------------------
 
-          fecha: row.fecha
-            ? format(new Date(row.fecha), "dd/MM/yyyy")
-            : "",
+          fecha: row.fecha ? format(new Date(row.fecha), "dd/MM/yyyy") : "",
 
-            consecutivo_fur: row.consecutivo_fur ?? "",
+          consecutivo_fur: row.consecutivo_fur ?? "",
 
           placa: row.placa ?? "",
 
           pin: row.pin ?? "",
 
+          vehiculo_tipo: row.vehiculo_tipo ?? "",
+
           tipo_inspeccion: row.tipo_inspeccion ?? "",
 
           servicio: row.servicio ?? "",
 
-          empresa: row.empresa ?? "",
-
+          // Monto recaudado
           valor_recaudado:
-            row.valor_recaudado !== null &&
-            row.valor_recaudado !== undefined
+            row.valor_recaudado !== null && row.valor_recaudado !== undefined
               ? Number(row.valor_recaudado)
               : null,
 
@@ -260,77 +267,80 @@ export function DownloadAutobigExcelButton() {
 
           numero: "",
 
-          forma_pago: "",
+          forma_pago: row.metodos_pago?.join(", ") ?? "",
 
           fupas_restantes: "",
 
           certificados_restantes: "",
+          empresa: row.empresa ?? "",
 
           numero_lateral: "",
         });
       });
 
+      // ==========================================================
+      // Estilos por columna
+      // ==========================================================
 
-
-// ==========================================================
-// Estilos por columna
-// ==========================================================
-
-// FECHA
-worksheet.getColumn("fecha").font = {
-  name: "Calibri",
-  size: 14,
-  bold: true,
-};
-
-worksheet.getColumn("placa").eachCell((cell, rowNumber) => {
-  if (rowNumber > 1) {
-    cell.font = {
-      name: "Calibri",
-      size: 11,
-      bold: true,
-      color: { argb: "FFFF0000" }, // Rojo
-    };
-  }
-});
-
-worksheet.getColumn("tipo_inspeccion").eachCell((cell, rowNumber) => {
-  if (rowNumber > 1) {
-    const tipoInspeccion = String(cell.value ?? "").toLowerCase();
-
-    if (tipoInspeccion.includes("preventiva")) {
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFF4B183" },
-      };
-    }
-
-    if (tipoInspeccion.includes("reinspeccion") ||
-        tipoInspeccion.includes("reinspección")) {
-      cell.font = {
+      // FECHA
+      worksheet.getColumn("fecha").font = {
         name: "Calibri",
-        size: 11,
+        size: 14,
         bold: true,
-        color: { argb: "FFFF0000" },
       };
-    }
-  }
-});
 
-worksheet.getColumn("servicio").eachCell((cell, rowNumber) => {
-  if (rowNumber > 1) {
-    const servicio = String(cell.value ?? "").toLowerCase().trim();
+      worksheet.getColumn("placa").eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) {
+          cell.font = {
+            name: "Calibri",
+            size: 11,
+            bold: true,
+            color: { argb: "FFFF0000" }, // Rojo
+          };
+        }
+      });
 
-    if (servicio === "particular") {
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFF4B183" },
-      };
-    }
-  }
-});
+      worksheet.getColumn("tipo_inspeccion").eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) {
+          const tipoInspeccion = String(cell.value ?? "").toLowerCase();
+
+          if (tipoInspeccion.includes("preventiva")) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFF4B183" },
+            };
+          }
+
+          if (
+            tipoInspeccion.includes("reinspeccion") ||
+            tipoInspeccion.includes("reinspección")
+          ) {
+            cell.font = {
+              name: "Calibri",
+              size: 11,
+              bold: true,
+              color: { argb: "FFFF0000" },
+            };
+          }
+        }
+      });
+
+      worksheet.getColumn("servicio").eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) {
+          const servicio = String(cell.value ?? "")
+            .toLowerCase()
+            .trim();
+
+          if (servicio === "particular") {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFF4B183" },
+            };
+          }
+        }
+      });
 
       // ==========================================================
       // Formato de valores numéricos
@@ -405,10 +415,7 @@ worksheet.getColumn("servicio").eachCell((cell, rowNumber) => {
   // ============================================================
 
   const isButtonDisabled =
-    !dateRange?.from ||
-    !dateRange?.to ||
-    !tenantId ||
-    exportMutation.isPending;
+    !dateRange?.from || !dateRange?.to || !tenantId || exportMutation.isPending;
 
   const totalCountLabel =
     totalADescargar !== undefined && totalADescargar !== null

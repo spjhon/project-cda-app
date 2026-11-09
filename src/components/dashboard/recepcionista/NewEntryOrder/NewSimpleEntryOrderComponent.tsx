@@ -54,7 +54,7 @@ export default function NewSimpleEntryOrderComponent() {
   const PermissionsContextReceived = useContext(PermissionsContext);
 
   const [formData, setFormData] = useState(initialOrderFormData);
-  console.log(formData)
+  //console.log(formData)
   // Diálogo de éxito
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessages, setSuccessMessages] = useState<

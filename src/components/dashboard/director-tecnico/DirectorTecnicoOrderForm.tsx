@@ -97,11 +97,8 @@ export default function DirectorTecnicoOrderForm({
 
   // 🌟 CONTROL: Identificar si es un tipo de servicio que exime de certificado oficial RTM
   const tipoServicioLower = orden.service_type?.toLowerCase() || "";
-  const noAplicaRTM =
-    tipoServicioLower === "preventiva" ||
-    tipoServicioLower === "peritaje" ||
-    tipoServicioLower === "prueba_gases" ||
-    tipoServicioLower === "preventiva_viajero";
+  const AplicaRTM = tipoServicioLower === "rmt"
+    
 
   // Manejador para inputs de texto (RTM y FUR)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,12 +185,11 @@ export default function DirectorTecnicoOrderForm({
 
     // Solo exige RTM si es aprobado Y NO es ni preventiva ni peritaje
     if (
-      !noAplicaRTM &&
-      formData.resultado_revision === "aprobado" &&
+      AplicaRTM &&
       formData.consecutivo_rtm.trim() === ""
     ) {
       setServerError(
-        "Si la revisión es APROBADA, debe ingresar el consecutivo del certificado RTM",
+        "Si es una RTM, sin importar si esta aprobada o rechazada, debe de tener un consecutivo RUNT",
       );
       setShowErrorDialog(true);
       setIsSubmitting(false);
@@ -289,7 +285,7 @@ export default function DirectorTecnicoOrderForm({
     // en caso de que no aplique RTM
     const payloadData = {
       ...formData,
-      consecutivo_rtm: noAplicaRTM ? "" : formData.consecutivo_rtm,
+      consecutivo_rtm: !AplicaRTM ? "" : formData.consecutivo_rtm,
     };
 
     try {
@@ -337,6 +333,13 @@ export default function DirectorTecnicoOrderForm({
       queryClient.invalidateQueries({
         queryKey: ["entry_orders", "list"],
       });
+
+
+
+
+if (hasFullInfoModule){
+
+
 
       // ============================================================
       // 3.2 Obtener la orden actualizada para el PDF
@@ -503,6 +506,19 @@ export default function DirectorTecnicoOrderForm({
         URL.revokeObjectURL(url);
       }
 
+
+
+
+
+}
+
+
+
+
+
+
+
+
       // ============================================================
       // 3.5 Actualizar créditos
       // ============================================================
@@ -510,6 +526,10 @@ export default function DirectorTecnicoOrderForm({
       queryClient.invalidateQueries({
         queryKey: ["tenant-credits", tenantId],
       });
+
+
+
+
     } catch (error: unknown) {
       console.error("Error inesperado:", error);
 
@@ -605,7 +625,7 @@ export default function DirectorTecnicoOrderForm({
             <Label
               htmlFor="consecutivo_rtm"
               className={`text-foreground font-medium text-xs ${
-                formData.resultado_revision === "aprobado" && !noAplicaRTM
+                formData.resultado_revision === "aprobado" && AplicaRTM
                   ? "after:content-['_*_'] after:text-destructive"
                   : ""
               }`}
@@ -617,22 +637,16 @@ export default function DirectorTecnicoOrderForm({
               id="consecutivo_rtm"
               name="consecutivo_rtm"
               placeholder={
-                noAplicaRTM
-                  ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}`
-                  : formData.resultado_revision === "rechazado"
-                    ? "No aplica por rechazo del vehículo"
-                    : "Ej: RTM-2026X"
+                !AplicaRTM
+                  ? `No aplica para servicio de ${orden.service_type?.toUpperCase()}` : "Ej: RTM-2026X"
               }
               disabled={
-                noAplicaRTM ||
-                formData.resultado_revision === "rechazado" ||
+                !AplicaRTM ||
                 orden.estado_orden !== "en_prueba" ||
                 !formData.resultado_revision
               }
               value={
-                noAplicaRTM || formData.resultado_revision === "rechazado"
-                  ? ""
-                  : formData.consecutivo_rtm
+                !AplicaRTM ? "" : formData.consecutivo_rtm
               }
               onChange={handleChange}
               className="bg-background border-border font-mono text-xs h-9 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
