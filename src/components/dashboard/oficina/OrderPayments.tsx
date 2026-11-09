@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,10 @@ export default function OrderPayments({
   setPayments,
   disabled = false,
 }: OrderPaymentsProps) {
+
+
+const [inputValues, setInputValues] = useState<Record<number, string>>({});
+
   const addPayment = () => {
     if (payments.length >= MAX_PAYMENTS) return;
 
@@ -57,6 +61,11 @@ export default function OrderPayments({
     ]);
   };
 
+
+
+
+
+
   const removePayment = (index: number) => {
     setPayments((prev) => prev.filter((_, i) => i !== index));
   };
@@ -64,7 +73,7 @@ export default function OrderPayments({
   const updatePayment = (
     index: number,
     field: keyof EntryOrderPaymentDetail,
-    value: string | number,
+    value: number | string,
   ) => {
     setPayments((prev) =>
       prev.map((payment, i) =>
@@ -152,21 +161,27 @@ export default function OrderPayments({
                 Valor Recaudado ($)
               </Label>
 
-              <Input
-                type="number"
-                min="0"
-                placeholder="0"
-                value={payment.monto_bruto === 0 ? "" : payment.monto_bruto}
-                onChange={(e) =>
-                  updatePayment(
-                    index,
-                    "monto_bruto",
-                    e.target.value === "" ? 0 : Number(e.target.value),
-                  )
-                }
-                className="bg-background h-10 text-xs"
-                disabled={disabled}
-              />
+             <Input
+  type="number"
+  min={0}
+  placeholder="0"
+  // Si el inputValues tiene un valor para este index, lo usamos. Si no, usamos el del estado general.
+  value={inputValues[index] !== undefined ? inputValues[index] : String(payment.monto_bruto)}
+  onChange={(e) => {
+    const val = e.target.value;
+    
+    // Bloquea negativos
+    if (val.startsWith("-")) return;
+
+    // 1. Guardamos el string EXACTO en el estado local (para que se vea el 0 o se pueda borrar)
+    setInputValues((prev) => ({ ...prev, [index]: val }));
+    
+    // 2. Actualizamos el estado real (payments) con el número
+    updatePayment(index, "monto_bruto", val === "" ? 0 : Number(val));
+  }}
+  className="bg-background h-10 text-xs"
+  disabled={disabled}
+/>
             </div>
           </div>
 

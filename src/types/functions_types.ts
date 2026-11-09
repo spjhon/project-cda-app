@@ -101,7 +101,7 @@ export interface TirePressureDetail {
 export interface EntryOrderPaymentDetail {
   id: string;
   payment_method: Database["public"]["Enums"]["office_payment_type_enum"] | null;
-  monto_bruto: number;
+  monto_bruto:  number;
   num_comprobante: string | null;
   created_at: string;
   updated_at: string;

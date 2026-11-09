@@ -37,98 +37,86 @@ export const ID_DOCUMENT_OPTIONS = [
   { label: "Tarjeta de Identidad", value: "tarjeta_identidad" },
   { label: "Registro Civil", value: "registro_civil" },
   { label: "Carnet Diplomático", value: "carnet_diplomatico" },
-  { label: "Permiso por Protección Temporal", value: "permiso_por_proteccion_temporal" },
+  {
+    label: "Permiso por Protección Temporal",
+    value: "permiso_por_proteccion_temporal",
+  },
 ];
 
-export default function RuntScraperModal<T extends { vehicle?: { placa?: string } }>({
-  formData,
-  setFormData,
-}: RuntScraperModalProps<T>) {
+export default function RuntScraperModal<
+  T extends { vehicle?: { placa?: string } },
+>({ formData, setFormData }: RuntScraperModalProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Campos locales del formulario del RUNT
   // Estados locales independientes
-  const [tipoDocumento, setTipoDocumento] = useState( "cedula_ciudadania" );
-  const [numeroDocumento, setNumeroDocumento] = useState( "", );
+  const [tipoDocumento, setTipoDocumento] = useState("cedula_ciudadania");
+  const [numeroDocumento, setNumeroDocumento] = useState("");
   const [captchaValue, setCaptchaValue] = useState("");
- 
-const [isRtmWarningOpen, setIsRtmWarningOpen] = useState(false);
-const [rtmWarningMessage, setRtmWarningMessage] = useState<string | null>(
-  null,
-);
 
+  const [isRtmWarningOpen, setIsRtmWarningOpen] = useState(false);
+  const [rtmWarningMessage, setRtmWarningMessage] = useState<string | null>(
+    null,
+  );
 
+  const validateRtmExpiration = (fechaStr?: string | null) => {
+    if (!fechaStr) return;
 
+    let fechaVencimiento: Date;
 
+    if (fechaStr.includes("T")) {
+      const parsedDate = new Date(fechaStr);
 
+      if (Number.isNaN(parsedDate.getTime())) return;
 
+      fechaVencimiento = new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate(),
+      );
+    } else {
+      // Admite YYYY-MM-DD y DD/MM/YYYY.
+      const partes = fechaStr.split(/[-/]/);
 
+      if (partes.length !== 3) return;
 
-const validateRtmExpiration = (fechaStr?: string | null) => {
-  if (!fechaStr) return;
-
-  let fechaVencimiento: Date;
-
-  if (fechaStr.includes("T")) {
-    const parsedDate = new Date(fechaStr);
-
-    if (Number.isNaN(parsedDate.getTime())) return;
-
-    fechaVencimiento = new Date(
-      parsedDate.getFullYear(),
-      parsedDate.getMonth(),
-      parsedDate.getDate(),
-    );
-  } else {
-    // Admite YYYY-MM-DD y DD/MM/YYYY.
-    const partes = fechaStr.split(/[-/]/);
-
-    if (partes.length !== 3) return;
-
-    const [year, month, day] =
-      fechaStr.includes("-")
+      const [year, month, day] = fechaStr.includes("-")
         ? partes.map(Number)
         : [Number(partes[2]), Number(partes[1]), Number(partes[0])];
 
-    fechaVencimiento = new Date(year, month - 1, day);
+      fechaVencimiento = new Date(year, month - 1, day);
 
-    // Evita aceptar fechas inexistentes, como 31/02/2026.
-    if (
-      fechaVencimiento.getFullYear() !== year ||
-      fechaVencimiento.getMonth() !== month - 1 ||
-      fechaVencimiento.getDate() !== day
-    ) {
-      return;
+      // Evita aceptar fechas inexistentes, como 31/02/2026.
+      if (
+        fechaVencimiento.getFullYear() !== year ||
+        fechaVencimiento.getMonth() !== month - 1 ||
+        fechaVencimiento.getDate() !== day
+      ) {
+        return;
+      }
     }
-  }
 
-  const ahora = new Date();
-  const hoy = new Date(
-    ahora.getFullYear(),
-    ahora.getMonth(),
-    ahora.getDate(),
-  );
-
-  const diasVigentes = Math.round(
-    (fechaVencimiento.getTime() - hoy.getTime()) / 86_400_000,
-  );
-
-  if (diasVigentes > 10) {
-    setRtmWarningMessage(
-      `ADVERTENCIA: A la RTM todavía le quedan ${diasVigentes} días de vigencia. Por favor, compruebe la fecha y, si corresponde, informe al cliente para solicitar confirmación.`,
+    const ahora = new Date();
+    const hoy = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate(),
     );
-    setIsRtmWarningOpen(true);
-  } else {
-    setRtmWarningMessage(null);
-    setIsRtmWarningOpen(false);
-  }
-};
 
+    const diasVigentes = Math.round(
+      (fechaVencimiento.getTime() - hoy.getTime()) / 86_400_000,
+    );
 
-
-
-
-
+    if (diasVigentes > 10) {
+      setRtmWarningMessage(
+        `ADVERTENCIA: A la RTM todavía le quedan ${diasVigentes} días de vigencia. Por favor, compruebe la fecha y, si corresponde, informe al cliente para solicitar confirmación.`,
+      );
+      setIsRtmWarningOpen(true);
+    } else {
+      setRtmWarningMessage(null);
+      setIsRtmWarningOpen(false);
+    }
+  };
 
 
 
@@ -136,41 +124,57 @@ const validateRtmExpiration = (fechaStr?: string | null) => {
 
   const placa = formData?.vehicle?.placa || "";
 
+
+
+
+
+
+
+  
   // 1. TANSTACK QUERY: Obtener el Captcha Inicial e ID de Sesión
   const {
-  data: captchaData,
-  isLoading: isLoadingCaptcha,
-  isFetching: isFetchingCaptcha,
-  isError: isErrorCaptcha,
-} = useQuery({
-  queryKey: ["runtCaptcha", placa],
-  queryFn: async () => {
-    console.log(`🤖 Despertando scraper en casa para placa: ${placa}`);
+    data: captchaData,
+    isLoading: isLoadingCaptcha,
+    isFetching: isFetchingCaptcha,
+    isError: isErrorCaptcha,
+  } = useQuery({
+    queryKey: ["runtCaptcha", placa],
+    queryFn: async () => {
+      console.log(`🤖 Despertando scraper en casa para placa: ${placa}`);
 
-    const response = await fetch(
-      "https://runt-api.cda-app.com/api/scraper/init",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+      const response = await fetch(
+        "https://runt-api.cda-app.com/api/scraper/init",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
 
-    if (!response.ok) {
-      throw new Error("Error al conectar con el RUNT");
-    }
+      if (!response.ok) {
+        throw new Error("Error al conectar con el RUNT");
+      }
 
-    return response.json();
-  },
-  enabled: isOpen && !!placa,
-  staleTime: 0,
-  refetchOnWindowFocus: false,
-  gcTime: 0,
-});
+      return response.json();
+    },
+    enabled: isOpen && !!placa,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    gcTime: 0,
+  });
 
-const captchaImage =
-  captchaData?.success && captchaData?.captcha
-    ? captchaData.captcha
-    : null;
+
+
+
+  const captchaImage = captchaData?.success && captchaData?.captcha ? captchaData.captcha : null;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -199,16 +203,13 @@ const captchaImage =
         },
       );
 
-
-
-      if (!response.ok) { throw new Error("Error procesando los datos en el RUNT")};
-
+      if (!response.ok) {
+        throw new Error("Error procesando los datos en el RUNT");
+      }
 
       return response.json();
-
-
     },
-        onSuccess: (data) => {
+    onSuccess: (data) => {
       if (data.success) {
         validateRtmExpiration(data.payload.fecha_vencimiento_RTM);
         console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
@@ -243,35 +244,54 @@ const captchaImage =
             ...prev,
             // Actualizamos el SOAT general si existe
             ...(prevData.soat_vencimiento_snapshot !== undefined && {
-              soat_vencimiento_snapshot: data.payload.soat || prevData.soat_vencimiento_snapshot,
+              soat_vencimiento_snapshot:
+                data.payload.soat || prevData.soat_vencimiento_snapshot,
             }),
             informacion_buscada: true,
             vehicle: {
               ...prev.vehicle,
               capacidad_pasajeros:
                 data.payload.capacidad_pasajeros ||
-                prevData.vehicle?.capacidad_pasajeros || "",
+                prevData.vehicle?.capacidad_pasajeros ||
+                "",
               cilindrada:
-                data.payload.cilindrada_vehiculo || prevData.vehicle?.cilindrada || "",
-              clase: data.payload.clase_vehiculo || prevData.vehicle?.clase || "",
-              color: data.payload.color_vehiculo || prevData.vehicle?.color || "",
+                data.payload.cilindrada_vehiculo ||
+                prevData.vehicle?.cilindrada ||
+                "",
+              clase:
+                data.payload.clase_vehiculo || prevData.vehicle?.clase || "",
+              color:
+                data.payload.color_vehiculo || prevData.vehicle?.color || "",
               combustible:
-                data.payload.combustible_vehiculo || prevData.vehicle?.combustible || "",
+                data.payload.combustible_vehiculo ||
+                prevData.vehicle?.combustible ||
+                "",
               es_ensenanza:
-                data.payload.es_ensenanza ?? prevData.vehicle?.es_ensenanza ?? false,
-              linea: data.payload.lineaVehiculo || prevData.vehicle?.linea || "",
-              marca: data.payload.marca_vehiculo || prevData.vehicle?.marca || "",
-              modelo: data.payload.modelo_vehiculo || prevData.vehicle?.modelo || "",
+                data.payload.es_ensenanza ??
+                prevData.vehicle?.es_ensenanza ??
+                false,
+              linea:
+                data.payload.lineaVehiculo || prevData.vehicle?.linea || "",
+              marca:
+                data.payload.marca_vehiculo || prevData.vehicle?.marca || "",
+              modelo:
+                data.payload.modelo_vehiculo || prevData.vehicle?.modelo || "",
               tipo_servicio_vehiculo:
-                data.payload.tipo_servicio || prevData.vehicle?.tipo_servicio_vehiculo || "",
+                data.payload.tipo_servicio ||
+                prevData.vehicle?.tipo_servicio_vehiculo ||
+                "",
 
               // RTM - Fecha de vencimiento
               fecha_vencimiento_rtm:
-                data.payload.fecha_vencimiento_RTM || prevData.vehicle?.fecha_vencimiento_rtm || "",
+                data.payload.fecha_vencimiento_RTM ||
+                prevData.vehicle?.fecha_vencimiento_rtm ||
+                "",
 
               // RTM - Organismo que expidió
               organismo_que_expidio_ultima_rtm:
-                data.payload.organismo_que_expidio_la_ultima_RTM || prevData.vehicle?.organismo_que_expidio_ultima_rtm || "",
+                data.payload.organismo_que_expidio_la_ultima_RTM ||
+                prevData.vehicle?.organismo_que_expidio_ultima_rtm ||
+                "",
 
               // RTM - Vigente según RUNT
               rtm_vigente_de_acuerdo_al_runt:
@@ -287,11 +307,15 @@ const captchaImage =
 
               // Fecha de matrícula
               fecha_matricula:
-                data.payload.fecha_matricula || prevData.vehicle?.fecha_matricula || "",
+                data.payload.fecha_matricula ||
+                prevData.vehicle?.fecha_matricula ||
+                "",
 
               // ✅ SOAT vigente - AHORA DENTRO DE vehicle
               soat_vigente_de_acuerdo_al_runt:
-                data.payload.SOAT_vigente_de_acuerdo_al_RUNT || prevData.vehicle?.soat_vigente_de_acuerdo_al_runt || "",
+                data.payload.SOAT_vigente_de_acuerdo_al_RUNT ||
+                prevData.vehicle?.soat_vigente_de_acuerdo_al_runt ||
+                "",
             },
           } as T; // Volvemos a castear al tipo original T
         });
@@ -312,26 +336,29 @@ const captchaImage =
 
 
 
-const handleOpenChange = (open: boolean) => {
-  setIsOpen(open);
-
-  if (open) {
-    setNumeroDocumento("");
-    setTipoDocumento("cedula_ciudadania");
-  }
-
-  if (!open) {
-    setCaptchaValue("");
-  }
-
-  solveRuntMutation.reset();
-};
 
 
 
 
 
 
+
+
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+
+    if (open) {
+      setNumeroDocumento("");
+      setTipoDocumento("cedula_ciudadania");
+    }
+
+    if (!open) {
+      setCaptchaValue("");
+    }
+
+    solveRuntMutation.reset();
+  };
 
   const handleSubmitRunt = (e: React.FormEvent) => {
     e.preventDefault();
@@ -352,13 +379,13 @@ const handleOpenChange = (open: boolean) => {
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={
-          <Button
-            type="button"
-            disabled={!placa}
-            className={`
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogTrigger
+          render={
+            <Button
+              type="button"
+              disabled={!placa}
+              className={`
             w-full h-16 gap-2 font-bold rounded-xl transition-all active:scale-95 text-lg
             ${
               placa
@@ -366,205 +393,208 @@ const handleOpenChange = (open: boolean) => {
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }
           `}
-          >
-            <Globe className="h-5 w-5" />
-            <span className="hidden md:inline">ACTUALIZAR DATOS VIA RUNT</span>
-            <span className="md:hidden">RUNT</span>
-          </Button>
-        }
-      ></DialogTrigger>
-
-      <DialogContent className="sm:max-w-106.25">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <Globe className="h-5 w-5 text-primary" />
-            Consulta Automática RUNT
-          </DialogTitle>
-
-          <DialogDescription>
-            Buscando información oficial para el vehículo con placas{" "}
-            <strong className="text-foreground bg-muted px-2 py-0.5 rounded uppercase tracking-wider">
-              {placa}
-            </strong>
-            .
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmitRunt} className="space-y-4 pt-2">
-          {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
-          <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-xl p-3 bg-muted min-h-25 relative">
-            {isLoadingCaptcha || isFetchingCaptcha ? (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <span>Conectando con el RUNT en tiempo real...</span>
-              </div>
-            ) : captchaImage ? (
-              <div className="flex flex-col items-center w-full gap-2">
-                <img
-                  src={captchaImage}
-                  alt="Captcha RUNT"
-                  className="h-14 object-contain border border-border bg-card rounded shadow-sm"
-                />
-              </div>
-            ) : isErrorCaptcha ? (
-              <div className="text-center p-2">
-                <p className="text-xs text-destructive mb-2">
-                  No se pudo conectar con el servidor.
-                </p>
-              </div>
-            ) : null}
-          </div>
-
-          {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
-          <div className="space-y-1">
-            <Label htmlFor="captcha" className="text-sm font-semibold">
-              Escribe las letras del Captcha
-            </Label>
-
-            <Input
-              id="captcha"
-              type="text"
-              placeholder="Ej: AB12"
-              value={captchaValue}
-              onChange={(e) => setCaptchaValue(e.target.value)}
-              className="font-mono text-center tracking-widest text-lg h-11"
-              maxLength={6}
-              required
-              disabled={
-                isLoadingCaptcha ||
-                solveRuntMutation.isPending ||
-                !captchaData?.captcha
-              }
-            />
-          </div>
-
-          {/* SELECT TIPO DE DOCUMENTO */}
-          <div className="space-y-1">
-            <Label htmlFor="tipoDoc" className="text-sm font-semibold">
-              Tipo de Documento del Propietario
-            </Label>
-
-            <Select
-              items={ID_DOCUMENT_OPTIONS}
-              value={tipoDocumento}
-              onValueChange={(v) =>
-                setTipoDocumento(v ? v : "cedula_ciudadania")
-              }
             >
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="Seleccione tipo" />
-              </SelectTrigger>
+              <Globe className="h-5 w-5" />
+              <span className="hidden md:inline">
+                ACTUALIZAR DATOS VIA RUNT
+              </span>
+              <span className="md:hidden">RUNT</span>
+            </Button>
+          }
+        ></DialogTrigger>
 
-              <SelectContent alignItemWithTrigger={false}>
-                {ID_DOCUMENT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <DialogContent className="sm:max-w-106.25">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Globe className="h-5 w-5 text-primary" />
+              Consulta Automática RUNT
+            </DialogTitle>
 
-          {/* INPUT NÚMERO DE DOCUMENTO */}
-          <div className="space-y-1">
-            <Label htmlFor="numDoc" className="text-sm font-semibold">
-              Número de Documento
-            </Label>
+            <DialogDescription>
+              Buscando información oficial para el vehículo con placas{" "}
+              <strong className="text-foreground bg-muted px-2 py-0.5 rounded uppercase tracking-wider">
+                {placa}
+              </strong>
+              .
+            </DialogDescription>
+          </DialogHeader>
 
-            <Input
-              id="numDoc"
-              type="text"
-              placeholder="Número de identificación"
-              value={numeroDocumento}
-              onChange={(e) => setNumeroDocumento(e.target.value)}
-              className="h-11"
-              required
-              disabled={solveRuntMutation.isPending}
-            />
-          </div>
-
-          {/* ESTADO */}
-          {(solveRuntMutation.isPending ||
-            solveRuntMutation.isError ||
-            mutationData) && (
-            <div
-              className={`p-3 rounded-lg border text-sm text-center transition-all ${
-                solveRuntMutation.isPending
-                  ? "bg-primary/10 border-primary/20 text-primary"
-                  : solveRuntMutation.isError || mutationData?.success === false
-                    ? "bg-destructive/10 border-destructive/20 text-destructive"
-                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-              }`}
-            >
-              {solveRuntMutation.isPending && (
-                <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span>Buscando datos en el RUNT... Por favor espera.</span>
+          <form onSubmit={handleSubmitRunt} className="space-y-4 pt-2">
+            {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
+            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-xl p-3 bg-muted min-h-25 relative">
+              {isLoadingCaptcha || isFetchingCaptcha ? (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>Conectando con el RUNT en tiempo real...</span>
                 </div>
-              )}
-
-              {solveRuntMutation.isError && (
-                <p className="font-semibold text-destructive">
-                  ❌{" "}
-                  {(solveRuntMutation.error as Error)?.message ??
-                    "Hubo un error de conexión con tu PC local."}
-                </p>
-              )}
-
-              {mutationData?.success === true && (
-                <p className="font-medium">ℹ️ {mutationData.message}</p>
-              )}
-
-              {mutationData?.success === false && (
-                <p className="font-medium text-destructive">
-                  ❌ {mutationData.message}
-                </p>
-              )}
+              ) : captchaImage ? (
+                <div className="flex flex-col items-center w-full gap-2">
+                  <img
+                    src={captchaImage}
+                    alt="Captcha RUNT"
+                    className="h-14 object-contain border border-border bg-card rounded shadow-sm"
+                  />
+                </div>
+              ) : isErrorCaptcha ? (
+                <div className="text-center p-2">
+                  <p className="text-xs text-destructive mb-2">
+                    No se pudo conectar con el servidor.
+                  </p>
+                </div>
+              ) : null}
             </div>
-          )}
 
-          {/* BOTONES */}
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className="w-1/3 h-11"
-              disabled={solveRuntMutation.isPending}
-            >
-              Cancelar
-            </Button>
+            {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
+            <div className="space-y-1">
+              <Label htmlFor="captcha" className="text-sm font-semibold">
+                Escribe las letras del Captcha
+              </Label>
 
-            <Button
-              type="submit"
-              className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2"
-              disabled={
-                isLoadingCaptcha ||
-                solveRuntMutation.isPending ||
-                !captchaValue ||
-                !captchaData?.captcha ||
-                solveRuntMutation.isSuccess
-              }
-            >
-              {solveRuntMutation.isPending && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
+              <Input
+                id="captcha"
+                type="text"
+                placeholder="Ej: AB12"
+                value={captchaValue}
+                onChange={(e) => setCaptchaValue(e.target.value)}
+                className="font-mono text-center tracking-widest text-lg h-11"
+                maxLength={6}
+                required
+                disabled={
+                  isLoadingCaptcha ||
+                  solveRuntMutation.isPending ||
+                  !captchaData?.captcha
+                }
+              />
+            </div>
 
-              {solveRuntMutation.isPending
-                ? "Extrayendo..."
-                : "Consultar e Importar"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-    <GenericErrorDialog
-  isOpen={isRtmWarningOpen}
-  setIsOpen={setIsRtmWarningOpen}
-  headerText="Advertencia sobre la vigencia de la RTM"
-  descriptionText="Verifica la información obtenida del RUNT."
-  errors={rtmWarningMessage}
-/>
-</>
+            {/* SELECT TIPO DE DOCUMENTO */}
+            <div className="space-y-1">
+              <Label htmlFor="tipoDoc" className="text-sm font-semibold">
+                Tipo de Documento del Propietario
+              </Label>
+
+              <Select
+                items={ID_DOCUMENT_OPTIONS}
+                value={tipoDocumento}
+                onValueChange={(v) =>
+                  setTipoDocumento(v ? v : "cedula_ciudadania")
+                }
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="Seleccione tipo" />
+                </SelectTrigger>
+
+                <SelectContent alignItemWithTrigger={false}>
+                  {ID_DOCUMENT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* INPUT NÚMERO DE DOCUMENTO */}
+            <div className="space-y-1">
+              <Label htmlFor="numDoc" className="text-sm font-semibold">
+                Número de Documento
+              </Label>
+
+              <Input
+                id="numDoc"
+                type="text"
+                placeholder="Número de identificación"
+                value={numeroDocumento}
+                onChange={(e) => setNumeroDocumento(e.target.value)}
+                className="h-11"
+                required
+                disabled={solveRuntMutation.isPending}
+              />
+            </div>
+
+            {/* ESTADO */}
+            {(solveRuntMutation.isPending ||
+              solveRuntMutation.isError ||
+              mutationData) && (
+              <div
+                className={`p-3 rounded-lg border text-sm text-center transition-all ${
+                  solveRuntMutation.isPending
+                    ? "bg-primary/10 border-primary/20 text-primary"
+                    : solveRuntMutation.isError ||
+                        mutationData?.success === false
+                      ? "bg-destructive/10 border-destructive/20 text-destructive"
+                      : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                }`}
+              >
+                {solveRuntMutation.isPending && (
+                  <div className="flex items-center justify-center gap-2 font-medium animate-pulse">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span>Buscando datos en el RUNT... Por favor espera.</span>
+                  </div>
+                )}
+
+                {solveRuntMutation.isError && (
+                  <p className="font-semibold text-destructive">
+                    ❌{" "}
+                    {(solveRuntMutation.error as Error)?.message ??
+                      "Hubo un error de conexión con tu PC local."}
+                  </p>
+                )}
+
+                {mutationData?.success === true && (
+                  <p className="font-medium">ℹ️ {mutationData.message}</p>
+                )}
+
+                {mutationData?.success === false && (
+                  <p className="font-medium text-destructive">
+                    ❌ {mutationData.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* BOTONES */}
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="w-1/3 h-11"
+                disabled={solveRuntMutation.isPending}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="submit"
+                className="w-2/3 h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2"
+                disabled={
+                  isLoadingCaptcha ||
+                  solveRuntMutation.isPending ||
+                  !captchaValue ||
+                  !captchaData?.captcha ||
+                  solveRuntMutation.isSuccess
+                }
+              >
+                {solveRuntMutation.isPending && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+
+                {solveRuntMutation.isPending
+                  ? "Extrayendo..."
+                  : "Consultar e Importar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <GenericErrorDialog
+        isOpen={isRtmWarningOpen}
+        setIsOpen={setIsRtmWarningOpen}
+        headerText="Advertencia sobre la vigencia de la RTM"
+        descriptionText="Verifica la información obtenida del RUNT."
+        errors={rtmWarningMessage}
+      />
+    </>
   );
 }

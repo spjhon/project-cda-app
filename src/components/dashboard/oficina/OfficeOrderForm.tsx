@@ -80,6 +80,8 @@ const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId
     orden.payments ?? []
   );
 
+  console.log("estos son los payments: ", payments)
+
 const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
 
   const {
@@ -92,8 +94,6 @@ const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
     companyId: selectedCompanyId,
     orderId: orden.id,
   });
-
-  console.log("estos son los order rates: ", orderRates)
 
   const selectedRateIdFromOrder = orden.vehicle_service_rate_id;
 
@@ -149,11 +149,11 @@ const selectedRate =
       payments.some(
         (payment) =>
           !payment.payment_method ||
-          payment.monto_bruto <= 0,
+          payment.monto_bruto < 0,
       )
     ) {
       alert(
-        "Debe registrar al menos un método de pago y todos los pagos deben tener un valor mayor a $0.",
+        "Debe registrar al menos un método de pago y todos los pagos deben tener un valor.",
       );
       setIsSubmitting(false);
       return;

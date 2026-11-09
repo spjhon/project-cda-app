@@ -35,7 +35,7 @@ CREATE TABLE public.entry_order_payments (
     ON DELETE RESTRICT,
 
   CONSTRAINT entry_order_payments_monto_bruto_check
-    CHECK (monto_bruto > 0)
+    CHECK (monto_bruto >= 0)
 );
 
 

@@ -168,9 +168,9 @@ BEGIN
                     'Operación cancelada: El valor de un pago no es válido.';
         END;
 
-        IF v_monto IS NULL OR v_monto <= 0 THEN
+        IF v_monto IS NULL OR v_monto < 0 THEN
             RAISE EXCEPTION
-                'Operación cancelada: Todos los pagos deben tener un valor mayor que cero.';
+                'Operación cancelada: Todos los pagos deben tener un valor 0 o mayor.';
         END IF;
 
         v_num_comprobante :=

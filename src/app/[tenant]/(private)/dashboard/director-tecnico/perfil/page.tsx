@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { GeminiTest } from "@/components/dashboard/director-tecnico/GeminiTest";
 
 export default function DirectorTecnicoProfilePage() {
   const router = useRouter();
@@ -600,6 +601,8 @@ await queryClient.invalidateQueries({
 
         
       </Card>
+
+      <GeminiTest></GeminiTest>
     </div>
   );
 }

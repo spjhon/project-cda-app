@@ -69,14 +69,14 @@ export async function insertOficinaData({
   const invalidPayment = payments.some(
     (payment) =>
       !payment.payment_method||
-      payment.monto_bruto <= 0,
+      payment.monto_bruto < 0,
   );
 
   if (invalidPayment) {
     return {
       data: null,
       error:
-        "Error: Todos los pagos deben tener un método seleccionado y un valor mayor a $0.",
+        "Error: Todos los pagos deben tener un método seleccionado.",
     };
   }
 
