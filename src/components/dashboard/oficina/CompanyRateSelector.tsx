@@ -6,7 +6,6 @@ import {
   Loader2,
   Building2,
   ChevronsUpDown,
-  Check,
   ListChecks,
   X,
 } from "lucide-react"

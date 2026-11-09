@@ -80,8 +80,6 @@ const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId
     orden.payments ?? []
   );
 
-  console.log("estos son los payments: ", payments)
-
 const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
 
   const {

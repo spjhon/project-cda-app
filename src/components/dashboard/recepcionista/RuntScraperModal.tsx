@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Globe, Loader2 } from "lucide-react";
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog";
+import { useReadCaptchaAction } from "@/lib/client-actions/useReadCaptchaAction";
 
 interface RuntScraperModalProps<T> {
   formData: T;
@@ -58,6 +59,8 @@ export default function RuntScraperModal<
   const [rtmWarningMessage, setRtmWarningMessage] = useState<string | null>(
     null,
   );
+
+  const { readCaptcha, isLoading: isAiLoading } = useReadCaptchaAction();
 
   const validateRtmExpiration = (fechaStr?: string | null) => {
     if (!fechaStr) return;
@@ -130,8 +133,9 @@ export default function RuntScraperModal<
 
 
 
-  
+
   // 1. TANSTACK QUERY: Obtener el Captcha Inicial e ID de Sesión
+    // 1. TANSTACK QUERY: Obtener el Captcha Inicial e ID de Sesión
   const {
     data: captchaData,
     isLoading: isLoadingCaptcha,
@@ -154,7 +158,28 @@ export default function RuntScraperModal<
         throw new Error("Error al conectar con el RUNT");
       }
 
-      return response.json();
+      // Obtenemos los datos
+      const data = await response.json();
+
+      // ✅ AQUÍ ESTÁ LA MAGIA (Variable temporal)
+      if (data.success && data.captcha) {
+        try {
+          // Llamamos a la IA (Esperamos la respuesta)
+          const textoCaptcha = await readCaptcha(data.captcha);
+          
+          if (textoCaptcha) {
+            // Seteamos el input directamente
+            setCaptchaValue(textoCaptcha);
+          }
+        } catch (error) {
+          // Si la IA falla, no rompemos el flujo del RUNT, 
+          // simplemente dejamos que el usuario lo escriba manual.
+          console.warn("No se pudo autocompletar el captcha con IA:", error);
+        }
+      }
+
+      // Retornamos los datos originales para que la UI los pinte
+      return data;
     },
     enabled: isOpen && !!placa,
     staleTime: 0,
