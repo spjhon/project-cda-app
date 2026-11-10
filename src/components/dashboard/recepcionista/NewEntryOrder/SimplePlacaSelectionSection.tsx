@@ -813,7 +813,7 @@ const handleReinspeccionChange = (checked: boolean) => {
                   formData={formData}
                   setFormData={setFormData}
                 />
-                <CameraCapture></CameraCapture>
+              
               </div>
             </div>
 
