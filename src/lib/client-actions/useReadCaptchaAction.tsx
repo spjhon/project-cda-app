@@ -31,7 +31,7 @@ export function useReadCaptchaAction() {
             role: "user",
             parts: [
               {
-                text: "Transcribe exactamente las letras y números que aparecen en esta imagen de captcha. Devuelve únicamente el texto, sin espacios ni explicaciones.",
+                text: "Transcribe exactamente las letras y números que aparecen en esta imagen de captcha diferencinado correctamente entre mayusculas y minusculas. Devuelve únicamente el texto, sin espacios ni explicaciones.",
               },
               {
                 inlineData: {

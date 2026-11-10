@@ -41,7 +41,7 @@ import { GenericSuccessDialog } from "@/components/feedbackDialogs/GenericSucces
 import { Database } from "../../../../supabase/types/database.types";
 import FeesTable from "./FeesTable";
 import { useCreateVehicleServiceRate } from "@/lib/client-actions/create_vehicle_service_rate";
-import { CreateVehicleServiceRateInput, createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
+import { createVehicleServiceRateSchema } from "@/lib/zod-schemas/validaciones-formularios/create-vehicle-service-rate-schema";
 import { CreateFeeInput } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
 import { CompanyRateSelector } from "./CompanyRateSelector";
 import { useQueryClient } from "@tanstack/react-query";

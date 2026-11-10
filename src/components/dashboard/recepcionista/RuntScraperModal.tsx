@@ -190,7 +190,7 @@ export default function RuntScraperModal<
 
 
 
-  const captchaImage = captchaData?.success && captchaData?.captcha ? captchaData.captcha : null;
+  const captchaImage = captchaData?.success && captchaData?.captcha && !isErrorCaptcha ? captchaData.captcha : null;
 
 
 
@@ -445,52 +445,7 @@ export default function RuntScraperModal<
           </DialogHeader>
 
           <form onSubmit={handleSubmitRunt} className="space-y-4 pt-2">
-            {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
-            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-xl p-3 bg-muted min-h-25 relative">
-              {isLoadingCaptcha || isFetchingCaptcha ? (
-                <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  <span>Conectando con el RUNT en tiempo real...</span>
-                </div>
-              ) : captchaImage ? (
-                <div className="flex flex-col items-center w-full gap-2">
-                  <img
-                    src={captchaImage}
-                    alt="Captcha RUNT"
-                    className="h-14 object-contain border border-border bg-card rounded shadow-sm"
-                  />
-                </div>
-              ) : isErrorCaptcha ? (
-                <div className="text-center p-2">
-                  <p className="text-xs text-destructive mb-2">
-                    No se pudo conectar con el servidor.
-                  </p>
-                </div>
-              ) : null}
-            </div>
-
-            {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
-            <div className="space-y-1">
-              <Label htmlFor="captcha" className="text-sm font-semibold">
-                Escribe las letras del Captcha
-              </Label>
-
-              <Input
-                id="captcha"
-                type="text"
-                placeholder="Ej: AB12"
-                value={captchaValue}
-                onChange={(e) => setCaptchaValue(e.target.value)}
-                className="font-mono text-center tracking-widest text-lg h-11"
-                maxLength={6}
-                required
-                disabled={
-                  isLoadingCaptcha ||
-                  solveRuntMutation.isPending ||
-                  !captchaData?.captcha
-                }
-              />
-            </div>
+          
 
             {/* SELECT TIPO DE DOCUMENTO */}
             <div className="space-y-1">
@@ -536,6 +491,55 @@ export default function RuntScraperModal<
                 disabled={solveRuntMutation.isPending}
               />
             </div>
+
+             {/* INPUT PARA ESCRIBIR EL CAPTCHA */}
+            <div className="space-y-1">
+              <Label htmlFor="captcha" className="text-sm font-semibold">
+                Escribe las letras del Captcha
+              </Label>
+
+              <Input
+                id="captcha"
+                type="text"
+                placeholder="Ej: AB12"
+                value={captchaValue}
+                onChange={(e) => setCaptchaValue(e.target.value)}
+                className="font-mono text-center tracking-widest text-lg h-11"
+                maxLength={6}
+                required
+                disabled={
+                  isLoadingCaptcha ||
+                  solveRuntMutation.isPending ||
+                  !captchaData?.captcha
+                }
+              />
+            </div>
+
+              {/* SECCIÓN DE LA IMAGEN DEL CAPTCHA */}
+            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-xl p-3 bg-muted min-h-25 relative">
+              {isLoadingCaptcha || isFetchingCaptcha ? (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground text-sm">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>Conectando con el RUNT en tiempo real...</span>
+                </div>
+              ) : captchaImage ? (
+                <div className="flex flex-col items-center w-full gap-2">
+                  <img
+                    src={captchaImage}
+                    alt="Captcha RUNT"
+                    className="h-14 object-contain border border-border bg-card rounded shadow-sm"
+                  />
+                </div>
+              ) : isErrorCaptcha ? (
+                <div className="text-center p-2">
+                  <p className="text-xs text-destructive mb-2">
+                    No se pudo conectar con el servidor.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+           
 
             {/* ESTADO */}
             {(solveRuntMutation.isPending ||

@@ -43,6 +43,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import RuntScraperModal from "../RuntScraperModal";
 import { initialOrderFormData, SimpleOrderFormData } from "./NewSimpleEntryOrderComponent";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import { CameraCapture } from "../CameraCapture";
 
 
 
@@ -812,6 +813,7 @@ const handleReinspeccionChange = (checked: boolean) => {
                   formData={formData}
                   setFormData={setFormData}
                 />
+                <CameraCapture></CameraCapture>
               </div>
             </div>
 
