@@ -113,7 +113,13 @@ BEGIN
     AND eo.fecha <= p_end_date
     AND eo.deleted_at IS NULL
 
-  ORDER BY eo.fecha ASC;
+  ORDER BY 
+  CASE 
+    WHEN eo.consecutivo_fur ~ '^[0-9]+$' THEN eo.consecutivo_fur::BIGINT
+    WHEN eo.consecutivo_fur ~ '^[0-9]+-[0-9]+$' THEN SPLIT_PART(eo.consecutivo_fur, '-', 1)::BIGINT
+    ELSE NULL
+  END ASC NULLS LAST,
+  eo.fecha ASC;
 
 END;
 $$;

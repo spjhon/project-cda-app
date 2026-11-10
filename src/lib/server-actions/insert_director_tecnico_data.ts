@@ -47,21 +47,17 @@ export async function insertDirectorTecnicoData({
     };
   }
 
-  // Regla de negocio explícita previa a Zod
-if (
-  formData.resultado_revision === "aprobado" &&
-  (!formData.consecutivo_rtm ||
-    formData.consecutivo_rtm.trim() === "") &&
-  serviceType !== "preventiva" &&
-  serviceType !== "preventiva_viajero" &&
-  serviceType !== "peritaje" &&
-  serviceType !== "prueba_gases"
-) {
-  return {
-    data: null,
-    error: "Error: Si la revisión es APROBADA, debe ingresar el consecutivo RTM",
-  };
-}
+  // ✅ Regla de negocio: El RTM es obligatorio SOLO si el servicio es RTM.
+  // No importa si es aprobado o rechazado.
+  if (
+    serviceType === "RTM" &&
+    (!formData.consecutivo_rtm || formData.consecutivo_rtm.trim() === "")
+  ) {
+    return {
+      data: null,
+      error: "Error: El consecutivo RTM es obligatorio para el servicio de Revisión Técnico Mecánica (RTM).",
+    };
+  }
 
   const dataToValidate = {
     ...formData,
@@ -95,9 +91,9 @@ if (
   // Si fue rechazado por defectos, el certificado RTM
   // obligatoriamente viaja como NULL a Postgres.
   const rtmFinal =
-    resultado_revision === "rechazado"
-      ? null
-      : consecutivo_rtm;
+    serviceType === "RTM"
+      ? consecutivo_rtm
+      : "";
 
   // ============================================================
   // 4. CLIENTE SUPABASE SERVER
