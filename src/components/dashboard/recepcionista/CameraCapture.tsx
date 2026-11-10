@@ -5,7 +5,7 @@
 // Imports
 // ============================================================
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, RefreshCw, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,62 @@ export function CameraCapture() {
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  // ==========================================================
+  // Preview
+  // ==========================================================
+
+  const photoPreview = useMemo(() => {
+    if (!photo) return null;
+
+    return URL.createObjectURL(photo);
+  }, [photo]);
+
+  // Liberar URL de la fotografía anterior o al desmontar.
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
+  // ==========================================================
+  // Conectar cámara al elemento video
+  // ==========================================================
+
+  useEffect(() => {
+    if (!cameraActive) return;
+
+    const video = videoRef.current;
+    const stream = streamRef.current;
+
+    if (!video || !stream) return;
+
+    video.srcObject = stream;
+
+    const handleVideoReady = () => {
+      setVideoReady(true);
+    };
+
+    video.addEventListener("loadedmetadata", handleVideoReady);
+
+    video.play().catch((error) => {
+      console.error("Error reproduciendo la cámara:", error);
+
+      setCameraError(
+        "No fue posible mostrar la imagen de la cámara."
+      );
+    });
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleVideoReady);
+      video.pause();
+      video.srcObject = null;
+    };
+  }, [cameraActive]);
 
   // ==========================================================
   // Activar cámara
@@ -37,22 +92,33 @@ export function CameraCapture() {
   const startCamera = async () => {
     try {
       setCameraError(null);
+      setVideoReady(false);
 
-      // Solicitar acceso a la cámara.
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "Tu navegador no permite acceder a la cámara. Verifica que estés utilizando HTTPS."
+        );
+      }
+
+      // Detectar dispositivo móvil.
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+      );
+
+      // Celular: cámara trasera.
+      // Computador: cámara frontal.
+      const facingMode = isMobile ? "environment" : "user";
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode: { ideal: "environment" },
+          facingMode: { ideal: facingMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         },
       });
 
       streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
       setCameraActive(true);
     } catch (error) {
       console.error("Error al acceder a la cámara:", error);
@@ -73,7 +139,9 @@ export function CameraCapture() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
 
     streamRef.current = null;
+
     setCameraActive(false);
+    setVideoReady(false);
   };
 
   // ==========================================================
@@ -83,7 +151,10 @@ export function CameraCapture() {
   const takePhoto = () => {
     const video = videoRef.current;
 
-    if (!video || !video.videoWidth) return;
+    if (!video || !videoReady || !video.videoWidth) {
+      setCameraError("La cámara todavía no está lista.");
+      return;
+    }
 
     const canvas = document.createElement("canvas");
 
@@ -92,13 +163,25 @@ export function CameraCapture() {
 
     const context = canvas.getContext("2d");
 
-    if (!context) return;
+    if (!context) {
+      setCameraError("No fue posible procesar la fotografía.");
+      return;
+    }
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     canvas.toBlob(
       (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          setCameraError("No fue posible capturar la fotografía.");
+          return;
+        }
 
         const file = new File(
           [blob],
@@ -121,6 +204,7 @@ export function CameraCapture() {
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     };
   }, []);
 
@@ -131,17 +215,26 @@ export function CameraCapture() {
   return (
     <div className="flex w-full max-w-md flex-col gap-4">
 
-      {/* Cámara */}
+      {/* ================================================== */}
+      {/* Vista de cámara */}
+      {/* ================================================== */}
 
       {cameraActive && (
-        <div className="relative overflow-hidden rounded-xl border border-border">
+        <div className="relative overflow-hidden rounded-xl border border-border bg-black">
+
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="aspect-[4/3] w-full bg-black object-cover"
+            className="aspect-[4/3] w-full object-cover"
           />
+
+          {!videoReady && (
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-white">
+              Iniciando cámara...
+            </div>
+          )}
 
           <Button
             size="icon"
@@ -151,21 +244,26 @@ export function CameraCapture() {
           >
             <X />
           </Button>
+
         </div>
       )}
 
+      {/* ================================================== */}
       {/* Fotografía capturada */}
+      {/* ================================================== */}
 
-      {photo && (
+      {photoPreview && (
         <div className="flex flex-col gap-3">
+
           <img
-            src={URL.createObjectURL(photo)}
+            src={photoPreview}
             alt="Fotografía capturada"
             className="w-full rounded-xl border border-border object-contain"
           />
 
           <p className="text-sm text-muted-foreground">
-            {photo.name} · {(photo.size / 1024).toFixed(2)} KB
+            {photo?.name} ·{" "}
+            {((photo?.size ?? 0) / 1024).toFixed(2)} KB
           </p>
 
           <Button
@@ -175,10 +273,13 @@ export function CameraCapture() {
             <RefreshCw />
             Tomar otra fotografía
           </Button>
+
         </div>
       )}
 
+      {/* ================================================== */}
       {/* Botones */}
+      {/* ================================================== */}
 
       {!cameraActive && !photo && (
         <Button onClick={startCamera}>
@@ -188,13 +289,18 @@ export function CameraCapture() {
       )}
 
       {cameraActive && (
-        <Button onClick={takePhoto}>
+        <Button
+          onClick={takePhoto}
+          disabled={!videoReady}
+        >
           <Camera />
           Tomar fotografía
         </Button>
       )}
 
+      {/* ================================================== */}
       {/* Errores */}
+      {/* ================================================== */}
 
       {cameraError && (
         <p className="text-sm text-destructive">
