@@ -42,6 +42,23 @@ interface AutobigReportRow {
   resultado_inspeccion: string | null;
 }
 
+export function replaceRTMWithCertificacion<
+  T extends { tipo_inspeccion: string | null },
+>(data: T[]): T[] {
+  return data.map((item) => {
+    // Si tipo_inspeccion es exactamente "RTM", lo cambiamos.
+    // Si no, lo dejamos tal cual.
+    if (item.tipo_inspeccion === "RTM") {
+      return {
+        ...item,
+        tipo_inspeccion: "CERTIFICACION",
+      };
+    }
+
+    return item;
+  });
+}
+
 // ============================================================
 // Componente
 // ============================================================
@@ -113,7 +130,7 @@ export function DownloadAutobigExcelButton() {
         );
       }
 
-      console.log(orders);
+      const ordersParaExcel = replaceRTMWithCertificacion(orders);
 
       // ==========================================================
       // Crear libro de Excel
@@ -231,7 +248,7 @@ export function DownloadAutobigExcelButton() {
       // Poblar datos
       // ==========================================================
 
-      (orders as AutobigReportRow[]).forEach((row) => {
+      (ordersParaExcel as AutobigReportRow[]).forEach((row) => {
         worksheet.addRow({
           // ------------------------------------------------------
           // Datos provenientes de la RPC

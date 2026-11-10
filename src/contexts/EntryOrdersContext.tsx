@@ -9,7 +9,7 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { startOfMonth, format, startOfDay, subDays } from "date-fns";
 import { PermissionsContext } from "./PermissionsLoaderContext";
@@ -191,6 +191,94 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
 
 
 
+
+
+
+
+
+
+
+
+
+  // ============================================
+  // REALTIME: ESCUCHAR CAMBIOS EN ENTRY_ORDERS Y TENANT_CREDITS
+  // ============================================
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const channel = supabaseBrowser
+      .channel(`realtime-tenant-${tenantId}`)
+      
+      // --------------------------------------------------------
+      // 1. Escuchar cambios en las órdenes de entrada
+      // --------------------------------------------------------
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // INSERT, UPDATE, DELETE
+          schema: "public",
+          table: "entry_orders",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        (payload) => {
+          console.log("🔔 Cambio en entry_orders:", payload);
+          
+          // Actualizamos la tabla principal
+          queryClient.invalidateQueries({ queryKey: ["entry_orders", "list"] });
+          
+          // Como cambió una orden, los créditos también pudieron haber cambiado
+          queryClient.invalidateQueries({ queryKey: ["tenant-credits"] });
+          
+          // Actualizamos la lista de órdenes pendientes de días anteriores
+          queryClient.invalidateQueries({ queryKey: ["pending-previous-day-orders"] });
+        },
+      )
+
+      // --------------------------------------------------------
+      // 2. Escuchar cambios manuales en los créditos del CDA
+      // --------------------------------------------------------
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Escuchamos INSERT (si se crea por primera vez) y UPDATE
+          schema: "public",
+          table: "tenant_credits",
+          filter: `tenant_id=eq.${tenantId}`, // 👈 Usamos tenant_id, no id
+        },
+        (payload) => {
+          console.log("🔔 Créditos actualizados manualmente:", payload);
+          
+          // Forzamos la actualización de los créditos en pantalla
+          queryClient.invalidateQueries({ queryKey: ["tenant-credits"] });
+        },
+      )
+      
+      // --------------------------------------------------------
+      // 3. Suscripción final
+      // --------------------------------------------------------
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log(`🟢 Realtime conectado para el tenant ${tenantId}`);
+        }
+      });
+
+    // Limpieza del canal al desmontar el componente o cambiar de tenant
+    return () => {
+      console.log(`🔴 Desconectando Realtime del tenant ${tenantId}`);
+      supabaseBrowser.removeChannel(channel);
+    };
+  }, [tenantId, queryClient, supabaseBrowser]);
+
+
+
+
+
+
+
+
+
+
+
 // ============================================
   // TANSTACK QUERY: ÓRDENES DE ENTRADA (TABLA)
   // ============================================
@@ -246,7 +334,8 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
     },
 
     staleTime: 0,
-    refetchInterval: 15000,
+    refetchOnWindowFocus: false,
+    //refetchInterval: 15000,
     enabled:
       pathname === "/dashboard/admin" ||
       pathname === "/dashboard/recepcionista/ordenes-de-entrada" ||
@@ -431,9 +520,9 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
  const tenantCreditsQuery = useQuery({
   queryKey: ["tenant-credits", tenantId],
   enabled: !!tenantId,
-
+refetchOnWindowFocus: false,
   staleTime: Infinity,
-  refetchInterval: 15000,
+  //refetchInterval: 15000,
 
   queryFn: async () => {
     if (!tenantId) {

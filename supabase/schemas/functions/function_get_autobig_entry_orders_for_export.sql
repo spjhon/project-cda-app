@@ -113,7 +113,7 @@ BEGIN
     AND eo.fecha <= p_end_date
     AND eo.deleted_at IS NULL
 
-  ORDER BY eo.fecha DESC;
+  ORDER BY eo.fecha ASC;
 
 END;
 $$;
