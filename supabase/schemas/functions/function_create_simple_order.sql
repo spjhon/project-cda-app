@@ -197,19 +197,17 @@ END IF;
 
   IF v_es_reinspeccion THEN
 
-  IF NOT EXISTS (
+    IF NOT EXISTS (
     SELECT 1
     FROM public.entry_orders
     WHERE id = v_id_reprobado
       AND tenant_id = v_tenant_id
       AND deleted_at IS NULL
-      AND estado_orden = 'reprobada'::public.order_status_enum
+      AND resultado_revision = 'rechazado' -- ✅ Consultamos el campo correcto
       AND (v_order_id IS NULL OR id <> v_order_id)
   ) THEN
-
     RAISE EXCEPTION
-      'La orden original de reinspección no existe, no pertenece a este centro, no está reprobada o no está disponible.';
-
+      'La orden original de reinspección no existe, no pertenece a este centro, no está rechazada o no está disponible.';
   END IF;
 
 END IF;

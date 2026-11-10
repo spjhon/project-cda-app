@@ -164,14 +164,19 @@ const selectedRate =
 }
 
     try {
+       const isReinspeccion = orden.es_reinspeccion === true;
+       const finalPayments = isReinspeccion 
+  ? payments.map(p => ({ ...p, monto_bruto: 0 })) 
+  : payments;
       const { data, error } = await insertOficinaData({
         orderId: orden.id,
         formData: formData,
-        payments: payments,
+        payments: finalPayments,
         vehicleServiceRateId: selectedRate.rateId,
-ratePriceSnapshot: selectedRate.totalPrice,
+ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
         service_type: orden.service_type,
         companyId: selectedCompanyId,
+        
       });
 
       if (error || !data) {

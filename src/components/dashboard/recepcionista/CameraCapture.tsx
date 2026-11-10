@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { initialOrderFormData } from "./NewEntryOrder/NewSimpleEntryOrderComponent";
 import { NormalizedVehicleData, useExtractVehicleData } from "@/lib/client-actions/useReadCarCardPropertyAction";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 
 // Ajusta la importación de initialOrderFormData según tu estructura de carpetas real.
@@ -211,30 +212,102 @@ export function CameraCapture({ formData, setFormData }: CameraCaptureProps) {
   // Procesar imagen con IA y actualizar estado
   // ==========================================================
 
-  const handleExtractData = async () => {
+ const handleExtractData = async () => {
     if (!photo) return;
 
-    // El hook ya nos devuelve los datos normalizados (clase, combustible y servicio adaptados)
     const data: NormalizedVehicleData | null = await extractData(photo);
     
-    if (data) {
-      console.log("🚀 Datos normalizados listos para la DB:", data);
+    if (data && data.placa) {
+      console.log("🚀 Datos extraídos por la IA:", data);
 
-      setFormData((prev) => ({
-        ...prev,
-        tenant_id: tenant_id,
+      // ==========================================================
+      // 1. VALIDACIÓN DE NEGOCIO (Copiada del diálogo manual)
+      // ==========================================================
+      
+      const placaLimpia = data.placa.toUpperCase();
+      const supabaseBrowser = createSupabaseBrowserClient();
+      let isValid = true;
+
+      // --- RTM PRIMERA VEZ ---
+      if (!formData.es_reinspeccion && formData.service_type === "RTM") {
+        const { data: RTMcheckInfo, error: ErrorRTMcheckInfo } = await supabaseBrowser.rpc(
+          "check_rtm_primera_vez_eligibility",
+          { p_placa: placaLimpia, p_tenant_id: tenant_id }
+        );
+
+        if (ErrorRTMcheckInfo) {
+          setCameraError(`Error de comunicación: ${ErrorRTMcheckInfo.message}`);
+          isValid = false;
+        } else if (!RTMcheckInfo || !RTMcheckInfo[0].puede_primera_vez) {
+          setCameraError(RTMcheckInfo?.[0]?.motivo || "No aplica para primera vez RTM.");
+          isValid = false;
+        }
+      }
+
+      // --- RTM REINSPECCIÓN ---
+      if (isValid && formData.es_reinspeccion && formData.service_type === "RTM") {
+        const { data: rpcData, error: rpcError } = await supabaseBrowser.rpc(
+          "check_rtm_reinspection_eligibility",
+          { p_placa: placaLimpia, p_tenant_id: tenant_id }
+        );
+        
+        if (rpcError) {
+          setCameraError(`Error de comunicación: ${rpcError.message}`);
+          isValid = false;
+        } else if (!rpcData || !rpcData[0].merece_reinspeccion) {
+          setCameraError(rpcData?.[0]?.motivo || "No aplica para reinspección RTM.");
+          isValid = false;
+        } else {
+          // Si es válido, guardamos el id_reprobado
+          setFormData((prev) => ({
+            ...prev,
+            id_reprobado: rpcData[0].id_reprobado,
+          }));
+        }
+      }
+
+      // --- PREVENTIVA REINSPECCIÓN ---
+      if (isValid && formData.es_reinspeccion && formData.service_type === "preventiva") {
+        const { data: rpcData, error: rpcError } = await supabaseBrowser.rpc(
+          "check_preventiva_reinspection_eligibility",
+          { p_placa: placaLimpia, p_tenant_id: tenant_id }
+        );
+        
+        if (rpcError) {
+          setCameraError(`Error de comunicación: ${rpcError.message}`);
+          isValid = false;
+        } else if (!rpcData || !rpcData[0].merece_reinspeccion) {
+          setCameraError(rpcData?.[0]?.motivo || "No aplica para reinspección preventiva.");
+          isValid = false;
+        } else {
+           setFormData((prev) => ({
+            ...prev,
+            id_reprobado: rpcData[0].id_reprobado,
+          }));
+        }
+      }
+
+      // ==========================================================
+      // 2. SI TODO ES VÁLIDO, ACTUALIZAMOS EL FORMULARIO
+      // ==========================================================
+      if (isValid) {
+        setFormData((prev) => ({
+          ...prev,
+          tenant_id: tenant_id,
           funcionario_id: user_id,
-        vehicle: {
-          ...prev.vehicle,
-          placa: data.placa || prev.vehicle.placa,
-          marca: data.marca || prev.vehicle.marca,
-          linea: data.linea || prev.vehicle.linea,
-          modelo: data.modelo || prev.vehicle.modelo,
-          combustible: data.combustible,
-          clase: data.clase,
-          tipo_servicio_vehiculo: data.tipo_servicio_vehiculo,
-        },
-      }));
+          informacion_buscada: true, // Marcamos que la búsqueda fue exitosa
+          vehicle: {
+            ...prev.vehicle,
+            placa: placaLimpia,
+            marca: data.marca || prev.vehicle.marca,
+            linea: data.linea || prev.vehicle.linea,
+            modelo: data.modelo || prev.vehicle.modelo,
+            combustible: data.combustible,
+            clase: data.clase,
+            tipo_servicio_vehiculo: data.tipo_servicio_vehiculo,
+          },
+        }));
+      }
     }
   };
 

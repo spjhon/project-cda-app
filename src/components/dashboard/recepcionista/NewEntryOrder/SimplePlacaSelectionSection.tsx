@@ -368,11 +368,17 @@ const handleReinspeccionChange = (checked: boolean) => {
           return;
         }
 
+        console.log("ESTE ES EL ID_REPROBADO: ", rpcData[0].id_reprobado)
+
         // Si Postgres dio luz verde, inyectamos el 'id_reprobado' en el estado
         setFormData((prev) => ({
+          
           ...prev,
           id_reprobado: rpcData[0].id_reprobado,
         }));
+
+
+
       } catch (err) {
         console.error("Error inesperado en el cliente:", err);
         setSearchStatus("error");
@@ -464,6 +470,7 @@ const handleReinspeccionChange = (checked: boolean) => {
         setFormData((prev) => ({
           ...prev,
           ...initialOrderFormData,
+          id_reprobado: prev.id_reprobado,
           informacion_buscada: false,
           tenant_id: tenant_id,
           funcionario_id: user_id,
