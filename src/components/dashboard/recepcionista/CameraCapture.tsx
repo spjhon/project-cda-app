@@ -1,26 +1,59 @@
-
 "use client";
+
+//media.devices.insecure.enabled
+//media.getusermedia.insecure.enabled
+//next dev --experimental-https
 
 // ============================================================
 // Imports
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, RefreshCw, X } from "lucide-react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Camera, RefreshCw, X, Sparkles, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { initialOrderFormData } from "./NewEntryOrder/NewSimpleEntryOrderComponent";
+import { NormalizedVehicleData, useExtractVehicleData } from "@/lib/client-actions/useReadCarCardPropertyAction";
+import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
+
+
+// Ajusta la importación de initialOrderFormData según tu estructura de carpetas real.
+// Asumimos que el tipo es el que me compartiste previamente. 
+
+// ============================================================
+// Types
+// ============================================================
+
+interface CameraCaptureProps {
+  formData: typeof initialOrderFormData;
+  setFormData: React.Dispatch<React.SetStateAction<typeof initialOrderFormData>>;
+}
 
 // ============================================================
 // Componente
 // ============================================================
 
-export function CameraCapture() {
+export function CameraCapture({ formData, setFormData }: CameraCaptureProps) {
+
+  const PermissionsContextReceived = useContext(PermissionsContext);
+  
+      const tenant_id = PermissionsContextReceived?.PermissionsContextValue.tenantObject?.id ?? "";
+    const user_id =
+      PermissionsContextReceived?.PermissionsContextValue.user.id ?? "";
+
+      
   // ==========================================================
   // Refs
   // ==========================================================
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // ==========================================================
+  // Hooks de IA
+  // ==========================================================
+  
+  const { extractData, isLoading: isExtracting, error: extractError } = useExtractVehicleData();
 
   // ==========================================================
   // States
@@ -37,7 +70,6 @@ export function CameraCapture() {
 
   const photoPreview = useMemo(() => {
     if (!photo) return null;
-
     return URL.createObjectURL(photo);
   }, [photo]);
 
@@ -72,10 +104,7 @@ export function CameraCapture() {
 
     video.play().catch((error) => {
       console.error("Error reproduciendo la cámara:", error);
-
-      setCameraError(
-        "No fue posible mostrar la imagen de la cámara."
-      );
+      setCameraError("No fue posible mostrar la imagen de la cámara.");
     });
 
     return () => {
@@ -100,21 +129,15 @@ export function CameraCapture() {
         );
       }
 
-      // Detectar dispositivo móvil.
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(
-        navigator.userAgent
-      );
-
-      // Celular: cámara trasera.
-      // Computador: cámara frontal.
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       const facingMode = isMobile ? "environment" : "user";
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
           facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
         },
       });
 
@@ -122,11 +145,8 @@ export function CameraCapture() {
       setCameraActive(true);
     } catch (error) {
       console.error("Error al acceder a la cámara:", error);
-
       setCameraError(
-        error instanceof Error
-          ? error.message
-          : "No fue posible acceder a la cámara."
+        error instanceof Error ? error.message : "No fue posible acceder a la cámara."
       );
     }
   };
@@ -137,9 +157,7 @@ export function CameraCapture() {
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
-
     streamRef.current = null;
-
     setCameraActive(false);
     setVideoReady(false);
   };
@@ -157,10 +175,8 @@ export function CameraCapture() {
     }
 
     const canvas = document.createElement("canvas");
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
+    canvas.width = 1920;
+    canvas.height = 1080;
     const context = canvas.getContext("2d");
 
     if (!context) {
@@ -168,13 +184,7 @@ export function CameraCapture() {
       return;
     }
 
-    context.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     canvas.toBlob(
       (blob) => {
@@ -198,6 +208,37 @@ export function CameraCapture() {
   };
 
   // ==========================================================
+  // Procesar imagen con IA y actualizar estado
+  // ==========================================================
+
+  const handleExtractData = async () => {
+    if (!photo) return;
+
+    // El hook ya nos devuelve los datos normalizados (clase, combustible y servicio adaptados)
+    const data: NormalizedVehicleData | null = await extractData(photo);
+    
+    if (data) {
+      console.log("🚀 Datos normalizados listos para la DB:", data);
+
+      setFormData((prev) => ({
+        ...prev,
+        tenant_id: tenant_id,
+          funcionario_id: user_id,
+        vehicle: {
+          ...prev.vehicle,
+          placa: data.placa || prev.vehicle.placa,
+          marca: data.marca || prev.vehicle.marca,
+          linea: data.linea || prev.vehicle.linea,
+          modelo: data.modelo || prev.vehicle.modelo,
+          combustible: data.combustible,
+          clase: data.clase,
+          tipo_servicio_vehiculo: data.tipo_servicio_vehiculo,
+        },
+      }));
+    }
+  };
+
+  // ==========================================================
   // Limpiar recursos al desmontar
   // ==========================================================
 
@@ -213,21 +254,18 @@ export function CameraCapture() {
   // ==========================================================
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4">
-
+    <div className="flex w-full flex-col gap-4">
       {/* ================================================== */}
       {/* Vista de cámara */}
       {/* ================================================== */}
-
       {cameraActive && (
-        <div className="relative overflow-hidden rounded-xl border border-border bg-black">
-
+        <div className="relative overflow-hidden rounded-xl border border-border bg-black flex items-center justify-center w-full min-h-[250px] md:min-h-[350px]">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="aspect-[4/3] w-full object-cover"
+            className="w-full h-130 md:h-130 object-cover"
           />
 
           {!videoReady && (
@@ -244,45 +282,72 @@ export function CameraCapture() {
           >
             <X />
           </Button>
-
         </div>
       )}
 
       {/* ================================================== */}
       {/* Fotografía capturada */}
       {/* ================================================== */}
-
       {photoPreview && (
-        <div className="flex flex-col gap-3">
-
+        <div className="flex flex-col gap-3 w-full">
           <img
             src={photoPreview}
             alt="Fotografía capturada"
-            className="w-full rounded-xl border border-border object-contain"
+            className="w-full rounded-xl border border-border object-contain bg-black/5"
           />
 
           <p className="text-sm text-muted-foreground">
-            {photo?.name} ·{" "}
-            {((photo?.size ?? 0) / 1024).toFixed(2)} KB
+            {photo?.name} · {((photo?.size ?? 0) / 1024).toFixed(2)} KB
           </p>
 
-          <Button
-            variant="outline"
-            onClick={() => setPhoto(null)}
-          >
-            <RefreshCw />
-            Tomar otra fotografía
-          </Button>
+          {/* BOTONES DE ACCIÓN POST-CAPTURA */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
+            <Button
+              variant="outline"
+              onClick={() => setPhoto(null)}
+              disabled={isExtracting}
+              className="flex-1"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Tomar otra
+            </Button>
 
+            <Button 
+              onClick={handleExtractData} 
+              disabled={isExtracting}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Extrayendo...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Extraer Datos (IA)
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* MOSTRAR ERROR DE LA IA SI FALLA */}
+          {extractError && (
+            <p className="text-sm text-destructive font-medium bg-destructive/10 p-2 rounded">
+              {extractError}
+            </p>
+          )}
         </div>
       )}
 
       {/* ================================================== */}
-      {/* Botones */}
+      {/* Botones principales */}
       {/* ================================================== */}
-
       {!cameraActive && !photo && (
-        <Button onClick={startCamera}>
+        <Button 
+          onClick={startCamera}
+          className="w-full h-14 md:h-16 text-lg font-bold gap-3 bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+        >
           <Camera />
           Activar cámara
         </Button>
@@ -292,22 +357,21 @@ export function CameraCapture() {
         <Button
           onClick={takePhoto}
           disabled={!videoReady}
+          className="w-full h-14 text-lg font-bold"
         >
-          <Camera />
+          <Camera className="mr-2" />
           Tomar fotografía
         </Button>
       )}
 
       {/* ================================================== */}
-      {/* Errores */}
+      {/* Errores de cámara */}
       {/* ================================================== */}
-
       {cameraError && (
-        <p className="text-sm text-destructive">
+        <p className="text-sm text-destructive font-medium bg-destructive/10 p-2 rounded">
           {cameraError}
         </p>
       )}
-
     </div>
   );
 }

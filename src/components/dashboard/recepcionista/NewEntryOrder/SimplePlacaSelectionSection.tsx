@@ -90,6 +90,7 @@ const SERVICE_TYPES: ServiceOption[] = [
 export interface SimplePlacaSelectionSectionProps {
   formData: SimpleOrderFormData;
   setFormData: Dispatch<SetStateAction<SimpleOrderFormData>>;
+  cameraResetKey: number; // <-- Añadimos la prop
 }
 
 type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
@@ -97,6 +98,7 @@ type SearchStatus = "idle" | "loading" | "found" | "not_found" | "error";
 export default function SimplePlacaSelectionSection({
   setFormData,
   formData,
+   cameraResetKey,
 }: SimplePlacaSelectionSectionProps) {
 
 const PermissionsContextReceived = useContext(PermissionsContext);
@@ -649,6 +651,15 @@ const handleReinspeccionChange = (checked: boolean) => {
             </div>
           </div>
 
+          {/* AQUÍ VA EL NUEVO COMPONENTE DE CÁMARA */}
+              <div className="md:col-span-12 mb-2">
+  <CameraCapture 
+  key={cameraResetKey}
+    formData={formData} 
+    setFormData={setFormData} 
+  />
+</div>
+
           {/* PLACA */}
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
@@ -714,6 +725,8 @@ const handleReinspeccionChange = (checked: boolean) => {
                           autoFocus
                         />
                       </div>
+
+                       
 
                       {/* BOTÓN BUSCAR */}
                       <Button
@@ -813,10 +826,8 @@ const handleReinspeccionChange = (checked: boolean) => {
                   formData={formData}
                   setFormData={setFormData}
                 />
-              
               </div>
             </div>
-
             {/* ESTADO PLACA */}
             {/* Indicador de placa seleccionada */}
             <div

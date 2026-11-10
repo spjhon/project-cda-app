@@ -54,7 +54,8 @@ export default function NewSimpleEntryOrderComponent() {
   const PermissionsContextReceived = useContext(PermissionsContext);
 
   const [formData, setFormData] = useState(initialOrderFormData);
-  //console.log(formData)
+   const [cameraResetKey, setCameraResetKey] = useState(0);
+  console.log(formData)
   // Diálogo de éxito
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessages, setSuccessMessages] = useState<
@@ -88,6 +89,8 @@ export default function NewSimpleEntryOrderComponent() {
     onSuccess: () => {
       // Reiniciar formulario
       setFormData(initialOrderFormData);
+
+       setCameraResetKey((prev) => prev + 1);
 
       // Mensaje de éxito
       setSuccessMessages("La orden fue registrada correctamente.");
@@ -145,6 +148,7 @@ export default function NewSimpleEntryOrderComponent() {
           <SimplePlacaSelectionSection
             setFormData={setFormData}
             formData={formData}
+             cameraResetKey={cameraResetKey} 
           ></SimplePlacaSelectionSection>
         </div>
         {/**SECCION DE DATOS DEL VEHICULO */}

@@ -577,7 +577,7 @@ export default function SimpleVehicleDataSection({
                     <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
                   </Label>
                   <Input
-                    required
+                   
                     type="date"
                     className="border-blue-100 focus:ring-blue-500"
                     value={formData.soat_vencimiento_snapshot || ""}
