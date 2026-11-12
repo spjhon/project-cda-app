@@ -52,7 +52,7 @@ export interface FetchEntryOrdersParams {
 
 export interface PendingPreviousDayOrder {
   id: string;
-  consecutivo: number;
+  consecutivo: number | null;
   fecha: string;
   estado_orden: "abierta" | "en_prueba" | "finalizada" | "anulada";
   vehiculo_placa_snapshot: string;
@@ -401,7 +401,7 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
         throw new Error("Tenant ID no definido.");
       }
 
-      const { data, error } = await supabaseBrowser
+           const { data, error } = await supabaseBrowser
         .from("entry_orders")
         .select(
           `
@@ -417,7 +417,7 @@ const hoy = new Date(`${hoyColombia}T12:00:00`);
         .lt("fecha", fechaHasta)
         .in("estado_orden", ["abierta", "en_prueba"])
         .is("deleted_at", null)
-        .order("consecutivo");
+        .order("fecha", { ascending: true }); // 👈 Ordenamos por fecha
 
       if (error) {
         throw new Error(error.message);

@@ -8,13 +8,13 @@ import { CuadroMetrica } from "./CuadroMetrica";
 import { DayChartItem, MonthChartItem } from "@/contexts/AdminLoaderContext";
 import { LazyChartOnScroll } from "./RenderWhenVisible";
 import { usePathname } from "next/navigation";
-import { CompleteDataRTM } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
+import { CompleteAnalyticsData } from "@/app/[tenant]/(private)/dashboard/admin/analitica/page";
 //import { useSidebar } from "@/components/ui/sidebar";
 
 interface AnaliticaPorCantidadProps {
   titulo: string;
   descripcion: string;
-  datos: CompleteDataRTM;
+  datos: CompleteAnalyticsData;
 }
 
 // Lazy load Chart component
@@ -53,10 +53,10 @@ export default function AnaliticaPorCantidad({
 
     if (titulo === "Inspecciones Realizadas") {
       return {
-        total_hoy: datos.total_rtm_hoy ?? 0,
-        total_ayer: datos.total_rtm_ayer ?? 0,
-        total_mes: datos.total_rtm_mes_actual ?? 0,
-        total_anio: datos.total_rtm_anio_actual ?? 0,
+        total_hoy: datos.total_servicio_hoy ?? 0,
+        total_ayer: datos.total_servicio_ayer ?? 0,
+        total_mes: datos.total_servicio_mes ?? 0,
+        total_anio: datos.total_servicio_anio ?? 0,
         chartMonthData: datos.chart_mes_actual ?? [],
         chartYearData: datos.chart_anio_actual ?? [],
       };
@@ -64,7 +64,7 @@ export default function AnaliticaPorCantidad({
 
     if (titulo === "Cantidad RTM Reprobadas") {
       return {
-        total_hoy: datos.total_rtm_rechazados_hoy ?? 0,
+        total_hoy: datos.total_rechazado_hoy ?? 0,
         total_ayer: datos.total_rechazado_ayer ?? 0,
         total_mes: datos.total_rechazado_mes ?? 0,
         total_anio: datos.total_rechazado_anio ?? 0,

@@ -1,11 +1,10 @@
-
 CREATE OR REPLACE FUNCTION public.fetch_admin_analitics_diary(
     p_tenant_id UUID,
     p_servicio_tipo public.service_type_enum DEFAULT NULL
 )
 RETURNS TABLE (
-    total_rtm_hoy INTEGER,
-    total_rtm_rechazados_hoy INTEGER
+    total_servicio_hoy INTEGER,
+    total_rechazado_hoy INTEGER
 )
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -13,8 +12,7 @@ SET search_path = public
 AS $$
 DECLARE
     v_hoy_inicio TIMESTAMPTZ := DATE_TRUNC('day', NOW());
-    v_hoy_fin TIMESTAMPTZ := DATE_TRUNC('day', NOW())
-        + INTERVAL '1 day';
+    v_hoy_fin TIMESTAMPTZ := DATE_TRUNC('day', NOW()) + INTERVAL '1 day';
 BEGIN
     -- =========================================================
     -- PASO 1: VALIDAR EL TENANT SOLICITADO
@@ -44,14 +42,11 @@ BEGIN
 
     RETURN QUERY
     SELECT
-        COUNT(*) FILTER (
-            WHERE eo.resultado_revision IS NULL
-               OR eo.resultado_revision IS NOT NULL
-        )::INTEGER AS total_rtm_hoy,
+        COUNT(*)::INTEGER AS total_servicio_hoy,
 
         COUNT(*) FILTER (
             WHERE eo.resultado_revision = 'rechazado'
-        )::INTEGER AS total_rtm_rechazados_hoy
+        )::INTEGER AS total_rechazado_hoy
 
     FROM public.entry_orders eo
     WHERE eo.tenant_id = p_tenant_id

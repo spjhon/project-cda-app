@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     fecha                       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     -- Consecutivo visible para el cliente.
-    consecutivo                 INTEGER NOT NULL,
+    consecutivo                 INTEGER NULL,
 
     -- Indica si proviene de una reinspección.
     es_reinspeccion             BOOLEAN DEFAULT FALSE,

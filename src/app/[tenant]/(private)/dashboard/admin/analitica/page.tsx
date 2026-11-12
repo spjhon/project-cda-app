@@ -21,21 +21,15 @@ import {
 } from "@/contexts/AdminLoaderContext";
 import { useContext } from "react";
 
-export type CompleteDataRTM =
+export type CompleteAnalyticsData =
   | (AdminAnalyticsData &
       AdminAnalyticsDiaryData & {
         tasa_rechazo_hoy: number;
         tasa_rechazo_ayer: number;
-
-        total_rtm_mes_actual: number;
-        total_rtm_anio_actual: number;
-
         tasa_rechazo_mes: number;
         tasa_rechazo_anio: number;
-
         chart_mes_actual: DayChartItem[];
         chart_anio_actual: MonthChartItem[];
-
         chart_tasa_rechazo_mes: DayChartItem[];
         chart_tasa_rechazo_anio: MonthChartItem[];
       })
@@ -87,37 +81,37 @@ export default function AnaliticaPage() {
   );
 
   // Guardamos el valor en una constante segura (si es undefined, vale 0)
-  const totalHoy = analyticsDataDiary?.total_rtm_hoy ?? 0;
-  const totalRechazadosHoy = analyticsDataDiary?.total_rtm_rechazados_hoy ?? 0;
+  const totalHoy = analyticsDataDiary?.total_servicio_hoy ?? 0;
+const totalRechazadosHoy = analyticsDataDiary?.total_rechazado_hoy ?? 0;
 
-  const completeDataRTM: CompleteDataRTM = analyticsQuery.data
+  const CompleteAnalyticsData: CompleteAnalyticsData = analyticsQuery.data
     ? {
         ...analyticsQuery?.data,
 
-        total_rtm_hoy: totalHoy,
-        total_rtm_rechazados_hoy: totalRechazadosHoy,
+        total_servicio_hoy: totalHoy,
+        total_rechazado_hoy: totalRechazadosHoy,
         // Tasa Hoy: (Rechazos Hoy / Total Hoy) * 100
         tasa_rechazo_hoy:
           totalHoy > 0
             ? Number(((totalRechazadosHoy / totalHoy) * 100).toFixed(2))
             : 0,
 
-        total_rtm_ayer: analyticsQuery.data.total_rtm_ayer,
+        total_servicio_ayer: analyticsQuery.data.total_servicio_ayer,
         total_rechazado_ayer: analyticsQuery.data.total_rechazado_ayer,
         // Tasa Ayer: (Rechazos Ayer / Total Ayer) * 100
         tasa_rechazo_ayer:
-          analyticsQuery.data.total_rtm_ayer > 0
+          analyticsQuery.data.total_servicio_ayer > 0
             ? Number(
                 (
                   (analyticsQuery.data.total_rechazado_ayer /
-                    analyticsQuery.data.total_rtm_ayer) *
+                    analyticsQuery.data.total_servicio_ayer) *
                   100
                 ).toFixed(2),
               )
             : 0,
 
-        total_rtm_mes_actual: analyticsQuery.data.total_rtm_mes + totalHoy,
-        total_rtm_anio_actual: analyticsQuery.data.total_rtm_anio + totalHoy,
+        total_servicio_mes: analyticsQuery.data.total_servicio_mes + totalHoy,
+        total_servicio_anio: analyticsQuery.data.total_servicio_anio + totalHoy,
 
         total_rechazado_mes:
           analyticsQuery.data.total_rechazado_mes + totalRechazadosHoy,
@@ -126,12 +120,12 @@ export default function AnaliticaPage() {
 
         // Tasa Mes: (Acumulado Rechazos Mes / Acumulado Total Mes) * 100
         tasa_rechazo_mes:
-          analyticsQuery.data.total_rtm_mes + totalHoy > 0
+          analyticsQuery.data.total_servicio_mes + totalHoy > 0
             ? Number(
                 (
                   ((analyticsQuery.data.total_rechazado_mes +
                     totalRechazadosHoy) /
-                    (analyticsQuery.data.total_rtm_mes + totalHoy)) *
+                    (analyticsQuery.data.total_servicio_mes + totalHoy)) *
                   100
                 ).toFixed(2),
               )
@@ -139,12 +133,12 @@ export default function AnaliticaPage() {
 
         // Tasa Año: (Acumulado Rechazos Año / Acumulado Total Año) * 100
         tasa_rechazo_anio:
-          analyticsQuery.data.total_rtm_anio + totalHoy > 0
+          analyticsQuery.data.total_servicio_anio + totalHoy > 0
             ? Number(
                 (
                   ((analyticsQuery.data.total_rechazado_anio +
                     totalRechazadosHoy) /
-                    (analyticsQuery.data.total_rtm_anio + totalHoy)) *
+                    (analyticsQuery.data.total_servicio_anio + totalHoy)) *
                   100
                 ).toFixed(2),
               )
@@ -326,19 +320,19 @@ export default function AnaliticaPage() {
         <AnaliticaPorCantidad
           titulo="Inspecciones Realizadas"
           descripcion="Volumen total de vehículos que han ingresado a la línea de revisión (Primeras entradas)."
-          datos={completeDataRTM}
+          datos={CompleteAnalyticsData}
         />
 
         <AnaliticaPorCantidad
-          titulo="Cantidad RTM Reprobadas"
-          descripcion="RTMs reprobadas."
-          datos={completeDataRTM}
+          titulo="Cantidad Reprobadas"
+          descripcion="Reprobadas."
+          datos={CompleteAnalyticsData}
         />
 
         <AnaliticaPorCantidad
           titulo="Tasa de Rechazo"
           descripcion="Porcentaje de reprobadas con respecto a todas la placas por primera vez (no se cuentan reinspecciones reprobadas)"
-          datos={completeDataRTM}
+          datos={CompleteAnalyticsData}
         />
 
         <AnaliticaVehiculosPorTipo />

@@ -1,25 +1,42 @@
 "use client";
 
-
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { keepPreviousData, useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { Database } from "../../supabase/types/database.types";
+
+
+
+
+
+
 // ============================================================================
 // ANALYTICS DIARIOS
 // Datos del RPC: fetch_admin_analitics_diary
 // ============================================================================
 
 export interface AdminAnalyticsDiaryData {
-  // Cantidad de RTM realizadas hoy
-  total_rtm_hoy: number;
-  // Cantidad de RTM rechazadas hoy
-  total_rtm_rechazados_hoy: number;
+  // Cantidad de inspecciones del servicio filtrado realizadas hoy
+  total_servicio_hoy: number;
+  // Cantidad de inspecciones rechazadas del servicio filtrado hoy
+  total_rechazado_hoy: number;
 }
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // ESTRUCTURAS BASE PARA LOS GRÁFICOS
@@ -43,6 +60,11 @@ export interface MonthChartItem {
   total: number;
 }
 
+
+
+
+
+
 // ============================================================================
 // ANALYTICS HISTÓRICOS
 // Datos del RPC: fetch_admin_analitics
@@ -50,47 +72,42 @@ export interface MonthChartItem {
 
 export interface AdminAnalyticsData {
   // --------------------------------------------------------------------------
-  // Totales generales de RTM
+  // Totales generales (del servicio filtrado o todos)
   // --------------------------------------------------------------------------
 
-  // Total de RTM realizadas ayer
-  total_rtm_ayer: number;
+  // Total del servicio filtrado ayer
+  total_servicio_ayer: number;
 
-  // Total de RTM realizadas durante el mes actual
-  total_rtm_mes: number;
+  // Total del servicio filtrado durante el mes actual
+  total_servicio_mes: number;
 
-  // Total de RTM realizadas durante el año actual
-  total_rtm_anio: number;
+  // Total del servicio filtrado durante el año actual
+  total_servicio_anio: number;
 
   // --------------------------------------------------------------------------
-  // Totales de RTM rechazadas
+  // Totales de rechazados (del servicio filtrado o todos)
   // --------------------------------------------------------------------------
 
-  // Total de RTM rechazadas ayer
   total_rechazado_ayer: number;
-
-  // Total de RTM rechazadas durante el mes actual
   total_rechazado_mes: number;
-
-  // Total de RTM rechazadas durante el año actual
   total_rechazado_anio: number;
 
   // --------------------------------------------------------------------------
   // Datos para gráficos
   // --------------------------------------------------------------------------
 
-  // RTM realizadas por día del mes solicitado
   chart_mes: DayChartItem[];
-
-  // RTM realizadas por mes del año solicitado
   chart_anio: MonthChartItem[];
-
-  // RTM rechazadas por día del mes solicitado
   chart_rechazado_mes: DayChartItem[];
-
-  // RTM rechazadas por mes del año solicitado
   chart_rechazado_anio: MonthChartItem[];
 }
+
+
+
+
+
+
+
 
 // ============================================================================
 // PQAF
@@ -114,11 +131,7 @@ export interface PQAFListItem {
   description: string;
 
   // Tipo de requerimiento
-  requirement_type:
-    | "peticion"
-    | "queja"
-    | "apelacion"
-    | "felicitacion";
+  requirement_type: "peticion" | "queja" | "apelacion" | "felicitacion";
 
   // Estado actual del requerimiento
   status:
@@ -137,9 +150,14 @@ export interface PQAFListItem {
 }
 
 
+
+
 export type ServiceTypeFilter = ServiceTypeEnum | null;
 
+
+
 export type VehiclesByTypeData = Record<string, number>;
+
 
 
 
@@ -148,10 +166,6 @@ export type VehiclesByTypeData = Record<string, number>;
 // CONTEXT
 // Estructura completa de datos y funcionalidades expuestas por el Context
 // ============================================================================
-
-
-
-
 
 export interface AdminContextType {
   AdminContextValue: {
@@ -173,20 +187,18 @@ export interface AdminContextType {
     // Query completa de TanStack Query para los analytics históricos.
     // Contiene data, estados, errores, refetch, etc.
     analyticsQuery: UseQueryResult<AdminAnalyticsData, Error>;
-// ------------------------------------------------------------------------
-// Selector de mes, año y servicio para analytics
-// ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // Selector de mes, año y servicio para analytics
+    // ------------------------------------------------------------------------
 
-mesSeleccionado: number;
-setMesSeleccionado: (mes: number) => void;
+    mesSeleccionado: number;
+    setMesSeleccionado: (mes: number) => void;
 
-anoSeleccionado: number;
-setAnoSeleccionado: (ano: number) => void;
+    anoSeleccionado: number;
+    setAnoSeleccionado: (ano: number) => void;
 
-servicioTipoSeleccionado: ServiceTypeFilter;
-setServicioTipoSeleccionado: (servicio: ServiceTypeFilter) => void;
-
-
+    servicioTipoSeleccionado: ServiceTypeFilter;
+    setServicioTipoSeleccionado: (servicio: ServiceTypeFilter) => void;
 
     // ------------------------------------------------------------------------
     // Analytics - Vehículos por tipo
@@ -203,25 +215,17 @@ setServicioTipoSeleccionado: (servicio: ServiceTypeFilter) => void;
 
     setDateVehicleTypeRange: (range: DateRange | undefined) => void;
 
-// ------------------------------------------------------------------------
-// Analytics - Pagos por método
-// ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // Analytics - Pagos por método
+    // ------------------------------------------------------------------------
 
-paymentsByMethodQuery: UseQueryResult<
-  PaymentsByMethodData,
-  Error
->;
+    paymentsByMethodQuery: UseQueryResult<PaymentsByMethodData, Error>;
 
-paymentsByMethodDiaryQuery: UseQueryResult<
-  PaymentsByMethodData,
-  Error
->;
+    paymentsByMethodDiaryQuery: UseQueryResult<PaymentsByMethodData, Error>;
 
-datePaymentMethodRange: DateRange | undefined;
+    datePaymentMethodRange: DateRange | undefined;
 
-setDatePaymentMethodRange: (
-  range: DateRange | undefined,
-) => void;
+    setDatePaymentMethodRange: (range: DateRange | undefined) => void;
 
     // ------------------------------------------------------------------------
     // PQAF
@@ -278,51 +282,51 @@ setDatePaymentMethodRange: (
       setRowsPerPage: (rows: number) => void;
     };
 
-    
     // ------------------------------------------------------------------------
-// Analytics - Contabilidad
-// ------------------------------------------------------------------------
+    // Analytics - Contabilidad
+    // ------------------------------------------------------------------------
 
-// Query completa de TanStack Query para los analytics contables históricos.
-// Contiene data, estados, errores, refetch, etc.
-analyticsContabilidadQuery: UseQueryResult<
-  AdminContabilidadData,
-  Error
->;
+    // Query completa de TanStack Query para los analytics contables históricos.
+    // Contiene data, estados, errores, refetch, etc.
+    analyticsContabilidadQuery: UseQueryResult<AdminContabilidadData, Error>;
 
-// Query de datos correspondientes únicamente al día actual.
-analyticsContabilidadQueryDiary: UseQueryResult<
-  AdminContabilidadDiaryData,
-  Error
->;
+    // Query de datos correspondientes únicamente al día actual.
+    analyticsContabilidadQueryDiary: UseQueryResult<
+      AdminContabilidadDiaryData,
+      Error
+    >;
 
-// ------------------------------------------------------------------------
-// Selector de mes, año y servicio para analytics contables
-// ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // Selector de mes, año y servicio para analytics contables
+    // ------------------------------------------------------------------------
 
-mesContabilidadSeleccionado: number;
+    mesContabilidadSeleccionado: number;
 
-setMesContabilidadSeleccionado: (mes: number) => void;
+    setMesContabilidadSeleccionado: (mes: number) => void;
 
-anoContabilidadSeleccionado: number;
+    anoContabilidadSeleccionado: number;
 
-setAnoContabilidadSeleccionado: (ano: number) => void;
+    setAnoContabilidadSeleccionado: (ano: number) => void;
 
-servicioTipoContabilidadSeleccionado: ServiceTypeFilter;
+    servicioTipoContabilidadSeleccionado: ServiceTypeFilter;
 
-setServicioTipoContabilidadSeleccionado: (
-  servicio: ServiceTypeFilter,
-) => void;
-
-
-
-
+    setServicioTipoContabilidadSeleccionado: (
+      servicio: ServiceTypeFilter,
+    ) => void;
   };
 }
 
 
+
+
+
+
 export type ServiceTypeEnum =
-  Database["public"]["Enums"]["service_type_enum"] | null;
+  | Database["public"]["Enums"]["service_type_enum"]
+  | null;
+
+
+
 
 
 export const AdminContext = createContext<AdminContextType | null>(null);
@@ -362,6 +366,12 @@ export type AdminContabilidadData = {
 };
 
 
+
+
+
+
+
+
 export type PaymentsByMethodData = {
   efectivo: number;
   tarjeta_debito: number;
@@ -373,9 +383,19 @@ export type PaymentsByMethodData = {
 };
 
 
+
+
+
+
+
+
+
 export type AdminContabilidadDiaryData = {
   total_recaudado_hoy: number;
 };
+
+
+
 
 
 interface AdminLoaderContext {
@@ -383,19 +403,29 @@ interface AdminLoaderContext {
   rol: string;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default function ReceptionistLoaderContext({
   rol,
   children,
 }: AdminLoaderContext) {
-
-  
-
-
-
   const pathname = usePathname();
 
   const permissionscontextRecived = useContext(PermissionsContext);
-  const tenantId = permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
+  const tenantId =
+    permissionscontextRecived?.PermissionsContextValue.tenantObject?.id;
 
   const supabaseBrowser = createSupabaseBrowserClient();
 
@@ -405,7 +435,7 @@ export default function ReceptionistLoaderContext({
     "DESC",
   );
 
- // 1. Rango de fechas por defecto: Desde hace 1 mes hasta Hoy
+  // 1. Rango de fechas por defecto: Desde hace 1 mes hasta Hoy
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subMonths(new Date(), 1),
     to: new Date(),
@@ -417,71 +447,100 @@ export default function ReceptionistLoaderContext({
   const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
 
-
-
-//--------------------------------------------
+  //--------------------------------------------
   //STATES DEL MES Y AÑO A BUSCAR
   //--------------------------------------------
 
-const ahora = new Date();
+  const ahora = new Date();
 
-const mesActual = Number(
-  ahora.toLocaleString("en-US", {
+  const mesActual = Number(
+    ahora.toLocaleString("en-US", {
+      timeZone: "America/Bogota",
+      month: "numeric",
+    }),
+  );
+
+  const anoActual = Number(
+    ahora.toLocaleString("en-US", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+    }),
+  );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //STATES DE LA CONSULTA POR VEHICLE TYPE
+
+  // STATES DE LA CONSULTA POR VEHICLE TYPE
+  // Las fechas se obtienen según el calendario de Colombia.
+  // Usamos las 12:00 del día para evitar problemas de cambio
+  // de fecha al convertir posteriormente el Date.
+
+  const fechaColombia = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Bogota",
-    month: "numeric",
-  })
-);
+  }).format(new Date());
 
-const anoActual = Number(
-  ahora.toLocaleString("en-US", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-  })
-);
+  const [anoColombia, mesColombia, diaColombia] = fechaColombia
+    .split("-")
+    .map(Number);
 
-//STATES DE LA CONSULTA POR VEHICLE TYPE
+  const [dateVehicleTypeRange, setDateVehicleTypeRange] = useState<
+    DateRange | undefined
+  >({
+    from: new Date(anoColombia, mesColombia - 1, 1, 12, 0, 0),
+    to: new Date(anoColombia, mesColombia - 1, diaColombia, 12, 0, 0),
+  });
 
-// STATES DE LA CONSULTA POR VEHICLE TYPE
-// Las fechas se obtienen según el calendario de Colombia.
-// Usamos las 12:00 del día para evitar problemas de cambio
-// de fecha al convertir posteriormente el Date.
+  const [datePaymentMethodRange, setDatePaymentMethodRange] = useState<
+    DateRange | undefined
+  >({
+    from: new Date(anoColombia, mesColombia - 1, 1, 12, 0, 0),
+    to: new Date(anoColombia, mesColombia - 1, diaColombia, 12, 0, 0),
+  });
 
-const fechaColombia = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "America/Bogota",
-}).format(new Date());
+  const [mesSeleccionado, setMesSeleccionado] = useState(mesActual);
+  const [anoSeleccionado, setAnoSeleccionado] = useState(anoActual);
+  const [servicioTipoSeleccionado, setServicioTipoSeleccionado] =
+    useState<ServiceTypeEnum | null>("RTM");
 
-const [anoColombia, mesColombia, diaColombia] = fechaColombia
-  .split("-")
-  .map(Number);
+  const [mesContabilidadSeleccionado, setMesContabilidadSeleccionado] =
+    useState<number>(mesActual);
 
-const [dateVehicleTypeRange, setDateVehicleTypeRange] = useState<
-  DateRange | undefined
->({
-  from: new Date(anoColombia, mesColombia - 1, 1, 12, 0, 0),
-  to: new Date(anoColombia, mesColombia - 1, diaColombia, 12, 0, 0),
-});
+  const [anoContabilidadSeleccionado, setAnoContabilidadSeleccionado] =
+    useState<number>(anoActual);
 
-const [datePaymentMethodRange, setDatePaymentMethodRange] = useState<
-  DateRange | undefined
->({
-  from: new Date(anoColombia, mesColombia - 1, 1, 12, 0, 0),
-  to: new Date(anoColombia, mesColombia - 1, diaColombia, 12, 0, 0),
-});
-
-const [mesSeleccionado, setMesSeleccionado] = useState(mesActual);
-const [anoSeleccionado, setAnoSeleccionado] = useState(anoActual);
-const [servicioTipoSeleccionado, setServicioTipoSeleccionado] = useState<ServiceTypeEnum | null>("RTM");
+  const [
+    servicioTipoContabilidadSeleccionado,
+    setServicioTipoContabilidadSeleccionado,
+  ] = useState<ServiceTypeEnum | null>("RTM");
 
 
 
-const [mesContabilidadSeleccionado, setMesContabilidadSeleccionado] =
-  useState<number>(mesActual);
 
-const [anoContabilidadSeleccionado, setAnoContabilidadSeleccionado] =
-  useState<number>(anoActual);
 
-const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccionado] =
-  useState<ServiceTypeEnum | null>("RTM");
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -498,12 +557,11 @@ const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccio
     refetch: refetchPQAF,
     isSuccess: isPQAFSuccess,
   } = useQuery({
-
     enabled: pathname === "/dashboard/admin/pqaf",
     queryKey: [
       "pqaf",
       "list",
-      
+
       orderByColumn,
       orderByDirection,
       dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "null",
@@ -522,11 +580,11 @@ const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccio
 
       // 🌟 Control preventivo de seguridad por si limpian el calendario
       // Si no hay fecha definida, por defecto no enviará solicitudes rotas al RPC
-     // 🌟 Control preventivo de seguridad por si limpian el calendario
+      // 🌟 Control preventivo de seguridad por si limpian el calendario
       const fechaDesde = dateRange?.from
         ? format(dateRange.from, "yyyy-MM-dd")
         : format(subMonths(new Date(), 1), "yyyy-MM-dd"); // 👈 Cambiado a hace 1 mes
-        
+
       const fechaHasta = dateRange?.to
         ? format(dateRange.to, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
@@ -555,11 +613,11 @@ const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccio
       // Casteas al tipo de lista de tu interfaz correspondiente (ej. PQAFListItem[])
       return (data as PQAFListItem[]) || [];
     },
-    
+
     staleTime: 0,
     refetchInterval: 15000,
     refetchOnWindowFocus: false,
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
   });
 
 
@@ -568,96 +626,61 @@ const [servicioTipoContabilidadSeleccionado, setServicioTipoContabilidadSeleccio
 
 
 
-const analyticsQuery = useQuery({
-  queryKey: [
-    "admin_analytics",
-    rol,
-    mesSeleccionado,          // 👈 ¡Obligatorio para que reaccione al cambio de mes!
-    anoSeleccionado,          // 👈 ¡Obligatorio para que reaccione al cambio de año!
-    servicioTipoSeleccionado, // 👈 ¡Obligatorio para que reaccione al cambiar de servicio!
-  ],
 
-  queryFn: async () => {
-    console.log(
-      `Pidiendo analytics de ${mesSeleccionado}/${anoSeleccionado}`,
-    );
 
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_analitics",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_mes_solicitado: mesSeleccionado,
-        p_ano_solicitado: anoSeleccionado,
-        p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
-      },
-    );
 
-    if (error) {
-      console.error(
-        "Error al extraer métricas e históricos con gráficos:",
-        error.message,
+
+
+
+
+
+  const analyticsQuery = useQuery({
+    queryKey: [
+      "admin_analytics",
+      rol,
+      mesSeleccionado, // 👈 ¡Obligatorio para que reaccione al cambio de mes!
+      anoSeleccionado, // 👈 ¡Obligatorio para que reaccione al cambio de año!
+      servicioTipoSeleccionado, // 👈 ¡Obligatorio para que reaccione al cambiar de servicio!
+    ],
+
+    queryFn: async () => {
+      console.log(
+        `Pidiendo analytics de ${mesSeleccionado}/${anoSeleccionado}`,
       );
 
-      throw new Error(error.message);
-    }
-
-    if (data && data.length > 0) {
-      return data[0] as unknown as AdminAnalyticsData;
-    }
-
-    throw new Error("El RPC no devolvió datos de analytics.");
-  },
-
-  staleTime: Infinity,
-  refetchOnWindowFocus: false,
-  enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
-  placeholderData: keepPreviousData
-});
-
-
-
-
-const analyticsQueryDiary = useQuery({
-  queryKey: [
-    "admin_analytics_diary",
-    rol,
-    servicioTipoSeleccionado, // 👈 ¡Obligatorio! Para que se entere si cambia el servicio
-  ],
-  queryFn: async () => {
-    console.log(
-      `Pidiendo analytics diarios - servicio: ${
-        servicioTipoSeleccionado ?? "todos"
-      }`,
-    );
-
-    const { data, error } = await supabaseBrowser.rpc(
-      "fetch_admin_analitics_diary",
-      {
-        p_tenant_id: tenantId ?? "",
-        p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
-      },
-    );
-
-    if (error) {
-      console.error(
-        "Error al extraer analytics diarios:",
-        error.message,
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_analitics",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_mes_solicitado: mesSeleccionado,
+          p_ano_solicitado: anoSeleccionado,
+          p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
+        },
       );
-      throw new Error(error.message);
-    }
 
-    if (data && data.length > 0) {
-      return data[0] as AdminAnalyticsDiaryData;
-    }
+      if (error) {
+        console.error(
+          "Error al extraer métricas e históricos con gráficos:",
+          error.message,
+        );
 
-    throw new Error("El RPC diario no devolvió datos.");
-  },
+        throw new Error(error.message);
+      }
 
-  refetchInterval: 15000,
-  staleTime: 0,
-  enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
-  placeholderData: keepPreviousData, // 👈 Opcional pero recomendado para evitar saltos en los datos del día
-});
+      console.log("Estos son los data de admin analitics: ", data)
+
+      if (data && data.length > 0) {
+        return data[0] as unknown as AdminAnalyticsData;
+      }
+
+      throw new Error("El RPC no devolvió datos de analytics.");
+    },
+
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+    placeholderData: keepPreviousData,
+  });
 
 
 
@@ -665,7 +688,74 @@ const analyticsQueryDiary = useQuery({
 
 
 
-const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
+
+
+
+
+
+
+
+
+
+  const analyticsQueryDiary = useQuery({
+    queryKey: [
+      "admin_analytics_diary",
+      rol,
+      servicioTipoSeleccionado, // 👈 ¡Obligatorio! Para que se entere si cambia el servicio
+    ],
+    queryFn: async () => {
+      console.log(
+        `Pidiendo analytics diarios - servicio: ${
+          servicioTipoSeleccionado ?? "todos"
+        }`,
+      );
+
+      const { data, error } = await supabaseBrowser.rpc(
+        "fetch_admin_analitics_diary",
+        {
+          p_tenant_id: tenantId ?? "",
+          p_servicio_tipo: servicioTipoSeleccionado ?? undefined,
+        },
+      );
+
+      if (error) {
+        console.error("Error al extraer analytics diarios:", error.message);
+        throw new Error(error.message);
+      }
+
+      if (data && data.length > 0) {
+        return data[0] as AdminAnalyticsDiaryData;
+      }
+
+      throw new Error("El RPC diario no devolvió datos.");
+    },
+
+    refetchInterval: 15000,
+    staleTime: 0,
+    enabled: pathname === "/dashboard/admin/analitica" && !!tenantId,
+    placeholderData: keepPreviousData, // 👈 Opcional pero recomendado para evitar saltos en los datos del día
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
     queryKey: [
       "admin_vehicles_by_type",
       rol,
@@ -708,10 +798,7 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
       );
 
       if (error) {
-        console.error(
-          "Error al extraer vehículos por tipo:",
-          error.message,
-        );
+        console.error("Error al extraer vehículos por tipo:", error.message);
 
         throw new Error(error.message);
       }
@@ -720,9 +807,7 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
         return data as VehiclesByTypeData;
       }
 
-      throw new Error(
-        "El RPC de vehículos por tipo no devolvió datos.",
-      );
+      throw new Error("El RPC de vehículos por tipo no devolvió datos.");
     },
 
     staleTime: Infinity,
@@ -736,11 +821,22 @@ const vehiclesByTypeQuery = useQuery<VehiclesByTypeData, Error>({
 
 
 
-const vehiclesByTypeDiaryQuery = useQuery<VehiclesByTypeData, Error>({
-    queryKey: [
-      "admin_vehicles_by_type_diary",
-      rol,
-    ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const vehiclesByTypeDiaryQuery = useQuery<VehiclesByTypeData, Error>({
+    queryKey: ["admin_vehicles_by_type_diary", rol],
 
     queryFn: async () => {
       console.log("Pidiendo vehículos por tipo - diario");
@@ -776,14 +872,7 @@ const vehiclesByTypeDiaryQuery = useQuery<VehiclesByTypeData, Error>({
     placeholderData: keepPreviousData, // 👈 ¡Clave aquí! Evita que la tabla/gráfico parpadee cada 15 segundos cuando se refresca solo en segundo plano.
   });
 
-
-
-
-
-
-
-
-const analyticsContabilidadQuery = useQuery({
+  const analyticsContabilidadQuery = useQuery({
     queryKey: [
       "admin_analytics_contabilidad",
       rol,
@@ -803,8 +892,7 @@ const analyticsContabilidadQuery = useQuery({
           p_tenant_id: tenantId ?? "",
           p_mes_solicitado: mesContabilidadSeleccionado,
           p_ano_solicitado: anoContabilidadSeleccionado,
-          p_servicio_tipo:
-            servicioTipoContabilidadSeleccionado ?? undefined,
+          p_servicio_tipo: servicioTipoContabilidadSeleccionado ?? undefined,
         },
       );
 
@@ -821,15 +909,12 @@ const analyticsContabilidadQuery = useQuery({
         return data[0] as unknown as AdminContabilidadData;
       }
 
-      throw new Error(
-        "El RPC no devolvió datos de analytics de contabilidad.",
-      );
+      throw new Error("El RPC no devolvió datos de analytics de contabilidad.");
     },
 
     staleTime: Infinity,
     refetchOnWindowFocus: false,
-    enabled:
-      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    enabled: pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
     placeholderData: keepPreviousData, // 👈 Añadido para transiciones fluidas sin spinners
   });
 
@@ -839,7 +924,18 @@ const analyticsContabilidadQuery = useQuery({
 
 
 
-const analyticsContabilidadQueryDiary = useQuery({
+
+
+
+
+
+
+
+
+
+
+
+  const analyticsContabilidadQueryDiary = useQuery({
     queryKey: [
       "admin_analytics_contabilidad_diary",
       rol,
@@ -851,8 +947,7 @@ const analyticsContabilidadQueryDiary = useQuery({
         "fetch_admin_contabilidad_diary",
         {
           p_tenant_id: tenantId ?? "",
-          p_servicio_tipo:
-            servicioTipoContabilidadSeleccionado ?? undefined,
+          p_servicio_tipo: servicioTipoContabilidadSeleccionado ?? undefined,
         },
       );
 
@@ -864,25 +959,16 @@ const analyticsContabilidadQueryDiary = useQuery({
         return data[0] as AdminContabilidadDiaryData;
       }
 
-      throw new Error(
-        "El RPC diario de contabilidad no devolvió datos.",
-      );
+      throw new Error("El RPC diario de contabilidad no devolvió datos.");
     },
 
     refetchInterval: 15000,
     staleTime: 0,
-    enabled:
-      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    enabled: pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
     placeholderData: keepPreviousData, // 👈 Transición fluida al cambiar de servicio
   });
 
-
-
-
-
-
-
-const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
+  const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
     queryKey: [
       "admin_payments_by_method",
       rol,
@@ -925,10 +1011,7 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
       );
 
       if (error) {
-        console.error(
-          "Error al extraer pagos por método:",
-          error.message,
-        );
+        console.error("Error al extraer pagos por método:", error.message);
 
         throw new Error(error.message);
       }
@@ -937,14 +1020,11 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
         return data as PaymentsByMethodData;
       }
 
-      throw new Error(
-        "El RPC de pagos por método no devolvió datos.",
-      );
+      throw new Error("El RPC de pagos por método no devolvió datos.");
     },
 
     staleTime: Infinity,
-    enabled:
-      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    enabled: pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
     placeholderData: keepPreviousData, // 👈 Transición fluida al cambiar el rango de fechas
   });
 
@@ -954,14 +1034,27 @@ const paymentsByMethodQuery = useQuery<PaymentsByMethodData, Error>({
 
 
 
-const paymentsByMethodDiaryQuery = useQuery<
-    PaymentsByMethodData,
-    Error
-  >({
-    queryKey: [
-      "admin_payments_by_method_diary",
-      rol,
-    ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const paymentsByMethodDiaryQuery = useQuery<PaymentsByMethodData, Error>({
+    queryKey: ["admin_payments_by_method_diary", rol],
 
     queryFn: async () => {
       console.log("Pidiendo pagos por método - diario");
@@ -970,7 +1063,7 @@ const paymentsByMethodDiaryQuery = useQuery<
         "fetch_admin_payments_by_method_diary",
         {
           p_tenant_id: tenantId ?? "",
-        }
+        },
       );
 
       if (error) {
@@ -983,9 +1076,7 @@ const paymentsByMethodDiaryQuery = useQuery<
       }
 
       if (!data) {
-        throw new Error(
-          "El RPC de pagos por método diario no devolvió datos.",
-        );
+        throw new Error("El RPC de pagos por método diario no devolvió datos.");
       }
 
       return data as unknown as PaymentsByMethodData;
@@ -993,10 +1084,15 @@ const paymentsByMethodDiaryQuery = useQuery<
 
     refetchInterval: 15000,
     staleTime: 0,
-    enabled:
-      pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
+    enabled: pathname === "/dashboard/admin/analitica-contable" && !!tenantId,
     placeholderData: keepPreviousData, // 👈 Evita parpadeos cada 15s cuando se refresca en segundo plano
   });
+
+
+
+
+
+
 
 
 
@@ -1004,32 +1100,32 @@ const paymentsByMethodDiaryQuery = useQuery<
     rol: rol,
     analyticsQuery: analyticsQuery,
     analyticsQueryDiary: analyticsQueryDiary,
-      mesSeleccionado,
-      setMesSeleccionado,
-      anoSeleccionado,
-      setAnoSeleccionado,
-      servicioTipoSeleccionado,
-      setServicioTipoSeleccionado,
-    
+    mesSeleccionado,
+    setMesSeleccionado,
+    anoSeleccionado,
+    setAnoSeleccionado,
+    servicioTipoSeleccionado,
+    setServicioTipoSeleccionado,
+
     vehiclesByTypeQuery: vehiclesByTypeQuery,
     vehiclesByTypeDiaryQuery: vehiclesByTypeDiaryQuery,
-      dateVehicleTypeRange,
-      setDateVehicleTypeRange,
+    dateVehicleTypeRange,
+    setDateVehicleTypeRange,
 
     analyticsContabilidadQuery: analyticsContabilidadQuery,
     analyticsContabilidadQueryDiary: analyticsContabilidadQueryDiary,
-      mesContabilidadSeleccionado,
-      anoContabilidadSeleccionado,
-      servicioTipoContabilidadSeleccionado,
-      setMesContabilidadSeleccionado,
-      setAnoContabilidadSeleccionado,
-      setServicioTipoContabilidadSeleccionado,   
-      
+    mesContabilidadSeleccionado,
+    anoContabilidadSeleccionado,
+    servicioTipoContabilidadSeleccionado,
+    setMesContabilidadSeleccionado,
+    setAnoContabilidadSeleccionado,
+    setServicioTipoContabilidadSeleccionado,
+
     paymentsByMethodQuery: paymentsByMethodQuery,
     paymentsByMethodDiaryQuery: paymentsByMethodDiaryQuery,
-      datePaymentMethodRange,
-      setDatePaymentMethodRange,
-    
+    datePaymentMethodRange,
+    setDatePaymentMethodRange,
+
     PQAFQuery: {
       PQAFData: PQAFData || [],
       isFetchingPQAF,
@@ -1061,6 +1157,15 @@ const paymentsByMethodDiaryQuery = useQuery<
       setRowsPerPage,
     },
   };
+
+
+
+
+
+
+
+
+
 
   return (
     <AdminContext.Provider value={{ AdminContextValue }}>

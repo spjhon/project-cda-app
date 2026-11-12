@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { useCreateImageLink } from "@/lib/client-actions/useCreateImageLink";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import MigracionTemporalPage from "@/components/dashboard/director-tecnico/MigracionTemporalPage";
 
 
 export default function DirectorTecnicoProfilePage() {
@@ -599,7 +600,7 @@ await queryClient.invalidateQueries({
           {isUpdating ? "Guardando..." : "Registrar Firma"}
         </Button>
 
-        
+        <MigracionTemporalPage></MigracionTemporalPage>
       </Card>
 
  
