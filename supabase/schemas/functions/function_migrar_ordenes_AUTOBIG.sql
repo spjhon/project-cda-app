@@ -5,40 +5,44 @@ SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
-  v_row JSONB;
-  v_order_id UUID;
-  v_payment JSONB;
-  v_count INT := 0;
+  v_row           JSONB;
+  v_order_id      UUID;
+  v_payment       JSONB;
+  v_count         INT := 0;
   v_payment_count INT := 0;
-  v_fecha_orden TIMESTAMPTZ;
+  v_fecha_orden   TIMESTAMPTZ;
 BEGIN
-  -- Validar que el array no esté vacío
-  IF p_data IS NULL OR jsonb_typeof(p_data) <> 'array' OR jsonb_array_length(p_data) = 0 THEN
+  -- ============================================================
+  -- 0. VALIDACIÓN DE ENTRADA
+  -- ============================================================
+  IF p_data IS NULL
+     OR jsonb_typeof(p_data) <> 'array'
+     OR jsonb_array_length(p_data) = 0 THEN
     RAISE EXCEPTION 'El array de datos está vacío o no es válido.';
   END IF;
 
-  -- Iterar sobre cada orden del array
+  -- ============================================================
+  -- 1. ITERAR SOBRE CADA ORDEN
+  -- ============================================================
   FOR v_row IN SELECT * FROM jsonb_array_elements(p_data)
   LOOP
-
-  -- Extraemos la fecha de la orden una sola vez
     v_fecha_orden := (v_row->>'fecha')::TIMESTAMPTZ;
-    -- ============================================================
-    -- 1. INSERTAR LA ORDEN EN entry_orders
-    -- ============================================================
+
+    -- ----------------------------------------------------------
+    -- 1.1 INSERTAR LA ORDEN EN entry_orders
+    --      (sin vehiculo_modelo_snapshot, vehiculo_clase_snapshot,
+    --       vehiculo_combustible_snapshot — columnas eliminadas)
+    -- ----------------------------------------------------------
     INSERT INTO public.entry_orders (
       tenant_id,
       funcionario_id,
       fecha,
-      created_at,  -- 👈 NUEVO
-      updated_at,  -- 👈 NUEVO
+      created_at,
+      updated_at,
       consecutivo_fur,
       vehiculo_placa_snapshot,
       vehiculo_marca_snapshot,
       vehiculo_linea_snapshot,
-      vehiculo_modelo_snapshot,
-      vehiculo_clase_snapshot,
-      vehiculo_combustible_snapshot,
       vehiculo_tipo_snapshot,
       vehiculo_tipo_servicio_snapshot,
       vehiculo_blindaje_snapshot,
@@ -59,15 +63,12 @@ BEGIN
       (v_row->>'tenant_id')::UUID,
       (v_row->>'funcionario_id')::UUID,
       v_fecha_orden,
-      v_fecha_orden,  -- 👈 created_at = fecha
-      v_fecha_orden,  -- 👈 updated_at = fecha
+      v_fecha_orden,
+      v_fecha_orden,
       v_row->>'consecutivo_fur',
       v_row->>'vehiculo_placa_snapshot',
       v_row->>'vehiculo_marca_snapshot',
       v_row->>'vehiculo_linea_snapshot',
-      (v_row->>'vehiculo_modelo_snapshot')::INTEGER,
-      v_row->>'vehiculo_clase_snapshot',
-      v_row->>'vehiculo_combustible_snapshot',
       (v_row->>'vehiculo_tipo_snapshot')::public.vehicle_type_enum,
       (v_row->>'vehiculo_tipo_servicio_snapshot')::public.vehicle_service_type_enum,
       (v_row->>'vehiculo_blindaje_snapshot')::BOOLEAN,
@@ -89,10 +90,9 @@ BEGIN
 
     v_count := v_count + 1;
 
-    -- ============================================================
-    -- 2. INSERTAR LOS PAGOS EN entry_order_payments
-    -- ============================================================
-    -- Verificar si el payload trae pagos
+    -- ----------------------------------------------------------
+    -- 1.2 INSERTAR LOS PAGOS EN entry_order_payments
+    -- ----------------------------------------------------------
     IF v_row ? 'payments' AND jsonb_typeof(v_row->'payments') = 'array' THEN
       FOR v_payment IN SELECT * FROM jsonb_array_elements(v_row->'payments')
       LOOP
@@ -102,25 +102,25 @@ BEGIN
           payment_method,
           monto_bruto,
           num_comprobante,
-          created_at,  -- 👈 NUEVO
-          updated_at   -- 👈 NUEVO
+          created_at,
+          updated_at
         ) VALUES (
           (v_row->>'tenant_id')::UUID,
           v_order_id,
           (v_payment->>'payment_method')::public.office_payment_type_enum,
           (v_payment->>'monto_bruto')::NUMERIC,
           NULLIF(v_payment->>'num_comprobante', ''),
-           v_fecha_orden,  -- 👈 created_at = fecha de la orden
-          v_fecha_orden   -- 👈 updated_at = fecha de la orden
+          v_fecha_orden,
+          v_fecha_orden
         );
-        
+
         v_payment_count := v_payment_count + 1;
       END LOOP;
     END IF;
   END LOOP;
 
   -- ============================================================
-  -- 3. RETORNAR RESULTADO
+  -- 2. RETORNAR RESULTADO
   -- ============================================================
   RETURN jsonb_build_object(
     'success', true,
@@ -129,7 +129,6 @@ BEGIN
   );
 
 EXCEPTION WHEN OTHERS THEN
-  -- Si algo falla, PostgreSQL hace ROLLBACK automático de todo el bloque
   RAISE EXCEPTION 'Error en la migración (orden %): %', v_count + 1, SQLERRM;
 END;
 $$;

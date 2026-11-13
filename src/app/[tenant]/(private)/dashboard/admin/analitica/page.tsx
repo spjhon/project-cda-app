@@ -273,6 +273,9 @@ const totalRechazadosHoy = analyticsDataDiary?.total_rechazado_hoy ?? 0;
       }
     : undefined;
 
+
+      //console.log("Este es el complete analitics data: ", CompleteAnalyticsData)
+
   return (
     // section proporciona la raíz semántica. px-4 o px-6 da el margen sutil para que nada toque los bordes.
     <section className="w-full px-6 py-4 flex flex-col gap-6 bg-background">

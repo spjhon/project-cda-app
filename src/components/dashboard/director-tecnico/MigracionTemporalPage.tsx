@@ -198,7 +198,7 @@ export default function MigracionTemporalPage() {
 
           const tipoInspeccion = tipoInspeccionRaw.toUpperCase();
 
-          let serviceType: "RTM" | "preventiva";
+          let serviceType: "RTM" | "preventiva" | "prueba_gases";
           let esReinspeccion: boolean;
 
           if (tipoInspeccion === "CERTIFICACION") {
@@ -210,9 +210,12 @@ export default function MigracionTemporalPage() {
           } else if (tipoInspeccion === "PREVENTIVA") {
             serviceType = "preventiva";
             esReinspeccion = false;
+          } else if (tipoInspeccion === "SOLO GASES") {
+            serviceType = "prueba_gases";
+            esReinspeccion = false;
           } else {
             throw new Error(
-              `Fila ${index + 2}: TIPO DE INSPECCION inválido "${tipoInspeccionRaw}". Debe ser CERTIFICACION, REINSPECCION o PREVENTIVA.`,
+              `Fila ${index + 2}: TIPO DE INSPECCION inválido "${tipoInspeccionRaw}". Debe ser CERTIFICACION, REINSPECCION, SOLO GASES o PREVENTIVA.`,
             );
           }
 
@@ -319,15 +322,12 @@ export default function MigracionTemporalPage() {
           // --------------------------------------------------------
           const payload = {
             tenant_id: "dddddddd-0000-0000-0000-000000000004", // 👈 Placeholder
-            funcionario_id: "0eb9553f-5478-4046-8931-63686dea5561", // 👈 Placeholder
+            funcionario_id: "a7cdf37c-6a98-4da8-8d7e-c0f6c6e1da7a", // 👈 Placeholder
             fecha: fechaParseada,
             consecutivo_fur: fur,
             vehiculo_placa_snapshot: placa,
             vehiculo_marca_snapshot: "N/A",
             vehiculo_linea_snapshot: "N/A",
-            vehiculo_modelo_snapshot: 2026,
-            vehiculo_clase_snapshot: "sin_clase",
-            vehiculo_combustible_snapshot: "gasolina",
             vehiculo_tipo_snapshot: tipoVehiculo,
             vehiculo_tipo_servicio_snapshot: tipoServicioVehiculo,
             vehiculo_blindaje_snapshot: false,
@@ -343,8 +343,8 @@ export default function MigracionTemporalPage() {
             consecutivo_rtm: consecutivoRtm,
             company_name_snapshot: companyNameSnapshot,
             funcionario_tipo_documento_snapshot: "cedula_ciudadania",
-            funcionario_numero_documento_snapshot: "1053782464",
-            funcionario_nombre_snapshot: "Juan Camilo Patiño Aristizabal",
+            funcionario_numero_documento_snapshot: "1118549824",
+            funcionario_nombre_snapshot: "Lorena Naranjo Sanchez",
           };
 
           payloads.push(payload);

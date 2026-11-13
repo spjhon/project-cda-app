@@ -667,7 +667,7 @@ export default function ReceptionistLoaderContext({
         throw new Error(error.message);
       }
 
-      console.log("Estos son los data de admin analitics: ", data)
+     
 
       if (data && data.length > 0) {
         return data[0] as unknown as AdminAnalyticsData;

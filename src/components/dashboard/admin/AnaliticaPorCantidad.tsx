@@ -62,7 +62,7 @@ export default function AnaliticaPorCantidad({
       };
     }
 
-    if (titulo === "Cantidad RTM Reprobadas") {
+    if (titulo === "Cantidad Reprobadas") {
       return {
         total_hoy: datos.total_rechazado_hoy ?? 0,
         total_ayer: datos.total_rechazado_ayer ?? 0,

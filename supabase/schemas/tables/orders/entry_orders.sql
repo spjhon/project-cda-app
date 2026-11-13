@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     vehiculo_linea_snapshot                     VARCHAR NOT NULL,
 
     -- Modelo del vehículo.
-    vehiculo_modelo_snapshot                    INTEGER NOT NULL,
+    vehiculo_modelo_snapshot                    INTEGER NULL,
 
     -- Color registrado.
     vehiculo_color_snapshot                     VARCHAR NULL,
@@ -75,10 +75,10 @@ CREATE TABLE IF NOT EXISTS public.entry_orders (
     vehiculo_tipo_snapshot                      public.vehicle_type_enum NOT NULL,
 
     -- Clase del vehículo.
-    vehiculo_clase_snapshot                     VARCHAR NOT NULL,
+    vehiculo_clase_snapshot                     VARCHAR NULL,
 
     -- Tipo de combustible.
-    vehiculo_combustible_snapshot               VARCHAR NOT NULL,
+    vehiculo_combustible_snapshot               VARCHAR NULL,
 
     -- Cilindraje registrado.
     vehiculo_cilindrada_snapshot                INTEGER NULL,
