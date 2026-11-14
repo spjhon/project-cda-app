@@ -1,16 +1,14 @@
 
--- La firma cambia de un argumento a dos.
--- Eliminamos la versión anterior para evitar ambigüedades.
-DROP FUNCTION IF EXISTS public.fetch_order_rate(UUID);
-
 CREATE OR REPLACE FUNCTION public.fetch_order_rate(
     p_order_id UUID,
     p_company_id UUID DEFAULT NULL
 )
 RETURNS TABLE (
     rate_id UUID,
+    name TEXT,
     base_price NUMERIC(12,2),
     iva_percentage NUMERIC(5,2),
+    vehicle_age_years INTEGER,
     fees JSONB
 )
 LANGUAGE plpgsql
@@ -65,8 +63,10 @@ BEGIN
     RETURN QUERY
     SELECT
         vsr.id AS rate_id,
+        vsr.name,
         vsr.base_price,
         vsr.iva_percentage,
+        v_vehiculo_edad,
 
         /*
          * 4. Obtener los fees correspondientes a la tarifa
@@ -205,3 +205,13 @@ BEGIN
 
 END;
 $$;
+
+
+-- 3. Revocar el acceso público (cierra la puerta a anon)
+REVOKE EXECUTE ON FUNCTION public.fetch_order_rate(UUID, UUID) FROM PUBLIC;
+
+-- 4. Dar acceso solo a usuarios autenticados
+GRANT EXECUTE ON FUNCTION public.fetch_order_rate(UUID, UUID) TO authenticated;
+
+-- 5. (Opcional) Dar acceso al backend con service_role
+GRANT EXECUTE ON FUNCTION public.fetch_order_rate(UUID, UUID) TO service_role;

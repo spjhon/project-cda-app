@@ -2,15 +2,16 @@
 
 import {
   officeOrderSchema,
- 
+  priceSnapshotSchema,
 } from "@/lib/zod-schemas/oficinaInfo-schema";
 
 import { createSupabaseBrowserClient } from "../supabase/client";
-import { Database } from "../../../supabase/types/database.types";
-import { OfficeFormState } from "@/components/dashboard/oficina/OfficeOrderForm";
+import { Database, Json } from "../../../supabase/types/database.types";
+import {
+  OfficeFormState,
+  PriceSnapshotPayload,
+} from "@/components/dashboard/oficina/OfficeOrderForm";
 import { EntryOrderPaymentDetail } from "@/types/functions_types";
-
-
 
 interface UpdateOfficeOrderArgs {
   orderId: string;
@@ -20,6 +21,7 @@ interface UpdateOfficeOrderArgs {
   ratePriceSnapshot: number;
   service_type: Database["public"]["Enums"]["service_type_enum"];
   companyId: string | null;
+  priceSnapshot: PriceSnapshotPayload | null;
 }
 
 export async function insertOficinaData({
@@ -29,7 +31,8 @@ export async function insertOficinaData({
   vehicleServiceRateId,
   ratePriceSnapshot,
   service_type,
-  companyId
+  companyId,
+  priceSnapshot,
 }: UpdateOfficeOrderArgs) {
   if (!orderId || orderId === "") {
     return {
@@ -38,7 +41,7 @@ export async function insertOficinaData({
     };
   }
 
-  if (formData.oficina_consecutivo_factura.trim() === "" ) {
+  if (formData.oficina_consecutivo_factura.trim() === "") {
     return {
       data: null,
       error: "Error: No hay consecutivo de factura",
@@ -68,15 +71,15 @@ export async function insertOficinaData({
 
   const invalidPayment = payments.some(
     (payment) =>
-      !payment.payment_method||
+      !payment.payment_method ||
+      !payment.monto_bruto ||
       payment.monto_bruto < 0,
   );
 
   if (invalidPayment) {
     return {
       data: null,
-      error:
-        "Error: Todos los pagos deben tener un método seleccionado.",
+      error: "Error: Todos los pagos deben tener un método seleccionado.",
     };
   }
 
@@ -97,9 +100,9 @@ export async function insertOficinaData({
 
   // Validación estricta con Zod
   const validatedFields = officeOrderSchema.safeParse({
-  ...formData,
-  service_type,
-});
+    ...formData,
+    service_type,
+  });
 
   if (!validatedFields.success) {
     return {
@@ -108,29 +111,43 @@ export async function insertOficinaData({
     };
   }
 
+  // ------------------------------------------------------------
+  // Validar priceSnapshot (solo si viene, no es reinspección)
+  // ------------------------------------------------------------
+  if (priceSnapshot !== null) {
+    const validatedSnapshot = priceSnapshotSchema.safeParse(priceSnapshot);
+
+    if (!validatedSnapshot.success) {
+      return {
+        data: null,
+        error: validatedSnapshot.error.issues,
+      };
+    }
+  }
+
   // Inicialización del cliente de Supabase
   const supabaseBrowser = createSupabaseBrowserClient();
 
   // Invocación del RPC
-  const { data: officeUpdatedData, error } =
-    await supabaseBrowser.rpc("update_office_order_data", {
+  const { data: officeUpdatedData, error } = await supabaseBrowser.rpc(
+    "update_office_order_data",
+    {
       p_order_id: orderId,
       p_pin: formData.oficina_pin,
-      p_consecutivo_factura:
-        validatedFields.data.oficina_consecutivo_factura,
-      p_se_compro_soat:
-        validatedFields.data.se_compro_soat,
+      p_consecutivo_factura: validatedFields.data.oficina_consecutivo_factura,
+      p_se_compro_soat: validatedFields.data.se_compro_soat,
       p_vehicle_service_rate_id: vehicleServiceRateId,
       p_rate_price_snapshot: ratePriceSnapshot,
-       // ✅ Parámetro independiente del RPC
-   p_company_id: companyId!,
-       p_payments: payments.map((payment) => ({
-      paymentMethod: payment.payment_method,
-      amount: payment.monto_bruto,
-      receiptNumber: payment.num_comprobante ?? null,
-      
-    })),
-    });
+      // ✅ Parámetro independiente del RPC
+      p_company_id: companyId!,
+      p_payments: payments.map((payment) => ({
+        paymentMethod: payment.payment_method,
+        amount: payment.monto_bruto,
+        receiptNumber: payment.num_comprobante ?? null,
+      })),
+      p_price_snapshot: priceSnapshot as unknown as Json,
+    },
+  );
 
   // Gestión de errores provenientes de PostgreSQL
   if (error) {
@@ -140,9 +157,7 @@ export async function insertOficinaData({
     };
   }
 
-  console.log(
-    "Datos de liquidación de oficina actualizados correctamente:",
-  );
+  console.log("Datos de liquidación de oficina actualizados correctamente:");
   console.log(`Orden ID: ${orderId}`);
 
   return {

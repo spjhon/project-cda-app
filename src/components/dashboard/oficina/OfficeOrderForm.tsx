@@ -15,10 +15,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import CancelOrder from "../_shared/CancelOrder";
 import { useOrderRate } from "@/lib/client-actions/fetch_entry_order_rate";
 import OrderPayments from "./OrderPayments";
-import { EntryOrderListItem, EntryOrderPaymentDetail } from "@/types/functions_types";
+import {
+  EntryOrderListItem,
+  EntryOrderPaymentDetail,
+} from "@/types/functions_types";
 import { CompanyRateSelectorSingle } from "./CompanyRateSelectorSingle";
 import { useCompanies } from "@/lib/client-actions/fetch_tenant_companies";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 
 export interface OfficeFormState {
@@ -32,42 +43,123 @@ interface OfficeOrderFormProps {
   tenantId: string | undefined;
 }
 
+
+
+
+
+
+
+
+
+
+// ============================================================
+// TIPOS DEL SNAPSHOT DE PRECIO
+// ============================================================
+// Lo envía el frontend al server action cuando se confirma el pago.
+// El server action lo pasa tal cual a la RPC update_office_order_data.
+// La RPC lo inserta en:
+//   - entry_order_price_snapshot (cabecera, 1 fila)
+//   - entry_order_fee_snapshot (detalle, N filas)
+// ============================================================
+
+// ------------------------------------------------------------
+// FEE (una fila de entry_order_fee_snapshot)
+// ------------------------------------------------------------
+export interface PriceSnapshotFeePayload {
+  // Identificación congelada del fee
+  feeName: string
+  feeDescription: string | null
+
+  // Edad del vehículo al momento de la orden (misma para todos los fees)
+  vehicleAgeYears: number | null
+
+  // Rango de edad del fee (congelado, por si cambia en el futuro)
+  vehicleAgeFrom: number | null
+  vehicleAgeTo: number | null
+
+  // Montos congelados
+  feeAmount: number
+  ivaPercentage: number | null
+  ivaAmount: number
+  feeTotal: number
+}
+
+// ------------------------------------------------------------
+// CABECERA (una fila de entry_order_price_snapshot)
+// ------------------------------------------------------------
+export interface PriceSnapshotPayload {
+  // Rate congelado
+  rateName: string
+  basePrice: number
+  baseIvaPercentage: number | null
+  baseIvaAmount: number
+
+  // Agregados calculados por el frontend
+  feesSubtotal: number
+  feesIvaTotal: number
+  subtotal: number
+  ivaTotal: number
+  total: number
+
+  // Fees aplicados
+  fees: PriceSnapshotFeePayload[]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default function OfficeOrderForm({
   orden,
   tenantId,
 }: OfficeOrderFormProps) {
-
   const contextRecived = useContext(PermissionsContext);
-  
-  const tenantModules =
-    contextRecived?.PermissionsContextValue.tenantModules;
-  
+
+  const tenantModules = contextRecived?.PermissionsContextValue.tenantModules;
+
   const hasFullInfoModule = tenantModules?.some(
     (module) =>
       module.code === "full_info_module" &&
       module.is_active &&
-      module.is_enabled
+      module.is_enabled,
   );
 
-  
   const queryClient = useQueryClient();
 
   // 1. Traemos las compañías de forma limpia con TanStack Query
   const { data: companies } = useCompanies();
 
   // 2. Encontramos de forma síncrona y directa el ID inicial de la empresa basado en el NIT de la orden
-  const initialCompanyId = companies?.find(
-    (company) => company.nit === orden.company_nit_snapshot
-  )?.id ?? null;
+  const initialCompanyId =
+    companies?.find((company) => company.nit === orden.company_nit_snapshot)
+      ?.id ?? null;
 
   // Estado para cuando el usuario seleccione otra empresa de forma manual
-  const [userSelectedCompanyId, setUserSelectedCompanyId] = useState<string | null | undefined>(undefined);
+  const [userSelectedCompanyId, setUserSelectedCompanyId] = useState<
+    string | null | undefined
+  >(undefined);
 
-const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId : userSelectedCompanyId;
+  const selectedCompanyId =
+    userSelectedCompanyId === undefined
+      ? initialCompanyId
+      : userSelectedCompanyId;
 
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(null);
+  const [serverError, setServerError] = useState<$ZodIssue[] | null | string>(
+    null,
+  );
 
   // Inicialización limpia del estado con los datos que ya vienen en la orden
   const [formData, setFormData] = useState<OfficeFormState>({
@@ -77,10 +169,10 @@ const selectedCompanyId = userSelectedCompanyId === undefined ? initialCompanyId
   });
 
   const [payments, setPayments] = useState<EntryOrderPaymentDetail[]>(
-    orden.payments ?? []
+    orden.payments ?? [],
   );
 
-const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
+  const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
 
   const {
     data: orderRates,
@@ -93,23 +185,22 @@ const [selectedRateId, setSelectedRateId] = useState<string | null>(null)
     orderId: orden.id,
   });
 
+  console.log("Rate completo, con toda la info desglosada: ", orderRates);
+
   const selectedRateIdFromOrder = orden.vehicle_service_rate_id;
 
-const selectedRate =
-  orderRates?.find(
-    (rate) =>
-      rate.rateId === (selectedRateId ?? selectedRateIdFromOrder),
-  ) ?? orderRates?.[0];
+  const selectedRate =
+    orderRates?.find(
+      (rate) => rate.rate_id === (selectedRateId ?? selectedRateIdFromOrder),
+    ) ?? orderRates?.[0];
 
   const rateItems = [
-  { label: "Seleccione una tarifa", value: null },
-  ...(orderRates?.map((rate) => ({
-    label: `$${rate.totalPrice.toLocaleString("es-CO")}`,
-    value: rate.rateId,
-  })) ?? []),
-]
-
-
+    { label: "Seleccione una tarifa", value: null },
+    ...(orderRates?.map((rate) => ({
+      label: `$${rate.totalPrice.toLocaleString("es-CO")}`,
+      value: rate.rate_id,
+    })) ?? []),
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -142,12 +233,12 @@ const selectedRate =
       return;
     }
 
-    if (
+
+
+if (
       payments.length === 0 ||
       payments.some(
-        (payment) =>
-          !payment.payment_method ||
-          payment.monto_bruto < 0,
+        (payment) => !payment.payment_method || !payment.monto_bruto || payment.monto_bruto < 0,
       )
     ) {
       alert(
@@ -157,26 +248,58 @@ const selectedRate =
       return;
     }
 
-   if (!selectedRate) {
-  alert("Debe seleccionar una tarifa para la orden.")
-  setIsSubmitting(false)
-  return
-}
+
+    if (!selectedRate) {
+      alert("Debe seleccionar una tarifa para la orden.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-       const isReinspeccion = orden.es_reinspeccion === true;
-       const finalPayments = isReinspeccion 
-  ? payments.map(p => ({ ...p, monto_bruto: 0 })) 
-  : payments;
+      const isReinspeccion = orden.es_reinspeccion === true;
+      const finalPayments = isReinspeccion ? [] : payments;
+
+
+
+const priceSnapshot: PriceSnapshotPayload | null = isReinspeccion
+  ? null
+  : {
+      rateName: selectedRate.name,
+      basePrice: selectedRate.base_price,
+      baseIvaPercentage: selectedRate.iva_percentage,
+      baseIvaAmount: selectedRate.baseIvaAmount,
+      feesSubtotal: selectedRate.feesSubtotal,
+      feesIvaTotal: selectedRate.feesIvaTotal,
+      subtotal: selectedRate.subtotal,
+      ivaTotal: selectedRate.ivaTotal,
+      total: selectedRate.totalPrice,
+      fees: selectedRate.fees.map((fee) => ({
+        feeName: fee.name,
+        feeDescription: fee.description,
+        vehicleAgeYears: selectedRate.vehicle_age_years,
+        vehicleAgeFrom: fee.vehicle_age_from,
+        vehicleAgeTo: fee.vehicle_age_to,
+        feeAmount: fee.fee_amount,
+        ivaPercentage: fee.iva_percentage,
+        ivaAmount: fee.iva_amount,
+        feeTotal: fee.fee_total,
+      })),
+    }
+
+
+
+
+
       const { data, error } = await insertOficinaData({
         orderId: orden.id,
         formData: formData,
         payments: finalPayments,
-        vehicleServiceRateId: selectedRate.rateId,
-ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
+        vehicleServiceRateId: selectedRate.rate_id,
+        ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
         service_type: orden.service_type,
         companyId: selectedCompanyId,
-        
+        // 👇 NUEVO: desglose completo para el snapshot
+        priceSnapshot,
       });
 
       if (error || !data) {
@@ -191,9 +314,7 @@ ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
 
       alert(data);
     } catch (error: unknown) {
-      alert(
-        "Ocurrio un error inesperado en la validacion: " + error,
-      );
+      alert("Ocurrio un error inesperado en la validacion: " + error);
     } finally {
       setIsSubmitting(false);
     }
@@ -204,7 +325,7 @@ ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
     0,
   );
 
-  const totalToPay = selectedRate?.totalPrice ?? 0
+  const totalToPay = selectedRate?.totalPrice ?? 0;
   const paymentMatches = totalPayments === totalToPay;
 
   return (
@@ -266,44 +387,47 @@ ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
           </div>
 
           {/* Valor a pagar */}
-       <div className="space-y-1.5">
-  <Label className="text-foreground text-xs font-semibold">
-    VALOR A PAGAR
-  </Label>
+          <div className="space-y-1.5">
+            <Label className="text-foreground text-xs font-semibold">
+              VALOR A PAGAR
+            </Label>
 
-  {isLoadingOrderRate || isFetchingOrderRate ? (
-    <div className="flex items-center gap-2 h-10 text-xs text-muted-foreground">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Consultando tarifas...
-    </div>
-  ) : orderRateError || !orderRates?.length ? (
-    <p className="text-xs font-medium text-red-600 dark:text-red-400">
-      No hay tarifas configuradas para este vehículo.
-    </p>
-  ) : (
-   <Select
-  items={rateItems}
-  value={selectedRate?.rateId ?? null}
-  onValueChange={setSelectedRateId}
->
-  <SelectTrigger className="w-full bg-background h-10 text-xs">
-    <SelectValue />
-  </SelectTrigger>
+            {isLoadingOrderRate || isFetchingOrderRate ? (
+              <div className="flex items-center gap-2 h-10 text-xs text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Consultando tarifas...
+              </div>
+            ) : orderRateError || !orderRates?.length ? (
+              <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                No hay tarifas configuradas para este vehículo.
+              </p>
+            ) : (
+              <Select
+                items={rateItems}
+                value={selectedRate?.rate_id ?? null}
+                onValueChange={setSelectedRateId}
+              >
+                <SelectTrigger className="w-full bg-background h-10 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
 
-  <SelectContent>
-    <SelectGroup>
-      <SelectLabel>Tarifas disponibles</SelectLabel>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Tarifas disponibles</SelectLabel>
 
-      {rateItems.map((item) => (
-        <SelectItem key={item.value ?? "empty"} value={item.value}>
-          {item.label}
-        </SelectItem>
-      ))}
-    </SelectGroup>
-  </SelectContent>
-</Select>
-  )}
-</div>
+                    {rateItems.map((item) => (
+                      <SelectItem
+                        key={item.value ?? "empty"}
+                        value={item.value}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
 
           {/* Total ingresado */}
           <div className="space-y-1.5">
@@ -401,18 +525,18 @@ ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
       </div>
 
       {/* DOCUMENTOS */}
-{hasFullInfoModule && (
-  <div className="flex flex-col gap-1.5 text-center">
-    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-      Visor de Documentos Públicos
-    </span>
+      {hasFullInfoModule && (
+        <div className="flex flex-col gap-1.5 text-center">
+          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            Visor de Documentos Públicos
+          </span>
 
-    <div className="flex items-center justify-center gap-3 p-2.5 bg-muted rounded-xl border border-border">
-      <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
-      <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
-    </div>
-  </div>
-)}
+          <div className="flex items-center justify-center gap-3 p-2.5 bg-muted rounded-xl border border-border">
+            <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
+            <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+          </div>
+        </div>
+      )}
 
       {/* BOTONES */}
       <div
@@ -444,7 +568,8 @@ ratePriceSnapshot: isReinspeccion ? 0 : selectedRate.totalPrice,
                 type="submit"
                 disabled={
                   isSubmitting ||
-                  (orden.estado_orden === "en_prueba" && orden.es_reinspeccion) ||
+                  (orden.estado_orden === "en_prueba" &&
+                    orden.es_reinspeccion) ||
                   (orden.service_type !== "preventiva" && isOrderRateError) ||
                   (orden.service_type !== "preventiva" &&
                     (isLoadingOrderRate || isFetchingOrderRate))

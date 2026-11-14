@@ -43,7 +43,7 @@ export default function OrderPayments({
 }: OrderPaymentsProps) {
 
 
-const [inputValues, setInputValues] = useState<Record<number, string>>({});
+
 
   const addPayment = () => {
     if (payments.length >= MAX_PAYMENTS) return;
@@ -53,7 +53,7 @@ const [inputValues, setInputValues] = useState<Record<number, string>>({});
       {
         id: "",
     payment_method: null,
-    monto_bruto: 0,
+    monto_bruto: null,
     num_comprobante: "",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -73,7 +73,7 @@ const [inputValues, setInputValues] = useState<Record<number, string>>({});
   const updatePayment = (
     index: number,
     field: keyof EntryOrderPaymentDetail,
-    value: number | string,
+    value: number | string | null,
   ) => {
     setPayments((prev) =>
       prev.map((payment, i) =>
@@ -162,22 +162,24 @@ const [inputValues, setInputValues] = useState<Record<number, string>>({});
               </Label>
 
              <Input
-  type="number"
-  min={0}
+  type="text"
+  inputMode="numeric"
   placeholder="0"
-  // Si el inputValues tiene un valor para este index, lo usamos. Si no, usamos el del estado general.
-  value={inputValues[index] !== undefined ? inputValues[index] : String(payment.monto_bruto)}
+  value={payment.monto_bruto === null ? "" : payment.monto_bruto}
   onChange={(e) => {
-    const val = e.target.value;
-    
-    // Bloquea negativos
-    if (val.startsWith("-")) return;
+    const raw = e.target.value;
 
-    // 1. Guardamos el string EXACTO en el estado local (para que se vea el 0 o se pueda borrar)
-    setInputValues((prev) => ({ ...prev, [index]: val }));
-    
-    // 2. Actualizamos el estado real (payments) con el número
-    updatePayment(index, "monto_bruto", val === "" ? 0 : Number(val));
+    // Bloquea negativos
+    if (raw.startsWith("-")) return;
+
+    // Solo dígitos (sin decimales, letras, "e", etc.)
+    if (raw !== "" && !/^\d+$/.test(raw)) return;
+
+    // Vacío → null (muestra placeholder)
+    // Número → number
+    const numericValue = raw === "" ? null : Number(raw);
+
+    updatePayment(index, "monto_bruto", numericValue);
   }}
   className="bg-background h-10 text-xs"
   disabled={disabled}

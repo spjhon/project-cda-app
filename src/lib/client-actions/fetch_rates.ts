@@ -29,34 +29,6 @@ type VehicleServiceType =
   type VehicleRateFee =
   Database["public"]["Tables"]["fee_types"]["Row"]
 
-// ============================================================
-// TIPO DE FEE
-// ============================================================
-
-export interface VehicleRate {
-  id: string
-  tenant_id: string
-  name: string
-
-  vehicle_type: VehicleType
-
-  base_price: number
-  iva_percentage: number | null
-
-  service_type: ServiceType
-
-  is_active: boolean
-  created_at: string
-
-  fuels: FuelType[]
-  classes: VehicleClass[]
-  service_types: VehicleServiceType[]
-
-  fees: VehicleRateFee[]
-
-  // Empresas relacionadas con la tarifa
-  companies: VehicleRateCompany[]
-}
 
 // ============================================================
 // TIPO DE RATE
@@ -74,7 +46,7 @@ export interface VehicleRateCompany {
 export interface VehicleRate {
   id: string
   tenant_id: string
-
+  name: string
   vehicle_type: VehicleType
 
   base_price: number

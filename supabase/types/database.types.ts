@@ -23,7 +23,33 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "entry_order_payments": {
+            "entry_order_fee_snapshot": {
+                  Row: {
+                    "created_at": string,"entry_order_price_snapshot_id": string,"fee_amount": number,"fee_description": string | null,"fee_name": string,"fee_total": number,"id": string,"iva_amount": number,"iva_percentage": number,"tenant_id": string,"vehicle_age_from": number | null,"vehicle_age_to": number | null,"vehicle_age_years": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"entry_order_price_snapshot_id": string,"fee_amount": number,"fee_description"?: string | null,"fee_name": string,"fee_total": number,"id"?: string,"iva_amount"?: number,"iva_percentage"?: number,"tenant_id": string,"vehicle_age_from"?: number | null,"vehicle_age_to"?: number | null,"vehicle_age_years"?: number | null
+                  }
+                  Update: {
+                    "created_at"?: string,"entry_order_price_snapshot_id"?: string,"fee_amount"?: number,"fee_description"?: string | null,"fee_name"?: string,"fee_total"?: number,"id"?: string,"iva_amount"?: number,"iva_percentage"?: number,"tenant_id"?: string,"vehicle_age_from"?: number | null,"vehicle_age_to"?: number | null,"vehicle_age_years"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "entry_order_fee_snapshot_price_fkey"
+      columns: ["entry_order_price_snapshot_id"]
+isOneToOne: false
+      referencedRelation: "entry_order_price_snapshot"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "entry_order_fee_snapshot_tenant_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"entry_order_payments": {
                   Row: {
                     "created_at": string,"entry_order_id": string,"id": string,"monto_bruto": number,"num_comprobante": string | null,"payment_method": Database["public"]['Enums']["office_payment_type_enum"],"tenant_id": string,"updated_at": string
                   }
@@ -43,6 +69,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "entry_order_payments_tenant_id_fkey"
+      columns: ["tenant_id"]
+isOneToOne: false
+      referencedRelation: "tenants"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"entry_order_price_snapshot": {
+                  Row: {
+                    "base_price": number,"base_price_iva_amount": number,"base_price_iva_percentage": number,"created_at": string,"entry_order_id": string,"fees_iva_total": number,"fees_subtotal": number,"id": string,"iva_total": number,"subtotal": number,"tenant_id": string,"total": number,"vehicle_service_rate_name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "base_price": number,"base_price_iva_amount"?: number,"base_price_iva_percentage"?: number,"created_at"?: string,"entry_order_id": string,"fees_iva_total"?: number,"fees_subtotal"?: number,"id"?: string,"iva_total"?: number,"subtotal"?: number,"tenant_id": string,"total": number,"vehicle_service_rate_name": string
+                  }
+                  Update: {
+                    "base_price"?: number,"base_price_iva_amount"?: number,"base_price_iva_percentage"?: number,"created_at"?: string,"entry_order_id"?: string,"fees_iva_total"?: number,"fees_subtotal"?: number,"id"?: string,"iva_total"?: number,"subtotal"?: number,"tenant_id"?: string,"total"?: number,"vehicle_service_rate_name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "entry_order_price_snapshot_order_fkey"
+      columns: ["entry_order_id"]
+isOneToOne: true
+      referencedRelation: "entry_orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "entry_order_price_snapshot_tenant_fkey"
       columns: ["tenant_id"]
 isOneToOne: false
       referencedRelation: "tenants"
@@ -81,7 +133,7 @@ isOneToOne: false
                   }
                   ComputedFields: never
                   Insert: {
-                    "cliente_direccion_snapshot"?: string | null,"cliente_email_snapshot"?: string | null,"cliente_id"?: string | null,"cliente_nombre_snapshot"?: string | null,"cliente_numero_documento_snapshot"?: string | null,"cliente_telefono_snapshot"?: string | null,"cliente_tipo_documento_snapshot"?: string | null,"company_id"?: string | null,"company_name_snapshot"?: string | null,"company_nit_snapshot"?: string | null,"consecutivo"?: number | null,"consecutivo_fur"?: string | null,"consecutivo_rtm"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"director_tecnico_firma_path_snapshot"?: string | null,"director_tecnico_nombre_snapshot"?: string | null,"director_tecnico_numero_documento_snapshot"?: string | null,"director_tecnico_tipo_documento_snapshot"?: string | null,"es_reinspeccion"?: boolean | null,"estado_orden"?: Database["public"]['Enums']["order_status_enum"],"fecha"?: string,"fecha_limite_reinspeccion"?: string | null,"funcionario_firma_path_snapshot"?: string | null,"funcionario_id": string,"funcionario_nombre_snapshot": string,"funcionario_numero_documento_snapshot": string,"funcionario_tipo_documento_snapshot": string,"gas_numero_snapshot"?: string | null,"gas_vencimiento_snapshot"?: string | null,"id"?: string,"id_orden_reinspeccion"?: string | null,"id_reprobado"?: string | null,"kilometraje"?: string | null,"observaciones"?: string | null,"oficina_consecutivo_factura"?: string | null,"oficina_pin"?: string | null,"plantilla_id"?: string | null,"propietario_direccion_snapshot"?: string | null,"propietario_email_snapshot"?: string | null,"propietario_id"?: string | null,"propietario_nombre_snapshot"?: string | null,"propietario_numero_documento_snapshot"?: string | null,"propietario_telefono_snapshot"?: string | null,"propietario_tipo_documento_snapshot"?: string | null,"rate_price_snapshot"?: number | null,"resultado_revision"?: string | null,"se_compro_soat"?: boolean,"service_type"?: Database["public"]['Enums']["service_type_enum"],"soat_vencimiento_snapshot"?: string | null,"tenant_id": string,"updated_at"?: string,"vehicle_service_rate_id"?: string | null,"vehiculo_blindaje_snapshot": boolean,"vehiculo_capacidad_pasajeros_snapshot"?: number | null,"vehiculo_cilindrada_snapshot"?: number | null,"vehiculo_clase_snapshot": string,"vehiculo_color_snapshot"?: string | null,"vehiculo_combustible_snapshot": string,"vehiculo_es_ensenanza_snapshot": boolean,"vehiculo_es_extranjero_snapshot": boolean,"vehiculo_id"?: string | null,"vehiculo_linea_snapshot": string,"vehiculo_marca_snapshot": string,"vehiculo_modelo_snapshot": number,"vehiculo_placa_snapshot": string,"vehiculo_tipo_servicio_snapshot": Database["public"]['Enums']["vehicle_service_type_enum"],"vehiculo_tipo_snapshot": Database["public"]['Enums']["vehicle_type_enum"]
+                    "cliente_direccion_snapshot"?: string | null,"cliente_email_snapshot"?: string | null,"cliente_id"?: string | null,"cliente_nombre_snapshot"?: string | null,"cliente_numero_documento_snapshot"?: string | null,"cliente_telefono_snapshot"?: string | null,"cliente_tipo_documento_snapshot"?: string | null,"company_id"?: string | null,"company_name_snapshot"?: string | null,"company_nit_snapshot"?: string | null,"consecutivo"?: number | null,"consecutivo_fur"?: string | null,"consecutivo_rtm"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"director_tecnico_firma_path_snapshot"?: string | null,"director_tecnico_nombre_snapshot"?: string | null,"director_tecnico_numero_documento_snapshot"?: string | null,"director_tecnico_tipo_documento_snapshot"?: string | null,"es_reinspeccion"?: boolean | null,"estado_orden"?: Database["public"]['Enums']["order_status_enum"],"fecha"?: string,"fecha_limite_reinspeccion"?: string | null,"funcionario_firma_path_snapshot"?: string | null,"funcionario_id": string,"funcionario_nombre_snapshot": string,"funcionario_numero_documento_snapshot": string,"funcionario_tipo_documento_snapshot": string,"gas_numero_snapshot"?: string | null,"gas_vencimiento_snapshot"?: string | null,"id"?: string,"id_orden_reinspeccion"?: string | null,"id_reprobado"?: string | null,"kilometraje"?: string | null,"observaciones"?: string | null,"oficina_consecutivo_factura"?: string | null,"oficina_pin"?: string | null,"plantilla_id"?: string | null,"propietario_direccion_snapshot"?: string | null,"propietario_email_snapshot"?: string | null,"propietario_id"?: string | null,"propietario_nombre_snapshot"?: string | null,"propietario_numero_documento_snapshot"?: string | null,"propietario_telefono_snapshot"?: string | null,"propietario_tipo_documento_snapshot"?: string | null,"rate_price_snapshot"?: number | null,"resultado_revision"?: string | null,"se_compro_soat"?: boolean,"service_type"?: Database["public"]['Enums']["service_type_enum"],"soat_vencimiento_snapshot"?: string | null,"tenant_id": string,"updated_at"?: string,"vehicle_service_rate_id"?: string | null,"vehiculo_blindaje_snapshot": boolean,"vehiculo_capacidad_pasajeros_snapshot"?: number | null,"vehiculo_cilindrada_snapshot"?: number | null,"vehiculo_clase_snapshot"?: string,"vehiculo_color_snapshot"?: string | null,"vehiculo_combustible_snapshot"?: string,"vehiculo_es_ensenanza_snapshot": boolean,"vehiculo_es_extranjero_snapshot": boolean,"vehiculo_id"?: string | null,"vehiculo_linea_snapshot": string,"vehiculo_marca_snapshot": string,"vehiculo_modelo_snapshot"?: number,"vehiculo_placa_snapshot": string,"vehiculo_tipo_servicio_snapshot": Database["public"]['Enums']["vehicle_service_type_enum"],"vehiculo_tipo_snapshot": Database["public"]['Enums']["vehicle_type_enum"]
                   }
                   Update: {
                     "cliente_direccion_snapshot"?: string | null,"cliente_email_snapshot"?: string | null,"cliente_id"?: string | null,"cliente_nombre_snapshot"?: string | null,"cliente_numero_documento_snapshot"?: string | null,"cliente_telefono_snapshot"?: string | null,"cliente_tipo_documento_snapshot"?: string | null,"company_id"?: string | null,"company_name_snapshot"?: string | null,"company_nit_snapshot"?: string | null,"consecutivo"?: number | null,"consecutivo_fur"?: string | null,"consecutivo_rtm"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"director_tecnico_firma_path_snapshot"?: string | null,"director_tecnico_nombre_snapshot"?: string | null,"director_tecnico_numero_documento_snapshot"?: string | null,"director_tecnico_tipo_documento_snapshot"?: string | null,"es_reinspeccion"?: boolean | null,"estado_orden"?: Database["public"]['Enums']["order_status_enum"],"fecha"?: string,"fecha_limite_reinspeccion"?: string | null,"funcionario_firma_path_snapshot"?: string | null,"funcionario_id"?: string,"funcionario_nombre_snapshot"?: string,"funcionario_numero_documento_snapshot"?: string,"funcionario_tipo_documento_snapshot"?: string,"gas_numero_snapshot"?: string | null,"gas_vencimiento_snapshot"?: string | null,"id"?: string,"id_orden_reinspeccion"?: string | null,"id_reprobado"?: string | null,"kilometraje"?: string | null,"observaciones"?: string | null,"oficina_consecutivo_factura"?: string | null,"oficina_pin"?: string | null,"plantilla_id"?: string | null,"propietario_direccion_snapshot"?: string | null,"propietario_email_snapshot"?: string | null,"propietario_id"?: string | null,"propietario_nombre_snapshot"?: string | null,"propietario_numero_documento_snapshot"?: string | null,"propietario_telefono_snapshot"?: string | null,"propietario_tipo_documento_snapshot"?: string | null,"rate_price_snapshot"?: number | null,"resultado_revision"?: string | null,"se_compro_soat"?: boolean,"service_type"?: Database["public"]['Enums']["service_type_enum"],"soat_vencimiento_snapshot"?: string | null,"tenant_id"?: string,"updated_at"?: string,"vehicle_service_rate_id"?: string | null,"vehiculo_blindaje_snapshot"?: boolean,"vehiculo_capacidad_pasajeros_snapshot"?: number | null,"vehiculo_cilindrada_snapshot"?: number | null,"vehiculo_clase_snapshot"?: string,"vehiculo_color_snapshot"?: string | null,"vehiculo_combustible_snapshot"?: string,"vehiculo_es_ensenanza_snapshot"?: boolean,"vehiculo_es_extranjero_snapshot"?: boolean,"vehiculo_id"?: string | null,"vehiculo_linea_snapshot"?: string,"vehiculo_marca_snapshot"?: string,"vehiculo_modelo_snapshot"?: number,"vehiculo_placa_snapshot"?: string,"vehiculo_tipo_servicio_snapshot"?: Database["public"]['Enums']["vehicle_service_type_enum"],"vehiculo_tipo_snapshot"?: Database["public"]['Enums']["vehicle_type_enum"]
@@ -817,7 +869,7 @@ isOneToOne: false
                            },
 "fetch_order_rate":
 { Args: { "p_company_id"?: string,"p_order_id": string }; Returns: {
-              "base_price": number,"fees": Json,"iva_percentage": number,"rate_id": string
+              "base_price": number,"fees": Json,"iva_percentage": number,"name": string,"rate_id": string,"vehicle_age_years": number
             }[]
                            },
 "fetch_orders_templates":
@@ -890,7 +942,7 @@ isOneToOne: false
 { Args: { "p_consecutivo_fur": string,"p_consecutivo_rtm": string,"p_director_tecnico_firma_path_snapshot": string,"p_director_tecnico_nombre_snapshot": string,"p_director_tecnico_numero_documento_snapshot": string,"p_director_tecnico_tipo_documento_snapshot": string,"p_es_reinspeccion"?: boolean,"p_order_id": string,"p_resultado_revision": string }; Returns: Json
                            },
 "update_office_order_data":
-{ Args: { "p_company_id": string,"p_consecutivo_factura": string,"p_order_id": string,"p_payments": Json,"p_pin": string,"p_rate_price_snapshot": number,"p_se_compro_soat": boolean,"p_vehicle_service_rate_id": string }; Returns: string
+{ Args: { "p_company_id": string,"p_consecutivo_factura": string,"p_order_id": string,"p_payments": Json,"p_pin": string,"p_price_snapshot"?: Json,"p_rate_price_snapshot": number,"p_se_compro_soat": boolean,"p_vehicle_service_rate_id": string }; Returns: string
                            },
 "update_tenant_credits":
 { Args: { "p_certificados_delta"?: number,"p_fupas_delta"?: number,"p_tenant_id": string }; Returns: {

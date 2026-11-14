@@ -1,47 +1,34 @@
+import { calculateVehicleRateTotal } from "@/lib/utils/calculate-vehicle-rate-total";
+import { RateFeeForCalculation } from "../client-actions/fetch_entry_order_rate";
 
-import { calculateVehicleRateTotal } from "@/lib/utils/calculate-vehicle-rate-total"
-
-export interface RateFeeForScenario {
-  id: string
-  name: string
-  description: string | null
-  fee_amount: number
-  iva_percentage: number | null
-  vehicle_age_from: number | null
-  vehicle_age_to: number | null
-}
 
 interface CalculateVehicleRateScenariosArgs {
-  basePrice: number
-  ivaPercentage: number | null
-  fees: RateFeeForScenario[]
+  base_price: number;
+  iva_percentage: number | null;
+  fees: RateFeeForCalculation[];
 }
 
 export interface VehicleRatePriceScenario {
-  id: string
-  label: string
-  ageFrom: number | null
-  ageTo: number | null
-  fees: RateFeeForScenario[]
-  totalPrice: number
+  id: string;
+  label: string;
+  ageFrom: number | null;
+  ageTo: number | null;
+  fees: RateFeeForCalculation[];
+  totalPrice: number;
 }
 
 export function calculateVehicleRateScenarios({
-  basePrice,
-  ivaPercentage,
+  base_price,
+  iva_percentage,
   fees,
 }: CalculateVehicleRateScenariosArgs): VehicleRatePriceScenario[] {
   const hasAgeRanges = fees.some(
-    (fee) =>
-      fee.vehicle_age_from !== null ||
-      fee.vehicle_age_to !== null,
-  )
+    (fee) => fee.vehicle_age_from !== null || fee.vehicle_age_to !== null,
+  );
 
   const fixedFees = fees.filter(
-    (fee) =>
-      fee.vehicle_age_from === null &&
-      fee.vehicle_age_to === null,
-  )
+    (fee) => fee.vehicle_age_from === null && fee.vehicle_age_to === null,
+  );
 
   // Sin tarifas por edad: un único precio general.
   if (!hasAgeRanges) {
@@ -55,92 +42,86 @@ export function calculateVehicleRateScenarios({
         totalPrice: calculateVehicleRateTotal({
           rates: [
             {
-              rateId: "general",
-              basePrice,
-              ivaPercentage,
+              rate_id: "general",
+              name: "Precio general", // 👈 neutro, no afecta cálculo
+              base_price,
+              iva_percentage,
+              vehicle_age_years: null, // 👈 neutro, no afecta cálculo
               fees,
             },
           ],
         })[0].totalPrice,
       },
-    ]
+    ];
   }
 
   // Cada límite marca el inicio de un nuevo intervalo.
   // Los rangos son inclusivos: [0, 2] y [3, 5].
-  const boundaries = new Set<number>([0])
+  const boundaries = new Set<number>([0]);
 
   for (const fee of fees) {
     if (fee.vehicle_age_from !== null && fee.vehicle_age_from >= 0) {
-      boundaries.add(fee.vehicle_age_from)
+      boundaries.add(fee.vehicle_age_from);
     }
 
     if (fee.vehicle_age_to !== null && fee.vehicle_age_to >= 0) {
-      boundaries.add(fee.vehicle_age_to + 1)
+      boundaries.add(fee.vehicle_age_to + 1);
     }
   }
 
-  const sortedBoundaries = [...boundaries].sort((a, b) => a - b)
+  const sortedBoundaries = [...boundaries].sort((a, b) => a - b);
 
   const intervals = sortedBoundaries
     .map((ageFrom, index) => {
-      const nextBoundary = sortedBoundaries[index + 1]
+      const nextBoundary = sortedBoundaries[index + 1];
 
       return {
         ageFrom,
         ageTo: nextBoundary === undefined ? null : nextBoundary - 1,
-      }
+      };
     })
     // Descartamos intervalos sin tarifas aplicables.
-   .filter(({ ageFrom }) =>
-  fees.some((fee) => {
-    const hasAgeRange =
-      fee.vehicle_age_from !== null ||
-      fee.vehicle_age_to !== null
+    .filter(({ ageFrom }) =>
+      fees.some((fee) => {
+        const hasAgeRange =
+          fee.vehicle_age_from !== null || fee.vehicle_age_to !== null;
 
-    const matchesFrom =
-      fee.vehicle_age_from === null ||
-      ageFrom >= fee.vehicle_age_from
+        const matchesFrom =
+          fee.vehicle_age_from === null || ageFrom >= fee.vehicle_age_from;
 
-    const matchesTo =
-      fee.vehicle_age_to === null ||
-      ageFrom <= fee.vehicle_age_to
+        const matchesTo =
+          fee.vehicle_age_to === null || ageFrom <= fee.vehicle_age_to;
 
-    return hasAgeRange && matchesFrom && matchesTo
-  }),
-)
+        return hasAgeRange && matchesFrom && matchesTo;
+      }),
+    );
 
   return intervals.map(({ ageFrom, ageTo }) => {
     const applicableFees = fees.filter((fee) => {
       const isFixed =
-        fee.vehicle_age_from === null &&
-        fee.vehicle_age_to === null
+        fee.vehicle_age_from === null && fee.vehicle_age_to === null;
 
       const matchesFrom =
-        fee.vehicle_age_from === null ||
-        ageFrom >= fee.vehicle_age_from
+        fee.vehicle_age_from === null || ageFrom >= fee.vehicle_age_from;
 
       const matchesTo =
-        fee.vehicle_age_to === null ||
-        ageFrom <= fee.vehicle_age_to
+        fee.vehicle_age_to === null || ageFrom <= fee.vehicle_age_to;
 
-      return isFixed || (matchesFrom && matchesTo)
-    })
+      return isFixed || (matchesFrom && matchesTo);
+    });
 
     const rangedFees = applicableFees.filter(
-      (fee) =>
-        fee.vehicle_age_from !== null ||
-        fee.vehicle_age_to !== null,
-    )
+      (fee) => fee.vehicle_age_from !== null || fee.vehicle_age_to !== null,
+    );
 
-    const scenarioFees = [...fixedFees, ...rangedFees]
+    const scenarioFees = [...fixedFees, ...rangedFees];
 
     const label =
       ageTo === null
         ? `Desde ${ageFrom} años`
         : ageFrom === ageTo
           ? `${ageFrom} ${ageFrom === 1 ? "año" : "años"}`
-          : `${ageFrom}–${ageTo} años`
+          : `${ageFrom}–${ageTo} años`;
 
     return {
       id: `${ageFrom}-${ageTo ?? "plus"}`,
@@ -151,13 +132,15 @@ export function calculateVehicleRateScenarios({
       totalPrice: calculateVehicleRateTotal({
         rates: [
           {
-            rateId: `${ageFrom}-${ageTo ?? "plus"}`,
-            basePrice,
-            ivaPercentage,
+            rate_id: `${ageFrom}-${ageTo ?? "plus"}`,
+            name: label, // 👈 reutilizas el label del escenario
+            base_price, // 👈 ojo: base_price, no basePrice
+            iva_percentage, // 👈 ojo: iva_percentage, no ivaPercentage
+            vehicle_age_years: null, // 👈 neutro
             fees: scenarioFees,
           },
         ],
       })[0].totalPrice,
-    }
-  })
+    };
+  });
 }

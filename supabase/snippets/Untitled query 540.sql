@@ -1,2 +1,0 @@
-REFRESH MATERIALIZED VIEW public.mv_reportes_diarios;
-REFRESH MATERIALIZED VIEW public.mv_reportes_contables;

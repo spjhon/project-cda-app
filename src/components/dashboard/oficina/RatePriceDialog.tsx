@@ -23,8 +23,8 @@ const calculateIva = (amount: number, percentage: number | null) =>
 
 export function RatePriceDialog({ rate }: RatePriceDialogProps) {
   const scenarios = calculateVehicleRateScenarios({
-    basePrice: rate.base_price,
-    ivaPercentage: rate.iva_percentage,
+    base_price: rate.base_price,
+    iva_percentage: rate.iva_percentage,
     fees: rate.fees,
   });
 

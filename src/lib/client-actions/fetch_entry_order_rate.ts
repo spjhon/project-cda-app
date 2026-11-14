@@ -6,18 +6,48 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 import {
   calculateVehicleRateTotal,
   type CalculatedVehicleRate,
-  type RateFeeForCalculation,
 } from "../utils/calculate-vehicle-rate-total"
+
+
+export interface RateFeeForCalculation {
+  // ============ Identificación ============
+  id: string
+  tenant_id: string
+  name: string
+  description: string | null
+
+  // ============ Montos base ============
+  fee_amount: number
+  iva_percentage: number | null
+
+  // ============ Rango de edad ============
+  vehicle_age_from: number | null
+  vehicle_age_to: number | null
+
+  // ============ Auditoría (vienen de la RPC) ============
+  created_at: string
+  updated_at: string
+}
+
 
 interface UseOrderRateArgs {
   orderId: string | undefined
   companyId: string | null
 }
 
-interface OrderRateData {
+export interface OrderRateData {
+  // ============ Identificación ============
   rate_id: string
+  name: string
+
+  // ============ Montos base ============
   base_price: number
   iva_percentage: number | null
+
+  // ============ Edad del vehículo calculada por la RPC ============
+  vehicle_age_years: number | null
+
+  // ============ Fees aplicables ============
   fees: RateFeeForCalculation[]
 }
 
@@ -52,14 +82,7 @@ export function useOrderRate({
 
       const rates = data as unknown as OrderRateData[]
 
-      return calculateVehicleRateTotal({
-        rates: rates.map((rate) => ({
-          rateId: rate.rate_id,
-          basePrice: Number(rate.base_price),
-          ivaPercentage: rate.iva_percentage,
-          fees: rate.fees ?? [],
-        })),
-      })
+      return calculateVehicleRateTotal({rates})
     },
   })
 }

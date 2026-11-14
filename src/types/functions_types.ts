@@ -101,7 +101,7 @@ export interface TirePressureDetail {
 export interface EntryOrderPaymentDetail {
   id: string;
   payment_method: Database["public"]["Enums"]["office_payment_type_enum"] | null;
-  monto_bruto:  number;
+  monto_bruto:  number | null;
   num_comprobante: string | null;
   created_at: string;
   updated_at: string;
@@ -139,11 +139,11 @@ export interface EntryOrderListItem {
   vehiculo_tipo_snapshot: Database["public"]["Enums"]["vehicle_type_enum"];
 vehiculo_tipo_servicio_snapshot: Database["public"]["Enums"]["vehicle_service_type_enum"];
 vehiculo_combustible_snapshot: string | null;
-vehiculo_blindaje_snapshot: boolean | null;
-vehiculo_es_ensenanza_snapshot: boolean | null;
-vehiculo_es_extranjero_snapshot: boolean | null;
-funcionario_nombre_snapshot: string | null;
-  estado_orden: string;
+vehiculo_blindaje_snapshot: boolean;
+vehiculo_es_ensenanza_snapshot: boolean;
+vehiculo_es_extranjero_snapshot: boolean;
+funcionario_nombre_snapshot: string;
+  estado_orden: Database["public"]["Enums"]["order_status_enum"];
 
   // Información de Oficina
   oficina_pin: string | null;
