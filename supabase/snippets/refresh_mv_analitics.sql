@@ -1,3 +1,0 @@
-REFRESH MATERIALIZED VIEW CONCURRENTLY mv_reportes_diarios;
-
-REFRESH MATERIALIZED VIEW CONCURRENTLY public.mv_reportes_contables;

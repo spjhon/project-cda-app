@@ -170,20 +170,25 @@ BEGIN
 
             -- 👇 NUEVO: combinaciones del mes como JSON
             COALESCE(
-                (
-                    SELECT jsonb_object_agg(
+            (
+                SELECT jsonb_object_agg(combinacion, total)
+                FROM (
+                    SELECT
                         mv2.vehiculo_tipo_snapshot::text || '_' ||
-                        mv2.vehiculo_tipo_servicio_snapshot::text,
-                        mv2.num_ordenes
-                    )
+                        mv2.vehiculo_tipo_servicio_snapshot::text AS combinacion,
+                        SUM(mv2.num_ordenes) AS total   -- 👈 SUM, no el valor crudo
                     FROM public.mv_reportes_desglose_precio mv2
                     WHERE mv2.fecha >= make_date(p_ano, cal.numero_mes, 1)
-                      AND mv2.fecha <  (make_date(p_ano, cal.numero_mes, 1) + INTERVAL '1 month')::DATE
-                      AND mv2.tenant_id = p_tenant_id
-                      AND (p_service_type IS NULL OR mv2.service_type = p_service_type)
-                ),
-                '{}'::jsonb
-            ) AS combinaciones
+                    AND mv2.fecha <  (make_date(p_ano, cal.numero_mes, 1) + INTERVAL '1 month')::DATE
+                    AND mv2.tenant_id = p_tenant_id
+                    AND (p_service_type IS NULL OR mv2.service_type = p_service_type)
+                    GROUP BY
+                        mv2.vehiculo_tipo_snapshot,
+                        mv2.vehiculo_tipo_servicio_snapshot
+                ) sub
+            ),
+            '{}'::jsonb
+        ) AS combinaciones
         FROM todos_los_meses cal
         LEFT JOIN public.mv_reportes_desglose_precio mv
             ON mv.fecha >= make_date(p_ano, cal.numero_mes, 1)
