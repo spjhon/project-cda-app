@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useContext, useState } from "react";
@@ -32,6 +31,13 @@ import {
   CreateFeeInput,
   createFeeSchema,
 } from "@/lib/zod-schemas/validaciones-formularios/crear-fee-schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // ==========================================
 // TIPO DEL FORMULARIO
@@ -48,6 +54,17 @@ interface FeeFormState {
 }
 
 // ==========================================
+// FEES FIJOS
+// ==========================================
+
+const FEES_FIJOS = [
+  { label: "SICOV", value: "sicov" },
+  { label: "ENTIDAD RECAUDADORA", value: "entidad_recaudadora" },
+  { label: "COMISIÓN RUNT", value: "comision_runt" },
+  { label: "ANSV", value: "ansv" },
+] as const;
+
+// ==========================================
 // PROPS
 // ==========================================
 
@@ -59,13 +76,10 @@ interface AddFeeDialogProps {
 // COMPONENTE
 // ==========================================
 
-export default function AddFeeDialog({
-  onFeeCreated,
-}: AddFeeDialogProps) {
+export default function AddFeeDialog({ onFeeCreated }: AddFeeDialogProps) {
   const contextReceived = useContext(PermissionsContext);
 
-  const tenantId =
-    contextReceived?.PermissionsContextValue?.tenantObject?.id;
+  const tenantId = contextReceived?.PermissionsContextValue?.tenantObject?.id;
 
   // ==========================================
   // ESTADO INICIAL
@@ -81,33 +95,27 @@ export default function AddFeeDialog({
     vehicle_age_to: "",
   };
 
-  const [form, setForm] =
-    useState<FeeFormState>(INITIAL_FORM);
+  const [form, setForm] = useState<FeeFormState>(INITIAL_FORM);
 
   // ==========================================
   // ESTADO DEL ERROR
   // ==========================================
 
   const [isErrorOpen, setIsErrorOpen] = useState(false);
-  const [errors, setErrors] =
-    useState<string | string[] | null>(null);
+  const [errors, setErrors] = useState<string | string[] | null>(null);
 
   // ==========================================
   // ESTADO DEL ÉXITO
   // ==========================================
 
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-  const [successMessages, setSuccessMessages] =
-    useState<string | null>(null);
+  const [successMessages, setSuccessMessages] = useState<string | null>(null);
 
   // ==========================================
   // ACTUALIZAR CAMPO
   // ==========================================
 
-  const handleChange = (
-    field: keyof FeeFormState,
-    value: string | number
-  ) => {
+  const handleChange = (field: keyof FeeFormState, value: string | number) => {
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -118,9 +126,7 @@ export default function AddFeeDialog({
   // SUBMIT
   // ==========================================
 
-  const handleSubmit = (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -128,30 +134,34 @@ export default function AddFeeDialog({
     // PREPARAR DATOS
     // ==========================================
 
+
+    // ==========================================
+      // VALIDAR QUE SE HAYA SELECCIONADO UN FEE
+      // ==========================================
+
+      if (!form.name) {
+        setErrors(["Debe seleccionar un fee"]);
+        setIsErrorOpen(true);
+        return;
+      }
+
     const data = {
       tenant_id: form.tenant_id,
       name: form.name.trim(),
       description: form.description.trim() || undefined,
 
-      fee_amount:
-        form.fee_amount === ""
-          ? null
-          : Number(form.fee_amount),
+      fee_amount: form.fee_amount === "" ? null : Number(form.fee_amount),
 
       iva_percentage:
-        (form.iva_percentage === "" || form.iva_percentage === "0")
+        form.iva_percentage === "" || form.iva_percentage === "0"
           ? null
           : Number(form.iva_percentage),
 
       vehicle_age_from:
-        form.vehicle_age_from === ""
-          ? null
-          : Number(form.vehicle_age_from),
+        form.vehicle_age_from === "" ? null : Number(form.vehicle_age_from),
 
       vehicle_age_to:
-        form.vehicle_age_to === ""
-          ? null
-          : Number(form.vehicle_age_to),
+        form.vehicle_age_to === "" ? null : Number(form.vehicle_age_to),
     };
 
     // ==========================================
@@ -165,9 +175,7 @@ export default function AddFeeDialog({
     // ==========================================
 
     if (!result.success) {
-      const messages = result.error.issues.map(
-        (issue) => issue.message
-      );
+      const messages = result.error.issues.map((issue) => issue.message);
 
       setErrors(messages);
       setIsErrorOpen(true);
@@ -186,20 +194,16 @@ export default function AddFeeDialog({
       fee_amount: result.data.fee_amount,
       iva_percentage: result.data.iva_percentage,
 
-      vehicle_age_from:
-        result.data.vehicle_age_from ?? null,
+      vehicle_age_from: result.data.vehicle_age_from ?? null,
 
-      vehicle_age_to:
-        result.data.vehicle_age_to ?? null,
+      vehicle_age_to: result.data.vehicle_age_to ?? null,
     };
 
     // ==========================================
     // MENSAJE DE ÉXITO
     // ==========================================
 
-    setSuccessMessages(
-      "El fee fue agregado correctamente."
-    );
+    setSuccessMessages("El fee fue agregado correctamente.");
 
     setIsSuccessOpen(true);
 
@@ -282,14 +286,11 @@ export default function AddFeeDialog({
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>
-                Agregar fee
-              </DialogTitle>
+              <DialogTitle>Agregar fee</DialogTitle>
 
               <DialogDescription>
-                Agrega un fee al rate actual. El fee se
-                mantendrá en el formulario hasta que se
-                registre el rate.
+                Agrega un fee al rate actual. El fee se mantendrá en el
+                formulario hasta que se registre el rate.
               </DialogDescription>
             </DialogHeader>
 
@@ -298,29 +299,37 @@ export default function AddFeeDialog({
                 ======================================== */}
 
             <FieldGroup className="mt-6">
-
               {/* ========================================
                   NOMBRE
                   ======================================== */}
 
-              <Field>
-                <Label htmlFor="fee-name">
-                  Nombre
-                </Label>
+              {/* ========================================
+                NOMBRE (SELECT DE FEES FIJOS)
+                ======================================== */}
 
-                <Input
-                  id="fee-name"
-                  name="name"
-                  value={form.name}
-                  onChange={(event) =>
-                    handleChange(
-                      "name",
-                      event.target.value
-                    )
-                  }
-                  placeholder="Ej. SICOV"
-                  required
-                />
+              <Field>
+                <Label htmlFor="fee-name">Nombre</Label>
+
+                <Select
+                  items={FEES_FIJOS.map((f) => ({
+                    label: f.label,
+                    value: f.value,
+                  }))}
+                  value={form.name || null}
+                  onValueChange={(value) => handleChange("name", value ?? "")}
+                >
+                  <SelectTrigger id="fee-name" className="w-full">
+                    <SelectValue placeholder="Seleccione un fee" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {FEES_FIJOS.map((fee) => (
+                      <SelectItem key={fee.value} value={fee.value}>
+                        {fee.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Field>
 
               {/* ========================================
@@ -328,19 +337,14 @@ export default function AddFeeDialog({
                   ======================================== */}
 
               <Field>
-                <Label htmlFor="fee-description">
-                  Descripción
-                </Label>
+                <Label htmlFor="fee-description">Descripción</Label>
 
                 <Textarea
                   id="fee-description"
                   name="description"
                   value={form.description}
                   onChange={(event) =>
-                    handleChange(
-                      "description",
-                      event.target.value
-                    )
+                    handleChange("description", event.target.value)
                   }
                   placeholder="Describe el fee..."
                   rows={3}
@@ -353,9 +357,7 @@ export default function AddFeeDialog({
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field>
-                  <Label htmlFor="fee-amount">
-                    Valor del fee
-                  </Label>
+                  <Label htmlFor="fee-amount">Valor del fee</Label>
 
                   <Input
                     id="fee-amount"
@@ -365,10 +367,7 @@ export default function AddFeeDialog({
                     step="0.01"
                     value={form.fee_amount}
                     onChange={(event) =>
-                      handleChange(
-                        "fee_amount",
-                        event.target.value
-                      )
+                      handleChange("fee_amount", event.target.value)
                     }
                     placeholder="0"
                     required
@@ -376,9 +375,7 @@ export default function AddFeeDialog({
                 </Field>
 
                 <Field>
-                  <Label htmlFor="fee-iva">
-                    IVA (%)
-                  </Label>
+                  <Label htmlFor="fee-iva">IVA (%)</Label>
 
                   <Input
                     id="fee-iva"
@@ -390,10 +387,7 @@ export default function AddFeeDialog({
                     value={form.iva_percentage}
                     placeholder="0"
                     onChange={(event) =>
-                      handleChange(
-                        "iva_percentage",
-                        event.target.value
-                      )
+                      handleChange("iva_percentage", event.target.value)
                     }
                   />
 
@@ -409,27 +403,21 @@ export default function AddFeeDialog({
 
               <div className="space-y-3">
                 <div>
-                  <Label>
-                    Rango de edad del vehículo
-                  </Label>
+                  <Label>Rango de edad del vehículo</Label>
 
                   <p className="text-xs text-muted-foreground mt-1">
-                    Indica la antigüedad del vehículo en años.
-                    Déjalo vacío si el fee aplica para cualquier
-                    antigüedad.
+                    Indica la antigüedad del vehículo en años. Déjalo vacío si
+                    el fee aplica para cualquier antigüedad.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
                   {/* ========================================
                       EDAD DESDE
                       ======================================== */}
 
                   <Field>
-                    <Label htmlFor="vehicle-age-from">
-                      Desde
-                    </Label>
+                    <Label htmlFor="vehicle-age-from">Desde</Label>
 
                     <Input
                       id="vehicle-age-from"
@@ -439,10 +427,7 @@ export default function AddFeeDialog({
                       step="1"
                       value={form.vehicle_age_from}
                       onChange={(event) =>
-                        handleChange(
-                          "vehicle_age_from",
-                          event.target.value
-                        )
+                        handleChange("vehicle_age_from", event.target.value)
                       }
                       placeholder="Ej. 0"
                     />
@@ -453,9 +438,7 @@ export default function AddFeeDialog({
                       ======================================== */}
 
                   <Field>
-                    <Label htmlFor="vehicle-age-to">
-                      Hasta
-                    </Label>
+                    <Label htmlFor="vehicle-age-to">Hasta</Label>
 
                     <Input
                       id="vehicle-age-to"
@@ -465,18 +448,13 @@ export default function AddFeeDialog({
                       step="1"
                       value={form.vehicle_age_to}
                       onChange={(event) =>
-                        handleChange(
-                          "vehicle_age_to",
-                          event.target.value
-                        )
+                        handleChange("vehicle_age_to", event.target.value)
                       }
                       placeholder="Ej. 2"
                     />
                   </Field>
-
                 </div>
               </div>
-
             </FieldGroup>
 
             {/* ==========================================
@@ -484,23 +462,15 @@ export default function AddFeeDialog({
                 ========================================== */}
 
             <DialogFooter className="mt-6">
-
               <DialogClose
                 render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={resetForm}
-                  >
+                  <Button type="button" variant="outline" onClick={resetForm}>
                     Cancelar
                   </Button>
                 }
               />
 
-              <Button type="submit">
-                Agregar fee
-              </Button>
-
+              <Button type="submit">Agregar fee</Button>
             </DialogFooter>
           </form>
         </DialogContent>

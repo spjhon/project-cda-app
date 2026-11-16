@@ -169,3 +169,80 @@ funcionario_nombre_snapshot: string;
   // Metadata de paginación
   total_count: number;
 }
+
+
+
+
+//------------------------------------------
+//FUNCTION: fetch_reportes_desglose_precio
+//FILE NAME: function_fetch_reportes_desglose_precio
+//--------------------------------------------
+// ============================================================
+// TIPOS: Desglose de precios
+// ============================================================
+
+// 👇 NUEVO: combinaciones por tipo de vehículo + tipo de servicio
+// Ej: { "liviano_particular": 30, "liviano_publico": 5, "pesado_particular": 10 }
+export type CombinacionesTipoServicio = Record<string, number>;
+
+// Item de un día en chart_mes
+export interface DesglosePrecioDiaItem {
+  fecha: string;          // "2026-11-01"
+  dia: number;            // 1-31
+  base_price: number;
+  base_iva_amount: number;
+  base_iva_percentage: number | null;
+  fee_sicov_amount: number;
+  fee_sicov_iva: number;
+  fee_sicov_iva_percentage: number | null;
+  fee_entidad_amount: number;
+  fee_entidad_iva: number;
+  fee_entidad_iva_percentage: number | null;
+  fee_runt_amount: number;
+  fee_runt_iva: number;
+  fee_runt_iva_percentage: number | null;
+  fee_ansv_amount: number;
+  fee_ansv_iva: number;
+  fee_ansv_iva_percentage: number | null;
+  fees_subtotal: number;
+  fees_iva_total: number;
+  subtotal: number;
+  iva_total: number;
+  total: number;
+  num_ordenes: number;
+  combinaciones: CombinacionesTipoServicio;   // 👈 NUEVO
+}
+
+// Item de un mes en chart_anio
+export interface DesglosePrecioMesItem {
+  numero_mes: number;     // 1-12
+  mes_nombre: string;     // "Noviembre"
+  base_price: number;
+  base_iva_amount: number;
+  base_iva_percentage: number | null;
+  fee_sicov_amount: number;
+  fee_sicov_iva: number;
+  fee_sicov_iva_percentage: number | null;
+  fee_entidad_amount: number;
+  fee_entidad_iva: number;
+  fee_entidad_iva_percentage: number | null;
+  fee_runt_amount: number;
+  fee_runt_iva: number;
+  fee_runt_iva_percentage: number | null;
+  fee_ansv_amount: number;
+  fee_ansv_iva: number;
+  fee_ansv_iva_percentage: number | null;
+  fees_subtotal: number;
+  fees_iva_total: number;
+  subtotal: number;
+  iva_total: number;
+  total: number;
+  num_ordenes: number;
+  combinaciones: CombinacionesTipoServicio;   // 👈 NUEVO
+}
+
+// Respuesta completa de la RPC
+export interface DesglosePrecioData {
+  chart_mes: DesglosePrecioDiaItem[];
+  chart_anio: DesglosePrecioMesItem[];
+}

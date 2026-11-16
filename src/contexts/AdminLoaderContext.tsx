@@ -12,6 +12,8 @@ import { format, subMonths } from "date-fns";
 import { usePathname } from "next/navigation";
 import { PermissionsContext } from "./PermissionsLoaderContext";
 import { Database } from "../../supabase/types/database.types";
+import { useReportesDesglosePrecio } from "@/lib/client-actions/useReportesDesglosePrecio";
+import { DesglosePrecioData } from "@/types/functions_types";
 
 
 
@@ -313,6 +315,8 @@ export interface AdminContextType {
     setServicioTipoContabilidadSeleccionado: (
       servicio: ServiceTypeFilter,
     ) => void;
+
+    reportesDesglosePrecioQuery: UseQueryResult<DesglosePrecioData, Error>;
   };
 }
 
@@ -872,6 +876,25 @@ export default function ReceptionistLoaderContext({
     placeholderData: keepPreviousData, // 👈 ¡Clave aquí! Evita que la tabla/gráfico parpadee cada 15 segundos cuando se refresca solo en segundo plano.
   });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const analyticsContabilidadQuery = useQuery({
     queryKey: [
       "admin_analytics_contabilidad",
@@ -1095,6 +1118,23 @@ export default function ReceptionistLoaderContext({
 
 
 
+const reportesDesglosePrecioQuery = useReportesDesglosePrecio({
+  tenantId,
+  mes: mesContabilidadSeleccionado,   // o los states que uses
+  ano: anoContabilidadSeleccionado,
+  serviceType: servicioTipoContabilidadSeleccionado,
+  enabled: pathname === "/dashboard/admin/informes",
+});
+
+
+
+
+
+
+
+
+
+
 
   const AdminContextValue = {
     rol: rol,
@@ -1125,6 +1165,8 @@ export default function ReceptionistLoaderContext({
     paymentsByMethodDiaryQuery: paymentsByMethodDiaryQuery,
     datePaymentMethodRange,
     setDatePaymentMethodRange,
+
+    reportesDesglosePrecioQuery,
 
     PQAFQuery: {
       PQAFData: PQAFData || [],

@@ -2,7 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { CircleDollarSign, ClipboardList, FilePenLine, FileStack, LayoutDashboard, LucideIcon, PlusCircle, UserCog} from "lucide-react";
+import {
+  CircleDollarSign,
+  ClipboardList,
+  FileBarChart,
+  FilePenLine,
+  FileStack,
+  LayoutDashboard,
+  LucideIcon,
+  PlusCircle,
+  UserCog,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -25,7 +35,6 @@ import { Separator } from "./separator";
 import { ModeToggle } from "../landingPage/NavBar/mode-toggle";
 import { Button } from "./button";
 
-
 interface NavItem {
   title: string;
   description: string;
@@ -36,9 +45,6 @@ interface NavItem {
 interface AppSidebarProps {
   rol: string; // 👈 Aquí declaramos que NAV_DATA es el array
 }
-
-
-
 
 interface NavItem {
   title: string;
@@ -60,7 +66,7 @@ const NavRecepcionista: NavItem[] = [
     href: "/dashboard/recepcionista/ordenes-de-entrada",
     icon: FileStack, // ✨ Da la sensación de un archivo digital con múltiples órdenes
   },
-  
+
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
     description: "Gestionar tu cuenta, firma y credenciales",
@@ -69,10 +75,7 @@ const NavRecepcionista: NavItem[] = [
   },
 ];
 
-
-
 const NavOficina: NavItem[] = [
-  
   {
     title: "Órdenes de Entrada",
     description: "Listado de órdenes de entrada",
@@ -86,7 +89,7 @@ const NavOficina: NavItem[] = [
     href: "/dashboard/oficina/precios",
     icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
   },
-  
+
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
     description: "Gestionar tu cuenta, firma y credenciales",
@@ -95,9 +98,7 @@ const NavOficina: NavItem[] = [
   },
 ];
 
-
 const NavAdmin: NavItem[] = [
-  
   {
     title: "Órdenes de Entrada",
     description: "Listado de órdenes de entrada",
@@ -116,7 +117,14 @@ const NavAdmin: NavItem[] = [
     title: "Analítica Contable", // 🔥 NUEVO MÓDULO
     description: "Estadísticas contables del CDA",
     href: "/dashboard/admin/analitica-contable",
-    icon: CircleDollarSign , // Queda impecable con el contenedor dinámico del sidebar
+    icon: CircleDollarSign, // Queda impecable con el contenedor dinámico del sidebar
+  },
+
+  {
+    title: "Informes", // 🔥 NUEVO MÓDULO
+    description: "Resumen Diario y Mensual de los servicios del CDA",
+    href: "/dashboard/admin/informes",
+    icon: FileBarChart, // Queda impecable con el contenedor dinámico del sidebar
   },
 
   {
@@ -125,20 +133,16 @@ const NavAdmin: NavItem[] = [
     href: "/dashboard/admin/pqaf",
     icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
   },
-  
+
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
     description: "Gestionar tu cuenta, firma y credenciales",
     href: "/dashboard/admin/perfil",
     icon: UserCog, // Queda impecable con el contenedor dinámico del sidebar
   },
-
-  
 ];
 
-
 const NavDirectorTecnico: NavItem[] = [
-  
   {
     title: "Órdenes de Entrada",
     description: "Listado de órdenes de entrada",
@@ -157,7 +161,7 @@ const NavDirectorTecnico: NavItem[] = [
     href: "/dashboard/director-tecnico/plantillas-creadas",
     icon: ClipboardList, // ✨ Representa fielmente los formatos de inspección ISO
   },
-  
+
   {
     title: "Mi Perfil", // 🔥 NUEVO MÓDULO
     description: "Gestionar tu cuenta, firma y credenciales",
@@ -166,12 +170,9 @@ const NavDirectorTecnico: NavItem[] = [
   },
 ];
 
-
 export function AppSidebar({ rol }: AppSidebarProps) {
+  let NAV_DATA = NavOficina; // Valor por defecto
 
-
-let NAV_DATA = NavOficina; // Valor por defecto
-  
   switch (rol) {
     case "recepcionista":
       NAV_DATA = NavRecepcionista;
@@ -182,38 +183,36 @@ let NAV_DATA = NavOficina; // Valor por defecto
     case "director-tecnico":
       NAV_DATA = NavDirectorTecnico;
       break;
-      case "admin":
+    case "admin":
       NAV_DATA = NavAdmin;
       break;
   }
 
-const contextRecived = useContext(PermissionsContext);
+  const contextRecived = useContext(PermissionsContext);
 
-
-  const tenantData = contextRecived?.PermissionsContextValue.tenantObject
+  const tenantData = contextRecived?.PermissionsContextValue.tenantObject;
   const user = contextRecived?.PermissionsContextValue.user;
 
+  const tenantModules = contextRecived?.PermissionsContextValue.tenantModules;
 
-const tenantModules = contextRecived?.PermissionsContextValue.tenantModules;
-
-const hasFullInfoModule = tenantModules?.some(
-  (module) =>
-    module.code === "full_info_module" &&
-    module.is_active &&
-    module.is_enabled
-);
-
-const filteredNavData = useMemo(() => {
-  if (rol !== "director-tecnico" || hasFullInfoModule) {
-    return NAV_DATA;
-  }
-
-  return NAV_DATA.filter(
-    (item) =>
-      item.href !== "/dashboard/director-tecnico/crear-orden-de-entrada" &&
-      item.href !== "/dashboard/director-tecnico/plantillas-creadas"
+  const hasFullInfoModule = tenantModules?.some(
+    (module) =>
+      module.code === "full_info_module" &&
+      module.is_active &&
+      module.is_enabled,
   );
-}, [rol, hasFullInfoModule]);
+
+  const filteredNavData = useMemo(() => {
+    if (rol !== "director-tecnico" || hasFullInfoModule) {
+      return NAV_DATA;
+    }
+
+    return NAV_DATA.filter(
+      (item) =>
+        item.href !== "/dashboard/director-tecnico/crear-orden-de-entrada" &&
+        item.href !== "/dashboard/director-tecnico/plantillas-creadas",
+    );
+  }, [rol, hasFullInfoModule]);
 
   const pathname = usePathname();
 
@@ -221,36 +220,45 @@ const filteredNavData = useMemo(() => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <Sidebar variant="inset" className="p-0" >
+    <Sidebar variant="inset" className="p-0">
       <SidebarHeader className="flex flex-col gap-2.5 px-4 py-3 border-b border-sidebar-border/50border ">
         {/* Funciones helper internas para las iniciales */}
         {(() => {
           const getTenantInitials = (name?: string) => {
             if (!name) return "CDA";
-            return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+            return name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase();
           };
 
           const getUserInitials = (name?: string) => {
             if (!name) return "U";
-            return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+            return name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase();
           };
 
-
-    return (
+          return (
             <>
               {/* BLOQUE 1: DATOS DEL TENANT (CDA / ORGANIZACIÓN) */}
               <div className="flex items-center gap-3 group/tenant">
                 <Avatar className="h-9 w-9 rounded-lg border border-border/60 shadow-xs bg-background transition-transform duration-200 group-hover/tenant:scale-102">
-                  <AvatarImage 
-                    src={tenantData?.logo_url || undefined} 
-                    alt={tenantData?.name || "Organización"} 
+                  <AvatarImage
+                    src={tenantData?.logo_url || undefined}
+                    alt={tenantData?.name || "Organización"}
                     className="object-contain p-1"
                   />
                   <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-bold">
                     {getTenantInitials(tenantData?.name)}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold text-sm text-foreground tracking-tight">
                     {tenantData?.name || "Cargando CDA..."}
@@ -271,7 +279,7 @@ const filteredNavData = useMemo(() => {
                     {getUserInitials(user?.name)}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="grid flex-1 text-left leading-none space-y-0.5">
                   <span className="truncate text-xs font-medium text-sidebar-foreground">
                     {user?.name || "Usuario Activo"}
@@ -291,13 +299,13 @@ const filteredNavData = useMemo(() => {
       <SidebarContent className="">
         <SidebarGroup>
           <SidebarGroupLabel className="px-2 py-3">
-  <div className="flex items-center justify-between w-full px-3 py-2 rounded-lg font-semibold tracking-wide text-xs uppercase transition-all duration-200 border shadow-sm bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border-blue-500/20 text-blue-700 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 dark:border-blue-400/30 dark:text-blue-300">
-    <span>Rol Actual:</span>
-    <span className="font-bold underline decoration-blue-500/50 underline-offset-4">
-      {rol.replace("-", " ")}
-    </span>
-  </div>
-</SidebarGroupLabel>
+            <div className="flex items-center justify-between w-full px-3 py-2 rounded-lg font-semibold tracking-wide text-xs uppercase transition-all duration-200 border shadow-sm bg-linear-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border-blue-500/20 text-blue-700 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 dark:border-blue-400/30 dark:text-blue-300">
+              <span>Rol Actual:</span>
+              <span className="font-bold underline decoration-blue-500/50 underline-offset-4">
+                {rol.replace("-", " ")}
+              </span>
+            </div>
+          </SidebarGroupLabel>
 
           <SidebarGroupContent className="flex flex-col gap-2 px-2">
             <SidebarMenu>
@@ -307,19 +315,18 @@ const filteredNavData = useMemo(() => {
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                   
                     <Link href={item.href}>
                       <SidebarMenuButton
                         isActive={active}
                         className={`h-15 w-full justify-start rounded-md my-3 border border-sidebar-border bg-sidebar-accent/50 text-sidebar-foreground transition-all duration-75 cursor-pointer font-bold shadow-2xl active:bg-sidebar-accent
                         
-                          ${active 
-                            ? "translate-x-0.5 translate-y-0.5 shadow-none bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border" 
-                            : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                          ${
+                            active
+                              ? "translate-x-0.5 translate-y-0.5 shadow-none bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border"
+                              : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                           }
                         `}
                       >
-                        
                         {/* Icono plano adaptativo */}
                         <Icon className="w-20 shrink-0 text-sidebar-foreground" />
 
@@ -334,10 +341,8 @@ const filteredNavData = useMemo(() => {
                             </span>
                           )}
                         </div>
-                      
                       </SidebarMenuButton>
                     </Link>
-                    
                   </SidebarMenuItem>
                 );
               })}
@@ -346,34 +351,29 @@ const filteredNavData = useMemo(() => {
         </SidebarGroup>
       </SidebarContent>
 
-     <SidebarFooter className="p-4 border-t border-sidebar-border/60 flex flex-col gap-3">
+      <SidebarFooter className="p-4 border-t border-sidebar-border/60 flex flex-col gap-3">
+        {/* Cambiar perfil */}
+        <Button variant="outline" className="w-full p-0">
+          <Link
+            href="/dashboard"
+            prefetch
+            className="flex h-full w-full items-center justify-center gap-2 px-4 py-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Cambiar Perfil</span>
+          </Link>
+        </Button>
 
-  {/* Cambiar perfil */}
-  <Button
-  variant="outline"
-  className="w-full p-0"
->
-  <Link
-    href="/dashboard"
-    prefetch
-    className="flex h-full w-full items-center justify-center gap-2 px-4 py-2"
-  >
-    <LayoutDashboard className="h-4 w-4" />
-    <span>Cambiar Perfil</span>
-  </Link>
-</Button>
+        {/* Acciones inferiores */}
+        <div className="flex items-center justify-center gap-2 w-full">
+          <LogoutButton />
+          <ModeToggle />
+        </div>
 
-  {/* Acciones inferiores */}
-  <div className="flex items-center justify-center gap-2 w-full">
-    <LogoutButton />
-    <ModeToggle />
-  </div>
-
-  <span className="text-xs text-center text-muted-foreground font-medium uppercase tracking-wider">
-    SaaS CDA - v1.0
-  </span>
-
-</SidebarFooter>
+        <span className="text-xs text-center text-muted-foreground font-medium uppercase tracking-wider">
+          SaaS CDA - v1.0
+        </span>
+      </SidebarFooter>
     </Sidebar>
   );
 }

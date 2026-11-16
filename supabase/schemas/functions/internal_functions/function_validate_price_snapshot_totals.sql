@@ -1,9 +1,3 @@
--- ============================================================
--- VALIDACIÓN DE CUADRE (trigger BEFORE INSERT)
--- Garantiza que los totales sean coherentes entre sí y que
--- coincidan con entry_orders.rate_price_snapshot si viene informado.
--- ============================================================
-
 CREATE OR REPLACE FUNCTION public.validate_price_snapshot_totals()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -12,7 +6,7 @@ DECLARE
     v_rate_price NUMERIC(12,2);
 BEGIN
     -- ---------------------------------------------------------
-    -- 1. Cuadre interno del snapshot
+    -- 1. Cuadre interno del snapshot (redondeo al peso)
     -- ---------------------------------------------------------
     IF NEW.subtotal <> (NEW.base_price + NEW.fees_subtotal) THEN
         RAISE EXCEPTION
@@ -34,7 +28,6 @@ BEGIN
 
     -- ---------------------------------------------------------
     -- 2. Coherencia con entry_orders.rate_price_snapshot
-    --    (solo si el padre trae un valor no nulo)
     -- ---------------------------------------------------------
     SELECT rate_price_snapshot
       INTO v_rate_price
