@@ -500,16 +500,17 @@ export default function CreatedOrdersTable() {
         // ------------------------------------------
         // CONSECUTIVO DE FACTURA
         // ------------------------------------------
-        columnHelper.accessor("oficina_consecutivo_factura", {
-          header: "Consecutivo factura",
-          cell: (info) => {
-            const consecutivo = info.getValue();
-
-            return (
-              <span className="font-medium">{consecutivo || "—"}</span>
-            );
-          },
-        }),
+        ...(tenantName !== "autobig"
+  ? [
+      columnHelper.accessor("oficina_consecutivo_factura", {
+        header: "Consecutivo factura",
+        cell: (info) => {
+          const consecutivo = info.getValue();
+          return <span className="font-medium">{consecutivo || "—"}</span>;
+        },
+      }),
+    ]
+  : []),
 
         // ------------------------------------------
         // TIPO DE INSPECCIÓN

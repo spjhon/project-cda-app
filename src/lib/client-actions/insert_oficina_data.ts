@@ -13,6 +13,7 @@ import {
 } from "@/components/dashboard/oficina/OfficeOrderForm";
 import { EntryOrderPaymentDetail } from "@/types/functions_types";
 
+
 interface UpdateOfficeOrderArgs {
   orderId: string;
   formData: OfficeFormState;
@@ -22,6 +23,7 @@ interface UpdateOfficeOrderArgs {
   service_type: Database["public"]["Enums"]["service_type_enum"];
   companyId: string | null;
   priceSnapshot: PriceSnapshotPayload | null;
+  tenant_name: string;
 }
 
 export async function insertOficinaData({
@@ -33,7 +35,16 @@ export async function insertOficinaData({
   service_type,
   companyId,
   priceSnapshot,
+  tenant_name
 }: UpdateOfficeOrderArgs) {
+
+
+
+
+ 
+
+
+
   if (!orderId || orderId === "") {
     return {
       data: null,
@@ -41,7 +52,7 @@ export async function insertOficinaData({
     };
   }
 
-  if (formData.oficina_consecutivo_factura.trim() === "") {
+  if (formData.oficina_consecutivo_factura.trim() === "" && tenant_name !== "autobig") {
     return {
       data: null,
       error: "Error: No hay consecutivo de factura",

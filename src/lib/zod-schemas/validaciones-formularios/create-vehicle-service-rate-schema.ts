@@ -122,8 +122,8 @@ name: z
   iva_percentage: z
     .number("El IVA debe ser un número")
     .min(
-      1,
-      "El IVA no puede ser negativo O 0"
+      0,
+      "El IVA no puede ser negativo"
     )
     .max(
       100,

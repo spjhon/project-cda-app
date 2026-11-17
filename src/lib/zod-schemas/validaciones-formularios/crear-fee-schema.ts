@@ -42,7 +42,7 @@ export const createFeeSchema = z
 
     iva_percentage: z
       .number("El IVA debe ser un número")
-      .min(1, "El IVA no puede ser negativo o 0")
+      .min(0, "El IVA no puede ser negativo")
       .max(100, "El IVA no puede ser superior al 100%")
       .nullable(),
 

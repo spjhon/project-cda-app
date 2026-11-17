@@ -19,10 +19,9 @@ const TipoPagoEnum = [
 // ============================================================
 
 export const officeOrderSchema = z.object({
-  oficina_consecutivo_factura: z
-    .string()
-    .trim()
-    .min(1, { message: "El consecutivo de la factura es obligatorio" }),
+ oficina_consecutivo_factura: z
+  .string({ message: "El consecutivo debe ser texto" })
+  .trim(),
 
   se_compro_soat: z.boolean({
     message: "Debe especificar si se gestionó el SOAT",

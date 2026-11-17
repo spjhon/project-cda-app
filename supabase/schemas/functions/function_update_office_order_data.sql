@@ -74,14 +74,6 @@ BEGIN
     END IF;
 
 
-    -- ========================================================
-    -- 3. Validar consecutivo de factura
-    -- ========================================================
-    IF p_consecutivo_factura IS NULL
-       OR TRIM(p_consecutivo_factura) = '' THEN
-        RAISE EXCEPTION
-            'Operación cancelada: No se ha registrado un consecutivo de factura.';
-    END IF;
 
 
     -- ========================================================
@@ -356,7 +348,7 @@ BEGIN
             p_order_id,
             (p_price_snapshot->>'rateName')::text,
             (p_price_snapshot->>'basePrice')::numeric(12,2),
-            NULLIF(p_price_snapshot->>'baseIvaPercentage', '')::numeric(5,2),
+            COALESCE(NULLIF(p_price_snapshot->>'baseIvaPercentage', '')::numeric(5,2), 0),
             (p_price_snapshot->>'baseIvaAmount')::numeric(12,2),
             (p_price_snapshot->>'feesSubtotal')::numeric(12,2),
             (p_price_snapshot->>'feesIvaTotal')::numeric(12,2),

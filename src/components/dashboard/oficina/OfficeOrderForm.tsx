@@ -127,6 +127,7 @@ export default function OfficeOrderForm({
   const contextRecived = useContext(PermissionsContext);
 
   const tenantModules = contextRecived?.PermissionsContextValue.tenantModules;
+  const tenant_name = contextRecived?.PermissionsContextValue.tenantObject?.domain;
 
   const hasFullInfoModule = tenantModules?.some(
     (module) =>
@@ -185,7 +186,7 @@ export default function OfficeOrderForm({
     orderId: orden.id,
   });
 
-  console.log("Rate completo, con toda la info desglosada: ", orderRates);
+  //console.log("Rate completo, con toda la info desglosada: ", orderRates);
 
   const selectedRateIdFromOrder = orden.vehicle_service_rate_id;
 
@@ -221,7 +222,7 @@ export default function OfficeOrderForm({
     setIsSubmitting(true);
     setServerError(null);
 
-    if (formData.oficina_consecutivo_factura.trim() === "") {
+    if (formData.oficina_consecutivo_factura.trim() === "" && tenant_name !== "autobig") {
       alert("No se ha colocado un consecutivo de factura");
       setIsSubmitting(false);
       return;
@@ -287,6 +288,9 @@ const priceSnapshot: PriceSnapshotPayload | null = isReinspeccion
     }
 
 
+    console.log("Este es el price snapshot: ", priceSnapshot)
+
+
 
 
 
@@ -300,6 +304,7 @@ const priceSnapshot: PriceSnapshotPayload | null = isReinspeccion
         companyId: selectedCompanyId,
         // 👇 NUEVO: desglose completo para el snapshot
         priceSnapshot,
+        tenant_name: tenant_name ?? ""
       });
 
       if (error || !data) {
@@ -381,7 +386,8 @@ const priceSnapshot: PriceSnapshotPayload | null = isReinspeccion
               disabled={
                 orden.estado_orden === "finalizada" ||
                 orden.estado_orden === "anulada" ||
-                orden.es_reinspeccion
+                orden.es_reinspeccion ||
+                tenant_name === "autobig"
               }
             />
           </div>

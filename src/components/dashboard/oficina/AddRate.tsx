@@ -603,6 +603,7 @@ createVehicleServiceRateMutation.mutate(
                 <FieldLabel htmlFor="base_price_rtm">Precio base</FieldLabel>
 
                 <Input
+                  required
                   id="base_price_rtm"
                   type="number"
                   min="0"
@@ -622,9 +623,10 @@ createVehicleServiceRateMutation.mutate(
                 <FieldLabel htmlFor="iva_percentage">IVA (%)</FieldLabel>
 
                 <Input
+                required
                   id="iva_percentage"
                   type="number"
-                  min="1"
+                  min="0"
                   max="100"
                   step="0.01"
                   value={form.iva_percentage}
