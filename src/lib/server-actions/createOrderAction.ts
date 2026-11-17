@@ -379,7 +379,7 @@ for (const firma of validatedFields.data.signatures ?? []) {
   // SARLAFT
   // ============================================================
 
-  if (activeModules.includes("sarlaft")) {
+  if (activeModules.includes("sarlaft") && !formData.es_reinspeccion) {
     const { data: sarlaftData, error: sarlaftError } =
       await supabaseServer.rpc("create_sarlaft_evidence", {
         p_entry_order_id: orderCreatedData,
