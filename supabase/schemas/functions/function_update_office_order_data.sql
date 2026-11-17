@@ -1,16 +1,4 @@
--- ============================================================
--- DROP de la firma anterior (cambia la lista de parámetros)
--- ============================================================
-DROP FUNCTION IF EXISTS public.update_office_order_data(
-    uuid,                    -- p_order_id
-    character varying,       -- p_pin
-    character varying,       -- p_consecutivo_factura
-    boolean,                 -- p_se_compro_soat
-    uuid,                    -- p_vehicle_service_rate_id
-    numeric,                 -- p_rate_price_snapshot
-    uuid,                    -- p_company_id
-    jsonb                    -- p_payments
-);
+
 
 -- ============================================================
 -- NUEVA VERSIÓN con snapshot de precio

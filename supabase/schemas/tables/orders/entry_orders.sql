@@ -291,14 +291,25 @@ ALTER TABLE public.entry_orders
 ALTER TABLE public.entry_orders
     FOREIGN KEY (id_reprobado) REFERENCES public.entry_orders(id) ON DELETE SET NULL
 
+
+
+
 ALTER TABLE public.entry_orders
   -- 1. FUR único por Tenant
   ADD CONSTRAINT entry_orders_tenant_fur_key 
     UNIQUE (tenant_id, consecutivo_fur),
 
-  -- 2. RTM único por Tenant
-  ADD CONSTRAINT entry_orders_tenant_rtm_key 
-    UNIQUE (tenant_id, consecutivo_rtm),
+   CREATE UNIQUE INDEX entry_orders_tenant_rtm_no_reinspeccion_idx
+  ON public.entry_orders (tenant_id, consecutivo_rtm)
+  WHERE (es_reinspeccion = false OR es_reinspeccion IS NULL)
+    AND consecutivo_rtm IS NOT NULL;
+
+
+    CREATE UNIQUE INDEX entry_orders_tenant_rtm_reinspeccion_idx
+  ON public.entry_orders (tenant_id, consecutivo_rtm)
+  WHERE es_reinspeccion = true
+    AND consecutivo_rtm IS NOT NULL;
+
 
   -- 3. Factura única por Tenant
 CREATE UNIQUE INDEX entry_orders_tenant_factura_no_reinspeccion_idx 

@@ -167,16 +167,6 @@ export const PersonSection = ({
     });
   };
 
-
-
-
-
-
-
-
-
-
-  
   const sarlaftMutation = useMutation({
     mutationFn: async (personType: "customer" | "owner") => {
       // ============================================================
@@ -229,12 +219,7 @@ export const PersonSection = ({
 
       const dataOFAC: APIResponse = await OFACresponse.json();
 
-      
-
-
-
-
-   const UNresponse = await fetch(
+      const UNresponse = await fetch(
         "https://runt-api.cda-app.com/api/scraper/sarlaft/un/init",
         {
           method: "POST",
@@ -249,20 +234,14 @@ export const PersonSection = ({
 
       const dataUN: APIResponse = await UNresponse.json();
 
-     
-
-
       let seEncontroAlgunaCoincidencia = false;
       let success = true;
-const mensaje = `${dataOFAC.message} ${dataUN.message}`;
-  
-      if (dataOFAC.coincidencia === true || dataUN.coincidencia === true){
+      const mensaje = `${dataOFAC.message} ${dataUN.message}`;
+
+      if (dataOFAC.coincidencia === true || dataUN.coincidencia === true) {
         seEncontroAlgunaCoincidencia = true;
         success = false;
       }
-
-
-
 
       return {
         personType,
@@ -272,7 +251,7 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
         mensaje: mensaje,
         resultado: dataOFAC.resultado,
         screenshotOFAC: dataOFAC.screenshot,
-        screenshotUN: dataUN.screenshot
+        screenshotUN: dataUN.screenshot,
       };
     },
 
@@ -281,9 +260,6 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
     // ==============================================================
 
     onSuccess: (result) => {
-
-
-
       setFormData((prev: ZodFullFormDataType) => {
         // ============================================================
         // CASO 1: SE CONSULTÓ EL CLIENTE
@@ -335,15 +311,7 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
         };
       });
 
-
-
-
-
       if (result.personType === "customer") {
-
-
-
-
         const OFAClink = document.createElement("a");
 
         OFAClink.href = `data:image/jpeg;base64,${result.screenshotOFAC}`;
@@ -361,8 +329,7 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
 
         OFAClink.click();
 
-
-         const UNlink = document.createElement("a");
+        const UNlink = document.createElement("a");
 
         UNlink.href = `data:image/jpeg;base64,${result.screenshotUN}`;
 
@@ -378,9 +345,6 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
         UNlink.download = `${formattedDateUN}-${formData.vehicle.placa}-Evidencia_Sarlaft_NacionesUnidas_cliente.jpg`;
 
         UNlink.click();
-
-
-        
       } else if (result.personType === "owner") {
         const OFAClink = document.createElement("a");
 
@@ -438,82 +402,73 @@ const mensaje = `${dataOFAC.message} ${dataUN.message}`;
     onError: (error, personType) => {
       console.error(error);
 
-      if (error.message.startsWith("Error HTTP:") || error.message.startsWith("NetworkError")){
+      if (
+        error.message.startsWith("Error HTTP:") ||
+        error.message.startsWith("NetworkError")
+      ) {
+        setSarlaftResult({
+          personType,
+          seHizoLaConsulta: false,
+          coincidencia: false,
+          mensaje:
+            error instanceof Error
+              ? `Error de red: ${error.message} Puede continuar con el proceso, sin embargo se recomienda hacer la consulta una vez se restablesca conexion`
+              : "No fue posible completar la consulta SARLAFT.",
+        });
 
+        setFormData((prev: ZodFullFormDataType) => {
+          // ============================================================
+          // CASO 1: SE CONSULTÓ EL CLIENTE
+          // ============================================================
 
+          if (personType === "customer") {
+            return {
+              ...prev,
 
-     
+              customer_data: {
+                ...prev.customer_data,
+                se_hizo_la_consulta: true,
+                resultado_consulta_sarlaf_desfavorable: false,
+              },
 
-      setSarlaftResult({
-        personType,
-        seHizoLaConsulta: false,
-        coincidencia: false,
-        mensaje:
-          error instanceof Error
-            ?  `Error de red: ${error.message} Puede continuar con el proceso, sin embargo se recomienda hacer la consulta una vez se restablesca conexion`
-            : "No fue posible completar la consulta SARLAFT.",
-      });
+              // Si cliente = propietario, ambos representan
+              // a la misma persona y la consulta aplica para ambos.
+              owner_data: prev.is_owner_same_as_customer
+                ? {
+                    ...prev.owner_data,
+                    se_hizo_la_consulta: true,
+                    resultado_consulta_sarlaf_desfavorable: false,
+                  }
+                : prev.owner_data,
+            };
+          }
 
-      
+          // ============================================================
+          // CASO 2: SE CONSULTÓ EL PROPIETARIO
+          // ============================================================
 
-
-
-
-
-      setFormData((prev: ZodFullFormDataType) => {
-        // ============================================================
-        // CASO 1: SE CONSULTÓ EL CLIENTE
-        // ============================================================
-
-        if (personType === "customer") {
           return {
             ...prev,
 
-            customer_data: {
-              ...prev.customer_data,
+            owner_data: {
+              ...prev.owner_data,
               se_hizo_la_consulta: true,
               resultado_consulta_sarlaf_desfavorable: false,
             },
 
-            // Si cliente = propietario, ambos representan
-            // a la misma persona y la consulta aplica para ambos.
-            owner_data: prev.is_owner_same_as_customer
+            // Si cliente = propietario, también actualizamos el cliente.
+            customer_data: prev.is_owner_same_as_customer
               ? {
-                  ...prev.owner_data,
+                  ...prev.customer_data,
                   se_hizo_la_consulta: true,
                   resultado_consulta_sarlaf_desfavorable: false,
                 }
-              : prev.owner_data,
+              : prev.customer_data,
           };
-        }
+        });
 
-        // ============================================================
-        // CASO 2: SE CONSULTÓ EL PROPIETARIO
-        // ============================================================
-
-        return {
-          ...prev,
-
-          owner_data: {
-            ...prev.owner_data,
-            se_hizo_la_consulta: true,
-            resultado_consulta_sarlaf_desfavorable: false,
-          },
-
-          // Si cliente = propietario, también actualizamos el cliente.
-          customer_data: prev.is_owner_same_as_customer
-            ? {
-                ...prev.customer_data,
-                se_hizo_la_consulta: true,
-                resultado_consulta_sarlaf_desfavorable: false,
-              }
-            : prev.customer_data,
-        };
-      });
-
-
-      setShowSarlaftDialog(true);
-return
+        setShowSarlaftDialog(true);
+        return;
       }
 
       // IMPORTANTE:
@@ -539,25 +494,6 @@ return
       setShowSarlaftDialog(true);
     },
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const isValidationError = sarlaftResult?.seHizoLaConsulta === false;
   const hasCoincidence = sarlaftResult?.coincidencia === true;
@@ -736,7 +672,8 @@ return
                 <>
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">
-                      Actividad Económica Cliente
+                      Actividad Económica Cliente - No se exige para
+                      reinspección.
                     </Label>
                     <Input
                       disabled={!formData.customer_data.numero_documento}
@@ -754,7 +691,7 @@ return
 
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold text-muted-foreground uppercase">
-                      Origen Fondos Cliente
+                      Origen Fondos Cliente - No se exige para reinspección.
                     </Label>
                     <Input
                       disabled={!formData.customer_data.numero_documento}
@@ -825,17 +762,22 @@ return
                       !formData.customer_data.numero_documento
                     }
                     onClick={() => sarlaftMutation.mutate("customer")}
-                    className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70"
+                    className="w-full min-h-14 h-auto gap-3 whitespace-normal text-center bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-70 py-3"
                   >
                     {sarlaftMutation.isPending ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Consultando listas...
+                        <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+                        <span className="leading-tight">
+                          Consultando listas...
+                        </span>
                       </>
                     ) : (
                       <>
-                        <ShieldCheck className="h-5 w-5" />
-                        Consultar SARLAFT y Listas Restrictivas
+                        <ShieldCheck className="h-5 w-5 shrink-0" />
+                        <span className="leading-tight wrap-break-word">
+                          Consultar SARLAFT y Listas Restrictivas - No se exige
+                          para reinspección.
+                        </span>
                       </>
                     )}
                   </Button>
@@ -881,18 +823,16 @@ return
                         <AlertDialogDescription className="text-base leading-relaxed">
                           {isValidationError ? (
                             <>
-                              Se ha producido un error al realizar la consulta SARLAFT para el{" "}
+                              Se ha producido un error al realizar la consulta
+                              SARLAFT para el{" "}
                               <strong>
                                 {sarlaftResult?.personType === "customer"
                                   ? "cliente"
                                   : "propietario"}
                               </strong>
                               <br></br>
-                              Descripcion del error: {" "}
-                              <br></br>
+                              Descripcion del error: <br></br>
                               <strong>{sarlaftResult.mensaje}</strong>
-                              
-                              
                             </>
                           ) : hasCoincidence ? (
                             <>
@@ -1136,17 +1076,22 @@ return
                         !formData.owner_data.numero_documento
                       }
                       onClick={() => sarlaftMutation.mutate("owner")}
-                      className="w-full h-14 gap-3 bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50"
+                      className="w-full min-h-14 h-auto gap-3 whitespace-normal text-center bg-primary text-primary-foreground font-bold text-base shadow-lg transition-all hover:scale-[1.01] hover:shadow-xl disabled:opacity-50 py-3"
                     >
                       {sarlaftMutation.isPending ? (
                         <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          Consultando listas...
+                          <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+                          <span className="leading-tight">
+                            Consultando listas...
+                          </span>
                         </>
                       ) : (
                         <>
-                          <ShieldCheck className="h-5 w-5" />
-                          Consultar SARLAFT y Listas Restrictivas
+                          <ShieldCheck className="h-5 w-5 shrink-0" />
+                          <span className="leading-tight wrap-break-word">
+                            Consultar SARLAFT y Listas Restrictivas - No se
+                            exige para reinspección.
+                          </span>
                         </>
                       )}
                     </Button>

@@ -921,7 +921,7 @@ isOneToOne: false
                            },
 "get_autobig_entry_orders_for_export":
 { Args: { "p_end_date": string,"p_start_date": string,"p_tenant_id": string }; Returns: {
-              "certificado_runt": string,"consecutivo_fur": string,"empresa": string,"fecha": string,"metodos_pago": (string)[],"pin": string,"placa": string,"resultado_inspeccion": string,"servicio": Database["public"]['Enums']["vehicle_service_type_enum"],"tipo_inspeccion": Database["public"]['Enums']["service_type_enum"],"valor_recaudado": number,"vehiculo_tipo": Database["public"]['Enums']["vehicle_type_enum"]
+              "certificado_runt": string,"consecutivo_fur": string,"empresa": string,"es_reinspeccion": boolean,"fecha": string,"metodos_pago": (string)[],"pin": string,"placa": string,"resultado_inspeccion": string,"servicio": Database["public"]['Enums']["vehicle_service_type_enum"],"tipo_inspeccion": Database["public"]['Enums']["service_type_enum"],"valor_recaudado": number,"vehiculo_tipo": Database["public"]['Enums']["vehicle_type_enum"]
             }[]
                            },
 "get_entry_orders_for_export":

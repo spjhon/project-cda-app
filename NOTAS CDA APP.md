@@ -24,7 +24,7 @@ To link with established env: `pnpx supabase link --project-ref lyktizihszlbmzzj
 actualizar dependencias: `pnpm add next@latest react@latest react-dom@latest`
 ver que falta por actualizar: `pnpm update --interactive --latest`, este permite no solo ver sino tambien instalar
 tambien ver que falta por actualizar: `pnpm outdated`
-Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest typescript@latest`
+Actualizar tipos de React (obligatorio para TS): `pnpm add -D @types/react@latest @types/react-dom@latest @types/node@latest`
 otros especificos para este projecto: `pnpm add @supabase/ssr@latest @supabase/supabase-js@latest`
 
 comando para desplegar funciones edge: `pnpx supabase functions deploy`

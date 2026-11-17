@@ -93,14 +93,14 @@ export async function createOrderAction(
     // CLIENTE
     // -------------------------
 
-    if (formData.customer_data.origen_fondos.trim() === "") {
+    if (formData.customer_data.origen_fondos.trim() === "" && formData.es_reinspeccion === false) {
       return {
         data: null,
         error: "Error: El origen de fondos del cliente es obligatorio.",
       };
     }
 
-    if (formData.customer_data.actividad_economica.trim() === "") {
+    if (formData.customer_data.actividad_economica.trim() === "" && formData.es_reinspeccion === false) {
       return {
         data: null,
         error: "Error: La actividad económica del cliente es obligatoria.",
@@ -115,7 +115,7 @@ export async function createOrderAction(
       };
     }
 
-    if (formData.customer_data.se_hizo_la_consulta === false) {
+    if (formData.customer_data.se_hizo_la_consulta === false && formData.es_reinspeccion === false) {
       return {
         data: null,
         error:
@@ -139,7 +139,7 @@ export async function createOrderAction(
 
     
 
-    if (formData.owner_data.se_hizo_la_consulta === false) {
+    if (formData.owner_data.se_hizo_la_consulta === false && formData.es_reinspeccion === false) {
       return {
         data: null,
         error:

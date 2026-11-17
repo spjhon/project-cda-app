@@ -86,8 +86,12 @@ export default function AccionesOrderDialog({
     <div className="flex flex-wrap items-center justify-center gap-3 p-4 bg-muted/50 rounded-xl border border-border/50 w-full">
       <OrderViewPDF orderId={orden.id} tenantId={tenantId} />
       <OrderDownloadPDF orderId={orden.id} tenantId={tenantId} />
+    {!orden.es_reinspeccion && (
+    <>
       <SarlaftViewPDF orderId={orden.id} />
       <SarlaftDownloadPDF orderId={orden.id} />
+    </>
+  )}
     </div>
   </div>
 )}

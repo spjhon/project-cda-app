@@ -677,10 +677,10 @@ const calcularTiempoSOAT = (fechaVencimiento: string): string => {
                 {/* --- SOAT --- */}
 <div className="space-y-2">
   <Label className="text-xs font-bold text-blue-700 flex items-center gap-1.5">
-    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT
+    <CalendarDays className="h-3.5 w-3.5" /> Vencimiento SOAT - No se exige para reinspección.
   </Label>
   <Input
-    required
+    required = {!formData.es_reinspeccion}
     type="date"
     className="border-blue-100 focus:ring-blue-500"
     value={formData.soat_vencimiento_snapshot || ""}

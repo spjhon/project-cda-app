@@ -1,3 +1,6 @@
+
+
+
 CREATE OR REPLACE FUNCTION public.get_autobig_entry_orders_for_export(
   p_tenant_id UUID,
   p_start_date TIMESTAMPTZ,
@@ -15,7 +18,8 @@ RETURNS TABLE (
   empresa TEXT,
   valor_recaudado NUMERIC(12, 2),
   certificado_runt VARCHAR,
-  resultado_inspeccion TEXT
+  resultado_inspeccion TEXT,
+  es_reinspeccion BOOLEAN
 )
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -104,7 +108,10 @@ BEGIN
     eo.consecutivo_rtm AS certificado_runt,
 
     -- Resultado de la inspección.
-    eo.resultado_revision AS resultado_inspeccion
+    eo.resultado_revision AS resultado_inspeccion,
+
+    -- ¿Es reinspección?
+    COALESCE(eo.es_reinspeccion, FALSE) AS es_reinspeccion   -- 👈 NUEVO
 
   FROM public.entry_orders eo
 
@@ -113,13 +120,30 @@ BEGIN
     AND eo.fecha <= p_end_date
     AND eo.deleted_at IS NULL
 
-  ORDER BY 
-  CASE 
-    WHEN eo.consecutivo_fur ~ '^[0-9]+$' THEN eo.consecutivo_fur::BIGINT
-    WHEN eo.consecutivo_fur ~ '^[0-9]+-[0-9]+$' THEN SPLIT_PART(eo.consecutivo_fur, '-', 1)::BIGINT
-    ELSE NULL
-  END ASC NULLS LAST,
-  eo.fecha ASC;
+  ORDER BY
+    -- 1. Fecha ascendente (criterio principal)
+    eo.fecha ASC,
+    -- 2. Grupo: 0 = RTM solo, 1 = reinspección (-1), 2 = preventiva (PR)
+    CASE
+      WHEN eo.consecutivo_fur ~ '^[0-9]+$' THEN 0
+      WHEN eo.consecutivo_fur ~ '^[0-9]+-[0-9]+$' THEN 1
+      WHEN eo.consecutivo_fur ~ '^PR[0-9]+$' THEN 2
+      ELSE 3
+    END ASC,
+    -- 3. Número base dentro del grupo
+    CASE
+      WHEN eo.consecutivo_fur ~ '^[0-9]+$' THEN eo.consecutivo_fur::BIGINT
+      WHEN eo.consecutivo_fur ~ '^[0-9]+-[0-9]+$' THEN SPLIT_PART(eo.consecutivo_fur, '-', 1)::BIGINT
+      WHEN eo.consecutivo_fur ~ '^PR[0-9]+$' THEN SUBSTRING(eo.consecutivo_fur FROM 3)::BIGINT
+      ELSE NULL
+    END ASC NULLS LAST;
 
 END;
 $$;
+
+-- ============================================================
+-- 3. Permisos (se pierden al dropear, hay que re-aplicarlos)
+-- ============================================================
+REVOKE EXECUTE ON FUNCTION public.get_autobig_entry_orders_for_export(UUID, TIMESTAMPTZ, TIMESTAMPTZ) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_autobig_entry_orders_for_export(UUID, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_autobig_entry_orders_for_export(UUID, TIMESTAMPTZ, TIMESTAMPTZ) TO service_role;
