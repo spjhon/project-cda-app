@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PersonSectionFirefox } from "./PersonSectionFirefox";
+import { PersonSection } from "../PersonSection";
 
 // 🌟 ESTADO INICIAL REUTILIZABLE (Con Return Explícito)
 export function getInitialOrderFormData(
@@ -657,7 +658,7 @@ if (activeModules.includes("sarlaft")) {
           ></PlacaSelectionSection>
 
           {/**SECCION DE LAS PERSONAS */}
-          <PersonSectionFirefox
+          <PersonSection
             formData={formData}
             setFormData={setFormData}
             selectedTemplate={selectedTemplate ? true : false}
