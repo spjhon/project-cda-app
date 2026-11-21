@@ -658,7 +658,7 @@ if (activeModules.includes("sarlaft")) {
           ></PlacaSelectionSection>
 
           {/**SECCION DE LAS PERSONAS */}
-          <PersonSection
+          <PersonSectionFirefox
             formData={formData}
             setFormData={setFormData}
             selectedTemplate={selectedTemplate ? true : false}

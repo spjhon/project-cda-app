@@ -830,7 +830,7 @@ const handleReinspeccionChange = (checked: boolean) => {
 
               {/* RUNT */}
               <div className="md:col-span-4">
-                <RuntScraperModal
+                <RuntScraperModalFirefox
                   formData={formData}
                   setFormData={setFormData}
                 />
