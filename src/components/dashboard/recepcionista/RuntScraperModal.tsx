@@ -237,7 +237,7 @@ export default function RuntScraperModal<
     onSuccess: (data) => {
       if (data.success) {
         validateRtmExpiration(data.payload.fecha_vencimiento_RTM);
-        console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
+       // console.log("✅ Datos extraídos del RUNT con éxito:", data.payload);
 
         setFormData((prev) => {
           // 1. Hacemos un cast a un tipo que tenga las propiedades del vehículo

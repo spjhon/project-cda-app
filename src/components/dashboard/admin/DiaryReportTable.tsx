@@ -188,39 +188,55 @@ export default function DiaryReportTable({
 
         columnHelper.accessor("fee_sicov_amount", {
           header: () => <span className="block text-right">SICOV</span>,
-          cell: (info) => (
-            <span className="block text-right tabular-nums">
-              {formatCurrency(info.getValue())}
-            </span>
-          ),
+          cell: (info) => {
+            const row = info.row.original;
+            const total = row.fee_sicov_amount + row.fee_sicov_iva;
+            return (
+              <span className="block text-right tabular-nums">
+                {formatCurrency(total)}
+              </span>
+            );
+          },
         }),
 
         columnHelper.accessor("fee_entidad_amount", {
-          header: () => <span className="block text-right">Entidad</span>,
-          cell: (info) => (
-            <span className="block text-right tabular-nums">
-              {formatCurrency(info.getValue())}
-            </span>
-          ),
-        }),
+  header: () => <span className="block text-right">Entidad</span>,
+  cell: (info) => {
+    const row = info.row.original;
+    const total = row.fee_entidad_amount + row.fee_entidad_iva;
+    return (
+      <span className="block text-right tabular-nums">
+        {formatCurrency(total)}
+      </span>
+    );
+  },
+}),
 
-        columnHelper.accessor("fee_runt_amount", {
-          header: () => <span className="block text-right">RUNT</span>,
-          cell: (info) => (
-            <span className="block text-right tabular-nums">
-              {formatCurrency(info.getValue())}
-            </span>
-          ),
-        }),
+columnHelper.accessor("fee_runt_amount", {
+  header: () => <span className="block text-right">RUNT</span>,
+  cell: (info) => {
+    const row = info.row.original;
+    const total = row.fee_runt_amount + row.fee_runt_iva;
+    return (
+      <span className="block text-right tabular-nums">
+        {formatCurrency(total)}
+      </span>
+    );
+  },
+}),
 
-        columnHelper.accessor("fee_ansv_amount", {
-          header: () => <span className="block text-right">ANSV</span>,
-          cell: (info) => (
-            <span className="block text-right tabular-nums">
-              {formatCurrency(info.getValue())}
-            </span>
-          ),
-        }),
+columnHelper.accessor("fee_ansv_amount", {
+  header: () => <span className="block text-right">ANSV</span>,
+  cell: (info) => {
+    const row = info.row.original;
+    const total = row.fee_ansv_amount + row.fee_ansv_iva;
+    return (
+      <span className="block text-right tabular-nums">
+        {formatCurrency(total)}
+      </span>
+    );
+  },
+}),
 
         columnHelper.accessor("total", {
           header: () => <span className="block text-right">Total</span>,
@@ -334,20 +350,20 @@ export default function DiaryReportTable({
                   {formatCurrency(totales.base_iva_amount)}
                 </TableCell>
 
-                <TableCell className="py-1 text-right tabular-nums">
-                  {formatCurrency(totales.fee_sicov_amount)}
+               <TableCell className="py-1 text-right tabular-nums">
+                  {formatCurrency(totales.fee_sicov_amount + totales.fee_sicov_iva)}
                 </TableCell>
 
                 <TableCell className="py-1 text-right tabular-nums">
-                  {formatCurrency(totales.fee_entidad_amount)}
+                  {formatCurrency(totales.fee_entidad_amount + totales.fee_entidad_iva)}
                 </TableCell>
 
                 <TableCell className="py-1 text-right tabular-nums">
-                  {formatCurrency(totales.fee_runt_amount)}
+                  {formatCurrency(totales.fee_runt_amount + totales.fee_runt_iva)}
                 </TableCell>
 
                 <TableCell className="py-1 text-right tabular-nums">
-                  {formatCurrency(totales.fee_ansv_amount)}
+                  {formatCurrency(totales.fee_ansv_amount + totales.fee_ansv_iva)}
                 </TableCell>
 
                 <TableCell className="py-1 text-right tabular-nums font-bold text-emerald-700 dark:text-emerald-400">

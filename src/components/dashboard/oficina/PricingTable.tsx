@@ -52,12 +52,13 @@ import {
   VehicleRate,
 } from "@/lib/client-actions/fetch_rates"
 
-import { AddRateDialog } from "./AddRate"
+
 import { useUpdateVehicleRateActive } from "@/lib/client-actions/update_vehicle_service_rate_is_active"
 import { GenericErrorDialog } from "@/components/feedbackDialogs/GenericErrorDialog"
 import { useDeleteVehicleRate } from "@/lib/client-actions/delete_vehicle_service_rate"
 import { GenericConfirmDialog } from "@/components/feedbackDialogs/GenericConfirmDialog"
 import { RatePriceDialog } from "./RatePriceDialog";
+import { RateDialog } from "./RateDialog";
 
 
 
@@ -406,6 +407,8 @@ export default function RatesTable() {
     tenantId,
   })
 
+
+  console.log("Rates para pricing table: ", rates)
  
 /* ==========================================
  * MUTATION: ESTADO ACTIVO
@@ -826,7 +829,7 @@ columnHelper.display({
           ========================================== */}
 
       <div className="flex justify-end">
-        <AddRateDialog />
+        <RateDialog />
       </div>
 
       {/* ==========================================

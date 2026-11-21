@@ -317,7 +317,7 @@ const INITIAL_FORM: CreateVehicleServiceRateData = {
 // COMPONENTE
 // -----------------------------------------------------------------------------
 
-export function AddRateDialog() {
+export function RateDialog() {
   const contextReceived = useContext(PermissionsContext);
 
 const queryClient = useQueryClient()
@@ -591,10 +591,17 @@ createVehicleServiceRateMutation.mutate(
                 />
               </div>
 
-              <CompanyRateSelector
-  form={form}
-  setForm={setForm}
-/>
+
+              {/**
+               * 
+               * <CompanyRateSelector
+                form={form}
+                setForm={setForm}
+              />
+               * 
+               * 
+               */}
+              
 
               {/* ----------------------------------------------------------------
                   PRECIO BASE

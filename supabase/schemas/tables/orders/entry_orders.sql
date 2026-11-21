@@ -291,7 +291,9 @@ ALTER TABLE public.entry_orders
 ALTER TABLE public.entry_orders
     FOREIGN KEY (id_reprobado) REFERENCES public.entry_orders(id) ON DELETE SET NULL
 
-
+constraint entry_orders_vehicle_service_rate_id_fkey
+  foreign KEY (vehicle_service_rate_id)
+  references vehicle_service_rate (id)
 
 
 ALTER TABLE public.entry_orders

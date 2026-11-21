@@ -44,6 +44,7 @@ import RuntScraperModal from "../RuntScraperModal";
 import { initialOrderFormData, SimpleOrderFormData } from "./NewSimpleEntryOrderComponent";
 import { PermissionsContext } from "@/contexts/PermissionsLoaderContext";
 import { CameraCapture } from "../CameraCapture";
+import RuntScraperModalFirefox from "./RuntScraperModalFirefox";
 
 
 

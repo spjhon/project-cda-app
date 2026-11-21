@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import TirePressureSection from "@/components/dashboard/recepcionista/TirePressureSection";
 import ConditionsSwitchSections from "@/components/dashboard/recepcionista/ConditionsSwitchSections";
 import SignatureSection from "@/components/dashboard/recepcionista/SignatureSection";
-import { PersonSection } from "@/components/dashboard/recepcionista/PersonSection";
+
 import { Textarea } from "@/components/ui/textarea";
 
 import {
@@ -43,6 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PersonSectionFirefox } from "./PersonSectionFirefox";
 
 // 🌟 ESTADO INICIAL REUTILIZABLE (Con Return Explícito)
 export function getInitialOrderFormData(
@@ -656,7 +657,7 @@ if (activeModules.includes("sarlaft")) {
           ></PlacaSelectionSection>
 
           {/**SECCION DE LAS PERSONAS */}
-          <PersonSection
+          <PersonSectionFirefox
             formData={formData}
             setFormData={setFormData}
             selectedTemplate={selectedTemplate ? true : false}
